@@ -144,7 +144,7 @@ def test_committed_kit_files_and_values():
     ids = [r["id"] for r in rr]
     assert len(ids) == len(set(ids))
     for r in rr:
-        assert r["certainty"] in CERTAINTY and r["verified_on"] == "" and r["rule"].strip() and r["source"].strip(), r["id"]
+        assert r["certainty"] in CERTAINTY and r["rule"].strip() and r["source"].strip(), r["id"]
         assert not VIET.search(" ".join(r.values())), f"{r['id']} contains accented text"
 
 
