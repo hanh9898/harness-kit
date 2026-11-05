@@ -70,7 +70,7 @@ One `role-<role>` entry per role, four cells (tools, docs, skills, delegation le
 
 ### 9. Standards
 
-Choose the checkable standard for the pieces chosen, from the kit's rules, never by loading them. Write `harness/STANDARDS.md` (first line: it applies only to changes under `harness/`) and one `standard-*` entry that points at it. Method: [STANDARDS-STEP.md](STANDARDS-STEP.md). Append the log line for `standards`.
+Choose the checkable standard for the pieces chosen, from the kit's rules, never by loading them. Write `harness/STANDARDS.md` (first line: it applies only to changes under `harness/`) and one `standard-*` entry per chosen rule, each pointing at its section. Method: [STANDARDS-STEP.md](STANDARDS-STEP.md). Append the log line for `standards`.
 
 ### 10. Isolation
 
