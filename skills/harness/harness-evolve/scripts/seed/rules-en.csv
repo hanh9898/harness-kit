@@ -101,7 +101,7 @@ id,rule
 4.23,"Restrict subagents with `tools:` or `disallowedTools:`; `Agent(worker, researcher)` limits which subagents may be spawned; a removed tool ""isn't in the subagent's session at all""."
 4.24,"Hard caps for an agent tree: default depth 3, default concurrency 20, `maxBudgetUsd` returns `Budget limit reached`; one workflow may run at most 1,000 agents. The numbers come from the docs and were not run."
 4.25,"Set `max_turns` and `max_budget_usd` for production agents; hitting a cap returns `error_max_turns` or `error_max_budget_usd` with no `result`; the budget is soft (overshoot by at most one response): ""Leave headroom for this"". A budget that covers subagents needs Claude Code v2.1.217+; `maxTurns` on a subagent returns ""partial"" from v2.1.246."
-4.26,"Open point: per-role cap values (turn counts, money) have no source."
+4.26,"Open point: per-role cap values (turn counts, money) have no source; the only source example is `max_turns=30`."
 4.27,"Subagent model order: call parameter, then `model` in frontmatter, then `CLAUDE_CODE_SUBAGENT_MODEL`, then the main model; `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` forces all. The order changed in v2.1.251, so record the version."
 4.28,"Effort order: `CLAUDE_CODE_EFFORT_LEVEL`, then the in-session choice, then `--effort`, then settings, then the model default; a subagent's `effort` frontmatter does not override the environment variable."
 4.29,Environment variables that force model or effort silently disable role profiles; check for them. Inferred.
