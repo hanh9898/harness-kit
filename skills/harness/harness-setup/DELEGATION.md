@@ -17,14 +17,16 @@ How much each role may decide for the user. Done after the tracer-bullet entries
 
 Write each question from its sheet at the end of this file, in the forms of [ASKING.md](ASKING.md). Say "axis", "level" and the 70 percent threshold in plain words; they are your working terms. The list of roles and the table below are the same questions as before, only worded from the sheets.
 
+Stage 4 is the longest, so **announce** it in the first question (ASKING.md, "Long stages"): for one role and one kind of decision it is about 6 questions (roles, the decision, undo and information in one confirmation, the level, the table, then the role's card), 8 if the level is 5 or higher; you take ONE kind of decision per role (the most recent one found in the history; more kinds can be added later in edit mode); the user may do one role first and stop. The undo and information questions (axes 1 and 2) are put in ONE confirmation turn (S16) when the pull request or commits give evidence for both; S17 is asked only for what S16 could not settle. Ask for the level (S18) with all seven levels shown in plain words.
+
 First ask the user to name the roles (propose from the flow in step 1 and the team shape of step 4; the log may name none). The first `delegation` log line lists all of them in `roles=`. For each role, list the kinds of decision it makes (a few, in the user's words). For each pair (role, decision kind):
 
 1. **Reversibility.** One-way (hard to undo) or two-way (cheap to undo)? Use `axis1`.
-2. **Information.** Does the role usually have enough to decide (about 70 percent)? Use `axis2`. For a one-way choice held at level 3 or lower, `unknown` is an accepted answer; it can only lower the level.
+2. **Information.** Does the role usually have enough to decide (about 70 percent)? Use `axis2`. (1 and 2 go in one confirmation turn when the history shows both: sheet S16.) For a one-way choice held at level 3 or lower, `unknown` is an accepted answer; it can only lower the level.
 3. **Level.** Suggest a level from `combine` and read `step<n>` for it; the user decides the number 1 to 7. One-way choices stay at 3 or lower unless the user states a reason; say the reason in the entry.
 4. **Zone and escalation.** Only for level 5 or higher: where may the role act alone (paths, commands, systems) and what makes it stop and ask (a count of refusals, an unknown, a cost)? Both must be concrete. An answer like "when unsure" is not a threshold; ask again. Below level 5 write `n/a`.
 
-Show the filled table for the role and wait for a yes before the next role.
+Show the filled table for the role and wait for a yes before the next role. The Level column holds the number the user said, and the table says so ("you chose level 4 in the last question"); never the suggestion if they differ.
 
 ## Entry
 
@@ -53,7 +55,7 @@ Changing delegation is editing the Level cells of the existing entry (edit mode)
 
 ## Question sheets (step 7)
 
-Stage 4 opens with S14 (full form); S15 to S20 follow in compact form. A new role restarts the loop at S15.
+Stage 4 opens with S14 (full form, with the announcement of the length); S15 to S20 follow in compact form. A new role restarts the loop at S15.
 
 ### [S14] The roles
 
@@ -79,19 +81,19 @@ Stage 4 opens with S14 (full form); S15 to S20 follow in compact form. A new rol
 - Unsure: say "not sure"; I use the choices found in the history
 - Suggest: "<example from the pull request, for instance choosing the name of a column>"
 
-### [S16] Hard or easy to undo
+### [S16] Easy or hard to undo, and enough information (one confirmation)
 
 - Stage: 4/6 Decide who may decide what
-- Helps: hard-to-undo choices stay under your control
-- If skipped: I treat it as hard to undo, which keeps the freedom low
-- Why: how hard a mistake is to undo decides how much freedom is safe
-- Ask: Last time <role> decided "<decision>" (<pull request or commit>): if it had been wrong, would undoing it have been hard or easy?
-- Terms: hard to undo = one-way, for example data lost or already shipped; easy = two-way, a cheap revert
-- Enough: hard or easy
-- Unsure: say "not sure"; I treat it as hard to undo
-- Suggest: the answer the history suggests (for example "easy: it was a single commit that can be reverted"), stated as a guess
+- Helps: hard-to-undo choices stay under your control, and a role that lacked information proposes and waits
+- If skipped: I treat it as hard to undo and as not enough information, which keeps the freedom low
+- Why: these two facts together decide how much freedom is safe
+- Ask: Last time <role> decided "<decision>" (<pull request or commit>), I see: <what git shows about undoing it, in plain words, for example "it is one commit that can be reverted: easy to undo"> and <what shows about information, for example "the task did not name the word used, so it probably lacked information">. Is that right?
+- Terms: easy to undo = a cheap revert; hard to undo = data lost or already shipped
+- Enough: yes, or which of the two is wrong
+- Unsure: say "not sure"; I treat it as hard to undo and not enough information
+- Suggest: the two findings above, stated as guesses. If the history shows only one of them, state that one and ask only about the other (that is S17)
 
-### [S17] Did the role have enough information
+### [S17] Did the role have enough information (only when S16 could not settle it)
 
 - Stage: 4/6 Decide who may decide what
 - Helps: a role that often lacked information proposes and waits; one with enough may act
@@ -101,7 +103,7 @@ Stage 4 opens with S14 (full form); S15 to S20 follow in compact form. A new rol
 - Terms: none
 - Enough: enough, not enough, or don't know
 - Unsure: say "don't know"; I treat it as not enough
-- Suggest: "Not enough: it had not read <document> yet." Name what you found
+- Suggest: "Not enough: it had not read <document> yet." Name what you found; if you found nothing, leave the suggestion out
 
 ### [S18] How much it may decide alone
 
@@ -109,11 +111,18 @@ Stage 4 opens with S14 (full form); S15 to S20 follow in compact form. A new rol
 - Helps: the number you pick is what the agent is allowed to do without asking you
 - If skipped: I use my suggested level, capped at 3 when the decision is hard to undo
 - Why: this is the final level for this kind of decision
-- Ask: For "<decision>" I suggest level <n> of 7: "<meaning of that level in plain words, from the framework piece>". Is that how much you want <role> to decide alone?
-- Terms: level = from 1 (the role only reports) to 7 (the role decides and acts alone, you are told afterwards); the meaning of the level is read from the framework, said in plain words
-- Enough: yes, or another number from 1 to 7
+- Ask: For "<decision>" I suggest level <n> of 7 ("<meaning of that level, one clause>") because <one plain reason: easy or hard to undo, enough or not enough information>. Which level do you want <role> to have, from 1 to 7?
+- Terms: show all seven levels, one short line each, with who decides (you = the user, the role = the agent or person in that role):
+  1 = you decide and tell the role what to do; the role only carries it out
+  2 = you decide and explain your reasons to the role; the role carries it out
+  3 = you ask the role for its view first, then you decide
+  4 = you and the role decide together; the role waits for your agreement
+  5 = the role decides after you have given your advice
+  6 = the role decides first, you review afterwards (suits choices that are easy to undo)
+  7 = the role decides and acts alone, you are told afterwards (only inside a bounded area, with a log)
+- Enough: one number from 1 to 7
 - Unsure: say "not sure"; I use the suggested level (capped at 3 when hard to undo)
-- Suggest: the level the framework gives for this answer of S16 and S17. A hard-to-undo choice above 3 needs your stated reason, which I write in the entry
+- Suggest: the level the framework gives for the answers of S16 and S17; state the reason in one plain sentence (never "the framework goes up to level 6", "step back one level"). A hard-to-undo choice above 3 needs your stated reason, which I write in the entry. Next question: from level 5 on I ask two more things (S19); say that only when the user picks 5 or more
 
 ### [S19] Where it may act alone and when it must stop (level 5 or higher)
 
@@ -135,8 +144,8 @@ Stage 4 opens with S14 (full form); S15 to S20 follow in compact form. A new rol
 - Helps: you see all levels of this role in one place before they are written
 - If skipped: the table stays a draft and nothing is written
 - Why: one yes covers the table and the evidence for it
-- Ask: Is this table right for <role>? <the table>
-- Terms: level, zone and stop point as in S18 and S19
+- Ask: Is this table right for <role>? <the table, in the user's language: "undo" column as easy or hard, "information" as enough, not enough or not known yet, "level" as the number the user chose, "areas" and "stop point" as the user's answers or "not needed below level 5">. Say before the table: "you chose level <n> in the last question".
+- Terms: level, area where it may act alone and stop point as in S18 and S19
 - Enough: yes, or the row to change
 - Unsure: say "not sure"; the table stays a draft
 - Suggest: yes

@@ -75,3 +75,44 @@ def test_questions_avoid_harness_words_in_why_and_ask():
 
 def test_no_absolute_paths_in_asking():
     assert "/Users/" not in (SETUP / "ASKING.md").read_text(encoding="utf-8")
+
+
+# --- Ticket 22: revisions from two unscripted readers. ---
+
+def _asking():
+    return (SETUP / "ASKING.md").read_text(encoding="utf-8")
+
+
+def test_level_scale_describes_all_seven_levels():
+    f, body = _sheets()["S18"]
+    for n in range(1, 8):
+        assert re.search(rf"^\s*{n}\s*=", body, re.M), f"S18 lacks a description for level {n}"
+    assert "who decides" in body.lower() or "you decide" in body.lower()
+
+
+def test_asking_has_the_ticket_22_rules():
+    text = _asking()
+    for needle in ("## Words the user sees", "## Long stages", "## Contradiction between git and the account",
+                   "## Echo the user's own choice"):
+        assert needle in text, needle
+
+
+def test_stage_four_is_announced_and_grouped():
+    deleg = (SETUP / "DELEGATION.md").read_text(encoding="utf-8")
+    assert "announce" in deleg.lower()
+    roles = (SETUP / "ROLES.md").read_text(encoding="utf-8")
+    assert "all four cells in one turn" in roles
+
+
+def test_overview_has_a_word_limit():
+    assert re.search(r"at most \d+ words", _asking())
+
+
+def test_kit_readme_counts_match_csv():
+    import csv
+    readme = (ROOT / "kit" / "README.md").read_text(encoding="utf-8")
+    for name in ("legos.csv", "rules.csv"):
+        with open(ROOT / "kit" / name, newline="", encoding="utf-8") as fh:
+            n = len(list(csv.reader(fh))) - 1
+        m = re.search(rf"\| `{re.escape(name)}` \|[^|]*\| (\d+) \|", readme)
+        assert m and int(m.group(1)) == n, (name, n, m and m.group(1))

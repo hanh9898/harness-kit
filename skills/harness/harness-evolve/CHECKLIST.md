@@ -49,3 +49,4 @@ E30 onward comes from ticket 19. Forms and rules live in `../harness-setup/ASKIN
 | E34 | Waiver reasons and team verification | Waiver and team cases | Reasons are the user's words; team verification uses a concrete recent task; uncertainty records not run |
 | E35 | Complete question sheets and concise links | Question-layer tests and line counts | V01-V10 each have nine fields; evolve SKILL.md has at most 80 lines; no duplicated ASKING.md |
 | E36 | Step 2 gate evidence block | Agent messages | Meets setup C94-C95: one language, conclusion first, plain needs, one approval, details on request; Stage 2/4 |
+| E37 | Two-reader revisions (ticket 22) | Real evolve run on an initialized repo | Applies C96 and C98-C100, C102-C103: consistent language and levels, announced length, one-idea follow-ups; overview about 120 words; full form after resuming |

@@ -8,14 +8,14 @@ Two layers. Layer one: one **overview message** at the start of the run (where t
 
 Send once, before the first question, in plain words. Four parts, in this order:
 
-1. **Final result**: what the user will see in the repo when the run ends (files and folders by name), in one or two sentences. Define "harness" in a few words: the rules, tools and checks around an agent in this repo.
+1. **Final result**: ONE sentence: what the user will see in the repo when the run ends, naming at most the folder `harness/` and one other file. Say what "harness" means in a few words (the rules, tools and checks around an agent in this repo); do not list record, log, glossary or other file names, they come up later when needed.
 2. **Stages**: one line per stage, taken from the stage table in the skill's `SKILL.md`: the plain name, then what the user does there. Say how many stages there are.
 3. **Effort**: `{effort}`. Not measured yet, so say so: "I have not timed this." Give no minutes and no count of questions you cannot back. Name what to have ready (setup: one piece of work finished recently; evolve: nothing).
 4. **How it goes**: one question per turn; "not sure" is an answer and I say which default I use; stop any time, the next run continues from `harness/progress.log`. Setup only: the user may ask to jump to stage 5.
 
 Note for whoever measures: `{effort}` stays a placeholder until a run with a real person gives a number; then replace the sentence in part 3 with that number and its source.
 
-Setup overview, shape (about 300 words, keep it shorter if the repo is small):
+Setup overview, shape (at most 150 words; a reader run found 300 words and five unfamiliar file names too much):
 
 ```
 Before I ask anything, here is where this is going.
@@ -27,7 +27,7 @@ Effort: <I have not timed this>. Have ready: <...>.
 How: one question per turn; say "not sure" and I use the stated default; stop any time and the next run picks up from the log.
 ```
 
-Evolve overview: same four parts, 4 stages, about 160 words, no "have ready".
+Evolve overview: same four parts, 4 stages, at most 120 words, no "have ready".
 
 ## Full form
 
@@ -93,6 +93,41 @@ Keep "If skipped" in the compact form only when the consequence is heavy or not 
 12. **Plain words for files and jargon.** A file or term the user has not met (record, progress log, hook, check) gets a short plain description the first time it appears. Do not quote source text in a language other than the user's; paraphrase it. Do not give a reason the user cannot use ("the repo has no spec yet").
 13. **Evidence block stays short**: the conclusion, then at most three lines per item. A reader run found a 6-line item with command examples unreadable.
 14. **Say only what is true.** "If skipped" and "Helps you" come from what the skill really does; no threat, no pressure to answer.
+15. **Never present an assumption as the user's word.** After "not sure" or "don't remember", later questions say "assuming <X>, from <PR or file>", never "you chose <X>" or "you said <X>". Never say the user said something (for example "the other roles come later") that they did not say.
+16. **Never re-ask what was just answered, and never call it missing.** Do not send two messages in a row that ask the same thing. When the user answered part of a question, name only the part still open.
+17. **A suggestion line exists or it does not.** If you have nothing to suggest, leave the line out and do not mention a suggestion anywhere else in the message. No filler about what the repo lacks ("no revert commit found") unless the user can use it to answer.
+18. **No apologetic voice for a repo without history.** Say "planned" and "as you describe it", not "not observed" or "not checked".
+
+## Words the user sees
+
+The record and the log keep English keys; what you SAY is in the user's language. Say these in plain words, and the first time a name for a thing appears, add what it is in a few words.
+
+| Do not say | Say (Vietnamese user) |
+|---|---|
+| gate | a check for whether a more complex solution is needed, or a review of sources |
+| hook | a small command that runs automatically before an agent operation |
+| script | a small command |
+| record, entry | files recording the project's individual choices (`harness/record/`) |
+| progress log | a progress journal for resuming later |
+| unverified | not yet tried |
+| fragile | easy to bypass |
+| spec | a document describing the work to do |
+| shared / project | shared across projects / specific to this project |
+| fail open, exit 2 | describe behavior: "if the script fails, the operation still runs" |
+
+A file name or command needs a plain description at first mention (`harness/gate.md` = where I keep the sources I read). Use plain descriptions rather than piece IDs, kit commands or untranslated quotes. "Shared" means reusable unchanged in another project; "project-specific" means it needs editing. The log retains `shared` and `project`.
+
+## Long stages
+
+A stage that will take more than about five questions is announced in its first question: say how many questions to expect for one item, that you take one item first, and that the user may stop after it. Where a sheet allows it, put what git already shows into ONE confirmation (as in "Confirming a chain") instead of one question per field; ask separately only about the fields the evidence does not settle. Stage 4 (who decides what) follows this: see `DELEGATION.md`.
+
+## Echo the user's own choice
+
+When an answer goes into a table, a summary or a record, show the user's answer, not your suggestion, and say where it came from ("you chose level 4 in the last question"). If the user's answer differs from your suggestion, the user's answer wins; do not say the suggestion again. In tables, "n/a" becomes "not needed" with the reason in a few words, and "unclear" becomes "not known yet".
+
+## Contradiction between git and the account
+
+If what the user tells differs from what git or the pull request shows (for example the user says they wrote the request, git shows an agent as author), do not argue and do not pick silently. Say both in one line, record the user's account, add the git view as a note in the log (`git_differs=<step>`), and ask once whether to keep the user's account. If the user keeps it, move on.
 
 ## Confirming a chain
 
@@ -112,7 +147,7 @@ You cannot name a finished piece of work: the repo has no commits, only an initi
 2. Ask the "who" questions about that plan in ONE turn, in the future tense, as a proposed chain built from what the user already said (the agent app named, the guidance files): "For <plan> I assume: request written by <A>, code by <B>, review by <C>, merge by <D>. Is that the plan?" A reader run found four separate who-questions pointless for a one-person repo. If the user says no, ask which link is wrong, one per turn. No git evidence exists, so do not cite any.
 3. Skip the "was it different from usual?" question; there is nothing to compare. Write the flow summary in the log as planned, not yet observed.
 
-Sheet S01 asks "which agent app does your team use" without "the last piece of work"; sheet S07 asks which part of the planned work worries the user most. The same applies to any sheet whose "Ask" names a past piece of work: use the planned work instead, and ignore the "Suggest" line that needs git evidence.
+Sheet S01 is still asked, without "the last piece of work": suggest the app from the guidance files or config folders if there are any, and do not mention co-author signatures when git has none. Sheets S03 to S05 (labels) are asked only for items that really exist beyond the original guidance files; if there are none, say in one line that there is nothing to label yet and that the guidance files count as the project's own, and write `labels=none` in the log. Sheet S07 asks which part of the planned work worries the user most. The same applies to any sheet whose "Ask" names a past piece of work: use the planned work instead, and ignore the "Suggest" line that needs git evidence.
 
 ## List question
 
@@ -122,7 +157,7 @@ Name reserved: **list question**, a question whose answer is a list (for example
 
 At most one follow-up per question, one question per turn:
 
-1. **General answer** ("usually...", "it depends"): bring it back to the one concrete piece of work already named: "For <the piece of work>, who did that step?"
+1. **General answer** ("usually...", "it depends"): say the same question again, now about the one concrete piece of work already named. It is the same question reworded, not a second one: no new idea, no extra "and".
 2. **Partly answered**: accept what was given, say in one sentence what is still missing, and offer your suggested answer for it. Never re-ask what was answered.
 3. **"Not sure" or "don't remember"**: use the suggested answer as an assumption, say which one you used, write `unclear` where the record or log takes it, and leave it to edit mode. This is information, not a failure.
 4. **"Why do you ask?"**: answer with exactly the one line from "Why I ask", then repeat the question. Add no new question.
@@ -134,27 +169,26 @@ At most one follow-up per question, one question per turn:
 The simplicity-gate evidence (setup step 3, evolve step 2) and any proposal that carries evidence (setup step 4) are shown to the user in this form, not as the raw block of `GATE.md`. It is a question too: full form at the first one of a stage, compact after. The record keeps its English keys (`gate_*`) exactly as before; only what you SAY to the user is in the user's language, and no English label (lighter rung, why not enough, source, answer) is spoken.
 
 ```
-❓ **Q<n>** - **Do you approve what I found?**
+❓ **Q<n>** - **<short title in plain words>**
 Stage <k>/<N>: <stage name in plain words>
-<I checked: one sentence of conclusion: "I checked <N> things and <M> need nothing heavier than <the lightest way>; <K> need a closer look: <name>.">
-For each item, one short group:
-  <the need in plain words, never a piece id or code like L05>: <the way I propose, in plain words> instead of <the lighter way>, because <one line>.
-  Reliability: <which source I quoted word for word, which one I only have a summary of, in one short line>
-Helps you at the end: <what stays out of the result if you say no>
-Terms: <the few words that need a line>
-Not sure: <default: items without your approval are dropped; nothing recorded or installed>
-Decide: <ONE sentence: "Do you approve this?"> If yes, the next step is <...>; if you reject an item, I drop it and record nothing for it.
+I checked: <ONE sentence: "I checked <N> things; <M> are fine with <the simple way>, for <K> I propose something heavier: <the need in plain words>.">
+<The need in plain words>: I propose <the way, in plain words> instead of <the simpler way>, because <one short reason a non-expert can follow>.
+How sure I am: <"sure: the documentation says so" or "partly sure: <what I could only read as a summary>"; one line>
+If you say no: <what is left out of the result>
+Decide: <ONE sentence ending in a question mark>? If yes, <next step>; if no, <what is dropped>.
 
-➡️ <your recommendation: approve the items whose source says what I claim; name any that say less>
+➡️ <recommendation, one line>
 ```
+
+Hard limits for this block: at most 8 lines of text in total; no command, no code, no quoted source text; no word from "Words the user sees" without its plain version; no "Terms" line unless one word truly needs it (then at most one line). A reader run found a block of ten lines with command examples and an English quote only half readable, and a "reliability" line that talked about quotations instead of what the user needs to know (can I trust this?).
 
 Rules for this block:
 
 1. The conclusion comes first and the decision sentence is the last line before the suggestion: ONE ask, one line. Nothing after it except the suggestion.
 2. Needs in plain words only. A piece id, a source id or a rung name is "Terms" at most, never the label of an item.
-3. Reliability in one short line per item: say which source was quoted word for word and which one only gave a summary.
+3. "How sure I am" in one short line per item: whether the documentation says it directly, or whether I could only read a summary of it, and what that means for the user (can they trust the proposal). Do not talk about quotations.
 4. Full detail (piece id, url, date read, exact answer) is shown only when the user asks to see it ("show me the sources"); it is always written to `harness/gate.md` and the entry keys as before.
-5. Words like "lighter way" and "heavier way" replace rung terms; explain "way" levels once under Terms the first time: a rule in a text file, a reusable instruction (skill), a small script, an outside service (MCP).
+5. Words like "simple way" and "heavier way" replace rung terms. The first time, say the four kinds in plain words in one clause: a rule written in a text file, a reusable instruction, a small command, an outside service.
 6. A proposal (tools, folders, team shape) that carries evidence puts its evidence in one line "Because: <...>" and keeps the full block for when the user asks.
 
 ## Question sheets
@@ -173,7 +207,7 @@ Where each sheet is: S01, S02, S06 in `BOUNDARY.md`; S03 to S05 in `BOUNDARY.md`
 - Terms: need = one thing you want easier, safer or faster in the flow
 - Enough: one place, one or two sentences
 - Unsure: say "not sure"; I use the rework spot named under Suggest
-- Suggest: "I see <fix commit / reverted change / reopened ticket> after <step>. Is that the spot?" Name what you found; if nothing, say the repo shows no rework
+- Suggest: "I see <fix commit / reverted change / reopened ticket> after <step>. Is that the spot?" Name what you found; if nothing, leave the suggestion line out entirely and say nothing about it
 
 ### [S08] Confirm the need and the building block (step 2)
 
@@ -193,8 +227,8 @@ Where each sheet is: S01, S02, S06 in `BOUNDARY.md`; S03 to S05 in `BOUNDARY.md`
 - Helps: you see a real pass or fail for what was set up, not my claim that it works
 - If skipped: the entry stays "unverified" and I do not call it working
 - Why: a check is a command; I run it only with your yes, and its real output goes into the record
-- Ask: Shall I run `<command>` to see whether "<piece in plain words>" works?
-- Terms: check = a command whose pass or fail shows the piece works; unverified = recorded but never proven
+- Ask: Shall I run `<command>` to see whether "<piece in plain words>" works? (ONE command for ONE entry. With several entries, say first "there are N entries, one check each" and ask for the entries one by one; read-only commands may be run together only if you say so and the user agrees.)
+- Terms: check = a command whose pass or fail shows the piece works; "not yet tried" (unverified) = recorded but never proven
 - Enough: yes, or a different command
 - Unsure: say "not sure"; I do not run it and the entry stays unverified
 - Suggest: yes, the command that comes from the piece's description; say where it comes from
@@ -209,7 +243,7 @@ Where each sheet is: S01, S02, S06 in `BOUNDARY.md`; S03 to S05 in `BOUNDARY.md`
 - Terms: harness = the rules, tools and checks around an agent in this repo
 - Enough: one or two sentences telling what happened
 - Unsure: say "not sure"; I propose the first mismatch or failing check I found in stage 1
-- Suggest: "Latest I see: the check of '<entry>' has failed since <date>. Is that the spot?" If nothing failed, say the record and the files agree
+- Suggest: "Latest I see: the check of '<entry>' has failed since <date>. Is that the spot?" If nothing failed, leave the suggestion out
 
 ### [V06] Confirm the change sentence (evolve step 1)
 
