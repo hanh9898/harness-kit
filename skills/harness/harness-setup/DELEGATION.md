@@ -47,4 +47,4 @@ Append one `delegation` log line per entry, after the check result (no separate 
 
 ## Switching on or off
 
-Changing delegation is editing the Level cells of the existing entry (edit mode): off is every level to 3 or lower, on is level 6 for reversible kinds, per `combine`. Update `verified_on` after the check reruns. Create no new entry, delete none, rebuild neither roles nor team; the role profiles point at the entry and need no change. Level 5 or higher still needs zone and escalation.
+Changing delegation is editing the Level cells of the existing entry (edit mode): off is every level to 3 or lower, on is level 6 for reversible kinds, per `combine`. Leave Zone and Escalation as they are (a level below 5 may keep them; the check still passes). Turning on moves a kind to the level the user names, or back to its earlier level if the user says so; ask when unclear. Update `verified_on` after the check reruns. A level change adds no log line (the entry is the same, the step is the same). Create no new entry, delete none, rebuild neither roles nor team; the role profiles point at the entry and need no change. Level 5 or higher still needs zone and escalation.
