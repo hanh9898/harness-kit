@@ -16,6 +16,9 @@ GEN = ROOT / "skills" / "harness" / "harness-evolve" / "scripts" / "generate_kit
 SEED = GEN.parent / "seed"
 NOTES = ROOT / "docs" / "generation-notes.md"
 REPORTS = Path(os.environ.get("HARNESS_REPORTS", "/Users/hanhnt2/Desktop/hbu-1976-control/.scratch/harness-standards-suite"))
+# Rows added AFTER initial generation (ticket 07 step 1: H18, rules 2.24 and 7.32). CSV is authoritative;
+# the generator and seeds do NOT add these rows, so source report counts remain 162/211.
+ADDED_AFTER_GENERATION = {"legos": 1, "rules": 2}
 NOMINAL = {"legos": 162, "rules": 211, "patterns": 13}
 needs_reports = pytest.mark.skipif(not (REPORTS / "synthesis.md").is_file(), reason="source reports are unavailable on this machine")
 CERTAINTY = {"stated", "inferred", "open", "partial"}
@@ -91,8 +94,8 @@ def test_independent_counts_match_generated_or_difference_is_explained(tmp_path)
 
 @needs_reports
 def test_committed_kit_matches_counts():
-    assert len(rows(KIT / "legos.csv")) == count_legos()
-    assert len(rows(KIT / "rules.csv")) == count_rules()
+    assert len(rows(KIT / "legos.csv")) == count_legos() + ADDED_AFTER_GENERATION["legos"]
+    assert len(rows(KIT / "rules.csv")) == count_rules() + ADDED_AFTER_GENERATION["rules"]
 
 
 # ---- Partial certainty (R6). ----
