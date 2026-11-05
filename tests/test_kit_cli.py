@@ -67,3 +67,17 @@ def test_show_refuses_pattern_matching_many(tmp_path):
 def test_real_kit_runs_from_default_dir():
     r = run(KIT_CLI, "list")
     assert r.returncode == 0 and r.stdout.strip()
+
+
+def test_patterns_list_and_show_one_row_only():
+    r = run(KIT_CLI, "list", "P")
+    assert r.returncode == 0 and "P6" in r.stdout and "Orchestrator" in r.stdout
+    assert "Avoid when" not in r.stdout
+    r = run(KIT_CLI, "show", "P6")
+    assert r.returncode == 0 and "Orchestrator with workers" in r.stdout and "Avoid when" in r.stdout
+    assert "Peer handoff" not in r.stdout
+
+
+def test_pattern_unknown_fails_with_next_step():
+    r = run(KIT_CLI, "show", "P99")
+    assert r.returncode != 0 and "kit list P" in r.stderr and r.stdout == ""

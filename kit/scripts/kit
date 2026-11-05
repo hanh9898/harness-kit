@@ -4,6 +4,8 @@
   kit list              groups and piece counts
   kit list <group>      one line per piece (ID, rung, name, summary)
   kit show <id|name>    every column of exactly one piece
+  kit list P            one line per team architecture pattern (patterns.md)
+  kit show P<number>    every column of exactly one pattern, for example P6
 
 Add --dir DIR to use another kit directory; default: the kit containing scripts/.
 Uses only the standard library.
@@ -20,15 +22,38 @@ def load(kit_dir):
         return list(csv.DictReader(f))
 
 
+def load_patterns(kit_dir):
+    """Table rows in patterns.md as {number: [cells...]}; empty if the file is absent."""
+    path = kit_dir / "patterns.md"
+    if not path.is_file():
+        return {}, []
+    head, out = [], {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
+        if line.startswith("| #"):
+            head = cells
+        elif line.startswith("| ") and cells[0].isdigit():
+            out[int(cells[0])] = cells
+    return out, head
+
+
 def fail(msg, code=2):
     print(f"ERROR: {msg}", file=sys.stderr)
     return code
 
 
-def cmd_list(rows, group):
+def cmd_list(rows, group, patterns=None):
+    if group is not None and group.lower() in ("p", "patterns"):
+        if not patterns:
+            return fail("patterns.md is missing from the kit directory.")
+        for n, c in patterns.items():
+            print(f"P{n}\t{c[1]}\t{c[3]}")
+        return 0
     if group is None:
         for g, n in sorted(Counter(r["group"] for r in rows).items()):
             print(f"{g}\t{n} pieces")
+        if patterns:
+            print(f"P\t{len(patterns)} team architecture patterns")
         print("Next step: kit list <group> to see pieces, kit show <id> to see one piece.")
         return 0
     picked = [r for r in rows if r["group"].lower() == group.lower()]
@@ -39,8 +64,15 @@ def cmd_list(rows, group):
     return 0
 
 
-def cmd_show(rows, query):
+def cmd_show(rows, query, patterns=None, head=None):
     q = query.strip().lower()
+    if q[:1] == "p" and q[1:].isdigit():
+        n = int(q[1:])
+        if n not in (patterns or {}):
+            return fail(f"`{query}` matches no pattern.\nNext step: run `kit list P` to see patterns.")
+        for k, v in zip(head, patterns[n]):
+            print(f"{k}: {v}")
+        return 0
     hit = [r for r in rows if q and (r["id"].lower() == q or r["name"].lower() == q)]
     if len(hit) != 1:
         why = "matches no piece" if not hit else "matches more than one piece"
@@ -61,7 +93,10 @@ def main(argv=None):
         rows = load(Path(a.dir))
     except OSError as e:
         return fail(f"Cannot read legos.csv in {a.dir} ({e}).")
-    return cmd_list(rows, a.group) if a.cmd == "list" else cmd_show(rows, a.query)
+    patterns, head = load_patterns(Path(a.dir))
+    if a.cmd == "list":
+        return cmd_list(rows, a.group, patterns)
+    return cmd_show(rows, a.query, patterns, head)
 
 
 if __name__ == "__main__":

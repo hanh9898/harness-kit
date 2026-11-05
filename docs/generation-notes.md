@@ -31,3 +31,9 @@ Report 27 has a 7-row axis matrix and report 28 a 9-row one. The kit groups them
 ## What was translated by hand
 
 Free text in the reports is Vietnamese. The generator does not translate. Names, summaries, rule text, pattern text and the delegation text were translated block by block into `skills/harness/harness-evolve/scripts/seed/`. The generator parses ids, groups, certainty, sources, ordering and counts from the reports, and stops when a seed block does not match a report id or count.
+
+## After the first generation: the CSV is the source of truth
+
+`generate_kit.py` ran once. From then on `kit/legos.csv` and `kit/rules.csv` are edited by hand and are the source of truth; the generator and its `seed/` are not updated to follow them (the generator refuses to overwrite a hand-edited kit).
+
+Rows added after the first generation, all at the end of the file so later merges stay clean: lego `H18` (review checklist), rules `2.24` and `7.32`, giving 163 legos and 213 rules in the committed kit. The extra detail text on `D04`, `L08` and `I04` was edited in place. The independent count test still compares the generator against the source reports (162 and 211); only the committed-kit check adds `ADDED_AFTER_GENERATION`.

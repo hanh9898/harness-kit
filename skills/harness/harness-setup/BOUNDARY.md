@@ -5,7 +5,7 @@ Classify every item the flow turned up (tool, document, data, role, script). Two
 - `shared`: names nothing about this project; works unchanged in another project.
 - `project`: carries this project's name, data, paths, tools or roles. Business documents, data snapshots and tools that process them are `project` harness too.
 
-Ask in order; stop at the first answer that settles it.
+Put these to the user in order, one per turn, for the items not yet settled; stop at the first answer that settles each item. A suggested label is a proposal until the user answers.
 
 1. **Own names or values?** Project name, machine path, entry from a project log, project-only tool or role. Yes: `project`.
 2. **Delete test.** Carry it into another project: still true and still runs? Yes: `shared`.
