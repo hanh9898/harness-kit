@@ -135,7 +135,7 @@ A stage that will take more than about five questions is announced in its first 
 
 ## Echo the user's own choice
 
-When an answer goes into a table, a summary or a record, show the user's answer, not your suggestion, and say where it came from ("you chose level 4 in the last question"). If the user's answer differs from your suggestion, the user's answer wins; do not say the suggestion again. In tables, "n/a" becomes "not needed" with the reason in a few words, and "unclear" becomes "not known yet".
+When an answer goes into a table, a summary or a record, show the user's answer, not your suggestion, and say where it came from ("you chose level 4 in the last question"). If the user's answer differs from your suggestion, the user's answer wins; say it once in the echo: "you chose level 4, not my suggestion of 5, so I write 4". The question number does not restart after a resume: take it from the last question you can count in the log, or drop the number and keep the stage line. In tables, "n/a" becomes "not needed" with the reason in a few words, and "unclear" becomes "not known yet".
 
 ## Contradiction between git and the account
 
@@ -268,6 +268,7 @@ Where each sheet is: S01, S02, S06 in `BOUNDARY.md`; S03 to S05 in `BOUNDARY.md`
 - Enough: yes, or what to correct
 - Unsure: say "not sure"; I keep the draft and start nothing
 - Suggest: yes; the role and entry are taken from the record, say which file
+- Note: when the change raises a level of freedom to 5 or more, the places it may act alone and the stop point are asked with sheet S19 of `DELEGATION.md` (compact form) before the change is settled; below 5 they stay "not needed". If the user is not sure, the level stays where it was and the change is kept as a draft in the log.
 
 ### [V07] Approve the evidence list (evolve step 2)
 
