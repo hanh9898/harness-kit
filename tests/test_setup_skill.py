@@ -15,7 +15,7 @@ def test_skill_is_hand_typed_only():
 def test_body_short_and_every_sibling_pointed_to():
     body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
     assert len(body.splitlines()) <= 170
-    for sib in ("BOUNDARY.md", "RECORD-FORMAT.md"):
+    for sib in ("BOUNDARY.md", "RECORD-FORMAT.md", "GATE.md", "PROPOSALS.md"):
         assert (SKILL / sib).is_file() and f"]({sib})" in body
 
 
