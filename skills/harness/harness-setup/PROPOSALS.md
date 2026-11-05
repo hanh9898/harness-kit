@@ -7,10 +7,10 @@ Three parts, in order. Present a part, wait, change it until the user settles it
 3. **Agent team shape.** Take it from the team patterns in the kit, never by loading them all:
 
 ```
-../../../kit/scripts/kit list P       # one line per pattern
-../../../kit/scripts/kit show P<n>    # one pattern in full
+<skill-dir>/../../../kit/scripts/kit list P       # one line per pattern
+<skill-dir>/../../../kit/scripts/kit show P<n>    # one pattern in full
 ```
 
-(Resolve the path to the plugin's `kit/scripts/kit`.) The patterns favour the simplest shape. Start from the single agent, show `Use when` and `Avoid when` of the pattern you propose, and pick a heavier one only if the flow you observed matches its `Use when`. State any condition the pattern carries (some are experimental on their platform).
+(Substitute `<skill-dir>` as in SKILL.md.) The patterns favour the simplest shape. Start from the single agent, show `Use when` and `Avoid when` of the pattern you propose, and pick a heavier one only if the flow you observed matches its `Use when`. State any condition the pattern carries (some are experimental on their platform).
 
 Settled parts are logged one line each (`proposal part=tools|folders|team`). A part the user rejects entirely is logged with `outcome=none`.
