@@ -56,10 +56,10 @@ Read first. One line per entry, no detail:
 Append only; one line per finished step, never edited:
 
 ```
-<UTC timestamp from `date -u +%FT%TZ`> step=<observe|need-to-piece|gate|proposal|record|check|delegation|roles|standards|isolation|wiring|final> <key=value ...>
+<UTC timestamp from `date -u +%FT%TZ`> step=<observe|need-to-piece|gate|proposal|record|check|delegation-draft|delegation|roles|standards|isolation|wiring|final> <key=value ...>
 ```
 
-`observe` carries `platform=`, `flow=` and `labels=`; `need-to-piece` carries `need=` and `piece=`; `gate` carries `items=` (approved) and `dropped=`; `proposal` carries `part=` (tools, folders or team) and `outcome=`; `record` and `check` carry `entry=` (`check` also `result=`); `standards` and `isolation` carry `entry=` (or `outcome=none`) and `result=`; `wiring` carries `map=`, `block=` and `hooks=`; `final` carries `entries=` and `result=`; `delegation` and `roles` carry `entry=` and `result=`, and the first `delegation` line also `roles=` (all role names). Always take the timestamp from running `date -u`, never from memory. Before logging a step, read the last line: a line for the same step and the same entry (or, for `need-to-piece`, the same need) already there is not logged again.
+`observe` carries `platform=`, `flow=` and `labels=`; `need-to-piece` carries `need=` and `piece=`; `gate` carries `items=` (approved) and `dropped=`; `proposal` carries `part=` (tools, folders or team) and `outcome=`; `record` and `check` carry `entry=` (`check` also `result=`); `standards` and `isolation` carry `entry=` (or `outcome=none`) and `result=`; `wiring` carries `map=`, `block=` and `hooks=`; `final` carries `entries=` and `result=`; `delegation-draft` is the one line written in the middle of step 7, after each answer that settles a field of a table row: `role=`, `kind=` and the fields settled so far (`undo=`, `info=`, `level=`, `zone=`, `stop=`); it lets a later run continue inside a stage without asking again; `delegation` and `roles` carry `entry=` and `result=`, and the first `delegation` line also `roles=` (all role names). Always take the timestamp from running `date -u`, never from memory. Before logging a step, read the last line: a line for the same step and the same entry (or, for `need-to-piece`, the same need) already there is not logged again.
 
 ## Writing safely
 

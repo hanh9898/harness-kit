@@ -23,7 +23,7 @@ Stages (the "k/6" of every question; the overview message lists them first):
 | 5 | Rules, keeping the tooling apart from your product, wiring it in | 9, 10, 11 | picks rules, says yes or no to isolation, confirms hook files |
 | 6 | Final check | 12 | reads the report; no question |
 
-Before the first question send the overview message (ASKING.md). The user may ask to start at stage 5 (steps 9 to 12). A repo with no finished work to point at follows the "Repo with no history" branch.
+Before the first question send the overview message (ASKING.md), short. Everything you say is in the user's words: ASKING.md has the table of words not to say. The user may ask to start at stage 5 (steps 9 to 12). A repo with no finished work to point at follows the "Repo with no history" branch.
 
 ## Process
 
@@ -31,7 +31,7 @@ Before the first question send the overview message (ASKING.md). The user may as
 
 Setup is a prerequisite. Look for an `## Agent skills` block in `AGENTS.md` or `CLAUDE.md` and for `docs/agents/`. Missing either: tell the user to run `setup-matt-pocock-skills` first, then stop. Write nothing.
 
-Then read where the last run stopped. `harness/progress.log` exists: read its last line, say aloud which step it logged and that you continue after it. Resume at the first step without a log line (a recorded entry with no `check` line resumes at step 6; every entry checked but no `delegation` line resumes at step 7; a `delegation` line but no `roles` line, step 8; then the first of steps 9 to 12 without its log line), taking platform, flow, labels and approved gate evidence (`harness/gate.md`) from the files; ask nothing a logged line already answers.
+Then read where the last run stopped. `harness/progress.log` exists: read its last line, say aloud which step it logged and that you continue after it. Resume at the first step without a log line (a recorded entry with no `check` line resumes at step 6; every entry checked but no `delegation` line resumes at step 7 (a `delegation-draft` line for a role without its `delegation` line: continue at the first field not yet settled, and say what was kept); a `delegation` line but no `roles` line, step 8; then the first of steps 9 to 12 without its log line), taking platform, flow, labels and approved gate evidence (`harness/gate.md`) from the files; ask nothing a logged line already answers.
 
 Pick the mode. `harness/record/` exists: **edit mode**; ask only about what differs from the record, and start at step 2 for the new need unless the flow itself changed. If the user names a later step (steps 9 to 12), start there. Entries checked but no delegation or role entries yet: offer step 7. An old entry without gate fields is readable: say it predates the gate, and run step 3 for it before you change it. Otherwise: **fresh mode**.
 
@@ -71,11 +71,11 @@ Write each settled item as an entry and update the index as set out in [RECORD-F
 
 ### 6. Install and run the check
 
-Create what the settled parts name (the script, the folders) and nothing else. Then propose one check (S13, in ASKING.md), a command that proves the piece works (start from the piece's `detail`; with `outside the kit`, design it with the user). Run it once the user agrees. Paste the real output into the entry. Set `status: passing` and `verified_on` only after the check ran and passed; a failure is `failing`. A piece the kit marks as unchecked on this platform needs its own check before `passing`. Append the log line for `check` once, after the final result.
+Create what the settled parts name (the script, the folders) and nothing else. Then propose one check per entry (S13, in ASKING.md; one command each, and say the number of entries first), a command that proves the piece works (start from the piece's `detail`; with `outside the kit`, design it with the user). Run only the command the user agreed to, nothing else (no probe commands to "see what happens"). Run it once the user agrees. Paste the real output into the entry. Set `status: passing` and `verified_on` only after the check ran and passed; a failure is `failing`. A piece the kit marks as unchecked on this platform needs its own check before `passing`. Append the log line for `check` once, after the final result.
 
 ### 7. Delegation
 
-Its own step, never mixed into the team shape. For each role and each kind of decision, ask the four axes and agree one level from 1 to 7. Fetch the framework piece by piece, never the whole file. Write one `delegation-<role>` entry per role. Turning delegation on or off later is changing a level, nothing rebuilt. Method, format and sheets S14 to S20: [DELEGATION.md](DELEGATION.md). Append the log line for `delegation` per entry.
+Its own step, never mixed into the team shape. It is the longest stage: announce its length first (DELEGATION.md). For each role and each kind of decision, ask the four axes and agree one level from 1 to 7. Fetch the framework piece by piece, never the whole file. Write one `delegation-<role>` entry per role. Turning delegation on or off later is changing a level, nothing rebuilt. Method, format and sheets S14 to S20: [DELEGATION.md](DELEGATION.md). Append the log line for `delegation` per entry.
 
 ### 8. Roles and profiles
 

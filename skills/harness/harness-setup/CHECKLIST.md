@@ -98,3 +98,23 @@ C68-C78 are reserved for ticket 20 (routing multiple needs); ticket 19 starts at
 | C93 | Stand-in user comprehension | Compare the new run with the earlier transcript | Records clarification and incomplete-answer counts against the old run; acknowledges stand-in agent limitations |
 | C94 | Readable gate evidence | Steps 3 and 4 messages | Consistent language, conclusion first, plain needs, explained unfamiliar terms, stage/name, and one reliability line per source |
 | C95 | One approval with consequences | Evidence block | Exactly one decision question last before suggestion; names next step or rejection result; full details only on request; stored evidence remains complete |
+
+## Two-reader question-layer revisions (ticket 22): C96 to C108
+
+Each row corresponds to an issue found by two unscripted readers (question-19-reader-A.md and -B.md). Replay sessions for a repo with history and a one-commit repo using stand-in user agents, then have two other agents read only assistant messages. Anything readers cannot infer without user messages counts as a message defect.
+
+| # | Observation | Evidence | Pass condition |
+|---|---|---|---|
+| C96 | Consistent user-facing language | Reader-assessed transcript | Avoids unexplained foreign labels and jargon; describes unfamiliar commands/files once; uses no piece IDs or untranslated quotes; record/log keys remain English |
+| C97 | Short opening | Opening turn | About 150 words maximum; one outcome sentence; at most two filenames beyond harness/; one line per stage; reader overload at most moderate |
+| C98 | Explain all seven levels | Autonomy question | One plain line per level identifying the decision maker; readers can distinguish adjacent levels without extra framework jargon |
+| C99 | Preserve the selected level | Selection, readback and record | Table matches the user's stated level and cites the answer; inapplicable or unknown cells use plain explanations |
+| C100 | Announce and group stage 4 | First stage 4 turn | Announces questions per role, defaults to one decision type, permits one role first; at most eight questions per role/type below level 5; combines evidenced reversibility and information questions; groups all four known profile cells |
+| C101 | Git/account contradictions | User account differs from Git | States both once, records the user's account and discrepancy, allows one correction without arguing |
+| C102 | Incomplete answers remain one idea | General or partial answers | Rephrases the same concrete question without adding an idea; never requests an already supplied answer |
+| C103 | Assumptions are not user choices | Questions after uncertainty | Calls the choice an assumption from a named source, never attributes unspoken choices to the user |
+| C104 | One check is one command | Step 6 | Announces N entries with one check each and asks per entry; may explicitly group read-only checks |
+| C105 | Shared/project labels | Stage 1 and log | Explains reuse unchanged versus project-specific editing in one sentence; user-facing labels are plain; log retains shared/project |
+| C106 | Empty repo questions | One-commit repo | S01 still asks, based on guidance files if present; S03-S05 only for real items beyond root instructions; otherwise explains no items need labels and logs labels=none |
+| C107 | Voice and unnecessary lines | Reports and need selection | No apologetic voice for planned work; no suggestion references without a suggestion; no irrelevant missing-Git-evidence remarks |
+| C108 | Two new readers | question-22-reader reports | Each reader finds unfamiliar terms in at most 10% of questions, none in gate evidence blocks; zero ambiguous or contradictory questions |

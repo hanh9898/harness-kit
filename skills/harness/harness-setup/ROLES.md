@@ -15,7 +15,7 @@ One profile per role. A profile is a map of four cells; each cell points to some
 - delegation: <record/delegation-<role>.md>
 ```
 
-Use the roles of step 7. Write each question from sheet S21 below, in the forms of [ASKING.md](ASKING.md). Ask the user for each cell, one cell per turn; propose from the record and the repo (tools from `record/` tool entries, docs from `AGENTS.md` and `docs/agents/`, skills from the installed ones). A skill cell holds the skill name and the path of its `SKILL.md` (ask the user or look in the installed skill folders; do not guess). `gate_*` keys: an instruction-file item like the delegation entry (`gate_lighter_rung: none`, `gate_source` the command you ran), approved by the user's yes to the profile. `none` is allowed for tools, docs and skills if the user says so; the delegation cell is never `none`.
+Use the roles of step 7. Write each question from sheet S21 below, in the forms of [ASKING.md](ASKING.md). When you can look up all four cells (tools from the record, documents from the guidance files, skills from the installed ones, the delegation pointer to the role's own entry), put all four cells in one turn as ONE confirmation ("all four cells in one turn"): show the card and ask "Is this card right for <role>?" Only if the user says no, or a cell cannot be looked up, ask for that cell alone, one cell per turn. Propose from the record and the repo (tools from `record/` tool entries, docs from `AGENTS.md` and `docs/agents/`, skills from the installed ones). A skill cell holds the skill name and the path of its `SKILL.md` (ask the user or look in the installed skill folders; do not guess). `gate_*` keys: an instruction-file item like the delegation entry (`gate_lighter_rung: none`, `gate_source` the command you ran), approved by the user's yes to the profile. `none` is allowed for tools, docs and skills if the user says so; the delegation cell is never `none`.
 
 ## Gate: every cell points at something real
 
@@ -34,8 +34,8 @@ Add a profile line to `record/index.md`. Append one `roles` log line per entry, 
 - Helps: each role starts with the tools, documents and skills it needs and nothing else
 - If skipped: I use my suggestion for tools, documents and skills; the delegation cell points at the role's own entry (never none)
 - Why: a profile tells the role what it may use; I fill one cell per turn
-- Ask (one cell per turn): For "<recent piece of work>", which <tools | documents | skills> does <role> need? (The fourth turn is the delegation cell: confirm the pointer to the role's own entry.)
-- Terms: profile = a short card for the role listing what it may use: tools, documents, skills, and how much it decides alone (the last one is a pointer to the table you just approved)
+- Ask (all four cells in one turn when all can be looked up; otherwise one cell per turn): For "<recent piece of work>", which <tools | documents | skills> does <role> need? (The fourth turn is the delegation cell: confirm the pointer to the role's own entry.)
+- Terms: delegation cell = a pointer to the table of levels you just approved, nothing new to decide; profile = a short card for the role listing what it may use: tools, documents, skills, and how much it decides alone (the last one is a pointer to the table you just approved)
 - Enough: a list, or "none"
 - Unsure: say "not sure"; I use my suggestion
 - Suggest: tools from the tool entries of the record, documents from the guidance files and docs folder of the repo, skills from the installed ones; for a skill give its name and the path of its description file, which I look up, never guess
