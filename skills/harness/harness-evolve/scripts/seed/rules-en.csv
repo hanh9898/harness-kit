@@ -1,0 +1,212 @@
+id,rule
+1.01,"A skill directory requires a `SKILL.md`; `scripts/`, `references/` and `assets/` are optional. This comes from an open specification."
+1.02,"The file must be named exactly `SKILL.md` (case-sensitive), the folder name must be kebab-case, and the skill folder must not contain a `README.md`. The source is a guide dated January 2026 that has not been checked against the current version, and the README rule is absent from the open specification."
+1.03,"`name` is 1-64 characters of a-z, 0-9 and hyphens; it ""Must not start or end with a hyphen"", has no `--`, and ""Must match the parent directory name"". Whether the field is mandatory or optional differs between sources."
+1.04,"`description` is 1-1024 characters and ""Should describe both what the skill does and when to use it""."
+1.05,"The description is a trigger condition, not a summary: ""the description field is not a summary, it's a description of when to trigger this skill""; ""the description carries the entire burden of triggering"". One of the supporting sources is secondary."
+1.06,"Open point: whether the description should be written in third person or as an imperative (""Use this skill when..."") is not settled; sources differ."
+1.07,"Avoid generic skill names such as `helper`, `utils`, `tools`, `documents`, `data`, `files`, and vague descriptions such as ""Helps with documents""."
+1.08,"Description plus `when_to_use` is truncated at 1,536 characters in Claude Code, so ""Put the key use case first"". This reflects the docs as read on 2026-11-04."
+1.09,In Claude Code the skill listing budget is 1% of the context window; rarely invoked skills lose their descriptions; check with `/doctor`; `skillOverrides` supports `name-only`; `skillListingBudgetFraction` raises the budget.
+1.10,"Do not use `<` or `>` (XML tags) in frontmatter, because frontmatter sits in the system prompt and hostile content could inject instructions. The source is a guide dated January 2026."
+1.11,"Open point: whether skill names that contain or start with ""claude"" or ""anthropic"" are reserved. The same guide says ""in name"" on one page and ""prefix"" on another."
+1.12,Keep the `SKILL.md` body under 500 lines.
+1.13,"Keep the body under about 5,000 tokens (""< 5000 tokens recommended""). The number is stated, but the unit differs across sources (tokens versus words), so the unit is open."
+1.14,"Use three-level progressive disclosure: frontmatter is always loaded, the body loads when relevant, linked files load when needed; ""keep the core of the skill lean""."
+1.15,"Reference files one level deep from `SKILL.md`: ""Keep references one level deep from `SKILL.md`."" Reason: Claude may only run `head -100` on nested files."
+1.16,"Write only what Claude does not already know: ""Only add context Claude doesn't already have.""; test each line with ""Would the agent get this wrong without this instruction?"""
+1.17,"Put a Gotchas section in `SKILL.md`: ""The highest-value content in many skills is a list of gotchas""; each time the agent has to be corrected, add the fix to Gotchas."
+1.18,"A rule that must hold every time belongs in a hook or script, not only in prose: ""Claude Code runs a hook every time its event occurs ... whether or not Claude is following the skill""; ""Code is deterministic; language interpretation isn't.""; a skill is only ""a control, though an advisory one""."
+1.19,"Put the most important instructions at the top of `SKILL.md`, because after compaction the end of a skill body is cut (""Truncation keeps the start of the file""). Claude Code; figures as documented on 2026-11-04."
+1.20,"Write guidance that applies to a whole task as standing instructions: ""Claude Code does not re-read the skill file on later turns, so write guidance that should apply throughout a task as standing instructions rather than one-time steps."" Claude Code."
+1.21,"Match specificity to how fragile the task is: ""Match the level of specificity to the task's fragility and variability.""; ""Calibrate each part independently."""
+1.22,"Explain the reason instead of issuing rigid directives: ""explaining why can be more effective than rigid directives""; ALWAYS/NEVER commands persuade less than reasoning."
+1.23,"Give defaults, not menus (""Provide defaults, not menus""), and prefer procedures over declarations."
+1.24,"Use one consistent term throughout, and do not write information that will go stale (use an ""Old patterns"" section instead)."
+1.25,"One job per skill: a skill that tries to do too much will ""straddle several and confuse the agent"". The source is secondary."
+1.26,Validate the format with tools: `skills-ref validate ./my-skill` and `claude plugin validate`. `claude plugin validate` needs Claude Code v2.1.233 or later.
+1.27,Install skills only from trusted sources.
+1.28,`allowed-tools` in frontmatter does not narrow the tool set; prefer narrow patterns over a bare `Bash`. This rests on a single course source and the field is not in one guide's frontmatter list.
+1.29,"A skill that need not trigger itself should be manual-only (`disable-model-invocation: true` keeps its description out of context). Claude Code; the mechanism is stated, turning it into a rule is inferred."
+1.30,"Invocation-graph constraint: a user-invoked skill may call a model-invoked skill but not another user-invoked skill. The source is a community repository, not the vendor, and checking it by machine is inferred."
+1.31,"Attach only the skills each agent needs; at most 500 skills per session; repo skills must sit at `.claude/skills/<name>/SKILL.md`, one level deep. This is from a beta managed-agents product; only the shape is borrowed for local harnesses."
+1.32,"Open point: ownership and lifecycle of a large skill set (owner, retirement, versions) has no source."
+2.01,"Keep `CLAUDE.md` under 200 lines: ""Keep CLAUDE.md under 200 lines, give it an owner, and review changes to it like code."" The source speaks only about `CLAUDE.md`."
+2.02,"Open point: whether the 200-line limit also applies to other markdown (role profiles, handoff notes) and to profiles loaded through `systemPrompt`. No source measures an optimal length outside `CLAUDE.md`."
+2.03,"`@import` helps organize but does not cut context cost: ""Imports help you organize a long file but don't reduce its context cost""."
+2.04,"Write down only what Claude cannot find in the repo: ""Only write down what Claude can't find by reading the repo, or what it would otherwise spend time rediscovering every session."""
+2.05,"Write instructions that are specific and verifiable (""Use 2-space indentation"" rather than ""Format code properly""), and make sure they do not contradict each other. `/doctor prompt-audit` can help."
+2.06,"`CLAUDE.md` guides but does not enforce: ""`CLAUDE.md` is for guidelines, and Claude is allowed to decide a guideline doesn't apply."" A ""never"" rule belongs in a deny rule or hook."
+2.07,"If a line is still missed after adding emphasis, it belongs in a hook; heavy emphasis makes Claude over-apply the rule."
+2.08,"In Claude Code, rules with `paths:` and subdirectory `CLAUDE.md` files live in the conversation and are lost to summarization on compaction; a rule that must survive should drop `paths:` or go in the root `CLAUDE.md`."
+2.09,"A rule without `paths:` is the same as putting the content in `CLAUDE.md`: ""always loaded, always costing tokens""."
+2.10,Use a rule with `paths:` when a convention applies to files scattered across the codebase (instead of a subdirectory `CLAUDE.md`).
+2.11,"Multi-step procedures, or content relevant to only part of the codebase, move to a skill or a path-scoped rule; reference material goes to a skill."
+2.12,"In Claude Code, editing `CLAUDE.md` mid-session does not take effect until `/clear`, `/compact` or a restart. The event is stated; the edit procedure that records reloading the session is inferred."
+2.13,"In Claude Code, block-level HTML comments in `CLAUDE.md` are stripped before entering context, so they can hold maintainer notes."
+2.14,"Record repeated mistakes in `CLAUDE.md`: ""A repeated mistake or a recurring review comment is a CLAUDE.md edit""; ""Anything you've had to correct twice already""."
+2.15,"Commit the file to git, give it an owner, and review changes like code."
+2.16,"Keep it under one page with four sections (Commands, Conventions, Architecture, Things Claude gets wrong). The source is a course, so it is secondary."
+2.17,"Add a section telling compaction what to preserve (""include a section telling it what to preserve when summarizing""); durable rules go in `CLAUDE.md` because it is reloaded on every request."
+2.18,"`CLAUDE.md` is layered: personal (`$HOME/.claude/CLAUDE.md`, not shared through git), project, and directory levels add up; skills and subagents of the same name override instead."
+2.19,"Position matters: put key findings summaries at the start of aggregated input and give details clear headings (""lost in the middle"")."
+2.20,"Progressive summarization loses figures, dates and expectations; keep a ""case facts"" block outside the summarized history, and record source and date when sources conflict."
+2.21,"Treat `CLAUDE.md`, `AGENTS.md` and notes written by outsiders or other agents as potentially untrusted input; shared memory should be mounted read-only when writing is not needed. The stated source is a beta managed-agents product; applying it to handoff files is inferred."
+2.22,"If a repo has `AGENTS.md`, Claude Code can read it instead of `CLAUDE.md`; use `@AGENTS.md` to share one file."
+2.23,"Choose where content lives: `CLAUDE.md` is always loaded; skills load on demand; hooks run per event; subagents have their own context; a hook's context cost is ""Zero, unless the hook returns output""."
+3.01,"One role per file: frontmatter (name, model, tools) plus a body that is the system prompt; keep the role prompt separate from task instructions (""The system prompt is distinct from user messages, which should describe the work to be done.""). The shape comes from a beta product; applying it to local harnesses is inferred."
+3.02,An orchestrator prompt states goals and quality criteria rather than listing every step.
+3.03,"Each delegation to a subagent needs an objective, output format, guidance on tools and sources, and task boundaries: ""Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information."""
+3.04,"Pass subagent context explicitly in the prompt: ""The only content you pass from parent to subagent is the Agent tool's prompt string""; a subagent ""doesn't see your conversation history"". A fork inherits everything; an ordinary subagent does not."
+3.05,"A subagent description should single out one role (""Write descriptions that single out one subagent"")."
+3.06,"Use explicit criteria rather than general advice: ""be conservative"" or ""only report high-confidence findings"" do not improve precision. Context: code review."
+3.07,"Use 2-4 few-shot examples for ambiguous cases, with the reason for choosing each; give concrete input/output examples when verbal descriptions are read inconsistently."
+3.08,Aim for a moderate altitude: start from a minimal prompt and add instructions based on observed failures.
+3.09,"With newer models use plain wording and drop heavy emphasis and old instructions: ""piling on emphasis mostly makes Claude over-apply the rule""; ""these models might now overtrigger. The fix is to soften any aggressive language."" Model dependent; an instruction to ""use a subagent to check"" is a related open point."
+3.10,"State when delegation to a subagent or workflow is allowed, or set a hard cap: ""give explicit guidance on which scenarios warrant delegation, or set deterministic caps on how many agents can be launched""."
+3.11,"State in the prompt that content from tools, documents and searches is untrusted data and must not override the original instructions. The source speaks about the `tool_result` API."
+3.12,Do not put user text inside a `tool_result` block; harness text inserted after a tool result is sparse and separate from the user's words. Applying this to `PostToolUse` hooks or relays is inferred and needs testing.
+3.13,Hard length limits in a prompt can reduce work quality; a model-specific change must be pinned to its target model.
+3.14,"Each role has a stop condition and reports when blocked or when the task is impossible, instead of working around it. Evidence is from internal model behavior; applying it to a harness is inference."
+3.15,"Keep the initializer prompt and the continuation prompt in two separate files. The source is a demo, not a production recommendation."
+3.16,"A reminder against ""laziness"" is more effective in the user prompt than in `SKILL.md`. The source gives one sentence and no data."
+3.17,Sensitive keywords in a system prompt can create unintended tool associations.
+3.18,"When several teams each add one sentence to a system prompt, contradictory rules result (a ""Frankenprompt"")."
+3.19,"Declare model and effort explicitly in the role profile (or use `inherit` deliberately), because defaults depend on version and environment variables. Inferred."
+3.20,A reviewer states alternatives before recommending; the human states an opinion before seeing the agent's proposal. Inferred from an experiment on causal analysis; the source measured the effect and wrote no rule.
+3.21,Open point: whether long instructions on tool usage belong in the system prompt or in the tool description.
+3.22,Open point: multi-phase role profiles (phases plus a supervisor role) have no source.
+4.01,"What must happen without exception should be enforced by a mechanism (a `command` or `http` hook, a deny rule, a managed setting, `tools:`), not by instruction: ""If something has to happen every time, make it a hook, a deny rule, or a managed setting."""
+4.02,"`prompt` and `agent` hooks are not deterministic; for real enforcement use `command` or `http` with `onFailure: ""block""`. `onFailure` needs Claude Code v2.1.295 or later and `agent` hooks are experimental."
+4.03,"A policy hook blocks with `exit 2`; ""Exit code 1 without valid JSON output is a non-blocking error""; ""Exit 2 blocks even when your hook prints JSON"". The table of events that can block is a condensed copy and needs checking against the original."
+4.04,"Hooks fail open by default: ""On most events, when a hook fails or times out, Claude Code still carries out the action""; `Stop`, `SubagentStop`, `TaskCompleted` and `TeammateIdle` ignore `onFailure`."
+4.05,Open point: whether a timed-out `PreToolUse` hook blocks the tool call.
+4.06,A `PreToolUse` `deny` holds even under `bypassPermissions` or `--dangerously-skip-permissions`; an `allow` hook cannot override a `deny` rule; hooks run before every step. Not yet run on a local Claude Code.
+4.07,"Hard blocks by name or path go in permission rules first; hooks handle dynamic logic: ""use the permission system rather than a hook to enforce a hard allow or deny""."
+4.08,"A matcher matches only the tool name, so a hook that guards file writes must cover both `Bash` and the file-writing tools, or it can be bypassed with `echo > file`. The matcher behavior is stated; the protection scope is inferred."
+4.09,"On a `Stop` hook, check `stop_hook_active`; after 8 consecutive blocks with no tool call Claude Code stops blocking by itself. `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` raises the cap."
+4.10,Hook scripts: output from the shell profile (`.zshrc`) on stdout corrupts JSON; use absolute paths or `${CLAUDE_PROJECT_DIR}`.
+4.11,Hooks merge across settings levels; managed hooks cannot be disabled; `allowManagedHooksOnly` blocks outside hooks.
+4.12,"Hooks and plugins run code with the user's rights (""what the plugin runs, it runs as you""), so review them like code. The rights are stated; the review rule is inferred."
+4.13,"Treat mods and channels as ""not adopted"": mods are not sandboxed and can approve tool calls before asking; channels let people reply to the tool-approval channel. Mods need v2.1.287 or later; channels are a research preview. The risks are stated; the advice to skip them is inferred."
+4.14,"Permission order: ""Rules are evaluated in order: deny, then ask, then allow.""; ""An allow rule can't carve an exception out of a deny rule.""; a deny at any level wins; managed settings are highest."
+4.15,"`allowed_tools` does not constrain `bypassPermissions`; to block, use `disallowed_tools` or a hook. SDK; the `default` mode denies calls that need approval from Claude Code v2.1.302."
+4.16,"Removing a tool is stronger than blocking by pattern: `disallowed_tools=[""Bash""]` drops the definition from the request, while `Bash(rm *)` blocks only that pattern."
+4.17,"The sandbox covers shell only: ""The sandbox covers shell commands only. Claude's file tools, MCP servers, and hooks run outside it.""; it is off by default; `denyRead` does not block the Read tool and `allowedDomains` does not limit WebFetch. An older source differs, so prefer the newer; the ""Security limitations"" section was not read."
+4.18,Unattended roles: enable the sandbox with `allowUnsandboxedCommands: false` and `failIfUnavailable: true`. Inferred.
+4.19,"Use `dontAsk` with a narrow allow list for locked-down agents: ""For a locked-down agent, pair `allowedTools` with `permissionMode: ""dontAsk""`""."
+4.20,"Use `bypassPermissions` only in a container or VM without internet; auto mode ""does not guarantee safety"", 17% of overeager actions are missed, and it is ""not a drop-in replacement for careful human review on high-stakes infrastructure"". Figures are vendor-internal and not reproduced."
+4.21,"The `permissionMode` in subagent frontmatter is ignored when the main session runs in `bypassPermissions`, `acceptEdits` or auto mode."
+4.22,"Hard constraints belong in managed settings or deny rules, not in allow rules or subagent frontmatter. Inferred."
+4.23,"Restrict subagents with `tools:` or `disallowedTools:`; `Agent(worker, researcher)` limits which subagents may be spawned; a removed tool ""isn't in the subagent's session at all""."
+4.24,"Hard caps for an agent tree: default depth 3, default concurrency 20, `maxBudgetUsd` returns `Budget limit reached`; one workflow may run at most 1,000 agents. The numbers come from the docs and were not run."
+4.25,"Set `max_turns` and `max_budget_usd` for production agents; hitting a cap returns `error_max_turns` or `error_max_budget_usd` with no `result`; the budget is soft (overshoot by at most one response): ""Leave headroom for this"". A budget that covers subagents needs Claude Code v2.1.217+; `maxTurns` on a subagent returns ""partial"" from v2.1.246."
+4.26,"Open point: per-role cap values (turn counts, money) have no source."
+4.27,"Subagent model order: call parameter, then `model` in frontmatter, then `CLAUDE_CODE_SUBAGENT_MODEL`, then the main model; `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` forces all. The order changed in v2.1.251, so record the version."
+4.28,"Effort order: `CLAUDE_CODE_EFFORT_LEVEL`, then the in-session choice, then `--effort`, then settings, then the model default; a subagent's `effort` frontmatter does not override the environment variable."
+4.29,Environment variables that force model or effort silently disable role profiles; check for them. Inferred.
+4.30,Open point: the default effort of the Sonnet 5.5 model is not settled by the sources.
+4.31,"Configuration defaults (effort, caching, prompt limits) are quality choices; review changes like code."
+4.32,"Changing model, effort, or the MCP/tool set mid-session loses the cache; pick model and effort at session start and compact at task boundaries. Claude Code; do not hard-code TTL or price figures."
+4.33,"MCP scopes: project `.mcp.json` (shared via git, needs approval on use) and personal `$HOME/.claude.json`; secrets go through `${GITHUB_TOKEN}` and are not committed."
+4.34,"MCP config precedence: local, project, user, plugin, connector; ""The entire server entry from that source is used; fields are not merged across scopes."""
+4.35,Connect only trusted MCP servers (prompt injection risk); `headersHelper` runs arbitrary shell commands once the directory is trusted.
+4.36,Keep secrets outside the agent boundary: an external proxy injects keys; do not put the Claude API key in the sandbox; keep URLs separate from tokens.
+4.37,"Isolate several agents on one machine with their own `cwd`, `settingSources: []`, `CLAUDE_CONFIG_DIR`, and shared auto memory turned off. SDK."
+4.38,Use structured telemetry without content (`OTEL_LOG_USER_PROMPTS` and `OTEL_LOG_TOOL_CONTENT` are off by default); assign identity per role. Traces are beta.
+4.39,Deny by default; version and review configuration; test rollback; write the allowed and forbidden policy down (Foundation level). One PDF source could not be read and the Enterprise level is unchecked.
+4.40,"Match isolation to the capacity for oversight: ""Match isolation strength to the user's capacity for oversight."" The principle is stated; that background roles need harder boundaries is inferred."
+4.41,Skills from a repo are a trust boundary: anyone who can commit to the repo can add a skill and the platform loads it without a review step. Beta managed-agents product.
+4.42,Open point: whether hooks and `settings` take effect in sessions opened by a launcher or agent-hosting platform rather than the vendor CLI directly.
+5.01,Hand off with structure to a person who cannot see the transcript. The original example is a customer-support escalation.
+5.02,A fresh session with a structured summary is more reliable than a resume that carries old tool results.
+5.03,"Keep state in files: an initializer run first, a progress file (`claude-progress.txt`), a feature list and descriptive git commits; end with the environment ""in a clean state"". The reference is demo code."
+5.04,Store state data as JSON and progress notes as text; models are less likely to corrupt JSON than Markdown.
+5.05,"The feature list may only change the `passes` field; ""It is unacceptable to remove or edit tests""."
+5.06,"At session start read the git log and progress notes, pick the highest-priority unfinished item, and run verification before new work."
+5.07,"One task per session; end cleanly (commit, update progress, leave the application runnable)."
+5.08,"Agree on ""done"" before writing code (a sprint contract between generator and evaluator)."
+5.09,"Separate the grader from the worker: ""agents reliably skew positive when grading their own work"" (stated for subjective tasks) and ""even on tasks that do have verifiable outcomes, agents still sometimes exhibit poor judgment""; ""completion is decided by a fresh model rather than the one doing the work""; ""The grader uses a separate context window"". Quote with its context."
+5.10,"A completion condition is a measurable end state, how to prove it, and constraints that must not change; at most 4,000 characters; the evaluator sees only Claude's output. For `/goal`, retry (three times then pause) applies only to interactive sessions from v2.1.269; check-ins need v2.1.236 and are capped at three from v2.1.246."
+5.11,"A rubric lists criteria that can be graded one by one (""The CSV contains a price column with numeric values"" instead of ""The data looks good""); ""vague criteria produce noisy evaluations"". Beta managed-agents product."
+5.12,"Put the ""is it really done"" gate at `SubagentStop`, `TaskCompleted`, `TeammateIdle` or `Stop` (exit 2 keeps the work going); check `stop_hook_active`. These events ignore `onFailure: ""block""`. Inferred."
+5.13,"Do not treat passing tests as done; the verifier must be nearly perfect, or the agent solves the wrong problem: ""the task verifier is nearly perfect, otherwise Claude will solve the wrong problem""."
+5.14,"Split a large review into a local per-file pass and a cross-file integration pass; when re-running a review, put earlier findings in context and report only what is new or unaddressed."
+5.15,"Review in tiers; review level follows the risk of the change, not the author; an approval is tied to one commit; an agent's approval does not replace a human's; ""Whoever prompted the change is on the hook for it."" The source is secondary and the tier thresholds are not published."
+5.16,Cap review rounds: after three rounds the reviewer asks the author to rethink the approach; re-review covers the diff only and flags error classes instead of single lines.
+5.17,"A human reviewer is an independent check only when the judgment is their own: ""a human reviewer is only an independent check if their judgment is their own"". Recording whether a proposal came from a person or an agent is inferred."
+5.18,"A message between agents is not user consent and cannot change configuration: ""a message from another session never counts as your consent"". Agent teams are experimental; platforms that host agents outside the vendor product do not get these guarantees automatically."
+5.19,The `auto` mode of a managed-agents product is not a human checkpoint; work that needs human approval should use `always_ask`. Beta; the name clashes with the auto mode of Claude Code.
+5.20,"A pull request is a checkpoint; the agent that wrote the code cannot approve it: ""Separation of duties is preserved, because the agent that wrote the code has no way to approve it."""
+5.21,"Use multiple agents only when needed: ""Start with the simplest approach that works, and add complexity only when evidence supports it.""; cost is about 15 times the tokens of chat in one source or 3-10 times in another; ""Outside these situations, the coordination costs typically exceed the benefits."" One source has no verbatim ""start with a single agent""."
+5.22,"Divide work along context boundaries (the agent that builds a feature also writes its tests); beware the ""telephone game"" that degrades fidelity at handoff; subagents should return light references."
+5.23,"A handoff contract is verified: the input schema is checked ""before any application side effects"", the context passed on is filtered, and the output is an artifact with an identity. Each element comes from a different non-vendor source; combining them into a pattern is inferred."
+5.24,"When agents share a filesystem but keep separate contexts, hand off through files, not memory. Beta platform; inferred."
+5.25,"Unattended runs: read from a bookmark; report an unreadable source rather than treating it as quiet; confirm before writing state, and write ""maybe posted"" if unsure; read-only access and a cost cap per run. Beta, secondary source, about chat and code-hosting integrations."
+5.26,"Compact at task boundaries, `/clear` between unrelated tasks, and delegate large reads to subagents."
+5.27,Use plan mode for large changes with several valid directions or many files.
+5.28,"Revisit harness assumptions when the model changes: ""every component in a harness encodes an assumption about what the model can't do on its own""; ""those assumptions need to be frequently questioned because they can go stale as models improve""."
+5.29,"A change that may trade away quality needs a soak period, a broad eval and a gradual rollout; dogfood with the exact public build. No soak threshold is given."
+5.30,"Keep a dated change log of the harness so quality drops can be correlated (the ""missed correlation"" lesson). Inferred."
+5.31,"Isolate untrusted content: a reading agent without privileges, an acting agent that sees only a summary; separate reading from acting."
+5.32,"Adversarial verification of each subagent output against a rubric; but ""most traditional coding tasks do not need a panel of 5 reviewers"". Secondary source."
+5.33,"Loop stop conditions: ""it's also common to include stopping conditions (such as a maximum number of iterations) to maintain control"". The source says ""common"", not mandatory."
+5.34,"Open point: a process-level decision record (who decided what, why, evidence, result) for unattended sessions has no source."
+5.35,Open point: gated phases and a supervisor role have no source.
+6.01,"A tool description is the main factor: ""Provide extremely detailed descriptions. This is by far the most important factor in tool performance."""
+6.02,"A description states what the tool does, when to use it and when not, the meaning of each parameter, and limits; at least 3-4 sentences."
+6.03,"State input formats, example queries, edge cases and boundaries; rename and re-describe tools to remove overlap."
+6.04,"Each tool has one distinct purpose and there are few tools: ""Make sure each tool you build has a clear, distinct purpose.""; yet also ""Consolidate related operations into fewer tools"". Open point: where the line between merging and splitting sits."
+6.05,"Tool names carry a service or resource prefix and match `^[a-zA-Z0-9_-]{1,128}$`; a full MCP tool name is `mcp__{server}__{tool}`."
+6.06,"Return only high-signal output with stable, meaningful identifiers (slug or UUID); long responses waste context. One source prefers natural-language names, another accepts slugs or UUIDs."
+6.07,"Claude Code's default output limit is 25,000 tokens with a warning above 10,000 (`MAX_MCP_OUTPUT_TOKENS` changes it); when truncating, tell the agent how to narrow (pagination, ranges, filters)."
+6.08,"An error says what went wrong and what to try next; MCP sets `isError: true`, the API sets `is_error: true`; an uncaught exception is turned into a raw error."
+6.09,Distinguish an access error from a valid empty result; do not swallow errors as success.
+6.10,"Tolerate call differences: accept case differences when matching is unambiguous, or return `is_error: true` with the correct name; ""Change the arguments so that it is harder to make mistakes."" Applying this to CLIs is inferred."
+6.11,"Annotations (`readOnlyHint` and others) are metadata, not enforcement: ""A tool marked `readOnlyHint: true` can still write to disk""; keep them true to the handler."
+6.12,`allowed_callers` is not a security boundary. API.
+6.13,"Too many tools reduce selection reliability (for example 18 versus 4-5); load on demand (tool search, `alwaysLoad` only for the few tools used every turn). The tool-search threshold is not consistent across sources."
+6.14,"For MCP descriptions and instructions put key details and keywords first; they are cut at 4,096 characters (preloaded) or 16,384 (via tool search). Claude Code docs of 2026-11-04."
+6.15,Tools that write files must guard against directory traversal.
+6.16,Tool results are untrusted content: keep them in `tool_result` and verify before trusting.
+6.17,"Use a narrow custom tool so the server keeps the final decision (""Give the agent one narrow custom tool"")."
+6.18,"Tools should be self-contained, robust to errors and clear in purpose; avoid bloated toolsets."
+6.19,"Do not add a tool just to ""think""; the vendor recommends extended thinking instead of the think tool (updated 2025-12-15). The quote is not verbatim."
+6.20,Prefer an existing MCP server for standard integrations; write your own only for custom workflows.
+6.21,"CLI for CI: `-p`/`--print` (non-interactive), `--output-format json`, `--json-schema`."
+6.22,"Prefer CLI tools over MCP when available (saves tokens): ""Prefer CLI tools when available"". The source is a single line."
+6.23,A programmable interface (an API or CLI with machine-readable output) beats an operation that needs full local state. Inferred from large-scale infrastructure that does not apply directly.
+6.24,"Open point: designing a CLI for agents (exit codes, flags, output format, error messages) has no source."
+6.25,Keep a manual-run script for trial and a record of every run; stop cleanly with SIGTERM and wait before a hard kill. Stated for a cloud/beta context; applying it to harness CLIs is inferred.
+6.26,A hook that logs every tool call with the session ID is the minimum audit trail. Inferred.
+7.01,Separate regression evals (near 100% pass) from capability evals (start at a low pass rate); run regression on every agent or model change. Applying this to a multi-agent harness is inferred.
+7.02,"Start with 20-50 tasks taken from real failures; balance cases that should and should not act: ""One-sided evals create one-sided optimization."""
+7.03,A good task is one where two independent experts reach the same pass/fail verdict; 0% pass across many runs usually means a broken task.
+7.04,"Grade the product, not the path; allow partial credit; guard against graders being gamed; start every run from a clean environment."
+7.05,Run several trials because output varies; use pass^k for agents that must be consistent. The number of trials for a harness is an open point.
+7.06,"Use deterministic graders where possible and LLM graders where needed; an LLM judge has an ""Unknown"" exit, is calibrated against humans, and is not the model under test. One source is secondary."
+7.07,"Read transcripts and execution traces, not only final results: ""Read agent execution traces, not just final outputs."""
+7.08,"Know the measurement noise before trusting a change: a gap under about 3 points is suspect; record the run environment configuration with results. The 3-point figure is from one benchmark, not from any specific harness."
+7.09,Split train and test; do not paste failures into the prompt; change one thing at a time; revert if train rises while test stays flat; do not merge if within noise. Secondary source.
+7.10,Keep answers and grading criteria out of the agent's reach; treat eval integrity as a continuing adversarial problem. The source concerns a web benchmark; applying it to a harness folder is inferred.
+7.11,An eval at 100% only tracks regression and gives no improvement signal; review periodically; do not trust a score before reading the details.
+7.12,"Run evals when `CLAUDE.md`, skills or hooks change; gate configuration changes on the results; write one eval case per incident, owned by the team. Course and blog sources."
+7.13,"A one-line prompt or default change needs a broad per-model eval and per-line ablation; code review, unit tests, end-to-end tests and dogfooding do not prove there is no regression."
+7.14,An eval must tell a correct version from a wrong one; monitor quality continuously in the real environment.
+7.15,"Skill trigger test: about 20 queries (8-10 of each kind, including near-misses), run 3 times, threshold 0.5, split 60% train / 40% validation; do not add keywords from failed queries (""that's overfitting""). Open specification."
+7.16,"Skill output test: start with 2-3 cases, run with and without the skill, clean context each run, concrete assertions (""Require concrete evidence for a PASS""), drop assertions that always pass."
+7.17,"Three areas of skill testing: triggering (should and should not), function, and comparison with a baseline. Thresholds such as 90% triggering are ""aspirational targets - rough benchmarks"" with no measurement method; the numeric thresholds are an open point."
+7.18,"`claude plugin eval`: each case runs 3 times, default threshold 1.0, with a no-plugin baseline (WITH and W/OUT), isolated from user `CLAUDE.md` and hooks, score is indicative only. Needs v2.1.269+; early access and may be disabled server-side; it does not measure a current harness directly."
+7.19,`claude plugin test` runs mod tests without a session or network; `claude plugin validate` checks structure. Mods are a new feature.
+7.20,"Use an independent reviewer that has not seen the author's reasoning: ""A fresh reviewer does help, because it hasn't seen your reasoning""; ""Independent review instances ... are more effective at catching subtle issues than self-review instructions or extended thinking"". Whether this holds for a review role running a smaller model is an open point."
+7.21,Have several agents vote before a finding is posted; measure the rate of rejected findings; reviewer changes also go through evals. Secondary source.
+7.22,Many adversarial review agents can make a system too complex; review intent rather than single lines at high volume.
+7.23,"Red-team with documents, emails and tool output that deliberately contain injected instructions; monitor outputs."
+7.24,Do not conclude from aggregate numbers; sample in strata by document type or field.
+7.25,"Iterate by tests: write the test first, ""fix the code, not the test""; the test exists before the fix and the agent cannot edit it."
+7.26,Test blocking hooks: each blocking hook has one real failing case; test that a deny rule truly blocks even when a broader allow exists; check that the sandbox is really on. Inferred.
+7.27,"Measure cache hits and context use (`cache_read_input_tokens`, `/context`, `/usage`) when evaluating a harness. Inferred."
+7.28,"Debug skill triggering by asking Claude ""When would you use the [skill name] skill?"" so it quotes the description back; use `claude --debug`."
+7.29,"A three-stage checklist (before starting, during development, before upload) can be turned into a lint. The checklist is stated, the lint is inferred; the guide is dated January 2026."
+7.30,"When the model changes, re-evaluate prompts on representative tasks: ""compare results on representative tasks"". Non-vendor source."
+7.31,"Open point: measuring behavioral regression of a multi-agent harness (trial counts, noise thresholds, graders for phase and handoff conventions) has no source."
