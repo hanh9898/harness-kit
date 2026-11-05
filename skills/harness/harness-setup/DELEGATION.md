@@ -47,7 +47,7 @@ awk -F'|' '/^## Levels by kind/{t=1;next} t&&/^\|/{n++; if(n>2){rows++; for(i=2;
 
 A check with `|` or quotes goes in the YAML key as a block scalar (`check: |-`).
 
-Append one `delegation` log line per entry, after the check result (no separate `record` or `check` lines for it). The run is done when every role in `roles=` has such a line; resume with the roles that lack one.
+Append a `delegation-draft` log line after each answer that settles a field of a table row (format in RECORD-FORMAT.md), so that stopping in the middle loses nothing. On resume in the middle of a stage, the first question uses the full form (ASKING.md) and starts with one sentence saying what was kept. Append one `delegation` log line per entry, after the check result (no separate `record` or `check` lines for it). The run is done when every role in `roles=` has such a line; resume with the roles that lack one.
 
 ## Switching on or off
 
@@ -113,13 +113,14 @@ Stage 4 opens with S14 (full form, with the announcement of the length); S15 to 
 - Why: this is the final level for this kind of decision
 - Ask: For "<decision>" I suggest level <n> of 7 ("<meaning of that level, one clause>") because <one plain reason: easy or hard to undo, enough or not enough information>. Which level do you want <role> to have, from 1 to 7?
 - Terms: show all seven levels, one short line each, with who decides (you = the user, the role = the agent or person in that role):
-  1 = you decide and tell the role what to do; the role only carries it out
-  2 = you decide and explain your reasons to the role; the role carries it out
-  3 = you ask the role for its view first, then you decide
-  4 = you and the role decide together; the role waits for your agreement
-  5 = the role decides after you have given your advice
-  6 = the role decides first, you review afterwards (suits choices that are easy to undo)
-  7 = the role decides and acts alone, you are told afterwards (only inside a bounded area, with a log)
+  1 = you decide and tell the role what to do; the role only carries it out (example for "choose the function name": you pick the name and tell Codex)
+  2 = you decide and explain your reasons to the role (you pick the name and say why)
+  3 = you ask the role's view first, then you decide (Codex says what it would pick; you choose)
+  4 = you and the role decide together; the role waits for your agreement (you two agree on the name before Codex writes it)
+  5 = the role decides after you have given advice (you say "keep the spec's word"; Codex picks the name)
+  6 = the role decides first, you look at it afterwards (Codex picks the name; you read it in the review)
+  7 = the role decides and acts alone, you are told afterwards (Codex picks the name and merges)
+  Give each example in the user's concrete decision, not the sample above.
 - Enough: one number from 1 to 7
 - Unsure: say "not sure"; I use the suggested level (capped at 3 when hard to undo)
 - Suggest: the level the framework gives for the answers of S16 and S17; state the reason in one plain sentence (never "the framework goes up to level 6", "step back one level"). A hard-to-undo choice above 3 needs your stated reason, which I write in the entry. Next question: from level 5 on I ask two more things (S19); say that only when the user picks 5 or more

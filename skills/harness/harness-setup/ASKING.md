@@ -15,11 +15,11 @@ Send once, before the first question, in plain words. Four parts, in this order:
 
 Note for whoever measures: `{effort}` stays a placeholder until a run with a real person gives a number; then replace the sentence in part 3 with that number and its source.
 
-Setup overview, shape (at most 150 words; a reader run found 300 words and five unfamiliar file names too much):
+Setup overview, shape (at most 150 words; a reader run found 300 words and five unfamiliar file names too much; a later run needed 200 words because each stage line carried two clauses: write each stage line as its plain name plus at most six words of what the user does):
 
 ```
 Before I ask anything, here is where this is going.
-End result: <what exists in the repo afterwards, by name>.
+End result: <ONE sentence: a folder `harness/` in the repo (say what it holds in a few words: rules, small commands and checks around the agent) plus a few lines added to `AGENTS.md` (say: the file where the repo tells agents how to work)>.
 <N> stages:
 1. <plain name>. <what you do>.
 ...
@@ -31,64 +31,67 @@ Evolve overview: same four parts, 4 stages, at most 120 words, no "have ready".
 
 ## Full form
 
-For the first question of each stage, and for the first question after resuming from the log in the middle of a stage (the user may have lost the thread):
+For the first question of each stage, and for the first question after resuming from the log in the middle of a stage (the user may have lost the thread; start with one sentence saying what was kept):
 
 ```
 ❓ **Q<n>** - **<short title>**
-Stage <k>/<N>: <stage name>
+Stage <k>/<N>: <stage name>, question <j> of about <m> in this stage
 Helps you at the end: <how this answer changes the final result, in what the user will see>
 If skipped: <the true consequence: the default used, what must be redone>
 Why I ask: <one line: what this answer decides right now>
+<What this question relies on, if it relies on an earlier answer: "You told me: <the user's own words, shortened>.">
 <The question: one idea, about ONE concrete recent thing>
-Terms: <word> = <one line>   (leave out when there is no unusual word)
-Enough: <how much is enough>
-Not sure: say "not sure"; I will <the default action>.
+<Only if a word is unusual: "<word> means <one line>.">
+<ONE sentence for enough and unsure: "<how much is enough>. If you are not sure, say so and I will <the default action>.">
 
-➡️ <suggested answer, from what I looked up; "yes" accepts it>
+My suggestion: <suggested answer, from what I looked up; "yes" accepts it>
 ```
+
+Use a phrase in the user's language for the suggestion label, never an arrow symbol: a reader could not distinguish the arrow from the user's own reply.
 
 Example (Vietnamese user, first question of stage 1):
 
 ```
-❓ **Q1** - **A recent completed piece of work**
-Stage 1/6: Understand how your team works
+❓ **Q2** - **A recent completed piece of work**
+Stage 1/6: Understand how your team works, question 2 of about 6 in this stage
 Helps you at the end: the recorded responsibilities match how your team works, so stage 4 does not need to be redone.
 If skipped: I use the latest piece of work in Git history; if it does not match your team's process, you will need to correct stage 4.
-Why I ask: I need a real example to reconstruct the workflow rather than guessing.
+Why I ask: I need a real example to reconstruct the steps from request to merge, rather than guessing.
 Which piece of work did you recently finish in this repo (merged or closed)?
-Enough: a title on one line.
-Not sure: if you cannot remember, I use the latest piece of work in Git history.
+A title on one line is enough. If you cannot remember, say "not sure"; I use the latest piece of work in Git history.
 
-➡️ The latest work I found is "<title>" (merged <date>). Use that?
+My suggestion: the latest work is "<title>" (merged <date>). Use that?
 ```
 
 ## Compact form
 
-For the second and later questions in the same stage. Five lines at most:
+For the second and later questions in the same stage. Five lines at most, same labels rule; it still carries the question number and "question j of about m":
 
 ```
-❓ **Q<n>** - **<title>**  ·  Stage <k>/<N>: <stage name>
-<Why I ask and what it helps, merged: "So that <final result the user sees>; it decides <what follows right away>.">
+❓ **Q<n>** - **<title>**  ·  Stage <k>/<N>: <stage name>  ·  question <j> of about <m>
+<Why and what it helps, merged: "So that <final result the user sees>; it decides <what follows right away>." Add "You told me: <...>" when the question relies on an earlier answer.>
 <The question: one idea, one concrete recent thing>
-<Terms, if any> · Enough: <...> · Not sure: <default>
+<Unusual word in one clause, if any> <Enough, and "if you are not sure, say so and I will <default>", as ONE sentence>
 
-➡️ <suggested answer>
+My suggestion: <suggested answer>
 ```
 
-Keep "If skipped" in the compact form only when the consequence is heavy or not obvious from the "Not sure" default.
+When the question is repeated after a "why do you ask", it keeps its own `Q<n>` heading and stage line; never send a bare repeat.
+
+Keep "If skipped" in the compact form only when the consequence is heavy or not obvious from the "not sure" default.
 
 ## Rules
 
 1. **One idea per question.** No "and" or "or" joining two different asks. A choice between two options is one idea.
 2. **Ask about ONE concrete recent thing**: "the last time", the latest merged piece of work, the latest change, a named file or commit. Never "usually", "in general", "would you".
 3. **No harness words** (rung, kit, gate, lego, tracer bullet, check scope, record entry id) in "Why I ask" and in the question. If a word cannot be avoided, put it in "Terms" with a one-line meaning. Say "a ready-made building block" for a kit piece, "the lightest way that works" for a rung.
-4. **Look it up, do not ask.** Anything the repo, git history, the pull requests, the tracker files, `harness/` or the log can answer, you read first. Ask only what stays open. Facts are your job, never the user's.
+4. **Look it up, do not ask, and open the file before you name anything in it.** A run said "Codex adds `ship()`" before reading the code; the function was named otherwise. Anything the repo, git history, the pull requests, the tracker files, `harness/` or the log can answer, you read first. Ask only what stays open. Facts are your job, never the user's.
 5. **The suggested answer comes from what you looked up** (a name, a commit, a path), stated as an assumption the user can correct. When you found nothing, say so in the suggestion line instead of guessing.
 6. **"Not sure" always names the default** you will use, and it must be safe: it keeps the level low, writes nothing, or changes the least. On every yes-gate the default is: the step stays a draft and nothing is written.
 7. **Word it so that "yes" accepts your suggestion.**
 8. **Stage k/N is the stage table of the skill**, repeated on every question. Do not renumber.
 9. **Read the sheet, then render.** The sheet for the step holds the data (Stage, Helps, If skipped, Why, Ask, Terms, Enough, Unsure, Suggest); you fill the placeholders from the repo and pick the form. Translate to the user's language; keep paths, commands and ids as they are.
-10. **Translate every label**, not only sentences: Stage, Helps you, If skipped, Why I ask, Terms, Enough, Not sure, Because and Decide use the user's language. Reader runs found untranslated labels embedded in localized messages; translate them consistently.
+10. **Translate every label**, not only sentences: Stage, Helps you, If skipped, Why I ask, My suggestion, Because and Decide use the user's language; Terms, Enough and Not sure become plain sentences. Reader runs found untranslated labels embedded in localized messages; translate them consistently.
 11. **The no-harness-words rule covers every line the user reads**, including the suggested answer and "Because": no piece id (D02, P1), no command (`kit show`), no word "gate" or "rung". Say what it is: "a ready-made way to block dangerous commands". Rule ids shown in brackets in sheet S22 are the one exception.
 12. **Plain words for files and jargon.** A file or term the user has not met (record, progress log, hook, check) gets a short plain description the first time it appears. Do not quote source text in a language other than the user's; paraphrase it. Do not give a reason the user cannot use ("the repo has no spec yet").
 13. **Evidence block stays short**: the conclusion, then at most three lines per item. A reader run found a 6-line item with command examples unreadable.
@@ -97,6 +100,10 @@ Keep "If skipped" in the compact form only when the consequence is heavy or not 
 16. **Never re-ask what was just answered, and never call it missing.** Do not send two messages in a row that ask the same thing. When the user answered part of a question, name only the part still open.
 17. **A suggestion line exists or it does not.** If you have nothing to suggest, leave the line out and do not mention a suggestion anywhere else in the message. No filler about what the repo lacks ("no revert commit found") unless the user can use it to answer.
 18. **No apologetic voice for a repo without history.** Say "planned" and "as you describe it", not "not observed" or "not checked".
+19. **Each message stands alone.** The user may have a bad memory and a reader cannot see earlier replies: when a question depends on an earlier answer, restate it in the question ("You told me the pain is <X>"). Use one name per thing for the whole run (do not say "bash" in one place and "shell" in another; do not call the same person "Lan" and "Claude Code" for the same role: say "Lan asked Claude Code to write it").
+20. **Counts come with names.** Never say "3 entries" or "2 items" without naming them in plain words in the same message.
+21. **Commands in a question are rare and short.** Say first, in a plain sentence, what the command proves and that it changes nothing. Show the command only if it is under about 60 characters with no pipe; otherwise say "I can show you the exact command if you want".
+22. **Name what you mean.** "I checked 1 thing" with no thing named, or "about 8 questions" with no reason, left readers guessing. Say which thing, or which questions.
 
 ## Words the user sees
 
@@ -112,10 +119,15 @@ The record and the log keep English keys; what you SAY is in the user's language
 | unverified | not yet tried |
 | fragile | easy to bypass |
 | spec | a document describing the work to do |
+| merge, pull request | combine changes into the main branch; request to combine changes (PR) |
 | shared / project | shared across projects / specific to this project |
+| a prior stage's workflow | the steps from request to merge |
+| building block, shared store | "a ready-made solution included with this tool" (first explain that the tool is the running plugin) |
+| record entries | "files recording individual choices" in `harness/record/`; use distinct names for distinct concepts |
+| context, trust boundary, role card | say what it does in one clause or leave it out |
 | fail open, exit 2 | describe behavior: "if the script fails, the operation still runs" |
 
-A file name or command needs a plain description at first mention (`harness/gate.md` = where I keep the sources I read). Use plain descriptions rather than piece IDs, kit commands or untranslated quotes. "Shared" means reusable unchanged in another project; "project-specific" means it needs editing. The log retains `shared` and `project`.
+The opening message explains `harness/` and `AGENTS.md` (the repo's agent instructions). Describe unfamiliar files and commands in plain words at first mention. Use descriptions rather than piece IDs, kit commands or untranslated quotes. "Shared" means reusable unchanged in another project; "project-specific" means it needs editing. The log retains `shared` and `project`.
 
 ## Long stages
 
@@ -171,13 +183,13 @@ The simplicity-gate evidence (setup step 3, evolve step 2) and any proposal that
 ```
 ❓ **Q<n>** - **<short title in plain words>**
 Stage <k>/<N>: <stage name in plain words>
-I checked: <ONE sentence: "I checked <N> things; <M> are fine with <the simple way>, for <K> I propose something heavier: <the need in plain words>.">
+I read: <ONE sentence naming the document in plain words and the need: "I read the official page of <the agent app> about <topic>, to find a way to <the need in plain words>."> Conclusion: <ONE sentence: "a plain rule would not be enough, a small command is" or the like>.
 <The need in plain words>: I propose <the way, in plain words> instead of <the simpler way>, because <one short reason a non-expert can follow>.
-How sure I am: <"sure: the documentation says so" or "partly sure: <what I could only read as a summary>"; one line>
+How sure I am: <"sure: the page says so directly" or "partly sure: for <app> I could only read a summary"; one line, naming the page in words, no url>
 If you say no: <what is left out of the result>
 Decide: <ONE sentence ending in a question mark>? If yes, <next step>; if no, <what is dropped>.
 
-➡️ <recommendation, one line>
+My suggestion: <recommendation, one line>
 ```
 
 Hard limits for this block: at most 8 lines of text in total; no command, no code, no quoted source text; no word from "Words the user sees" without its plain version; no "Terms" line unless one word truly needs it (then at most one line). A reader run found a block of ten lines with command examples and an English quote only half readable, and a "reliability" line that talked about quotations instead of what the user needs to know (can I trust this?).

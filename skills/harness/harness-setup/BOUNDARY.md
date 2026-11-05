@@ -28,7 +28,7 @@ Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02
 - Ask: Which agent app did your team use for the last piece of work in this repo? (Repo with no history: "Which agent app will your team use for the work you plan?")
 - Terms: agent app = the program in which an AI agent works on your code; if you name a folder such as the settings folder of the app, say what it is
 - Enough: one name
-- Unsure: say "not sure"; I use the app named under Suggest and tell you which
+- Unsure: say "not sure"; I use the app named under Suggest and tell you which; with no Suggest (empty repo, no config folder), I record no app yet and ask again at stage 5 when files are wired
 - Suggest: "The repo has <config folder> and commits signed <trailer>, so I think it is <app>. Is that right?" Look at config folders and commit trailers first; the platform of the answer is what the log records. Leave out the trailer part when git has none
 
 ### [S02] How one piece of work went from start to finish
