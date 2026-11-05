@@ -49,5 +49,5 @@ Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agen
 | C39 | Four-cell role profiles | Role record files | One file per role with tools, documents, skills and delegation cells |
 | C40 | Profile pointers resolve | Prepare a missing file, skill or entry | Executes actual checks, names the broken cell, reworks with user, and marks passing only after a successful rerun |
 | C41 | Delegation cell points to a real entry | Passing profile | References a delegation entry present in record files and index |
-| C42 | Resume without duplicates | Interrupt after delegation, then rerun twice | Reuses settled answers; no duplicate files, index lines or logs; delegation and roles are logged |
+| C42 | Resume without duplicates | Interrupt after delegation, then rerun twice | Reuses settled answers; no duplicate files, index lines or logs; delegation then roles per role, without redundant record/check lines |
 | C43 | Generic boundaries and short body | Boundary checker and line counts | No platform/project names; SKILL.md below 170 lines; body links to DELEGATION.md and ROLES.md |

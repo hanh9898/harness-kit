@@ -24,4 +24,4 @@ Use the roles of step 7. Ask the user for each cell, one cell per turn; propose 
 - Every pointer resolves: `passing`.
 - Any pointer does not: name the cell and the pointer to the user, go back and fix it (change the pointer, or create the missing thing through the earlier steps and its gate). Status stays `failing`; never write `passing`. Re-run the check after the fix.
 
-Add a profile line to `record/index.md`. A role already recorded is updated in place.
+Add a profile line to `record/index.md`. Append one `roles` log line per entry, after the check result (no separate `record` or `check` lines); the run is done when every role has one. A role already recorded is updated in place.
