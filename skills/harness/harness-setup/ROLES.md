@@ -35,7 +35,7 @@ Add a profile line to `record/index.md`. Append one `roles` log line per entry, 
 - If skipped: I use my suggestion for tools, documents and skills; the delegation cell points at the role's own entry (never none)
 - Why: a profile tells the role what it may use; I fill one cell per turn
 - Ask (one cell per turn): For "<recent piece of work>", which <tools | documents | skills> does <role> need? (The fourth turn is the delegation cell: confirm the pointer to the role's own entry.)
-- Terms: profile = four lists telling a role what it can use: tools, documents, skills, and how much it decides alone
+- Terms: profile = a short card for the role listing what it may use: tools, documents, skills, and how much it decides alone (the last one is a pointer to the table you just approved)
 - Enough: a list, or "none"
 - Unsure: say "not sure"; I use my suggestion
 - Suggest: tools from the tool entries of the record, documents from the guidance files and docs folder of the repo, skills from the installed ones; for a skill give its name and the path of its description file, which I look up, never guess

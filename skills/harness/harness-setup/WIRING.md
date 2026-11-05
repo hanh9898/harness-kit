@@ -85,7 +85,7 @@ For each entry whose piece is a hook (ask the user if unsure), on the platform t
 - Stage: 5/6 Rules, keeping the tooling apart from your product, wiring it in
 - Helps: the entry point in your guidance file stays correct and appears once
 - If skipped: I leave the block as it is and say so
-- Why: the lines between the two markers belong to the harness and will be replaced; yours outside them stay untouched
+- Why: asked only when the text between the markers differs from the text to be written; the lines between the two markers belong to the harness and will be replaced; yours outside them stay untouched
 - Ask: These lines between the markers will be replaced: <lines>. Is that OK?
 - Terms: marker = a pair of comment lines that fence the part of the file owned by the harness
 - Enough: yes, or the line you want to keep elsewhere

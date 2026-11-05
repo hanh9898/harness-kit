@@ -88,7 +88,11 @@ Keep "If skipped" in the compact form only when the consequence is heavy or not 
 7. **Word it so that "yes" accepts your suggestion.**
 8. **Stage k/N is the stage table of the skill**, repeated on every question. Do not renumber.
 9. **Read the sheet, then render.** The sheet for the step holds the data (Stage, Helps, If skipped, Why, Ask, Terms, Enough, Unsure, Suggest); you fill the placeholders from the repo and pick the form. Translate to the user's language; keep paths, commands and ids as they are.
-10. **Say only what is true.** "If skipped" and "Helps you" come from what the skill really does; no threat, no pressure to answer.
+10. **Translate every label**, not only sentences: Stage, Helps you, If skipped, Why I ask, Terms, Enough, Not sure, Because and Decide use the user's language. Reader runs found untranslated labels embedded in localized messages; translate them consistently.
+11. **The no-harness-words rule covers every line the user reads**, including the suggested answer and "Because": no piece id (D02, P1), no command (`kit show`), no word "gate" or "rung". Say what it is: "a ready-made way to block dangerous commands". Rule ids shown in brackets in sheet S22 are the one exception.
+12. **Plain words for files and jargon.** A file or term the user has not met (record, progress log, hook, check) gets a short plain description the first time it appears. Do not quote source text in a language other than the user's; paraphrase it. Do not give a reason the user cannot use ("the repo has no spec yet").
+13. **Evidence block stays short**: the conclusion, then at most three lines per item. A reader run found a 6-line item with command examples unreadable.
+14. **Say only what is true.** "If skipped" and "Helps you" come from what the skill really does; no threat, no pressure to answer.
 
 ## Confirming a chain
 
@@ -105,10 +109,10 @@ If the user says no, ask only which link is wrong, one link per turn. If the evi
 You cannot name a finished piece of work: the repo has no commits, only an initial commit, or no merged change, closed ticket or pull request. Then there is no "most recent piece of work" and you do not invent one. Say it in one line, then:
 
 1. Ask for **one piece of work the user plans to do next** in this repo (a named, concrete one), with a suggestion taken from the repo's guidance files or open tickets if any.
-2. Ask the "who" questions about that plan, in the future tense ("who will write the request for <plan>?"), suggesting from the guidance files; no git evidence exists, so the chain confirmation does not apply.
+2. Ask the "who" questions about that plan in ONE turn, in the future tense, as a proposed chain built from what the user already said (the agent app named, the guidance files): "For <plan> I assume: request written by <A>, code by <B>, review by <C>, merge by <D>. Is that the plan?" A reader run found four separate who-questions pointless for a one-person repo. If the user says no, ask which link is wrong, one per turn. No git evidence exists, so do not cite any.
 3. Skip the "was it different from usual?" question; there is nothing to compare. Write the flow summary in the log as planned, not yet observed.
 
-The same applies to any sheet whose "Ask" names a past piece of work: use the planned work instead, and ignore the "Suggest" line that needs git evidence.
+Sheet S01 asks "which agent app does your team use" without "the last piece of work"; sheet S07 asks which part of the planned work worries the user most. The same applies to any sheet whose "Ask" names a past piece of work: use the planned work instead, and ignore the "Suggest" line that needs git evidence.
 
 ## List question
 
@@ -137,8 +141,9 @@ For each item, one short group:
   <the need in plain words, never a piece id or code like L05>: <the way I propose, in plain words> instead of <the lighter way>, because <one line>.
   Reliability: <which source I quoted word for word, which one I only have a summary of, in one short line>
 Helps you at the end: <what stays out of the result if you say no>
-Decide: <ONE sentence: "Do you approve this?"> If yes, the next step is <...>; if you reject an item, I drop it and record nothing for it.
+Terms: <the few words that need a line>
 Not sure: <default: items without your approval are dropped; nothing recorded or installed>
+Decide: <ONE sentence: "Do you approve this?"> If yes, the next step is <...>; if you reject an item, I drop it and record nothing for it.
 
 ➡️ <your recommendation: approve the items whose source says what I claim; name any that say less>
 ```

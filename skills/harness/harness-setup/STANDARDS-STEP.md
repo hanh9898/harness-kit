@@ -32,7 +32,7 @@ One entry per standard, `standard-<slug>`, `kind: standard`. `choice` names the 
 - Helps: rules a command can check keep later changes to these files in line, without anyone remembering them
 - If skipped: I write no rule file and log that none was chosen
 - Why: I only write rules you pick; each line below is one rule that fits what you chose
-- Ask: Which of these rules do you want to hold for changes to the harness files (none is fine)? <one plain sentence per rule, its id in brackets>
+- Ask: Which of these rules do you want to hold for changes to the harness files (none is fine)? <one plain sentence per rule in your own words, what it protects and what happens if you skip it; id in brackets; no quoted English>
 - Terms: rule = a sentence from the shared rulebook that a command can check; harness files = the files this setup created
 - Enough: the ones you pick, or "none"
 - Unsure: say "not sure"; I pick none and write no rule file
