@@ -81,3 +81,20 @@ def test_patterns_list_and_show_one_row_only():
 def test_pattern_unknown_fails_with_next_step():
     r = run(KIT_CLI, "show", "P99")
     assert r.returncode != 0 and "kit list P" in r.stderr and r.stdout == ""
+
+
+def test_delegation_list_and_show_one_row_only():
+    r = run(KIT_CLI, "list", "delegation")
+    assert r.returncode == 0 and "axis4" in r.stdout and "step7" in r.stdout
+    assert "What the sources say" not in r.stdout
+    r = run(KIT_CLI, "show", "axis1")
+    assert r.returncode == 0 and "Reversibility" in r.stdout and "Information level" not in r.stdout
+    r = run(KIT_CLI, "show", "step3")
+    assert r.returncode == 0 and "Consult" in r.stdout and "Typical use" in r.stdout and "Delegate" not in r.stdout
+    r = run(KIT_CLI, "show", "combine")
+    assert r.returncode == 0 and "Turning delegation off" in r.stdout and "Reversibility" not in r.stdout
+
+
+def test_delegation_unknown_fails_with_next_step():
+    r = run(KIT_CLI, "show", "step9")
+    assert r.returncode != 0 and "kit list delegation" in r.stderr and r.stdout == ""

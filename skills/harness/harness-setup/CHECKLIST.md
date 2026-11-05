@@ -2,7 +2,7 @@
 
 Manual behavior checklist (seam 2). Every row is externally observable through messages, repo files, or file contents. Rerun and paste results into the ticket whenever the skill changes.
 
-C1-C20 come from ticket 08; ticket 09 strengthens C7, C11 and C13 and adds C21 onward.
+C1-C20 come from ticket 08; ticket 09 strengthens C7, C11 and C13 and adds C21-C31; ticket 10 adds C32 onward (delegation, roles and profiles). C18 now permits delegation and profiles but still excludes GLOSSARY-MAP.md, the Harness block and STANDARDS.md.
 
 Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agent skills block and docs/agents/), without harness/; another copy lacks docs/agents/. A stand-in user follows a prepared response script.
 
@@ -39,3 +39,15 @@ Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agen
 | C29 | Resume after the gate | Interrupt after evidence approval | New session reads the log and reuses approved evidence without asking again |
 | C30 | Generic boundaries | Boundary checker on skills | No fixed platform or project names, including new siblings |
 | C31 | Write only approved proposals | Resulting sample repo | Installs and generates only approved items |
+| C32 | Delegation follows team architecture | Transcript | Announces separate step 7 after step 4 items are recorded and checked; no delegation questions inside architecture selection |
+| C33 | Retrieve framework fragments | Command history | Uses delegation list and axis/step/combine show commands; never loads the entire delegation document |
+| C34 | Four axes per role and decision type | Transcript and delegation entries | Covers reversibility, information, level 1-7, permitted zone and escalation threshold; records all four |
+| C35 | High levels require zone and threshold | Level 5+ entry | Concrete zone and escalation threshold required before recording; lower levels are not forced to supply them |
+| C36 | One-way choices capped at level 3 | One-way decision entry | Level at most 3, or explicit rationale and user confirmation for a higher level |
+| C37 | Valid delegation entry and user-selected level | Delegation record files | Correct kind, four axes and approved gate fields; agent suggests but user selects the level |
+| C38 | Enable/disable changes the level | Edit delegation for a role | Changes only level and verification date; preserves entry, role and team; no duplicate index or log entries |
+| C39 | Four-cell role profiles | Role record files | One file per role with tools, documents, skills and delegation cells |
+| C40 | Profile pointers resolve | Prepare a missing file, skill or entry | Executes actual checks, names the broken cell, reworks with user, and marks passing only after a successful rerun |
+| C41 | Delegation cell points to a real entry | Passing profile | References a delegation entry present in record files and index |
+| C42 | Resume without duplicates | Interrupt after delegation, then rerun twice | Reuses settled answers; no duplicate files, index lines or logs; delegation then roles per role, without redundant record/check lines |
+| C43 | Generic boundaries and short body | Boundary checker and line counts | No platform/project names; SKILL.md below 170 lines; body links to DELEGATION.md and ROLES.md |

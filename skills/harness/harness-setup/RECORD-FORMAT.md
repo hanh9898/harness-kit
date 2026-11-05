@@ -29,6 +29,8 @@ gate_approved: user   # always "user"; an entry without it is not written
 
 Entries written before the gate existed have no `gate_*` keys. Read them as `gate: not run`; never delete or reject them. Run the gate for such an entry before you change it, then add the keys.
 
+Entries of `kind: delegation` (one per role) and `kind: role-profile` (one per role, named `role-<role>`) use the same keys. Their body is set out in [DELEGATION.md](DELEGATION.md) and [ROLES.md](ROLES.md); the `check` of a role profile tests that every pointer exists. Older entries are read as before.
+
 ## `gate.md`
 
 Hand-off from step 3 to step 5, so an interrupted run keeps the approved evidence. One `## <item>` section per approved item with the five evidence fields (`lighter_rung`, `why_not_enough`, `source`, `read_on`, `answer`). The entry holds the lasting copy; later runs read the entry.
@@ -48,10 +50,10 @@ Read first. One line per entry, no detail:
 Append only; one line per finished step, never edited:
 
 ```
-<UTC timestamp from `date -u +%FT%TZ`> step=<observe|need-to-piece|gate|proposal|record|check> <key=value ...>
+<UTC timestamp from `date -u +%FT%TZ`> step=<observe|need-to-piece|gate|proposal|record|check|delegation|roles> <key=value ...>
 ```
 
-`observe` carries `platform=`, `flow=` and `labels=`; `need-to-piece` carries `need=` and `piece=`; `gate` carries `items=` (approved) and `dropped=`; `proposal` carries `part=` (tools, folders or team) and `outcome=`; `record` and `check` carry `entry=`. Always take the timestamp from running `date -u`, never from memory. Before logging a step, read the last line: a line for the same step and the same entry (or, for `need-to-piece`, the same need) already there is not logged again.
+`observe` carries `platform=`, `flow=` and `labels=`; `need-to-piece` carries `need=` and `piece=`; `gate` carries `items=` (approved) and `dropped=`; `proposal` carries `part=` (tools, folders or team) and `outcome=`; `record` and `check` carry `entry=` (`check` also `result=`); `delegation` and `roles` carry `entry=` and `result=`, and the first `delegation` line also `roles=` (all role names). Always take the timestamp from running `date -u`, never from memory. Before logging a step, read the last line: a line for the same step and the same entry (or, for `need-to-piece`, the same need) already there is not logged again.
 
 ## Writing safely
 
