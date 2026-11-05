@@ -1,0 +1,19 @@
+# Forbidden strings in this directory. Each line is literal text or a regex prefixed with `re:`; comments follow ` # `.
+# Add a token when project-specific content leaks into shared standards; explain any removal in its commit.
+re:(?i)hbu  # specific project name, case insensitive
+/Users/  # machine-specific absolute path
+re:[A-Za-z]:\\  # Windows drive path
+re:~/  # user home path
+re:\bL\d{3}\b  # project-specific decision ledger ID
+decisions  # project-specific decision ledger tool
+bin/swarm  # project-specific launcher
+re:(?i)\bswarm\b  # specific launcher name
+commit-trailers  # project-specific commit checker
+harness-review  # project-specific reviewer role
+drive-sync  # project-specific external document writer role
+boundary-check  # project-specific product boundary tool
+.scratch  # project-specific scratch directory
+re:(?i)paseo  # specific agent platform
+re:(?i)pstack  # one user's specific skill collection
+Backlog  # specific issue tracker
+re:(?i)hblead  # another harness name; shared standards name no particular harness
