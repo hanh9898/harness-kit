@@ -1,0 +1,5 @@
+interface:
+  display_name: "Harness Setup"
+  short_description: "Build a project's harness, one piece at a time"
+policy:
+  allow_implicit_invocation: false
