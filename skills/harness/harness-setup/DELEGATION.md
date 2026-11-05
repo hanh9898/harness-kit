@@ -5,13 +5,13 @@ How much each role may decide for the user. Done after the tracer-bullet entries
 ## Take the framework in pieces
 
 ```
-../../../kit/scripts/kit list delegation     # four axes, seven steps, one line each
-../../../kit/scripts/kit show axis<n>        # one axis in full (1 to 4)
-../../../kit/scripts/kit show step<n>        # one step in full (1 to 7)
-../../../kit/scripts/kit show combine        # how the axes combine
+<skill-dir>/../../../kit/scripts/kit list delegation     # four axes, seven steps, one line each
+<skill-dir>/../../../kit/scripts/kit show axis<n>        # one axis in full (1 to 4)
+<skill-dir>/../../../kit/scripts/kit show step<n>        # one step in full (1 to 7)
+<skill-dir>/../../../kit/scripts/kit show combine        # how the axes combine
 ```
 
-(Resolve the path to the plugin's `kit/scripts/kit`.) Never open `delegation.md` whole. Its rows are marked `partial`; say so to the user. The four-axis combination is this project's design, not a published standard; do not credit it to a source.
+(Substitute `<skill-dir>` as in SKILL.md.) Never open `delegation.md` whole. Its rows are marked `partial`; say so to the user. The four-axis combination is this project's design, not a published standard; do not credit it to a source.
 
 ## Ask, one question per turn
 

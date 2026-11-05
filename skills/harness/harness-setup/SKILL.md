@@ -35,12 +35,12 @@ Read the description of the flow back to the user, labels included. Done when th
 Take **one** need from the flow, the one the user names or the most painful. Look it up in the kit, never by loading the store:
 
 ```
-../../../kit/scripts/kit list            # groups
-../../../kit/scripts/kit list <group>    # one line per piece
-../../../kit/scripts/kit show <id>       # one piece in full
+<skill-dir>/../../../kit/scripts/kit list            # groups
+<skill-dir>/../../../kit/scripts/kit list <group>    # one line per piece
+<skill-dir>/../../../kit/scripts/kit show <id>       # one piece in full
 ```
 
-(Paths run from this skill's folder; resolve them to the plugin's `kit/scripts/kit`.) Pick the piece whose `needed_when` matches. No piece fits: record `outside the kit`. Show the user the need and the piece (or `outside the kit`) and wait for a yes. Append the log line for `need-to-piece`.
+(`<skill-dir>` is the folder holding this SKILL.md as you were given it; the kit command is `kit/scripts/kit` in the same plugin, three levels up. Substitute the real folder before running.) Pick the piece whose `needed_when` matches. No piece fits: record `outside the kit`. Show the user the need and the piece (or `outside the kit`) and wait for a yes. Append the log line for `need-to-piece`.
 
 ### 3. Simplicity gate
 
