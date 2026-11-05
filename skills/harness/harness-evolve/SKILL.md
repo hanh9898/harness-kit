@@ -10,7 +10,18 @@ Change the project's **harness** one **checked change** at a time, and keep its 
 
 Terms: **kit**, **record** and **legos** are as in `harness-setup`; the record is `harness/record/`, one file per entry. A change is one sentence long and ends with a check that has run.
 
-Speak to the user in their own language. Ask **one question per turn**, then wait.
+Speak to the user in their own language. Ask **one question per turn**, then wait. Read [ASKING.md](../harness-setup/ASKING.md) before your first message (overview message, question forms, rules, sheets); write every question from its sheet (V01 to V10).
+
+Stages (the "k/4" of every question; the overview message lists them first):
+
+| Stage | Plain name | Steps | The user |
+|---|---|---|---|
+| 1 | See where things stand | 0 | sees mismatches, overdue and unfinished work; picks what first |
+| 2 | Settle one small change | 1, 2 | tells the latest snag, confirms one sentence, approves evidence |
+| 3 | Do it and check it | 3, 4 | mostly watches; may waive a failure or run a team check |
+| 4 | Write it down | 5 | reads the report; decides on a change to the standard |
+
+Before the first question send the overview message.
 
 Every step ends with one log line; the keys are fixed in the Log section of [UPDATE.md](UPDATE.md). Read that section before you write the first line.
 
@@ -26,11 +37,11 @@ Then read, in this order: `harness/record/index.md`, the entries, the last lines
 - **Overdue or failing**: entries whose `verified_on` is older than the limit in DRIFT.md, or whose check fails now.
 - **Unfinished work**: the log shows a `change` without its `update`. Ask: continue that, or start a new change.
 
-Show the user one list of findings and ask what to do first. Append the log line for `read`.
+Show the user one list of findings and ask what to do first (V01; V02 to V04 in DRIFT.md). Append the log line for `read`.
 
 ### 1. State the change
 
-One sentence: what changes, which role, which piece (a kit id or a record entry). The user names it, or picks from step 0. Look up the kit, never by loading the store:
+One sentence: what changes, which role, which piece (a kit id or a record entry). Ask for the latest snag (V05, in ASKING.md) and confirm the sentence (V06); the role and piece you look up yourself. The user names it, or picks from step 0. Look up the kit, never by loading the store:
 
 ```
 <skill-dir>/../../../kit/scripts/kit list            # groups
@@ -42,7 +53,7 @@ One sentence: what changes, which role, which piece (a kit id or a record entry)
 
 ### 2. Simplicity gate
 
-Run the gate again for every item the change adds or alters, exactly as set out in `../harness-setup/GATE.md` (relative to this skill's folder; open it, do not work from memory). The user approves the evidence; you never do. A lighter rung that is enough sends you back to step 1 with the lighter change. An item without approved evidence is dropped. Append the log line for `gate`.
+Run the gate again for every item the change adds or alters, exactly as set out in `../harness-setup/GATE.md` (relative to this skill's folder; open it, do not work from memory). The user approves the evidence (an evidence block; V07, in ASKING.md); you never do. A lighter rung that is enough sends you back to step 1 with the lighter change. An item without approved evidence is dropped. Append the log line for `gate`.
 
 ### 3. Do it through the Matt flow
 
@@ -50,8 +61,8 @@ Run the gate again for every item the change adds or alters, exactly as set out 
 
 ### 4. Check
 
-Run every check; paste command, exit code and output into the entry. Reviewing a harness change with `code-review`: its prompt must name `harness/STANDARDS.md` as the standard. Detail and the two exits (fail, waiver): [CHECK-STEP.md](CHECK-STEP.md). A failing check that is not waived sends you back to step 3. Changing a **team** entry: ask for one more verification that actually runs, outside the structural check. Append the log line for `check` per entry.
+Run every check; paste command, exit code and output into the entry. Reviewing a harness change with `code-review`: its prompt must name `harness/STANDARDS.md` as the standard. Detail, the two exits (fail, waiver) and sheets V08, V09: [CHECK-STEP.md](CHECK-STEP.md). A failing check that is not waived sends you back to step 3. Changing a **team** entry: ask for one more verification that actually runs, outside the structural check. Append the log line for `check` per entry.
 
 ### 5. Update
 
-Write the entries (temp file, then rename), set `verified_on`, add the log line, append the lessons, and offer any change to the standard as text. Remind the user of Matt's `retro`; never run it yourself. A rerun adds nothing twice. Method and formats: the rest of [UPDATE.md](UPDATE.md). Append the log line for `update`, then report: entries changed, check results, the log's last line.
+Write the entries (temp file, then rename), set `verified_on`, add the log line, append the lessons, and offer any change to the standard as text. Remind the user of Matt's `retro`; never run it yourself. A rerun adds nothing twice. Method, formats and sheet V10: the rest of [UPDATE.md](UPDATE.md). Append the log line for `update`, then report: entries changed, check results, the log's last line.

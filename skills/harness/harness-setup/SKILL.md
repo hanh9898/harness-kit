@@ -10,7 +10,20 @@ Build the project's **harness** (the frame around a coding agent that adds capab
 
 Terms: **kit** is the shared read-only store of pieces (**legos**); **record** is `harness/record/`, this project's harness choices, one file per entry. Both are defined in the kit README next to this plugin's `kit/` folder.
 
-Speak to the user in their own language. Ask **one question per turn**, then wait.
+Speak to the user in their own language. Ask **one question per turn**, then wait. Read [ASKING.md](ASKING.md) before your first message: it holds the overview message, the full and compact question forms, the rules, and the question sheets (S01 to S31). Each step below names its sheets; write every question from its sheet.
+
+Stages (the "k/6" of every question; the overview message lists them first):
+
+| Stage | Plain name | Steps | The user |
+|---|---|---|---|
+| 1 | Understand how your team works | 0, 1 | tells one recent piece of work, names the agent app, labels items, confirms the flow |
+| 2 | Pick one thing to improve and the lightest way to do it | 2, 3, 4 | picks a need, approves evidence, settles tools, folders, team shape |
+| 3 | Record it and try it out | 5, 6 | agrees one check and sees it run |
+| 4 | Decide who may decide what | 7, 8 | names roles, gives a recent decision per role, picks levels and profiles |
+| 5 | Rules, keeping the tooling apart from your product, wiring it in | 9, 10, 11 | picks rules, says yes or no to isolation, confirms hook files |
+| 6 | Final check | 12 | reads the report; no question |
+
+Before the first question send the overview message (ASKING.md). The user may ask to start at stage 5 (steps 9 to 12). A repo with no finished work to point at follows the "Repo with no history" branch.
 
 ## Process
 
@@ -24,11 +37,11 @@ Pick the mode. `harness/record/` exists: **edit mode**; ask only about what diff
 
 ### 1. Observe
 
-Learn how work really flows here, in plain words: where tasks come from, where the documents live, who hands work to whom. Read `AGENTS.md`, `docs/agents/` and the repo first; ask only what they leave open. Ask which agent platform the team works on; take the platform from the answer.
+Learn how work really flows here, in plain words: where tasks come from, where the documents live, who hands work to whom. Read `AGENTS.md`, `docs/agents/` and the repo first; ask only what they leave open. Ask which agent platform the team works on (S01); take the platform from the answer.
 
-Read [BOUNDARY.md](BOUNDARY.md). Put its three questions to the user, one per turn, about the items still unsettled; you may suggest an answer, the user decides. Every item ends as `shared` or `project`.
+Read [BOUNDARY.md](BOUNDARY.md). Put its three questions to the user (sheets S03 to S05 in it), one per turn, about the items still unsettled; you may suggest an answer, the user decides. Every item ends as `shared` or `project`.
 
-Read the description of the flow back to the user, labels included. Done when the user says it is right. Append the log line for `observe` (format in [RECORD-FORMAT.md](RECORD-FORMAT.md)); put the platform, a one-line flow summary and the labels in it, so a later run resumes from the log alone.
+Learn the flow from one recent piece of work (S02, in BOUNDARY.md; chain confirmation when git is clear). Read the description of the flow back to the user (S06), labels included. Done when the user says it is right. Append the log line for `observe` (format in [RECORD-FORMAT.md](RECORD-FORMAT.md)); put the platform, a one-line flow summary and the labels in it, so a later run resumes from the log alone.
 
 ### 2. Need to piece
 
@@ -40,17 +53,17 @@ Take **one** need from the flow, the one the user names or the most painful. Loo
 <skill-dir>/../../../kit/scripts/kit show <id>       # one piece in full
 ```
 
-(`<skill-dir>` is the folder holding this SKILL.md as you were given it; the kit command is `kit/scripts/kit` in the same plugin, three levels up. Substitute the real folder before running.) Pick the piece whose `needed_when` matches. No piece fits: record `outside the kit`. Show the user the need and the piece (or `outside the kit`) and wait for a yes. Append the log line for `need-to-piece`.
+(`<skill-dir>` is the folder holding this SKILL.md as you were given it; the kit command is `kit/scripts/kit` in the same plugin, three levels up. Substitute the real folder before running.) Pick the piece whose `needed_when` matches. No piece fits: record `outside the kit`. Ask which need hurts most (S07, in ASKING.md), then show the user the need and the piece (or `outside the kit`) and wait for a yes (S08). Append the log line for `need-to-piece`.
 
 ### 3. Simplicity gate
 
 Nothing is recorded or installed until it passes the gate. At this step the items are the pieces chosen in step 2 (the folder and team items of step 4 pass the same gate when proposed; in edit mode, every item you add or change). For **each** item, find the next lighter step on the ladder (instruction file, skill, script/CLI, MCP) and the evidence that it is not enough. Read the platform's docs or `--help` now, never from memory. Write url or command, date and the answer. Method and format: [GATE.md](GATE.md).
 
-Show the user the whole evidence list and wait. Only the user approves it; you never do. An item without approved evidence is dropped, not recorded. Append the log line for `gate`.
+Show the user the whole evidence list as an evidence block (ASKING.md; sheet S09 in GATE.md) and wait. Only the user approves it; you never do. An item without approved evidence is dropped, not recorded. Append the log line for `gate`.
 
 ### 4. Propose, one part at a time
 
-Three parts, in this order: tools to install (with their rung), folder layout, agent team shape. Propose one, wait for the user to settle it, then move on. The tools were gated in step 3; folder and team items go through the gate as you propose them, evidence shown with the proposal. Method: [PROPOSALS.md](PROPOSALS.md). Append one log line per settled part.
+Three parts, in this order: tools to install (with their rung), folder layout, agent team shape. Propose one, wait for the user to settle it, then move on. The tools were gated in step 3; folder and team items go through the gate as you propose them, evidence shown with the proposal. Method and sheets S10 to S12: [PROPOSALS.md](PROPOSALS.md). Append one log line per settled part.
 
 ### 5. Record
 
@@ -58,27 +71,27 @@ Write each settled item as an entry and update the index as set out in [RECORD-F
 
 ### 6. Install and run the check
 
-Create what the settled parts name (the script, the folders) and nothing else. Then propose one check, a command that proves the piece works (start from the piece's `detail`; with `outside the kit`, design it with the user). Run it once the user agrees. Paste the real output into the entry. Set `status: passing` and `verified_on` only after the check ran and passed; a failure is `failing`. A piece the kit marks as unchecked on this platform needs its own check before `passing`. Append the log line for `check` once, after the final result.
+Create what the settled parts name (the script, the folders) and nothing else. Then propose one check (S13, in ASKING.md), a command that proves the piece works (start from the piece's `detail`; with `outside the kit`, design it with the user). Run it once the user agrees. Paste the real output into the entry. Set `status: passing` and `verified_on` only after the check ran and passed; a failure is `failing`. A piece the kit marks as unchecked on this platform needs its own check before `passing`. Append the log line for `check` once, after the final result.
 
 ### 7. Delegation
 
-Its own step, never mixed into the team shape. For each role and each kind of decision, ask the four axes and agree one level from 1 to 7. Fetch the framework piece by piece, never the whole file. Write one `delegation-<role>` entry per role. Turning delegation on or off later is changing a level, nothing rebuilt. Method and format: [DELEGATION.md](DELEGATION.md). Append the log line for `delegation` per entry.
+Its own step, never mixed into the team shape. For each role and each kind of decision, ask the four axes and agree one level from 1 to 7. Fetch the framework piece by piece, never the whole file. Write one `delegation-<role>` entry per role. Turning delegation on or off later is changing a level, nothing rebuilt. Method, format and sheets S14 to S20: [DELEGATION.md](DELEGATION.md). Append the log line for `delegation` per entry.
 
 ### 8. Roles and profiles
 
-One `role-<role>` entry per role, four cells (tools, docs, skills, delegation level), each pointing to something that exists. A cell pointing at nothing sends you back to fix it; the entry is never `passing` until every pointer resolves. Method: [ROLES.md](ROLES.md). Append the log line for `roles` per entry.
+One `role-<role>` entry per role, four cells (tools, docs, skills, delegation level), each pointing to something that exists. A cell pointing at nothing sends you back to fix it; the entry is never `passing` until every pointer resolves. Method and sheet S21: [ROLES.md](ROLES.md). Append the log line for `roles` per entry.
 
 ### 9. Standards
 
-Choose the checkable standard for the pieces chosen, from the kit's rules, never by loading them. Write `harness/STANDARDS.md` (first line: it applies only to changes under `harness/`) and one `standard-*` entry per chosen rule, each pointing at its section. Method: [STANDARDS-STEP.md](STANDARDS-STEP.md). Append the log line for `standards`.
+Choose the checkable standard for the pieces chosen, from the kit's rules, never by loading them. Write `harness/STANDARDS.md` (first line: it applies only to changes under `harness/`) and one `standard-*` entry per chosen rule, each pointing at its section. Method and sheet S22: [STANDARDS-STEP.md](STANDARDS-STEP.md). Append the log line for `standards`.
 
 ### 10. Isolation
 
-Its own question: should the harness stay out of the product's commits, comments and PRs? If yes, propose rule, checker and review; the user chooses. Suggest, never edit, a scope line for the product's coding standards. Method: [ISOLATION.md](ISOLATION.md). Append the log line for `isolation`.
+Its own question: should the harness stay out of the product's commits, comments and PRs? If yes, propose rule, checker and review; the user chooses. Suggest, never edit, a scope line for the product's coding standards. Method and sheets S23 to S27: [ISOLATION.md](ISOLATION.md). Append the log line for `isolation`.
 
 ### 11. Map, entry point and hooks
 
-Register the contexts in `GLOSSARY-MAP.md`, create the harness glossary and ADR folder, replace the block between the two markers in `AGENTS.md` or `CLAUDE.md`, and wire and trigger every hook. Method: [WIRING.md](WIRING.md). Append the log line for `wiring`.
+Register the contexts in `GLOSSARY-MAP.md`, create the harness glossary and ADR folder, replace the block between the two markers in `AGENTS.md` or `CLAUDE.md`, and wire and trigger every hook. Method and sheets S28 to S31: [WIRING.md](WIRING.md). Append the log line for `wiring`.
 
 ### 12. Final check
 

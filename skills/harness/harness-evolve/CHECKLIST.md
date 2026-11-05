@@ -35,3 +35,17 @@ Prepare a Git repo copy that has completed `harness-setup` (with `harness/record
 | E27 | Idempotent rerun | Rerun a completed session with no changes | No duplicate entries, index lines, lessons, or step logs; files unchanged; identical final read lines are not repeated |
 | E28 | Stay within scope | Git status and hashes | Does not change kit, coding standards, or product code outside the agreed change; writes only harness files and explicitly affected paths |
 | E29 | Boundaries and length | Boundary checker and line counts | No fixed platform or project names; SKILL.md below 170 lines; body links explain when to open sibling files |
+
+## Question layer (ticket 19): E30 to E35
+
+E30 onward comes from ticket 19. Forms and rules live in `../harness-setup/ASKING.md` and are not copied here.
+
+| # | Observation | Evidence | Pass condition |
+|---|---|---|---|
+| E30 | Overview before the first question | Opening transcript | Describes the final record and log, four stages on separate lines, unmeasured effort, and method in the user's language |
+| E31 | Full and compact forms | Transcript | First question in each stage uses the full form with Stage k/4 and all required fields; later questions are compact; resumed stages reopen with the full form |
+| E32 | State the change across two turns | Step 1 transcript | First asks about one recent snag; then confirms a change sentence with role and entry looked up by the agent; user need not know kit IDs |
+| E33 | Questions follow drift, overdue and unfinished sheets | Step 0 transcript | Drift compares claim and disk, asks which to fix, defaults to no change; overdue shows dates and age; unfinished work names change and log date |
+| E34 | Waiver reasons and team verification | Waiver and team cases | Reasons are the user's words; team verification uses a concrete recent task; uncertainty records not run |
+| E35 | Complete question sheets and concise links | Question-layer tests and line counts | V01-V10 each have nine fields; evolve SKILL.md has at most 80 lines; no duplicated ASKING.md |
+| E36 | Step 2 gate evidence block | Agent messages | Meets setup C94-C95: one language, conclusion first, plain needs, one approval, details on request; Stage 2/4 |
