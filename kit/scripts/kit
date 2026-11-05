@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""kit: retrieve individual building blocks without loading the entire store.
+
+  kit list              groups and piece counts
+  kit list <group>      one line per piece (ID, rung, name, summary)
+  kit show <id|name>    every column of exactly one piece
+
+Add --dir DIR to use another kit directory; default: the kit containing scripts/.
+Uses only the standard library.
+"""
+import argparse
+import csv
+import sys
+from collections import Counter
+from pathlib import Path
+
+
+def load(kit_dir):
+    with (kit_dir / "legos.csv").open(encoding="utf-8", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def fail(msg, code=2):
+    print(f"ERROR: {msg}", file=sys.stderr)
+    return code
+
+
+def cmd_list(rows, group):
+    if group is None:
+        for g, n in sorted(Counter(r["group"] for r in rows).items()):
+            print(f"{g}\t{n} pieces")
+        print("Next step: kit list <group> to see pieces, kit show <id> to see one piece.")
+        return 0
+    picked = [r for r in rows if r["group"].lower() == group.lower()]
+    if not picked:
+        return fail(f"Group `{group}` does not exist.\nNext step: run `kit list` to see groups.")
+    for r in picked:
+        print(f"{r['id']}\t{r['rung']}\t{r['name']}\t{r['summary']}")
+    return 0
+
+
+def cmd_show(rows, query):
+    q = query.strip().lower()
+    hit = [r for r in rows if q and (r["id"].lower() == q or r["name"].lower() == q)]
+    if len(hit) != 1:
+        why = "matches no piece" if not hit else "matches more than one piece"
+        return fail(f"`{query}` {why}.\nNext step: run `kit list` then `kit list <group>` to find the correct ID.")
+    for k, v in hit[0].items():
+        print(f"{k}: {v}")
+    return 0
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--dir", default=str(Path(__file__).resolve().parent.parent))
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("list").add_argument("group", nargs="?")
+    sub.add_parser("show").add_argument("query")
+    a = ap.parse_args(argv)
+    try:
+        rows = load(Path(a.dir))
+    except OSError as e:
+        return fail(f"Cannot read legos.csv in {a.dir} ({e}).")
+    return cmd_list(rows, a.group) if a.cmd == "list" else cmd_show(rows, a.query)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
