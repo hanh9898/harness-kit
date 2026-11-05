@@ -27,12 +27,13 @@ In the `## Agent skills` block of `AGENTS.md` (or `CLAUDE.md`, whichever the pro
 <!-- harness:end -->
 ```
 
-Pointers only: no description, no rule text. No markers yet: append the pair at the end of the block. Markers present: replace everything between them with the text above, even if someone edited it; never add a second pair. Leave every line outside the markers as it is. Afterwards `grep -c` each marker: exactly one of each.
+Pointers only: no description, no rule text. No markers yet: append the pair at the end of the block. Markers present: replace everything between them with the text above, even if someone edited it; never add a second pair. If the text between the markers differs from the text above, show the user the lines that will be dropped before replacing. Leave every line outside the markers as it is. Afterwards `grep -c` each marker: exactly one of each.
 
 ## C. Hooks
 
 For each entry whose piece is a hook (ask the user if unsure), on the platform taken from the user's answer in step 1:
 
+0. A hook whose entry is `passing`, whose config file already holds the hook and has a `verified_platform`, is not re-triggered and not asked about again; run its check once and move on.
 1. Name the platform's config file for hooks (read the platform's docs or `--help` now, as in the gate). Ask the user to confirm the file.
 2. Show the exact addition. After a yes, merge it into that file: keep everything already there. Missing file: create it. Put the file's path in the entry's `check`.
 3. Trigger the hook for real: run the platform so that the hooked event fires (a command the hook blocks, or one it logs). Paste the real output. Use the platform's non-interactive mode if it has one.

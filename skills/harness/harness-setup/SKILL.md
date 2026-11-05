@@ -20,7 +20,7 @@ Setup is a prerequisite. Look for an `## Agent skills` block in `AGENTS.md` or `
 
 Then read where the last run stopped. `harness/progress.log` exists: read its last line, say aloud which step it logged and that you continue after it. Resume at the first step without a log line (a recorded entry with no `check` line resumes at step 6; every entry checked but no `delegation` line resumes at step 7; a `delegation` line but no `roles` line, step 8; then the first of steps 9 to 12 without its log line), taking platform, flow, labels and approved gate evidence (`harness/gate.md`) from the files; ask nothing a logged line already answers.
 
-Pick the mode. `harness/record/` exists: **edit mode**; ask only about what differs from the record, and start at step 2 for the new need unless the flow itself changed. Entries checked but no delegation or role entries yet: offer step 7. An old entry without gate fields is readable: say it predates the gate, and run step 3 for it before you change it. Otherwise: **fresh mode**.
+Pick the mode. `harness/record/` exists: **edit mode**; ask only about what differs from the record, and start at step 2 for the new need unless the flow itself changed. If the user names a later step (steps 9 to 12), start there. Entries checked but no delegation or role entries yet: offer step 7. An old entry without gate fields is readable: say it predates the gate, and run step 3 for it before you change it. Otherwise: **fresh mode**.
 
 ### 1. Observe
 
