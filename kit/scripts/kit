@@ -6,6 +6,9 @@
   kit show <id|name>    every column of exactly one piece
   kit list P            one line per team architecture pattern (patterns.md)
   kit show P<number>    every column of exactly one pattern, for example P6
+  kit list delegation   four axes and seven delegation levels, one entry per line (delegation.md)
+  kit show axis<number> one axis (1 to 4); kit show step<number> one level (1 to 7)
+  kit show combine      the "How the axes combine" section of delegation.md
 
 Add --dir DIR to use another kit directory; default: the kit containing scripts/.
 Uses only the standard library.
@@ -37,12 +40,44 @@ def load_patterns(kit_dir):
     return out, head
 
 
+def load_delegation(kit_dir):
+    """Axis and level rows plus the combination section from delegation.md: (axes, steps, combine)."""
+    path = kit_dir / "delegation.md"
+    axes, steps, combine, heads = {}, {}, [], {}
+    if not path.is_file():
+        return axes, steps, combine, heads
+    in_combine = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            in_combine = line.startswith("## How the axes combine")
+            continue
+        if in_combine and line.strip():
+            combine.append(line)
+        cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
+        if line.startswith("| #"):
+            heads["axis"] = cells
+        elif line.startswith("| Step"):
+            heads["step"] = cells
+        elif line.startswith("| ") and cells[0].isdigit():
+            (axes if "axis" in heads and "step" not in heads else steps)[int(cells[0])] = cells
+    return axes, steps, combine, heads
+
+
 def fail(msg, code=2):
     print(f"ERROR: {msg}", file=sys.stderr)
     return code
 
 
-def cmd_list(rows, group, patterns=None):
+def cmd_list(rows, group, patterns=None, deleg=None):
+    if group is not None and group.lower() == "delegation":
+        axes, steps = (deleg or ({}, {}, [], {}))[:2]
+        if not axes:
+            return fail("delegation.md is missing from the kit directory.")
+        for n, c in axes.items():
+            print(f"axis{n}\t{c[1]}\t{c[2]}")
+        for n, c in steps.items():
+            print(f"step{n}\t{c[1]}\t{c[2]}")
+        return 0
     if group is not None and group.lower() in ("p", "patterns"):
         if not patterns:
             return fail("patterns.md is missing from the kit directory.")
@@ -64,8 +99,20 @@ def cmd_list(rows, group, patterns=None):
     return 0
 
 
-def cmd_show(rows, query, patterns=None, head=None):
+def cmd_show(rows, query, patterns=None, head=None, deleg=None):
     q = query.strip().lower()
+    axes, steps, combine, heads = deleg or ({}, {}, [], {})
+    if q == "combine" and combine:
+        print("\n".join(combine))
+        return 0
+    for kind, table in (("axis", axes), ("step", steps)):
+        if q.startswith(kind) and q[len(kind):].isdigit():
+            n = int(q[len(kind):])
+            if n not in table:
+                return fail(f"`{query}` does not match.\nNext step: run `kit list delegation` to see axes and levels.")
+            for k, v in zip(heads[kind], table[n]):
+                print(f"{k}: {v}")
+            return 0
     if q[:1] == "p" and q[1:].isdigit():
         n = int(q[1:])
         if n not in (patterns or {}):
@@ -94,9 +141,10 @@ def main(argv=None):
     except OSError as e:
         return fail(f"Cannot read legos.csv in {a.dir} ({e}).")
     patterns, head = load_patterns(Path(a.dir))
+    deleg = load_delegation(Path(a.dir))
     if a.cmd == "list":
-        return cmd_list(rows, a.group, patterns)
-    return cmd_show(rows, a.query, patterns, head)
+        return cmd_list(rows, a.group, patterns, deleg)
+    return cmd_show(rows, a.query, patterns, head, deleg)
 
 
 if __name__ == "__main__":

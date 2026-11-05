@@ -38,9 +38,12 @@ In `sources`, `note:R24` means "research note 24", an internal note, not a link.
 scripts/kit list            # groups and piece counts
 scripts/kit list A          # one line per piece in group A
 scripts/kit show B01        # one piece in full, by id or exact name
+scripts/kit list P          # team patterns, one line each; scripts/kit show P6 for one
+scripts/kit list delegation # four axes and seven steps, one line each
+scripts/kit show axis1      # one axis; step3 for one step; combine for how the axes combine
 ```
 
-There is no command that prints the whole store, on purpose. Ask for a group, then a piece. `rules.csv`, `patterns.md` and `delegation.md` are read with a file viewer, one section at a time.
+There is no command that prints the whole store, on purpose. Ask for a group, then a piece. `rules.csv` is read with a file viewer, one section at a time.
 
 ## Where the data came from
 
