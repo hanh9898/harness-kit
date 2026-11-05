@@ -9,12 +9,16 @@
   kit list delegation   four axes and seven delegation levels, one entry per line (delegation.md)
   kit show axis<number> one axis (1 to 4); kit show step<number> one level (1 to 7)
   kit show combine      the "How the axes combine" section of delegation.md
+  kit list rules        gate rules (gates.csv, gate=yes), one line per rule: ID, topic, check
+  kit list rules <topic>  all rules for a topic (gate rules marked *); `kit list rules all` lists topics
+  kit show <rule ID>    all columns of a rule (for example 4.06), with its verified quote when it is a gate rule
 
 Add --dir DIR to use another kit directory; default: the kit containing scripts/.
 Uses only the standard library.
 """
 import argparse
 import csv
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -63,12 +67,46 @@ def load_delegation(kit_dir):
     return axes, steps, combine, heads
 
 
+def load_rules(kit_dir):
+    """(rules, gates): rules.csv by ID; gates maps IDs to gate=yes rows."""
+    def read(name):
+        path = kit_dir / name
+        if not path.is_file():
+            return []
+        with path.open(encoding="utf-8", newline="") as f:
+            return list(csv.DictReader(f))
+    return read("rules.csv"), {r["id"]: r for r in read("gates.csv") if r.get("gate") == "yes"}
+
+
 def fail(msg, code=2):
     print(f"ERROR: {msg}", file=sys.stderr)
     return code
 
 
-def cmd_list(rows, group, patterns=None, deleg=None):
+def cmd_list_rules(rules, gates, topic):
+    if not rules:
+        return fail("rules.csv is missing from the kit directory.")
+    if topic is None:
+        for r in rules:
+            if r["id"] in gates:
+                print(f"{r['id']}\t{r['topic']}\t{r['check']}\t{r['rule']}")
+        print("Next step: kit show <id> to see one rule; kit list rules <topic> to see a topic.")
+        return 0
+    if topic.lower() == "all":
+        for t, n in sorted(Counter(r["topic"] for r in rules).items()):
+            print(f"{t}\t{n} rules")
+        return 0
+    picked = [r for r in rules if r["topic"].lower() == topic.lower()]
+    if not picked:
+        return fail(f"Topic `{topic}` does not exist.\nNext step: run `kit list rules all` to see topics.")
+    for r in picked:
+        print(f"{r['id']}{'*' if r['id'] in gates else ''}\t{r['check']}\t{r['rule']}")
+    return 0
+
+
+def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None):
+    if group is not None and group.lower() == "rules":
+        return cmd_list_rules(*(rules or ([], {})), topic)
     if group is not None and group.lower() == "delegation":
         axes, steps = (deleg or ({}, {}, [], {}))[:2]
         if not axes:
@@ -99,7 +137,7 @@ def cmd_list(rows, group, patterns=None, deleg=None):
     return 0
 
 
-def cmd_show(rows, query, patterns=None, head=None, deleg=None):
+def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
     q = query.strip().lower()
     axes, steps, combine, heads = deleg or ({}, {}, [], {})
     if q == "combine" and combine:
@@ -120,6 +158,16 @@ def cmd_show(rows, query, patterns=None, head=None, deleg=None):
         for k, v in zip(head, patterns[n]):
             print(f"{k}: {v}")
         return 0
+    if rules and re.fullmatch(r"\d+\.\d+", q):
+        hit = [r for r in rules[0] if r["id"] == q]
+        if not hit:
+            return fail(f"`{query}` matches no rule.\nNext step: run `kit list rules` to see gate rules.")
+        for k, v in hit[0].items():
+            print(f"{k}: {v}")
+        g = rules[1].get(q)
+        if g:
+            print(f"gate: yes ({g['verify_method']})\nverified_quote: {g['verified_quote']}\ngate_note: {g['note']}")
+        return 0
     hit = [r for r in rows if q and (r["id"].lower() == q or r["name"].lower() == q)]
     if len(hit) != 1:
         why = "matches no piece" if not hit else "matches more than one piece"
@@ -133,7 +181,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dir", default=str(Path(__file__).resolve().parent.parent))
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("list").add_argument("group", nargs="?")
+    lp = sub.add_parser("list")
+    lp.add_argument("group", nargs="?")
+    lp.add_argument("topic", nargs="?")
     sub.add_parser("show").add_argument("query")
     a = ap.parse_args(argv)
     try:
@@ -142,9 +192,10 @@ def main(argv=None):
         return fail(f"Cannot read legos.csv in {a.dir} ({e}).")
     patterns, head = load_patterns(Path(a.dir))
     deleg = load_delegation(Path(a.dir))
+    rules = load_rules(Path(a.dir))
     if a.cmd == "list":
-        return cmd_list(rows, a.group, patterns, deleg)
-    return cmd_show(rows, a.query, patterns, head, deleg)
+        return cmd_list(rows, a.group, patterns, deleg, rules, a.topic)
+    return cmd_show(rows, a.query, patterns, head, deleg, rules)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 Manual behavior checklist (seam 2). Every row is externally observable through messages, repo files, or file contents. Rerun and paste results into the ticket whenever the skill changes.
 
-C1-C20 come from ticket 08; ticket 09 strengthens C7, C11 and C13 and adds C21-C31; ticket 10 adds C32 onward (delegation, roles and profiles). C18 now permits delegation and profiles but still excludes GLOSSARY-MAP.md, the Harness block and STANDARDS.md.
+C1-C20 come from ticket 08; ticket 09 strengthens C7, C11 and C13 and adds C21-C31; ticket 10 adds C32-C43 (delegation, roles and profiles); ticket 11 adds C44 onward (standards, isolation, map, marker, hooks and final checks). C18 now permits those items but excludes coding standards and paths outside harness/ unless a step names them.
 
 Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agent skills block and docs/agents/), without harness/; another copy lacks docs/agents/. A stand-in user follows a prepared response script.
 
@@ -51,3 +51,27 @@ Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agen
 | C41 | Delegation cell points to a real entry | Passing profile | References a delegation entry present in record files and index |
 | C42 | Resume without duplicates | Interrupt after delegation, then rerun twice | Reuses settled answers; no duplicate files, index lines or logs; delegation then roles per role, without redundant record/check lines |
 | C43 | Generic boundaries and short body | Boundary checker and line counts | No platform/project names; SKILL.md below 170 lines; body links to DELEGATION.md and ROLES.md |
+| C44 | Select standards through kit | Command history | Lists and shows individual rules; never loads rules.csv; offers verified gate rules first and only topics relevant to selected groups |
+| C45 | Harness standard starts with scope | harness/STANDARDS.md | First line limits scope to harness changes in the user's language; each rule has a kit ID and check method |
+| C46 | Standard entry is a pointer | Standard record files | Correct kind, points to a standards section, includes check and gate fields, and does not copy rule text |
+| C47 | Execute standard checks | Standard entries | Actual results recorded; passing and verification date follow execution |
+| C48 | Isolation is a separate question | Transcript | After standards, asks whether harness content should stay out of product commits, comments and PRs; records nothing before asking |
+| C49 | User selects isolation | Transcript | Offers rules, checker and review for approval; if rejected, creates no isolation entry and logs outcome=none |
+| C50 | Isolation check runs on a real case | Isolation entry | Executable check actually tests an operation with harness traces, records evidence, and never claims unexecuted verification passed |
+| C51 | Only propose coding-standard scope | Transcript, Git status and hashes | Shows exact proposed text for the user to add; never edits or creates CODING_STANDARDS.md |
+| C52 | Create map with product context | Glossary map | Adds root product glossary and ADR pointers; preserves existing rows and adds only the harness row |
+| C53 | Harness map row includes both paths | Glossary map | One description with harness glossary AND ADR paths; no copied terms |
+| C54 | Context relationships | Glossary map | Relationships section states harness reads product and product does not name harness; notes known same-name/different-meaning terms |
+| C55 | Domain docs become multi-context | Root and domain agent docs | Domain summary points to glossary map; domain doc includes harness ADR paths exactly once |
+| C56 | Harness context foundations | Harness glossary and ADR directory | Both exist; glossary opens with kit README link; preserves existing contents |
+| C57 | Harness block contains only pointers | Root instructions | One marked Harness block inside Agent skills; only record index, standards and ADR pointers |
+| C58 | Preserve outside markers | Before/after diff | All lines outside markers unchanged except the separately assessed domain summary |
+| C59 | Replace rather than append | Rerun marker writing after manual edits | Exactly one marker pair and Harness block; restores expected contents; no duplicate map rows, sections, entries or logs |
+| C60 | Structural team checks are labelled | Team entry and record format | check_scope=structural; documentation says passing does not prove the team runs |
+| C61 | Hook is actually wired | Platform config and command history | Uses selected platform, writes hook into the entry's named config, preserves existing config |
+| C62 | Hook actually triggers | Entry evidence | Triggers and records a real event; if unavailable, names the unverified platform and does not mark wiring passing |
+| C63 | Final verification | Transcript and records | Lists every entry/status, checks actual evidence for each passing entry, and reports failures |
+| C64 | Resume within steps 9-12 | Interrupt after standards, isolation or wiring logs | Reads log, resumes correct step, reuses answers and creates no duplicates |
+| C65 | Edit only differences | Rerun a completed setup | Announces edit mode; no-change run does not repeat standards, isolation or map questions; files unchanged |
+| C66 | Boundaries and short body | Boundary checker and line counts | No platform/project names; SKILL.md below 170 lines; body links explain standards, isolation and wiring siblings |
+| C67 | Harness standards in code review | Review a sample product diff | Records loaded standards and whether harness standards affected product code as an observation, not a pass criterion |

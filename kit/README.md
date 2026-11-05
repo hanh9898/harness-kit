@@ -43,7 +43,7 @@ scripts/kit list delegation # four axes and seven steps, one line each
 scripts/kit show axis1      # one axis; step3 for one step; combine for how the axes combine
 ```
 
-There is no command that prints the whole store, on purpose. Ask for a group, then a piece. `rules.csv` is read with a file viewer, one section at a time.
+There is no command that prints the whole store, on purpose. Ask for a group, then a piece. Rules have their own commands: `kit list rules` (gate rules only), `kit list rules <topic>`, `kit show <rule id>` (for example `4.06`). Do not load `rules.csv` whole.
 
 ## Where the data came from
 

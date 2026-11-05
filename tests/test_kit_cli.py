@@ -98,3 +98,21 @@ def test_delegation_list_and_show_one_row_only():
 def test_delegation_unknown_fails_with_next_step():
     r = run(KIT_CLI, "show", "step9")
     assert r.returncode != 0 and "kit list delegation" in r.stderr and r.stdout == ""
+
+
+def test_rules_list_gate_rules_first_and_show_one_rule(tmp_path):
+    root = write_kit(tmp_path / "k", [row("A01")])
+    (root / "rules.csv").write_text(
+        "id,topic,rule,source,certainty,check,verified_on\n"
+        "1.01,t1,Rule gate one,s,stated,machine,2026-01-01\n"
+        "1.02,t1,Rule plain two,s,stated,review,\n", encoding="utf-8")
+    (root / "gates.csv").write_text(
+        "id,gate,verify_method,verified_quote,note\n1.01,yes,raw-grep,Quoted one,n\n", encoding="utf-8")
+    r = run(KIT_CLI, "--dir", root, "list", "rules")
+    assert r.returncode == 0 and "1.01" in r.stdout and "1.02" not in r.stdout
+    r = run(KIT_CLI, "--dir", root, "list", "rules", "t1")
+    assert "1.01*" in r.stdout and "1.02" in r.stdout and "1.02*" not in r.stdout
+    r = run(KIT_CLI, "--dir", root, "show", "1.01")
+    assert r.returncode == 0 and "Quoted one" in r.stdout and "Rule plain two" not in r.stdout
+    r = run(KIT_CLI, "--dir", root, "show", "9.99")
+    assert r.returncode != 0 and "kit list rules" in r.stderr
