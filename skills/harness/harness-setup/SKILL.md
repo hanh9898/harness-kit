@@ -18,9 +18,9 @@ Speak to the user in their own language. Ask **one question per turn**, then wai
 
 Setup is a prerequisite. Look for an `## Agent skills` block in `AGENTS.md` or `CLAUDE.md` and for `docs/agents/`. Missing either: tell the user to run `setup-matt-pocock-skills` first, then stop. Write nothing.
 
-Then read where the last run stopped. `harness/progress.log` exists: read its last line, say aloud which step it logged and that you continue after it. Resume at the first step without a log line (a recorded entry with no `check` line resumes at step 6; every entry checked but no `delegation` line resumes at step 7; a `delegation` line but no `roles` line, step 8), taking platform, flow, labels and approved gate evidence (`harness/gate.md`) from the files; ask nothing a logged line already answers.
+Then read where the last run stopped. `harness/progress.log` exists: read its last line, say aloud which step it logged and that you continue after it. Resume at the first step without a log line (a recorded entry with no `check` line resumes at step 6; every entry checked but no `delegation` line resumes at step 7; a `delegation` line but no `roles` line, step 8; then the first of steps 9 to 12 without its log line), taking platform, flow, labels and approved gate evidence (`harness/gate.md`) from the files; ask nothing a logged line already answers.
 
-Pick the mode. `harness/record/` exists: **edit mode**; ask only about what differs from the record, and start at step 2 for the new need unless the flow itself changed. Entries checked but no delegation or role entries yet: offer step 7. An old entry without gate fields is readable: say it predates the gate, and run step 3 for it before you change it. Otherwise: **fresh mode**.
+Pick the mode. `harness/record/` exists: **edit mode**; ask only about what differs from the record, and start at step 2 for the new need unless the flow itself changed. If the user names a later step (steps 9 to 12), start there. Entries checked but no delegation or role entries yet: offer step 7. An old entry without gate fields is readable: say it predates the gate, and run step 3 for it before you change it. Otherwise: **fresh mode**.
 
 ### 1. Observe
 
@@ -54,7 +54,7 @@ Three parts, in this order: tools to install (with their rung), folder layout, a
 
 ### 5. Record
 
-Write each settled item as an entry and update the index as set out in [RECORD-FORMAT.md](RECORD-FORMAT.md): temp file first, then rename. Status starts `unverified`. Check for an existing entry for this need first and update it in place. Append the log line for `record` per entry.
+Write each settled item as an entry and update the index as set out in [RECORD-FORMAT.md](RECORD-FORMAT.md): temp file first, then rename. Status starts `unverified`. A `kind: team` entry carries `check_scope: structural`. Check for an existing entry for this need first and update it in place. Append the log line for `record` per entry.
 
 ### 6. Install and run the check
 
@@ -68,8 +68,18 @@ Its own step, never mixed into the team shape. For each role and each kind of de
 
 One `role-<role>` entry per role, four cells (tools, docs, skills, delegation level), each pointing to something that exists. A cell pointing at nothing sends you back to fix it; the entry is never `passing` until every pointer resolves. Method: [ROLES.md](ROLES.md). Append the log line for `roles` per entry.
 
-Report: entry paths, check results, and the log's last line.
+### 9. Standards
 
-## Next steps
+Choose the checkable standard for the pieces chosen, from the kit's rules, never by loading them. Write `harness/STANDARDS.md` (first line: it applies only to changes under `harness/`) and one `standard-*` entry per chosen rule, each pointing at its section. Method: [STANDARDS-STEP.md](STANDARDS-STEP.md). Append the log line for `standards`.
 
-This version stops here. Later steps (standards, isolation, map) are separate; name them in one line and leave them.
+### 10. Isolation
+
+Its own question: should the harness stay out of the product's commits, comments and PRs? If yes, propose rule, checker and review; the user chooses. Suggest, never edit, a scope line for the product's coding standards. Method: [ISOLATION.md](ISOLATION.md). Append the log line for `isolation`.
+
+### 11. Map, entry point and hooks
+
+Register the contexts in `GLOSSARY-MAP.md`, create the harness glossary and ADR folder, replace the block between the two markers in `AGENTS.md` or `CLAUDE.md`, and wire and trigger every hook. Method: [WIRING.md](WIRING.md). Append the log line for `wiring`.
+
+### 12. Final check
+
+List every entry in `record/` with its status. Verify with a command, not from memory, that each `passing` entry has a pasted check result with a date, and re-run any that does not. An entry whose check cannot run stays `unverified` or `failing`, and you say so. Append the log line for `final`, then report: entry paths, check results, and the log's last line.
