@@ -1,0 +1,5 @@
+interface:
+  display_name: "Harness Evolve"
+  short_description: "Change and maintain a project's harness, one checked change at a time"
+policy:
+  allow_implicit_invocation: false
