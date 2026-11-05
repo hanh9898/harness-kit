@@ -75,3 +75,26 @@ Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agen
 | C65 | Edit only differences | Rerun a completed setup | Announces edit mode; no-change run does not repeat standards, isolation or map questions; files unchanged |
 | C66 | Boundaries and short body | Boundary checker and line counts | No platform/project names; SKILL.md below 170 lines; body links explain standards, isolation and wiring siblings |
 | C67 | Harness standards in code review | Review a sample product diff | Records loaded standards and whether harness standards affected product code as an observation, not a pass criterion |
+
+## Question layer (ticket 19): C80 to C93
+
+C68-C78 are reserved for ticket 20 (routing multiple needs); ticket 19 starts at C80. Also prepare one repo with history and another with one commit. The stand-in user follows a response script and records whether each question's purpose was clear and whether the first answer was sufficient.
+
+| # | Observation | Evidence | Pass condition |
+|---|---|---|---|
+| C80 | Asking document sections | Document and question-layer tests | Also covers no-history branching; all expected sections present; no absolute paths |
+| C81 | Overview before first question | Opening transcript | Describes visible outcome, six stage lines and user actions, effort and method, uncertainty and resume behavior in the user's language |
+| C82 | Honest effort estimate | Opening turn | Says time is not measured, invents no minutes, and notes a real-user run will measure it |
+| C83 | Full form opens each stage | Transcript | Includes Stage k/6, benefit, skip consequence, purpose, question, sufficient answer, uncertainty default and suggestion |
+| C84 | Later questions are compact | Transcript | At most five lines with stage, combined purpose/impact, question, sufficient-answer/default line and suggestion |
+| C85 | One idea and plain language | Transcript | One idea per question; no unexplained framework jargon; unfamiliar terms receive plain definitions |
+| C86 | Ask about concrete recent work | Transcript | Process questions name a real task, PR or commit rather than asking about usual behavior |
+| C87 | Look up facts before asking | Commands and suggestions | Reads Git, PRs and files first; suggestions cite findings; does not ask facts the repo already supplies |
+| C88 | Grouped chain confirmation | Clear Git evidence for request/code/review/merge | States the entire four-step chain and asks once; asks only missing links when evidence is incomplete |
+| C89 | No-history branch | One-commit repo | Asks about planned next work and future roles with suggestions from repo guidance; invents no history |
+| C90 | Handle incomplete answers | General, partial, uncertain and why-ask cases | Refocuses on the same task; accepts supplied parts; uses stated defaults; explains purpose in one sentence; at most one follow-up |
+| C91 | Full form after mid-stage resume | Interrupt stage 4 and rerun | First resumed question uses the full form even within an existing stage |
+| C92 | Complete question sheets | Question-layer tests and line counts | S01-S31 and V01-V10 have nine fields each; setup SKILL.md at most 110 lines; each question step links to its sheet |
+| C93 | Stand-in user comprehension | Compare the new run with the earlier transcript | Records clarification and incomplete-answer counts against the old run; acknowledges stand-in agent limitations |
+| C94 | Readable gate evidence | Steps 3 and 4 messages | Consistent language, conclusion first, plain needs, explained unfamiliar terms, stage/name, and one reliability line per source |
+| C95 | One approval with consequences | Evidence block | Exactly one decision question last before suggestion; names next step or rejection result; full details only on request; stored evidence remains complete |

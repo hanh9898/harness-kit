@@ -31,6 +31,8 @@ Pointers only: no description, no rule text. No markers yet: append the pair at 
 
 ## C. Hooks
 
+Write the questions of parts B and C from the sheets at the end of this file, in the forms of [ASKING.md](ASKING.md).
+
 For each entry whose piece is a hook (ask the user if unsure), on the platform taken from the user's answer in step 1:
 
 0. A hook whose entry is `passing`, whose config file already holds the hook and has a `verified_platform`, is not re-triggered and not asked about again; run its check once and move on.
@@ -39,3 +41,53 @@ For each entry whose piece is a hook (ask the user if unsure), on the platform t
 3. Trigger the hook for real: run the platform so that the hooked event fires (a command the hook blocks, or one it logs). Paste the real output. Use the platform's non-interactive mode if it has one.
 4. Fired as expected: `passing`, and set `verified_platform` to the platform, event, matcher and date. Could not fire it on this platform here: leave the wiring `unverified`, set `verified_platform: not verified on <platform>`, tell the user, and do not call it `passing`.
 5. Any `kind: team` entry written before this step existed and lacking `check_scope: structural` gets it added now (see [RECORD-FORMAT.md](RECORD-FORMAT.md)).
+
+## Question sheets (step 11)
+
+### [S28] Is this piece a hook
+
+- Stage: 5/6 Rules, keeping the tooling apart from your product, wiring it in
+- Helps: hooks are wired and tested only where they are really hooks
+- If skipped: I treat it as not a hook and wire nothing
+- Why: asked only when the piece's description does not make it clear
+- Ask: Does "<piece>" have to run by itself when something happens in your agent app, for example before a command or a commit?
+- Terms: hook = an action the agent app runs by itself when an event happens
+- Enough: yes or no
+- Unsure: say "not sure"; I treat it as not a hook
+- Suggest: the answer the piece's description gives; say which line
+
+### [S29] The file that holds hook settings
+
+- Stage: 5/6 Rules, keeping the tooling apart from your product, wiring it in
+- Helps: the hook goes into the file your agent app really reads
+- If skipped: I write nothing and the hook stays unverified
+- Why: the file name comes from the app's documentation, which I read now
+- Ask: Is `<file>` the file where your agent app keeps hook settings?
+- Terms: none
+- Enough: yes, or the right file
+- Unsure: say "not sure"; I write nothing
+- Suggest: yes, with the documentation page or command I read today
+
+### [S30] Merge these lines into the settings file
+
+- Stage: 5/6 Rules, keeping the tooling apart from your product, wiring it in
+- Helps: the hook is active, and I can then trigger it for real to prove it
+- If skipped: nothing is written to the file
+- Why: these lines are the only change to your settings file; everything already there stays
+- Ask: Shall I merge exactly these lines into `<file>`? <lines>
+- Terms: none
+- Enough: yes, or what to change
+- Unsure: say "not sure"; I write nothing
+- Suggest: yes
+
+### [S31] Replace the lines between the markers
+
+- Stage: 5/6 Rules, keeping the tooling apart from your product, wiring it in
+- Helps: the entry point in your guidance file stays correct and appears once
+- If skipped: I leave the block as it is and say so
+- Why: asked only when the text between the markers differs from the text to be written; the lines between the two markers belong to the harness and will be replaced; yours outside them stay untouched
+- Ask: These lines between the markers will be replaced: <lines>. Is that OK?
+- Terms: marker = a pair of comment lines that fence the part of the file owned by the harness
+- Enough: yes, or the line you want to keep elsewhere
+- Unsure: say "not sure"; I leave the block unchanged
+- Suggest: yes, when the lines are only pointers I wrote before
