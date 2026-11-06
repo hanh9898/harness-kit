@@ -14,7 +14,7 @@ def read(name):
 
 
 GOOD_LOG = """\
-2026-01-01T00:00:00Z step=observe platform=x flow=a labels=none
+2026-01-01T00:00:00Z step=observe platform=x work=w flow=a labels=none
 2026-01-01T00:05:00Z step=proposal part=folders outcome=layout-a
 2026-01-01T00:09:00Z step=proposal part=tools outcome=t
 2026-01-01T00:20:00Z step=proposal part=folders outcome=layout-b revised=2026-01-01T00:05:00Z
@@ -32,9 +32,9 @@ def test_revised_pointing_nowhere_is_caught():
 
 
 def test_revised_pointing_forward_or_to_other_step_is_caught():
-    forward = "2026-01-01T00:00:00Z step=observe revised=2026-01-01T00:05:00Z\n2026-01-01T00:05:00Z step=gate items=a\n"
+    forward = "2026-01-01T00:00:00Z step=observe work=w labels=none revised=2026-01-01T00:05:00Z\n2026-01-01T00:05:00Z step=gate items=a\n"
     assert check_kit.check_progress_log(forward)
-    other = "2026-01-01T00:00:00Z step=observe\n2026-01-01T00:05:00Z step=gate revised=2026-01-01T00:00:00Z\n"
+    other = "2026-01-01T00:00:00Z step=observe work=w labels=none\n2026-01-01T00:05:00Z step=gate revised=2026-01-01T00:00:00Z\n"
     assert check_kit.check_progress_log(other)
 
 

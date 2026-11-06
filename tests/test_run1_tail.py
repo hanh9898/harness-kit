@@ -12,7 +12,7 @@ def log(tmp_path, *lines):
 
 
 def test_need_to_piece_with_groups_looked_at_passes(tmp_path):
-    r = log(tmp_path, 'step=observe platform=x flow="ticket, then code, then review" labels=none',
+    r = log(tmp_path, 'step=observe platform=x work=w flow="ticket, then code, then review" labels=none',
             "step=need-to-piece need=pull-tickets piece=J03 groups=A,E,J")
     assert r.returncode == 0, r.stdout
 

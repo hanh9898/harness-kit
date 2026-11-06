@@ -23,7 +23,7 @@ For the lead only; the runner of `replay-step0-1.md` never sees this file. Grade
 | A6 | transcript, branch comments | the suggested recent work follows `s02_work`: `git` from this repo's git history; `tracker` a closed ticket assigned to the user, never this repo's git and never another person's ticket; `planned` a planned piece in the future tense |
 | A7 | transcript | `s02_chain=pain`: S02 turn 1 is asked, then S07 with the steps of the flow document as choices, and no question about who wrote, coded, reviewed or merged. `s02_chain=who`: one chain confirmation when git is clear, otherwise one question per unclear link |
 | A8 | transcript | `s03_labels=ask`: one list-accepting question holds every item to label, each with a suggested label and a one-line reason; S03 to S05 appear only for an item without a suggestion; no run of one question per item. `skip`: one line, and `labels=none` in the log |
-| A9 | transcript, log | S06 reads back the flow with the labels and the card; the `observe` line carries `platform=`, `flow=` (in double quotes when it has spaces) and `labels=` |
+| A9 | transcript, log | S06 reads back the flow with the labels and the card; the `observe` line carries `platform=`, `work=`, `flow=` (in double quotes when it has spaces), `labels=` and, with `s02_chain=pain`, `pain=` |
 | A10 | transcript | no question asks what the repo, git, the tracker files or the `code_home` folders already answer |
 
 ## Recorded, not graded
