@@ -37,3 +37,7 @@ Free text in the reports is Vietnamese. The generator does not translate. Names,
 `generate_kit.py` ran once. From then on `kit/legos.csv` and `kit/rules.csv` are edited by hand and are the source of truth; the generator and its `seed/` are not updated to follow them (the generator refuses to overwrite a hand-edited kit).
 
 Rows added after the first generation, all at the end of the file so later merges stay clean: lego `H18` (review checklist), rules `2.24` and `7.32`, giving 163 legos and 213 rules in the committed kit. The extra detail text on `D04`, `L08` and `I04` was edited in place. The independent count test still compares the generator against the source reports (162 and 211); only the committed-kit check adds `ADDED_AFTER_GENERATION`.
+
+## Known defect: a URL is lost when one source cell holds two codes
+
+In the rules synthesis, a source cell can list two codes next to one link. `generate_kit.py` gives a code a URL only when the code stands alone with a link somewhere in the table; otherwise the code is written without a URL. In the committed kit this hit rule `7.06` (`H02b`) and rule `7.11` (`E16`). Before the generator runs again on new reports, fix the parsing; until then, check every code in a new `source` cell for a URL by hand.
