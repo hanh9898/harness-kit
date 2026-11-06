@@ -45,7 +45,7 @@ Step 1 writes nine lines, `field: value`, facts only, no prose; `python3 tools/c
 |---|---|
 | `matt_config` | `present`, `partial` or `absent`: the `## Agent skills` block and `docs/agents/` |
 | `work_source` | `git`, `tracker:<name>`, `doc:<path>` or `none`: where finished work is found |
-| `code_home` | `.` or paths of the repos holding the product code, comma separated |
+| `code_home` | `.` or paths of the repos the flow writes product files to (code or product documents), comma separated |
 | `flow_source` | `doc:<path>`, `sample` (one recent piece of work) or `asked` |
 | `prior_harness` | `none`, or paths of harness parts that already exist, comma separated |
 | `history` | `yes`, or `none` when no finished work can be named |
