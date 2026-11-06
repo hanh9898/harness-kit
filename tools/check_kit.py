@@ -2,6 +2,7 @@
 """check_kit: validate legos.csv data in a kit directory.
 
   check_kit.py [--dir DIR]
+  check_kit.py --log FILE        check a harness/progress.log for revised= entries
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
 IDs are unique. If gates.csv exists, gate=yes rules need an ISO verified_on date
@@ -87,10 +88,58 @@ def check_gates(kit_dir):
     return errs
 
 
+LOG_TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+
+
+def _parse_log(text):
+    rows = []
+    for n, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            continue
+        head, _, rest = line.partition(" ")
+        fields = dict(kv.split("=", 1) for kv in rest.split() if "=" in kv)
+        rows.append((n, head, fields))
+    return rows
+
+
+def _log_key(fields):
+    return fields.get("step", ""), fields.get("part") or fields.get("entry") or fields.get("role") or ""
+
+
+def effective_lines(text):
+    """Latest effective line per (step, part); part falls back to entry, then role."""
+    return {_log_key(f): dict(f, ts=ts) for _, ts, f in _parse_log(text)}
+
+
+def check_progress_log(text):
+    """A revised= line must reference an earlier timestamp with the same step."""
+    errs, seen = [], {}
+    for n, ts, f in _parse_log(text):
+        rev = f.get("revised")
+        if rev is not None:
+            target = seen.get(rev)
+            if not LOG_TS.fullmatch(rev) or target is None:
+                errs.append(f"progress.log:{n}: revised={rev} does not reference an earlier timestamp; fix: copy the original timestamp exactly")
+            elif target != f.get("step"):
+                errs.append(f"progress.log:{n}: revised={rev} points to step={target}, not step={f.get('step')}; fix: keep the replacement on the same step")
+        seen.setdefault(ts, f.get("step"))
+    return errs
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dir", default=str(Path(__file__).resolve().parent.parent / "kit"))
+    ap.add_argument("--log", help="check a progress.log instead of a kit directory")
     a = ap.parse_args(argv)
+    if a.log:
+        try:
+            errs = check_progress_log(Path(a.log).read_text(encoding="utf-8"))
+        except OSError as e:
+            errs = [f"progress.log: cannot read file ({e})"]
+        for e in errs:
+            print(f"ERROR: {e}")
+        print(f"{len(errs)} log errors." if errs else "Log clean.")
+        return 1 if errs else 0
     errs = check(Path(a.dir)) + check_gates(Path(a.dir))
     for e in errs:
         print(f"ERROR: {e}")

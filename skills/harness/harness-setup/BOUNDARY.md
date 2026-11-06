@@ -33,6 +33,8 @@ Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02
 
 ### [S02] How one piece of work went from start to finish
 
+Before turn 1, read the repo's own flow documents (files named like project-flow, workflow or process under `docs/`, and `docs/agents/issue-tracker.md`) and the tracker they name. If the current repo's git holds no product work because the code lives in another repo (a control repo: the work sits in a tracker), say so in one line and take the recent piece of work from the tracker or from the user, never from this repo's git. Ask the "who" chain (turns 2 to 5) only when the evidence for it is clear. If it is not, replace it with one question: which step of the flow hurts most, built from the steps in the flow document. A run showed users reject "who wrote, who merged": it names three people and is not yet a process.
+
 - Stage: 1/6 Understand how your team works
 - Helps: the rules about who does what match how your team really works, so stage 4 does not start over
 - If skipped: I use what git shows for the latest piece of work and mark the flow as not confirmed by you

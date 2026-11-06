@@ -103,7 +103,7 @@ Keep "If skipped" in the compact form only when the consequence is heavy or not 
 19. **Each message stands alone.** The user may have a bad memory and a reader cannot see earlier replies: when a question depends on an earlier answer, restate it in the question ("You told me the pain is <X>"). Use one name per thing for the whole run (do not say "bash" in one place and "shell" in another; do not call the same person "Lan" and "Claude Code" for the same role: say "Lan asked Claude Code to write it").
 20. **Counts come with names.** Never say "3 entries" or "2 items" without naming them in plain words in the same message.
 21. **Commands in a question are rare and short.** Say first, in a plain sentence, what the command proves and that it changes nothing. Show the command only if it is under about 60 characters with no pipe; otherwise say "I can show you the exact command if you want".
-22. **Name what you mean.** "I checked 1 thing" with no thing named, or "about 8 questions" with no reason, left readers guessing. Say which thing, or which questions.
+22. **Name what you mean.** "I checked 1 thing" with no thing named, or "about 8 questions" with no reason, left readers guessing. Say which thing, or which questions. When a part runs past the number of questions you announced, say once "this part is longer than expected because <reason>, about <n> questions left" and announce the new number; the full and compact forms then use the new number.
 
 ## Words the user sees
 
@@ -143,7 +143,7 @@ If what the user tells differs from what git or the pull request shows (for exam
 
 ## Confirming a chain
 
-Applies to "who wrote the request, who wrote the code, who reviewed, who merged" (sheet S02). Look the four up in git and the pull request first. If the evidence is clear for all four, do not ask four questions. State the whole chain for the piece of work and ask one idea:
+Applies to "who wrote the request, who wrote the code, who reviewed, who merged" (sheet S02), and only when the evidence is clear; when the code lives in another repo and the work sits in a tracker, read the tracker and the repo's flow document first, and ask which step hurts most instead. Look the four up in git and the pull request first. If the evidence is clear for all four, do not ask four questions. State the whole chain for the piece of work and ask one idea:
 
 ```
 For "<title>" I see: request written by <A> (<evidence>), code by <B> (<evidence>), reviewed by <C> (<evidence>), merged by <D> (<evidence>). Is that the chain for that piece of work?
@@ -156,7 +156,7 @@ If the user says no, ask only which link is wrong, one link per turn. If the evi
 You cannot name a finished piece of work: the repo has no commits, only an initial commit, or no merged change, closed ticket or pull request. Then there is no "most recent piece of work" and you do not invent one. Say it in one line, then:
 
 1. Ask for **one piece of work the user plans to do next** in this repo (a named, concrete one), with a suggestion taken from the repo's guidance files or open tickets if any.
-2. Ask the "who" questions about that plan in ONE turn, in the future tense, as a proposed chain built from what the user already said (the agent app named, the guidance files): "For <plan> I assume: request written by <A>, code by <B>, review by <C>, merge by <D>. Is that the plan?" A reader run found four separate who-questions pointless for a one-person repo. If the user says no, ask which link is wrong, one per turn. No git evidence exists, so do not cite any.
+2. Ask the "who" questions about that plan in ONE turn, and only when the evidence for them is clear (otherwise ask which step of the flow hurts most, as in S02 of BOUNDARY.md), in the future tense, as a proposed chain built from what the user already said (the agent app named, the guidance files): "For <plan> I assume: request written by <A>, code by <B>, review by <C>, merge by <D>. Is that the plan?" A reader run found four separate who-questions pointless for a one-person repo. If the user says no, ask which link is wrong, one per turn. No git evidence exists, so do not cite any.
 3. Skip the "was it different from usual?" question; there is nothing to compare. Write the flow summary in the log as planned, not yet observed.
 
 Sheet S01 is still asked, without "the last piece of work": suggest the app from the guidance files or config folders if there are any, and do not mention co-author signatures when git has none. Sheets S03 to S05 (labels) are asked only for items that really exist beyond the original guidance files; if there are none, say in one line that there is nothing to label yet and that the guidance files count as the project's own, and write `labels=none` in the log. Sheet S07 asks which part of the planned work worries the user most. The same applies to any sheet whose "Ask" names a past piece of work: use the planned work instead, and ignore the "Suggest" line that needs git evidence.

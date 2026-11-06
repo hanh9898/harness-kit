@@ -13,6 +13,8 @@ Three parts, in order. Write each proposal from its sheet below, in the forms of
 
 (Substitute `<skill-dir>` as in SKILL.md.) The patterns favour the simplest shape. Start from the single agent, show `Use when` and `Avoid when` of the pattern you propose, and pick a heavier one only if the flow you observed matches its `Use when`. State any condition the pattern carries (some are experimental on their platform).
 
+**Existing harness to rearrange (folder part).** If the user says the harness that already exists should be moved or reordered (tools, folders, profiles), do not plan the move here: a move plan grows into dozens of decisions inside setup. Record it as ONE separate item "needs refactor, not done": one log line (`proposal part=folders outcome=refactor-pending scope=<the user's own words>`) and one record entry `kind: folder`, `status: unverified`, with the scope the user named in `reason`. Tell the user in plain words that this is its own piece of work: a ticket or `harness-evolve`, in its own worktree, with a check for processes still running before anything moves, and reversible with git. Then return to the rest of the proposals. If the user still wants a plan now, allow ONE file, `harness/MOVE-PLAN.md`, that is written and not carried out, and state its question cap before the first question (for example at most 6 questions, one table row per folder with the decision, never one question per folder).
+
 Settled parts are logged one line each (`proposal part=tools|folders|team`). A part the user rejects entirely is logged with `outcome=none`.
 
 ## Question sheets (step 4)
@@ -39,7 +41,7 @@ Settled parts are logged one line each (`proposal part=tools|folders|team`). A p
 - Terms: harness files = the rules, tools and records this setup creates
 - Enough: yes, or the names to change
 - Unsure: say "not sure"; I add no new folder
-- Suggest: yes, names taken from folders the repo already has
+- Suggest: yes, names taken from folders the repo already has. When the user instead asks to rearrange what exists, follow "Existing harness to rearrange" above; do not ask this question for the move
 
 ### [S12] Agent team shape
 
