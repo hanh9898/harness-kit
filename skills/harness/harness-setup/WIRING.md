@@ -40,7 +40,6 @@ For each entry whose piece is a hook (ask the user if unsure), on the platform t
 2. Show the exact addition. After a yes, merge it into that file: keep everything already there. Missing file: create it. Put the file's path in the entry's `check`.
 3. Trigger the hook for real: run the platform so that the hooked event fires (a command the hook blocks, or one it logs). Paste the real output. Use the platform's non-interactive mode if it has one.
 4. Fired as expected: `passing`, and set `verified_platform` to the platform, event, matcher and date. Could not fire it on this platform here: leave the wiring `unverified`, set `verified_platform: not verified on <platform>`, tell the user, and do not call it `passing`.
-5. Any `kind: team` entry written before this step existed and lacking `check_scope: structural` gets it added now (see [RECORD-FORMAT.md](RECORD-FORMAT.md)).
 
 ## Question sheets (step 11)
 

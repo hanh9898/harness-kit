@@ -35,7 +35,6 @@ Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agen
 | C25 | Gate fields | New entry | Includes gate_lighter_rung, gate_why_not_enough, gate_source, gate_read_on, gate_answer and gate_approved |
 | C26 | Ordered proposal sections | Transcript | Tools with rungs, folders, then team architecture; waits after each section and re-proposes edited sections |
 | C27 | Query team patterns through show | Command history | Uses kit list P and kit show P<number>; never loads complete pattern or lego stores |
-| C28 | Legacy ticket-08 entries remain readable | Edit an entry without gate fields | Does not reject or delete it; explains missing gate evidence and runs the gate before changing it |
 | C29 | Resume after the gate | Interrupt after evidence approval | New session reads the log and reuses approved evidence without asking again |
 | C30 | Generic boundaries | Boundary checker on skills | No fixed platform or project names, including new siblings |
 | C31 | Write only approved proposals | Resulting sample repo | Installs and generates only approved items |
@@ -82,7 +81,7 @@ C68-C78 are reserved for ticket 20 (routing multiple needs); ticket 19 starts at
 
 | # | Observation | Evidence | Pass condition |
 |---|---|---|---|
-| C80 | Asking document sections | Document and question-layer tests | Also covers no-history branching; all expected sections present; no absolute paths |
+| C80 | Asking document sections | Document and question-layer tests | Overview, full/compact forms, rules, grouped confirmations, list-accepting conditions and incomplete answers; no absolute paths |
 | C81 | Overview before first question | Opening transcript | Describes visible outcome, six stage lines and user actions, effort and method, uncertainty and resume behavior in the user's language |
 | C82 | Honest effort estimate | Opening turn | Says time is not measured, invents no minutes, and notes a real-user run will measure it |
 | C83 | Full form opens each stage | Transcript | Includes Stage k/6, benefit, skip consequence, purpose, question, sufficient answer, uncertainty default and suggestion |
@@ -91,7 +90,7 @@ C68-C78 are reserved for ticket 20 (routing multiple needs); ticket 19 starts at
 | C86 | Ask about concrete recent work | Transcript | Process questions name a real task, PR or commit rather than asking about usual behavior |
 | C87 | Look up facts before asking | Commands and suggestions | Reads Git, PRs and files first; suggestions cite findings; does not ask facts the repo already supplies |
 | C88 | Grouped chain confirmation | Clear Git evidence for request/code/review/merge | States the entire four-step chain and asks once; asks only missing links when evidence is incomplete |
-| C89 | No-history branch | One-commit repo | Asks about planned next work and future roles with suggestions from repo guidance; invents no history |
+| C89 | Situation card selects planned work | One-commit repo with history=none | Situation checker selects s02_work=planned; asks about future work and roles instead of recent completed work |
 | C90 | Handle incomplete answers | General, partial, uncertain and why-ask cases | Refocuses on the same task; accepts supplied parts; uses stated defaults; explains purpose in one sentence; at most one follow-up |
 | C91 | Full form after mid-stage resume | Interrupt stage 4 and rerun | First resumed question uses the full form even within an existing stage |
 | C92 | Complete question sheets | Question-layer tests and line counts | S01-S31 and V01-V10 have nine fields each; setup SKILL.md at most 110 lines; each question step links to its sheet |
@@ -118,9 +117,10 @@ Each row corresponds to an issue found by two unscripted readers (question-19-re
 | C106 | Empty repo questions | One-commit repo | S01 still asks, based on guidance files if present; S03-S05 only for real items beyond root instructions; otherwise explains no items need labels and logs labels=none |
 | C107 | Voice and unnecessary lines | Reports and need selection | No apologetic voice for planned work; no suggestion references without a suggestion; no irrelevant missing-Git-evidence remarks |
 | C108 | Two new readers | question-22-reader reports | Each reader finds unfamiliar terms in at most 10% of questions, none in gate evidence blocks; zero ambiguous or contradictory questions |
-| C109 | Existing harness needs reorganization | User requests moving existing tools, folders or profiles | Setup records one needs-refactor/unverified folder entry and log line, explains separate evolve/worktree/check/rollback work, then resumes proposals; if planning is requested, uses one MOVE-PLAN.md with an announced question limit |
+| C109 | Hand off an existing harness without moving it | prior_harness is not none and user requests reorganization | Setup creates adopted or needs-change folder records, makes no move plan and moves nothing; evolve receives needs-change entries |
 | C110 | Control repo uses tracker work | Git contains no product work | Reads flow and tracker, explains that code is elsewhere, gets work from tracker or user; asks for the painful step rather than an unsupported author/merger chain |
 | C111 | Step 0 Agent skills block | Agent docs exist but root heading is absent | Shows the three-section draft, waits for approval, preserves surrounding content and setup prerequisites |
 | C112 | Revise a logged decision | User changes a prior decision | Appends the same step with revised=<old timestamp>; original stays unchanged; log checker passes |
 | C113 | Update question estimates | A section exceeds the estimate | Explains why once, announces the remaining count, and uses the new estimate |
 | C114 | Inspect and name every relevant kit group | Step 2 CLI history | Lists every kit group related to the need, names inspected groups, including easily missed scheduling and multi-source groups |
+| C115 | Situation card | After step 1 | Nine factual key:value lines; situation checker passes; confirmed=yes only after flow approval; sheets and step 10 follow printed branches |

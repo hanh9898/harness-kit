@@ -15,9 +15,21 @@ Where people can see the item (its visibility) is a note on the item, never a th
 
 A `shared` tool stays under `harness/tools/` and the record notes it as a candidate for the kit; kit changes go through a change to the plugin.
 
+## Branches from the situation card (step 1)
+
+`check_kit.py --situation` prints one `branch <name>=<value>` line per row. Sheets name no repo types; use the printed value.
+
+| Branch | Value: what the sheets do |
+|---|---|
+| `s02_work` | `git`: the recent piece of work comes from git history. `tracker`: from the tracker `work_source` names, never this repo's git. `doc`: from the flow document. `ask`: from the user. `planned`: no finished work; ask for one planned piece, in the future tense, drop S02 turn 6; any sheet whose Ask names a past piece of work uses the planned one and drops a Suggest that needs git |
+| `s02_chain` | `who`: S02 turns 2 to 5 (one confirmation when git is clear). `pain`: one question instead, which step of the flow hurts most, built from the steps of the flow document |
+| `s03_labels` | `ask`: S03 to S05 per unsettled item. `skip`: one line saying there is nothing to label yet, log `labels=none` |
+| `s11` | `new`: S11 as written. `handoff`: existing parts, see PROPOSALS.md |
+| `step10` | `ask`: ISOLATION.md. `skip`: log `isolation outcome=none` |
+
 ## Question sheets (step 1)
 
-Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02-S06 are compact. Order: S01, S02, then S03-S05 per unsettled item, then S06. With no history, ask S03-S05 only about existing items beyond original guidance files; otherwise explain the skip and log `labels=none`. User-facing labels are "shared across projects" and "specific to this project"; the log retains `shared` and `project`.
+Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02-S06 are compact. Order: S01, S02, then S03-S05 per unsettled item (see `s03_labels`), then S06. User-facing labels are "shared across projects" and "specific to this project"; the log retains `shared` and `project`.
 
 ### [S01] Which agent app the team uses
 
@@ -25,7 +37,7 @@ Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02
 - Helps: the tools and files I set up are the ones your agent app really reads
 - If skipped: I take the app the repo's config folders point to and say which; a wrong guess means files in the wrong place
 - Why: folders and settings differ from one agent app to another
-- Ask: Which agent app did your team use for the last piece of work in this repo? (Repo with no history: "Which agent app will your team use for the work you plan?")
+- Ask: Which agent app did your team use for the last piece of work in this repo? (`planned`: "...use for the work you plan?")
 - Terms: agent app = the program in which an AI agent works on your code; if you name a folder such as the settings folder of the app, say what it is
 - Enough: one name
 - Unsure: say "not sure"; I use the app named under Suggest and tell you which; with no Suggest (empty repo, no config folder), I record no app yet and ask again at stage 5 when files are wired
@@ -33,7 +45,7 @@ Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02
 
 ### [S02] How one piece of work went from start to finish
 
-Before turn 1, read the repo's own flow documents (files named like project-flow, workflow or process under `docs/`, and `docs/agents/issue-tracker.md`) and the tracker they name. If the current repo's git holds no product work because the code lives in another repo (a control repo: the work sits in a tracker), say so in one line and take the recent piece of work from the tracker or from the user, never from this repo's git. Ask the "who" chain (turns 2 to 5) only when the evidence for it is clear. If it is not, replace it with one question: which step of the flow hurts most, built from the steps in the flow document. A run showed users reject "who wrote, who merged": it names three people and is not yet a process.
+Before turn 1, read the repo's flow documents (files named like project-flow, workflow or process under `docs/`, and `docs/agents/issue-tracker.md`) and the tracker they name. Then follow the card's `s02_work` and `s02_chain` branches above. Users reject "who wrote, who merged" when it only names three people.
 
 - Stage: 1/6 Understand how your team works
 - Helps: the rules about who does what match how your team really works, so stage 4 does not start over
@@ -49,7 +61,7 @@ Before turn 1, read the repo's own flow documents (files named like project-flow
 - Terms: description of what to do (spec) = the document saying what to build; ticket = one small task cut from it; both live in the folder where this repo keeps them
 - Enough: per turn, above
 - Unsure: per turn, above
-- Suggest: per turn, above. If git shows all four of turns 2 to 5 clearly, use the chain confirmation instead of those four turns. Empty history: the "Repo with no history" branch of ASKING.md replaces turn 1 and drops turn 6. If the user's account differs from git, follow "Contradiction between git and the account" in ASKING.md
+- Suggest: per turn, above; with `planned`, turn 1 asks the planned work and suggests from the repo's guidance files or open tickets. If the user's account differs from git, follow "Contradiction between git and the account" in ASKING.md
 
 ### [S03] Does it carry this project's own names or values
 

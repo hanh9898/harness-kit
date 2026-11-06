@@ -13,8 +13,6 @@ Send once, before the first question, in plain words. Four parts, in this order:
 3. **Effort**: `{effort}`. Not measured yet, so say so: "I have not timed this." Give no minutes and no count of questions you cannot back. Name what to have ready (setup: one piece of work finished recently; evolve: nothing).
 4. **How it goes**: one question per turn; "not sure" is an answer and I say which default I use; stop any time, the next run continues from `harness/progress.log`. Setup only: the user may ask to jump to stage 5.
 
-Note for whoever measures: `{effort}` stays a placeholder until a run with a real person gives a number; then replace the sentence in part 3 with that number and its source.
-
 Setup overview, shape (at most 150 words; a reader run found 300 words and five unfamiliar file names too much; a later run needed 200 words because each stage line carried two clauses: write each stage line as its plain name plus at most six words of what the user does):
 
 ```
@@ -84,7 +82,7 @@ Keep "If skipped" in the compact form only when the consequence is heavy or not 
 
 1. **One idea per question.** No "and" or "or" joining two different asks. A choice between two options is one idea.
 2. **Ask about ONE concrete recent thing**: "the last time", the latest merged piece of work, the latest change, a named file or commit. Never "usually", "in general", "would you".
-3. **No harness words** (rung, kit, gate, lego, tracer bullet, check scope, record entry id) in "Why I ask" and in the question. If a word cannot be avoided, put it in "Terms" with a one-line meaning. Say "a ready-made building block" for a kit piece, "the lightest way that works" for a rung.
+3. **No harness words, anywhere the user reads**: the question, "Why I ask", the suggested answer, "Because", the evidence block. The words in the table "Words the user sees" below, a piece id (D02, P1), a command (`kit show`), and the words rung, kit, lego, tracer bullet, check scope, record entry id are not said; say what the thing is ("a ready-made way to block dangerous commands", "the lightest way that works"). A file or term the user has not met gets a short plain description at its first appearance; if a word cannot be avoided, put it in "Terms" with one line. Do not quote source text in another language; paraphrase. Rule ids shown in brackets in sheet S22 are the one exception.
 4. **Look it up, do not ask, and open the file before you name anything in it.** A run said "Codex adds `ship()`" before reading the code; the function was named otherwise. Anything the repo, git history, the pull requests, the tracker files, `harness/` or the log can answer, you read first. Ask only what stays open. Facts are your job, never the user's.
 5. **The suggested answer comes from what you looked up** (a name, a commit, a path), stated as an assumption the user can correct. When you found nothing, say so in the suggestion line instead of guessing.
 6. **"Not sure" always names the default** you will use, and it must be safe: it keeps the level low, writes nothing, or changes the least. On every yes-gate the default is: the step stays a draft and nothing is written.
@@ -92,18 +90,15 @@ Keep "If skipped" in the compact form only when the consequence is heavy or not 
 8. **Stage k/N is the stage table of the skill**, repeated on every question. Do not renumber.
 9. **Read the sheet, then render.** The sheet for the step holds the data (Stage, Helps, If skipped, Why, Ask, Terms, Enough, Unsure, Suggest); you fill the placeholders from the repo and pick the form. Translate to the user's language; keep paths, commands and ids as they are.
 10. **Translate every label**, not only sentences: Stage, Helps you, If skipped, Why I ask, My suggestion, Because and Decide use the user's language; Terms, Enough and Not sure become plain sentences. Reader runs found untranslated labels embedded in localized messages; translate them consistently.
-11. **The no-harness-words rule covers every line the user reads**, including the suggested answer and "Because": no piece id (D02, P1), no command (`kit show`), no word "gate" or "rung". Say what it is: "a ready-made way to block dangerous commands". Rule ids shown in brackets in sheet S22 are the one exception.
-12. **Plain words for files and jargon.** A file or term the user has not met (record, progress log, hook, check) gets a short plain description the first time it appears. Do not quote source text in a language other than the user's; paraphrase it. Do not give a reason the user cannot use ("the repo has no spec yet").
-13. **Evidence block stays short**: the conclusion, then at most three lines per item. A reader run found a 6-line item with command examples unreadable.
-14. **Say only what is true.** "If skipped" and "Helps you" come from what the skill really does; no threat, no pressure to answer.
-15. **Never present an assumption as the user's word.** After "not sure" or "don't remember", later questions say "assuming <X>, from <PR or file>", never "you chose <X>" or "you said <X>". Never say the user said something (for example "the other roles come later") that they did not say.
-16. **Never re-ask what was just answered, and never call it missing.** Do not send two messages in a row that ask the same thing. When the user answered part of a question, name only the part still open.
-17. **A suggestion line exists or it does not.** If you have nothing to suggest, leave the line out and do not mention a suggestion anywhere else in the message. No filler about what the repo lacks ("no revert commit found") unless the user can use it to answer.
-18. **No apologetic voice for a repo without history.** Say "planned" and "as you describe it", not "not observed" or "not checked".
-19. **Each message stands alone.** The user may have a bad memory and a reader cannot see earlier replies: when a question depends on an earlier answer, restate it in the question ("You told me the pain is <X>"). Use one name per thing for the whole run (do not say "bash" in one place and "shell" in another; do not call the same person "Lan" and "Claude Code" for the same role: say "Lan asked Claude Code to write it").
-20. **Counts come with names.** Never say "3 entries" or "2 items" without naming them in plain words in the same message.
-21. **Commands in a question are rare and short.** Say first, in a plain sentence, what the command proves and that it changes nothing. Show the command only if it is under about 60 characters with no pipe; otherwise say "I can show you the exact command if you want".
-22. **Name what you mean.** "I checked 1 thing" with no thing named, or "about 8 questions" with no reason, left readers guessing. Say which thing, or which questions. When a part runs past the number of questions you announced, say once "this part is longer than expected because <reason>, about <n> questions left" and announce the new number; the full and compact forms then use the new number.
+11. **Evidence block stays short**: the conclusion, then at most three lines per item. A reader run found a 6-line item with command examples unreadable.
+12. **Say only what is true.** "If skipped" and "Helps you" come from what the skill really does; no threat, no pressure to answer.
+13. **Never present an assumption as the user's word.** After "not sure" or "don't remember", later questions say "assuming <X>, from <PR or file>", never "you chose <X>" or "you said <X>". Never say the user said something (for example "the other roles come later") that they did not say.
+14. **A suggestion line exists or it does not.** If you have nothing to suggest, leave the line out and do not mention a suggestion anywhere else in the message. No filler about what the repo lacks ("no revert commit found") unless the user can use it to answer.
+15. **No apologetic voice when `s02_work` is `planned`.** Say "planned" and "as you describe it", not "not observed" or "not checked".
+16. **Each message stands alone.** The user may have a bad memory and a reader cannot see earlier replies: when a question depends on an earlier answer, restate it in the question ("You told me the pain is <X>"). Use one name per thing for the whole run (do not say "bash" in one place and "shell" in another; do not call the same person "Lan" and "Claude Code" for the same role: say "Lan asked Claude Code to write it").
+17. **Counts come with names.** Never say "3 entries" or "2 items" without naming them in plain words in the same message.
+18. **Commands in a question are rare and short.** Say first, in a plain sentence, what the command proves and that it changes nothing. Show the command only if it is under about 60 characters with no pipe; otherwise say "I can show you the exact command if you want".
+19. **Name what you mean.** "I checked 1 thing" with no thing named, or "about 8 questions" with no reason, left readers guessing. Say which thing, or which questions. A stage over about five questions announces in its first question how many to expect for one item, and that the user may stop after the first item. When a part runs past the number of questions you announced, say once "this part is longer than expected because <reason>, about <n> questions left" and announce the new number; the full and compact forms then use the new number.
 
 ## Words the user sees
 
@@ -121,17 +116,11 @@ The record and the log keep English keys; what you SAY is in the user's language
 | spec | a document describing the work to do |
 | merge, pull request | combine changes into the main branch; request to combine changes (PR) |
 | shared / project | shared across projects / specific to this project |
-| a prior stage's workflow | the steps from request to merge |
 | building block, shared store | "a ready-made solution included with this tool" (first explain that the tool is the running plugin) |
-| record entries | "files recording individual choices" in `harness/record/`; use distinct names for distinct concepts |
 | context, trust boundary, role card | say what it does in one clause or leave it out |
 | fail open, exit 2 | describe behavior: "if the script fails, the operation still runs" |
 
 The opening message explains `harness/` and `AGENTS.md` (the repo's agent instructions). Describe unfamiliar files and commands in plain words at first mention. Use descriptions rather than piece IDs, kit commands or untranslated quotes. "Shared" means reusable unchanged in another project; "project-specific" means it needs editing. The log retains `shared` and `project`.
-
-## Long stages
-
-A stage that will take more than about five questions is announced in its first question: say how many questions to expect for one item, that you take one item first, and that the user may stop after it. Where a sheet allows it, put what git already shows into ONE confirmation (as in "Confirming a chain") instead of one question per field; ask separately only about the fields the evidence does not settle. Stage 4 (who decides what) follows this: see `DELEGATION.md`.
 
 ## Echo the user's own choice
 
@@ -143,27 +132,13 @@ If what the user tells differs from what git or the pull request shows (for exam
 
 ## Confirming a chain
 
-Applies to "who wrote the request, who wrote the code, who reviewed, who merged" (sheet S02), and only when the evidence is clear; when the code lives in another repo and the work sits in a tracker, read the tracker and the repo's flow document first, and ask which step hurts most instead. Look the four up in git and the pull request first. If the evidence is clear for all four, do not ask four questions. State the whole chain for the piece of work and ask one idea:
+Applies to "who wrote the request, who wrote the code, who reviewed, who merged" (sheet S02) when the card's `s02_chain` is `who` and the evidence is clear. Look the four up in git and the pull request first. If the evidence is clear for all four, do not ask four questions. State the whole chain and ask one idea:
 
 ```
 For "<title>" I see: request written by <A> (<evidence>), code by <B> (<evidence>), reviewed by <C> (<evidence>), merged by <D> (<evidence>). Is that the chain for that piece of work?
 ```
 
-If the user says no, ask only which link is wrong, one link per turn. If the evidence is unclear for some links, state the clear ones and ask only about each unclear link, one per turn.
-
-## Repo with no history
-
-You cannot name a finished piece of work: the repo has no commits, only an initial commit, or no merged change, closed ticket or pull request. Then there is no "most recent piece of work" and you do not invent one. Say it in one line, then:
-
-1. Ask for **one piece of work the user plans to do next** in this repo (a named, concrete one), with a suggestion taken from the repo's guidance files or open tickets if any.
-2. Ask the "who" questions about that plan in ONE turn, and only when the evidence for them is clear (otherwise ask which step of the flow hurts most, as in S02 of BOUNDARY.md), in the future tense, as a proposed chain built from what the user already said (the agent app named, the guidance files): "For <plan> I assume: request written by <A>, code by <B>, review by <C>, merge by <D>. Is that the plan?" A reader run found four separate who-questions pointless for a one-person repo. If the user says no, ask which link is wrong, one per turn. No git evidence exists, so do not cite any.
-3. Skip the "was it different from usual?" question; there is nothing to compare. Write the flow summary in the log as planned, not yet observed.
-
-Sheet S01 is still asked, without "the last piece of work": suggest the app from the guidance files or config folders if there are any, and do not mention co-author signatures when git has none. Sheets S03 to S05 (labels) are asked only for items that really exist beyond the original guidance files; if there are none, say in one line that there is nothing to label yet and that the guidance files count as the project's own, and write `labels=none` in the log. Sheet S07 asks which part of the planned work worries the user most. The same applies to any sheet whose "Ask" names a past piece of work: use the planned work instead, and ignore the "Suggest" line that needs git evidence.
-
-## List question
-
-Name reserved: **list question**, a question whose answer is a list (for example several needs named at once). Condition for use: only when the skill's routing of several needs says so. These two skills do not use it yet; until they do, every question is one idea and takes one answer.
+If the user says no, ask only which link is wrong, one link per turn. If the evidence is unclear for some links, state the clear ones and ask only about each unclear link, one per turn. With `s02_work` `planned` there is no git evidence: state the chain in the future tense as an assumption built from what the user already said ("For <plan> I assume: request written by <A>, ...") and cite none.
 
 ## Incomplete answers
 
@@ -174,7 +149,6 @@ At most one follow-up per question, one question per turn:
 3. **"Not sure" or "don't remember"**: use the suggested answer as an assumption, say which one you used, write `unclear` where the record or log takes it, and leave it to edit mode. This is information, not a failure.
 4. **"Why do you ask?"**: answer with exactly the one line from "Why I ask", then repeat the question. Add no new question.
 5. **Second time without a usable answer**: use the default in "Not sure", say so, move on.
-6. **Memory is fallible**: where git or a pull request shows the answer, prefer that evidence and ask for confirmation.
 
 ## Evidence block
 
@@ -197,11 +171,10 @@ Hard limits for this block: at most 8 lines of text in total; no command, no cod
 Rules for this block:
 
 1. The conclusion comes first and the decision sentence is the last line before the suggestion: ONE ask, one line. Nothing after it except the suggestion.
-2. Needs in plain words only. A piece id, a source id or a rung name is "Terms" at most, never the label of an item.
-3. "How sure I am" in one short line per item: whether the documentation says it directly, or whether I could only read a summary of it, and what that means for the user (can they trust the proposal). Do not talk about quotations.
-4. Full detail (piece id, url, date read, exact answer) is shown only when the user asks to see it ("show me the sources"); it is always written to `harness/gate.md` and the entry keys as before.
-5. Words like "simple way" and "heavier way" replace rung terms. The first time, say the four kinds in plain words in one clause: a rule written in a text file, a reusable instruction, a small command, an outside service.
-6. A proposal (tools, folders, team shape) that carries evidence puts its evidence in one line "Because: <...>" and keeps the full block for when the user asks.
+2. "How sure I am" in one short line per item: whether the documentation says it directly, or whether I could only read a summary of it, and what that means for the user (can they trust the proposal). Do not talk about quotations.
+3. Full detail (piece id, url, date read, exact answer) is shown only when the user asks to see it ("show me the sources"); it is always written to `harness/gate.md` and the entry keys as before.
+4. Words like "simple way" and "heavier way" replace rung terms. The first time, say the four kinds in plain words in one clause: a rule written in a text file, a reusable instruction, a small command, an outside service.
+5. A proposal (tools, folders, team shape) that carries evidence puts its evidence in one line "Because: <...>" and keeps the full block for when the user asks.
 
 ## Question sheets
 
