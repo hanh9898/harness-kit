@@ -2,7 +2,7 @@
 """check_kit: validate legos.csv data in a kit directory.
 
   check_kit.py [--dir DIR]
-  check_kit.py --log FILE        check a harness/progress.log for revised=, groups= and double quotes
+  check_kit.py --log FILE        check a harness/progress.log for revised=, observe work=/labels=, need-to-piece groups= and double quotes
   check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
@@ -107,6 +107,14 @@ def check_gates(kit_dir):
 
 LOG_FIELD = re.compile(r'([\w-]+)=("([^"]*)"|\S*)')
 LOG_TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+LABEL_SIDE = re.compile(r"(shared|project)=[^,;=\s][^,;=]*(,\s*[^,;=\s][^,;=]*)*")
+
+
+def labels_ok(value):
+    """none, or shared=a,b and/or project=c,d joined by a semicolon, each label once."""
+    sides = [s.strip() for s in value.split(";")]
+    names = [s.partition("=")[0] for s in sides]
+    return value == "none" or (all(LABEL_SIDE.fullmatch(s) for s in sides) and len(set(names)) == len(names))
 
 
 def _parse_log(text):
@@ -134,10 +142,15 @@ def effective_lines(text):
 
 def check_progress_log(text, groups=None):
     """A revised= line must reference an earlier timestamp with the same step.
-    need-to-piece requires groups= with comma-separated inspected group letters, validated against groups when supplied."""
+    observe requires work= and correctly formatted labels=. need-to-piece requires groups= with comma-separated inspected group letters, validated against groups when supplied."""
     rows, errs = _parse_log(text)
     seen = {}
     for n, ts, f in rows:
+        if f.get("step") == "observe":
+            if not f.get("work"):
+                errs.append(f"progress.log:{n}: observe missing work=; fix: record the S02 turn-1 work item, for example work=PROJ-12")
+            if not labels_ok(f.get("labels", "")):
+                errs.append(f"progress.log:{n}: labels={f.get('labels', '')} has invalid format; fix: use labels=shared=a,b;project=c,d, omit empty sides, or labels=none")
         if f.get("step") == "need-to-piece":
             looked = [g for g in f.get("groups", "").split(",") if g]
             unknown = [g for g in looked if groups is not None and g not in groups]

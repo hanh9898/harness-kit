@@ -21,8 +21,8 @@ A `shared` tool stays under `harness/tools/` and the record notes it as a candid
 
 | Branch | Value: what the sheets do |
 |---|---|
-| `s02_work` | `git`: the recent piece of work comes from git history. `tracker`: the latest closed ticket assigned to the user in the tracker `work_source` names, never this repo's git. `doc`: from the flow document. `ask`: from the user. `planned`: no finished work; ask for one planned piece, in the future tense, drop S02 turn 6; any sheet whose Ask names a past piece of work uses the planned one and drops a Suggest that needs git |
-| `s02_chain` | `who`: S02 turns 2 to 5 (one confirmation when git is clear). `pain`: S02 turn 1, then S07 (ASKING.md) with the steps of the flow document as its choices, instead of turns 2 to 6; step 2 reuses the answer |
+| `s02_work` | `git`: the recent piece of work comes from git history. `tracker`: the ticket assigned to the user and finished most recently (any done status) in the tracker `work_source` names, never this repo's git; pass over a ticket that is only procedure (onboarding, checklist) and say why. `doc`: from the flow document. `ask`: from the user. `planned`: no finished work; ask for one planned piece, in the future tense, drop S02 turn 6; any sheet whose Ask names a past piece of work uses the planned one and drops a Suggest that needs git |
+| `s02_chain` | `who`: S02 turns 2 to 5 (one confirmation when git is clear). `pain`: S02 turn 1, then S07 (ASKING.md) with the steps of the flow document as its choices, instead of turns 2 to 6; the answer is logged as `pain=` and step 2 reuses it |
 | `s03_labels` | `ask`: one list-accepting question (ASKING.md): every unsettled item with a suggested label and a one-line reason drawn from S03 to S05; then S03 to S05 only per row the user disputes or you cannot suggest. `skip`: one line saying there is nothing to label yet, log `labels=none` |
 | `s11` | `new`: S11 as written. `handoff`: existing parts, see PROPOSALS.md |
 

@@ -40,9 +40,9 @@ Setup is a prerequisite: look for an `## Agent skills` block in `AGENTS.md` or `
 
 ### 1. Observe
 
-Learn how work really flows here. Write `harness/situation.md`, the situation card: nine lines `field: value`, facts you looked up (fields and values: [RECORD-FORMAT.md](RECORD-FORMAT.md)); draft it from the repo with `platform: unknown` and `confirmed: no`. Before the first question read `AGENTS.md`, `docs/agents/`, the repo and every local folder in the card's `code_home`; ask only what they leave open. Ask which agent app the team uses (S01) and write it into the card. Run `python3 <skill-dir>/../../../tools/check_kit.py --situation harness/situation.md`: it prints the branch each sheet takes (meanings in [BOUNDARY.md](BOUNDARY.md)). Sheets read the card, never a kind of repo.
+Learn how work really flows here. Draft `harness/situation.md`, the situation card: nine lines `field: value`, facts you looked up ([RECORD-FORMAT.md](RECORD-FORMAT.md)), with `platform: unknown` and `confirmed: no`. Before the first question read `AGENTS.md`, `docs/agents/`, the repo and the top of each local folder in `code_home` (listing, README, recent git log), ask only what they leave open, and run `python3 <skill-dir>/../../../tools/check_kit.py --situation harness/situation.md` (again after each edit): it prints the branch each sheet takes (meanings in BOUNDARY.md), hence the question count of stage 1. Ask which agent app the team uses (S01) and write it into the card.
 
-Read [BOUNDARY.md](BOUNDARY.md). Label the items as its `s03_labels` branch says; you suggest, the user decides. Every item ends as `shared` or `project`. Learn the flow (S02, in BOUNDARY.md), then read its description back (S06), labels and card included. Set `confirmed: yes` when the user says it is right. Append the log line for `observe` (format in RECORD-FORMAT.md): the platform, a one-line flow summary and the labels, so a later run resumes from the log alone.
+Read [BOUNDARY.md](BOUNDARY.md). Label the items as its `s03_labels` branch says; you suggest, the user decides. Every item ends as `shared` or `project`. Learn the flow (S02, in BOUNDARY.md), then read its description back (S06), labels and card included. Set `confirmed: yes` when the user says it is right. Append the log line for `observe` (keys in RECORD-FORMAT.md) and run `check_kit.py --log harness/progress.log`, so a later run resumes from the log alone.
 
 ### 2. Need to piece
 
@@ -54,7 +54,7 @@ Take **one** need from the flow, the one the user names or the most painful. Loo
 <skill-dir>/../../../kit/scripts/kit show <id>       # one piece in full
 ```
 
-(`<skill-dir>` is the folder holding this SKILL.md as you were given it, three levels below the plugin root; substitute it before running.) Run `kit list` for every group that could touch the need ("automatic" touches schedules too) and tell the user the group names you looked at. Pick the piece whose `needed_when` matches; none fits: `outside the kit`. Ask which need hurts most (S07, in ASKING.md; branch `pain` asked it in stage 1), show the need and the piece and wait for a yes (S08). Append the log line for `need-to-piece`, with the letters of the groups you looked at.
+(`<skill-dir>` is the folder holding this SKILL.md as you were given it, three levels below the plugin root; substitute it before running.) Run `kit list` for every group that could touch the need ("automatic" touches schedules too) and tell the user the group names you looked at. Pick the piece whose `needed_when` matches; none fits: `outside the kit`. Ask which need hurts most (S07, in ASKING.md; branch `pain` asked it in stage 1: take the `pain=` of the `observe` line, never ask again), show the need and the piece and wait for a yes (S08). Append the log line for `need-to-piece`, with the letters of the groups you looked at.
 
 ### 3. Simplicity gate
 
