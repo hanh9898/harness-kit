@@ -156,7 +156,7 @@ def test_generated_kit_passes_all_checkers(tmp_path):
     b = run(CHECK_BOUNDARY, "--root", out, "--tokens", TOKENS, "--strict")
     assert b.returncode == 0, b.stdout
     cli = subprocess.run([sys.executable, "-I", str(KIT_CLI), "--dir", str(out), "list"], capture_output=True, text=True)
-    assert cli.returncode == 0 and re.search(r"^A\t7 ", cli.stdout, re.M)
+    assert cli.returncode == 0 and re.search(r"^A\tIntake\t7 ", cli.stdout, re.M)
 
 
 def test_seed_folder_has_no_forbidden_tokens():

@@ -6,7 +6,7 @@
   check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
-IDs are unique. If gates.csv exists, gate=yes rules need an ISO verified_on date
+IDs are unique and every group has a name in groups.csv (id,name). If gates.csv exists, gate=yes rules need an ISO verified_on date
 in rules.csv, stated certainty, a valid verify_method and a nonempty verified_quote; gate=no requires a note.
 Print one legos.csv:line error per line; exit 1 on errors, 0 when clean.
 """
@@ -34,8 +34,8 @@ def check(kit_dir):
         missing = [c for c in COLUMNS if c not in (reader.fieldnames or [])]
         if missing:
             return [f"legos.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(COLUMNS)}"]
-        errs, seen = [], {}
-        for n, r in enumerate(reader, 2):
+        errs, seen, rows = [], {}, list(reader)
+        for n, r in enumerate(rows, 2):
             for c in COLUMNS:
                 if not (r.get(c) or "").strip():
                     errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has an empty `{c}` cell; fix: supply a value")
@@ -44,7 +44,23 @@ def check(kit_dir):
             if r["id"] in seen:
                 errs.append(f"legos.csv:{n}: duplicate id {r['id']} from line {seen[r['id']]}; fix: choose another ID")
             seen.setdefault(r["id"], n)
-        return errs
+        return errs + check_groups(kit_dir, {r["group"]: n for n, r in reversed(list(enumerate(rows, 2)))})
+
+
+def read_groups(kit_dir):
+    """{group ID: name} from groups.csv; raise OSError if the file is missing."""
+    with (kit_dir / "groups.csv").open(encoding="utf-8", newline="") as f:
+        return {(r.get("id") or "").strip(): (r.get("name") or "").strip() for r in csv.DictReader(f)}
+
+
+def check_groups(kit_dir, used):
+    """Every group used by legos.csv needs a name in groups.csv."""
+    try:
+        names = read_groups(kit_dir)
+    except OSError as e:
+        return [f"groups.csv: cannot read file ({e}); fix: create groups.csv with id,name columns"]
+    return [f"legos.csv:{n}: group `{g}` has no name in groups.csv; fix: add `{g},<group name>`"
+            for g, n in sorted(used.items()) if not names.get(g)]
 
 
 def check_gates(kit_dir):

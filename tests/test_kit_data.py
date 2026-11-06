@@ -49,3 +49,16 @@ def test_empty_required_cell_reported(tmp_path):
 def test_missing_legos_file_reported(tmp_path):
     r = run(CHECK_KIT, "--dir", tmp_path)
     assert r.returncode != 0 and "legos.csv" in r.stdout + r.stderr
+
+
+def test_group_without_name_reported(tmp_path):
+    root = write_kit(tmp_path, [row("A01"), row("B01", group="B")], groups={"A": "Intake"})
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1 and "`B`" in r.stdout and "groups.csv" in r.stdout and "`A`" not in r.stdout
+
+
+def test_missing_groups_file_reported(tmp_path):
+    root = write_kit(tmp_path, [row("A01")])
+    (root / "groups.csv").unlink()
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1 and "groups.csv" in r.stdout

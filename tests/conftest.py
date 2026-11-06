@@ -16,9 +16,13 @@ def run(script, *args):
     return subprocess.run([sys.executable, "-I", str(script), *map(str, args)], capture_output=True, text=True)
 
 
-def write_kit(root, rows, header=COLUMNS):
-    """Build a possibly invalid sample kit with legos.csv from dict rows."""
+def write_kit(root, rows, header=COLUMNS, groups=None):
+    """Build a possibly invalid sample kit with legos.csv from dict rows and groups.csv
+    (used groups default to names of the form `Group <id>`)."""
     root.mkdir(parents=True, exist_ok=True)
+    if groups is None:
+        groups = {r.get("group", ""): f"Group {r.get('group', '')}" for r in rows}
+    (root / "groups.csv").write_text("id,name\n" + "".join(f"{g},{n}\n" for g, n in groups.items()), encoding="utf-8")
     with (root / "legos.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         w.writerow(header)
