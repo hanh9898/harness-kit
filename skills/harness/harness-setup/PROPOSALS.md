@@ -11,9 +11,9 @@ Three parts, in order. Write each proposal from its sheet below, in the forms of
 <skill-dir>/../../../kit/scripts/kit show P<n>    # one pattern in full
 ```
 
-(Substitute `<skill-dir>` as in SKILL.md.) The patterns favour the simplest shape. Start from the single agent, show `Use when` and `Avoid when` of the pattern you propose, and pick a heavier one only if the flow you observed matches its `Use when`. State any condition the pattern carries (some are experimental on their platform).
+(Substitute `<skill-dir>` as in SKILL.md.) The patterns favour the simplest shape. Start from the single agent, show `Use when` and `Avoid when` of the pattern you propose, and pick a heavier one only if the flow you observed matches its `Use when`. A team may combine patterns, each tied to the part of the flow that matches its `Use when`. State any condition the pattern carries (some are experimental on their platform).
 
-**Existing harness (card branch `s11`).** `new`: nothing exists yet; lay out the files in S11. `handoff`: `prior_harness` lists parts that already exist. Setup moves, renames and reorders nothing and plans no move. For each listed part write one `kind: folder` entry with `status: adopted` (it meets the standard) or `needs-change` (it does not; the gap in `reason`, in the user's words), then ask S11 only for the new files. Tell the user in plain words that moving what exists is its own piece of work, done with `harness-evolve`, which picks up every `needs-change` entry. Log the part as `proposal part=folders outcome=handoff`; if the user changes their mind later, append a line with `revised=`.
+**Existing harness (card branch `s11`).** `new`: nothing exists yet; lay out the files in S11. `handoff`: `prior_harness` lists parts that already exist. Setup moves, renames and reorders nothing and plans no move. For each listed part write one `kind: folder` entry with `status: adopted` (it meets the standard) or `needs-change` (it does not; the gap in `reason`, in the user's words), then ask S11 only for the new files. Tell the user in plain words that moving what exists is its own piece of work, done with `harness-evolve`, which takes every `needs-change` entry first, on its first run after setup. Log the part as `proposal part=folders outcome=handoff`; if the user changes their mind later, append a line with `revised=`.
 
 Settled parts are logged one line each (`proposal part=tools|folders|team`). A part the user rejects entirely is logged with `outcome=none`.
 
@@ -53,4 +53,4 @@ Settled parts are logged one line each (`proposal part=tools|folders|team`). A p
 - Terms: team shape = how many agents there are and who passes work to whom
 - Enough: yes, or another shape
 - Unsure: say "not sure"; I use a single agent
-- Suggest: a single agent, unless the flow seen in stage 1 matches the "fits when" of a heavier shape; say which line matched. Name any condition (some shapes are experimental on a platform)
+- Suggest: a single agent, unless the flow seen in stage 1 matches the "fits when" of a heavier shape; say which line matched. Several shapes may be combined, each named with the part of the flow it covers. Name any condition (some shapes are experimental on a platform)

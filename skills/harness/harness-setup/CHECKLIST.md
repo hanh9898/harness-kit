@@ -14,7 +14,7 @@ Prepare a clean sample repo with setup-matt-pocock-skills output (AGENTS.md Agen
 | C4 | Do not ask known facts | Compare questions with root and agent docs | No questions about already configured tracker or domain document locations |
 | C5 | Ask the agent platform | Platform question | Asks and records the platform from the user's answer |
 | C6 | Confirm the workflow | Turn before step 2 | Reads back the workflow and waits for confirmation |
-| C7 | Three questions classify two labels | Classification turns | Asks each question in sequence without self-applying; answers determine shared/project labels shown in the readback |
+| C7 | List-accepting classification | Classification turn | Presents one table with suggested labels and one-line reasons; S03-S05 only for disputed or unknown rows; user determines shared/project labels |
 | C8 | Query the kit through CLI | Command history | Uses list then show; never reads the entire lego CSV |
 | C9 | Record index | Record index file | Exists with one pointer per entry |
 | C10 | One record entry | harness/record/<entry>.md | Contains kind, choice, reason, check, status and verified_on |
@@ -122,5 +122,5 @@ Each row corresponds to an issue found by two unscripted readers (question-19-re
 | C111 | Step 0 Agent skills block | Agent docs exist but root heading is absent | Shows the three-section draft, waits for approval, preserves surrounding content and setup prerequisites |
 | C112 | Revise a logged decision | User changes a prior decision | Appends the same step with revised=<old timestamp>; original stays unchanged; log checker passes |
 | C113 | Update question estimates | A section exceeds the estimate | Explains why once, announces the remaining count, and uses the new estimate |
-| C114 | Inspect and name every relevant kit group | Step 2 CLI history | Lists every kit group related to the need, names inspected groups, including easily missed scheduling and multi-source groups |
+| C114 | Inspect and name every relevant kit group | Step 2 CLI history | Lists every kit group related to the need, including scheduling for automation; logs groups=; log checker passes |
 | C115 | Situation card | After step 1 | Nine factual key:value lines; situation checker passes; confirmed=yes only after flow approval; sheets and step 10 follow printed branches |

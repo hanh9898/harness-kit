@@ -80,7 +80,7 @@ Keep "If skipped" in the compact form only when the consequence is heavy or not 
 
 ## Rules
 
-1. **One idea per question.** No "and" or "or" joining two different asks. A choice between two options is one idea.
+1. **One idea per question.** No "and" or "or" joining two different asks. A choice between two options is one idea. The named exception is the **list-accepting question**: one question over a table of items, each with a suggested value and a one-line reason; "yes" accepts every row and the user names only the wrong ones (labels of step 1, BOUNDARY.md).
 2. **Ask about ONE concrete recent thing**: "the last time", the latest merged piece of work, the latest change, a named file or commit. Never "usually", "in general", "would you".
 3. **No harness words, anywhere the user reads**: the question, "Why I ask", the suggested answer, "Because", the evidence block. The words in the table "Words the user sees" below, a piece id (D02, P1), a command (`kit show`), and the words rung, kit, lego, tracer bullet, check scope, record entry id are not said; say what the thing is ("a ready-made way to block dangerous commands", "the lightest way that works"). A file or term the user has not met gets a short plain description at its first appearance; if a word cannot be avoided, put it in "Terms" with one line. Do not quote source text in another language; paraphrase. Rule ids shown in brackets in sheet S22 are the one exception.
 4. **Look it up, do not ask, and open the file before you name anything in it.** A run said "Codex adds `ship()`" before reading the code; the function was named otherwise. Anything the repo, git history, the pull requests, the tracker files, `harness/` or the log can answer, you read first. Ask only what stays open. Facts are your job, never the user's.
@@ -180,7 +180,7 @@ Rules for this block:
 
 A sheet is the data of one question; the form is above. Sheets live in the sibling file of the step they belong to. Every sheet is a heading `### [Sxx] <title>` (setup) or `### [Vxx]` (evolve) followed by nine fields: Stage, Helps, If skipped, Why, Ask, Terms, Enough, Unsure, Suggest. Where a question has several turns, `Ask` lists them as numbered sub-bullets and each turn carries its own enough, unsure and suggest.
 
-Where each sheet is: S01, S02, S06 in `BOUNDARY.md`; S03 to S05 in `BOUNDARY.md`; S09 in `GATE.md`; S10 to S12 in `PROPOSALS.md`; S14 to S20 in `DELEGATION.md`; S21 in `ROLES.md`; S22 in `STANDARDS-STEP.md`; S23 to S27 in `ISOLATION.md`; S28 to S31 in `WIRING.md`; V01 to V04 in `../harness-evolve/DRIFT.md`; V08, V09 in `../harness-evolve/CHECK-STEP.md`; V10 in `../harness-evolve/UPDATE.md`. Steps that have no file of their own keep their sheets here, below.
+Where each sheet is: S01 to S06 in `BOUNDARY.md`; S09 in `GATE.md`; S10 to S12 in `PROPOSALS.md`; S14 to S20 in `DELEGATION.md`; S21 in `ROLES.md`; S22 in `STANDARDS-STEP.md`; S23 to S27 in `ISOLATION.md`; S28 to S31 in `WIRING.md`; V01 to V04 in `../harness-evolve/DRIFT.md`; V08, V09 in `../harness-evolve/CHECK-STEP.md`; V10 in `../harness-evolve/UPDATE.md`. Steps that have no file of their own keep their sheets here, below.
 
 ### [S07] Pick the need to work on (step 2)
 
@@ -192,7 +192,7 @@ Where each sheet is: S01, S02, S06 in `BOUNDARY.md`; S03 to S05 in `BOUNDARY.md`
 - Terms: need = one thing you want easier, safer or faster in the flow
 - Enough: one place, one or two sentences
 - Unsure: say "not sure"; I use the rework spot named under Suggest
-- Suggest: "I see <fix commit / reverted change / reopened ticket> after <step>. Is that the spot?" Name what you found; if nothing, leave the suggestion line out entirely and say nothing about it
+- Suggest: "I see <fix commit / reverted change / reopened ticket> after <step>. Is that the spot?" Name what you found; if nothing, leave the suggestion line out entirely and say nothing about it. With branch `pain` (BOUNDARY.md) it is asked in stage 1 (Stage 1/6) and offers the steps of the flow document as choices
 
 ### [S08] Confirm the need and the building block (step 2)
 
@@ -204,7 +204,7 @@ Where each sheet is: S01, S02, S06 in `BOUNDARY.md`; S03 to S05 in `BOUNDARY.md`
 - Terms: building block = a ready-made, described way of doing it from the shared store of this tool; if none fits I say "no ready-made block fits, we design one together"
 - Enough: yes, or what to change
 - Unsure: say "not sure"; I keep this as a draft and write nothing
-- Suggest: yes, with the one-line reason the block's "needed when" text matches your need
+- Suggest: yes, with the one-line reason the block's "needed when" text matches your need. If the need goes against a rule written in `AGENTS.md` or `docs/agents/`, quote that rule with its file:line; the user decides
 
 ### [S13] Run one check (step 6)
 

@@ -40,9 +40,9 @@ Setup is a prerequisite: look for an `## Agent skills` block in `AGENTS.md` or `
 
 ### 1. Observe
 
-Learn how work really flows here, in plain words. Read `AGENTS.md`, `docs/agents/` and the repo first; ask only what they leave open. Write `harness/situation.md`, the situation card: nine lines `field: value`, each a fact you looked up (fields and values: [RECORD-FORMAT.md](RECORD-FORMAT.md)). Draft it from the repo before the first question, with `platform: unknown` and `confirmed: no`. Ask which agent platform the team works on (S01) and write it into the card. Run `python3 <skill-dir>/../../../tools/check_kit.py --situation harness/situation.md`: it lists the branch each sheet takes ([BOUNDARY.md](BOUNDARY.md) says what they mean). Sheets read the card, never a kind of repo.
+Learn how work really flows here. Write `harness/situation.md`, the situation card: nine lines `field: value`, facts you looked up (fields and values: [RECORD-FORMAT.md](RECORD-FORMAT.md)); draft it from the repo with `platform: unknown` and `confirmed: no`. Before the first question read `AGENTS.md`, `docs/agents/`, the repo and every local folder in the card's `code_home`; ask only what they leave open. Ask which agent app the team uses (S01) and write it into the card. Run `python3 <skill-dir>/../../../tools/check_kit.py --situation harness/situation.md`: it prints the branch each sheet takes (meanings in [BOUNDARY.md](BOUNDARY.md)). Sheets read the card, never a kind of repo.
 
-Read [BOUNDARY.md](BOUNDARY.md). Put its three questions (S03 to S05) to the user, one per turn, about the items still unsettled; you may suggest, the user decides. Every item ends as `shared` or `project`. Learn the flow (S02, in BOUNDARY.md), then read its description back (S06), labels and card included. Set `confirmed: yes` when the user says it is right. Append the log line for `observe` (format in RECORD-FORMAT.md): the platform, a one-line flow summary and the labels, so a later run resumes from the log alone.
+Read [BOUNDARY.md](BOUNDARY.md). Label the items as its `s03_labels` branch says; you suggest, the user decides. Every item ends as `shared` or `project`. Learn the flow (S02, in BOUNDARY.md), then read its description back (S06), labels and card included. Set `confirmed: yes` when the user says it is right. Append the log line for `observe` (format in RECORD-FORMAT.md): the platform, a one-line flow summary and the labels, so a later run resumes from the log alone.
 
 ### 2. Need to piece
 
@@ -54,7 +54,7 @@ Take **one** need from the flow, the one the user names or the most painful. Loo
 <skill-dir>/../../../kit/scripts/kit show <id>       # one piece in full
 ```
 
-(`<skill-dir>` is the folder holding this SKILL.md as you were given it; the kit command is `kit/scripts/kit` in the same plugin, three levels up. Substitute the real folder before running.) Run `kit list` for every group that could touch the need, not one group, and tell the user the group names you looked at. Easy to forget when the user says "automatic": background jobs, notifications, recovery; or "several document sources". Pick the piece whose `needed_when` matches; none fits: record `outside the kit`. Ask which need hurts most (S07, in ASKING.md), show the user the need and the piece (or `outside the kit`) and wait for a yes (S08). Append the log line for `need-to-piece`.
+(`<skill-dir>` is the folder holding this SKILL.md as you were given it, three levels below the plugin root; substitute it before running.) Run `kit list` for every group that could touch the need ("automatic" touches schedules too) and tell the user the group names you looked at. Pick the piece whose `needed_when` matches; none fits: `outside the kit`. Ask which need hurts most (S07, in ASKING.md; branch `pain` asked it in stage 1), show the need and the piece and wait for a yes (S08). Append the log line for `need-to-piece`, with the letters of the groups you looked at.
 
 ### 3. Simplicity gate
 
@@ -86,7 +86,7 @@ Choose the checkable standard for the pieces chosen, from the kit's rules, never
 
 ### 10. Isolation
 
-Its own question, unless the card's `step10` branch is `skip` (log `isolation outcome=none`, no question): should the harness stay out of the product's commits, comments and PRs? If yes, propose rule, checker and review; the user chooses. Suggest, never edit, a scope line for the product's coding standards. Method and sheets S23 to S27: [ISOLATION.md](ISOLATION.md). Append the log line for `isolation`.
+Its own question, always asked: should the harness stay out of the product's commits, comments and PRs? If yes, propose rule, checker and review; the user chooses. Suggest, never edit, a scope line for the product's coding standards. Method and sheets S23 to S27: [ISOLATION.md](ISOLATION.md). Append the log line for `isolation`.
 
 ### 11. Map, entry point and hooks
 

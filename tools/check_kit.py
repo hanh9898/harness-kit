@@ -2,7 +2,7 @@
 """check_kit: validate legos.csv data in a kit directory.
 
   check_kit.py [--dir DIR]
-  check_kit.py --log FILE        check a harness/progress.log for revised= entries
+  check_kit.py --log FILE        check a harness/progress.log for revised=, groups= and double quotes
   check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
@@ -105,18 +105,22 @@ def check_gates(kit_dir):
     return errs
 
 
+LOG_FIELD = re.compile(r'([\w-]+)=("([^"]*)"|\S*)')
 LOG_TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
 
 def _parse_log(text):
-    rows = []
+    """Return (rows, errors); values containing whitespace use double quotes: flow="a then b"."""
+    rows, errs = [], []
     for n, line in enumerate(text.splitlines(), 1):
         if not line.strip():
             continue
         head, _, rest = line.partition(" ")
-        fields = dict(kv.split("=", 1) for kv in rest.split() if "=" in kv)
-        rows.append((n, head, fields))
-    return rows
+        if rest.count('"') % 2:
+            errs.append(f"progress.log:{n}: unclosed double quotes; fix: enclose the complete whitespace-containing value in one pair of \"...\"")
+            continue
+        rows.append((n, head, {k: q if v.startswith('"') else v for k, v, q in LOG_FIELD.findall(rest)}))
+    return rows, errs
 
 
 def _log_key(fields):
@@ -125,13 +129,22 @@ def _log_key(fields):
 
 def effective_lines(text):
     """Latest effective line per (step, part); part falls back to entry, then role."""
-    return {_log_key(f): dict(f, ts=ts) for _, ts, f in _parse_log(text)}
+    return {_log_key(f): dict(f, ts=ts) for _, ts, f in _parse_log(text)[0]}
 
 
-def check_progress_log(text):
-    """A revised= line must reference an earlier timestamp with the same step."""
-    errs, seen = [], {}
-    for n, ts, f in _parse_log(text):
+def check_progress_log(text, groups=None):
+    """A revised= line must reference an earlier timestamp with the same step.
+    need-to-piece requires groups= with comma-separated inspected group letters, validated against groups when supplied."""
+    rows, errs = _parse_log(text)
+    seen = {}
+    for n, ts, f in rows:
+        if f.get("step") == "need-to-piece":
+            looked = [g for g in f.get("groups", "").split(",") if g]
+            unknown = [g for g in looked if groups is not None and g not in groups]
+            if not looked:
+                errs.append(f"progress.log:{n}: need-to-piece missing groups=; fix: record every inspected kit group, for example groups=A,J")
+            elif unknown:
+                errs.append(f"progress.log:{n}: groups= contains unknown groups {', '.join(unknown)}; fix: use group letters from `kit list`")
         rev = f.get("revised")
         if rev is not None:
             target = seen.get(rev)
@@ -151,7 +164,7 @@ SITUATION_FIELDS = {
     "prior_harness": r"none|[^,\s][^,]*(,\s*[^,\s][^,]*)*",
     "history": r"yes|none",
     "tree_relation": r"shared|apart",
-    "platform": r"[\w.-]+",
+    "platform": r"[\w.-]+(@[\w.-]+)?",
     "confirmed": r"yes|no",
 }
 
@@ -188,7 +201,6 @@ def situation_branches(card):
         "s02_chain": "pain" if card["flow_source"].startswith("doc:") or card["code_home"] != "." else "who",
         "s03_labels": "skip" if card["history"] == "none" and card["prior_harness"] == "none" else "ask",
         "s11": "new" if card["prior_harness"] == "none" else "handoff",
-        "step10": "ask" if card["tree_relation"] == "shared" else "skip",
     }
 
 
@@ -214,7 +226,7 @@ def main(argv=None):
         return 0
     if a.log:
         try:
-            errs = check_progress_log(Path(a.log).read_text(encoding="utf-8"))
+            errs = check_progress_log(Path(a.log).read_text(encoding="utf-8"), set(read_groups(Path(a.dir))))
         except OSError as e:
             errs = [f"progress.log: cannot read file ({e})"]
         for e in errs:

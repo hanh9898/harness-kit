@@ -26,4 +26,4 @@ def test_setup_skill_md_is_short_with_no_long_line():
 
 def test_setup_total_lines_did_not_grow():
     total = sum(len(p.read_text(encoding="utf-8").splitlines()) for p in SETUP.glob("*.md") if p.name != "CHECKLIST.md")
-    assert total <= 1049, total
+    assert total <= 1044, total
