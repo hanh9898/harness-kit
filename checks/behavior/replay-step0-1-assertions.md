@@ -16,7 +16,7 @@ For the lead only; the runner of `replay-step0-1.md` never sees this file. Grade
 | # | Look at | Pass when |
 |---|---|---|
 | A1 | transcript, card | Step 0 matches the repo: with an `## Agent skills` block and `docs/agents/`, `matt_config: present`, no block is proposed and the run does not stop; without them the run stops and writes nothing but the transcript |
-| A2 | card | every value matches the facts you wrote down; `platform` is the app (or `<app>@<host>` when it runs through a host), not `unknown`; `confirmed: yes` after S06 |
+| A2 | card | every value matches the facts you wrote down; `platform` is the app S01 settled (or `<app>@<host>` when it runs through a host), `unknown` only when S01 had no suggestion and the answer was "not sure"; `confirmed: yes` after S06 |
 | A3 | `files-read.txt` | every local folder in `code_home` other than `.` is read before `--- first question sent ---` |
 | A4 | transcript | the overview message comes first; each message holds one question; each question carries its stage line (stage 1 of 6); the first question of the stage uses the full form, later ones the compact form |
 | A5 | transcript | no harness words in what the user reads: no piece id (A01, P1), no `kit show`, no "rung", "lego", "gate" without its plain version |
