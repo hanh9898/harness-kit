@@ -3,6 +3,7 @@
 
   check_kit.py [--dir DIR]
   check_kit.py --log FILE        check a harness/progress.log for revised= entries
+  check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
 IDs are unique. If gates.csv exists, gate=yes rules need an ISO verified_on date
@@ -126,11 +127,75 @@ def check_progress_log(text):
     return errs
 
 
+SITUATION_FIELDS = {
+    "matt_config": r"present|partial|absent",
+    "work_source": r"git|none|tracker:\S+|doc:\S+",
+    "code_home": r"\.|[^,\s][^,]*(,\s*[^,\s][^,]*)*",
+    "flow_source": r"sample|asked|doc:\S+",
+    "prior_harness": r"none|[^,\s][^,]*(,\s*[^,\s][^,]*)*",
+    "history": r"yes|none",
+    "tree_relation": r"shared|apart",
+    "platform": r"[\w.-]+",
+    "confirmed": r"yes|no",
+}
+
+
+def parse_situation(text):
+    """Return (card, errors); every nonblank, nonheading line must be key: value."""
+    card, errs = {}, []
+    for n, line in enumerate(text.splitlines(), 1):
+        if not line.strip() or line.startswith("#"):
+            continue
+        key, sep, value = line.partition(":")
+        key, value = key.strip(), value.strip()
+        if not sep or " " in key:
+            errs.append(f"situation.md:{n}: line is not `key: value`; fix: record one factual field per line")
+        elif key not in SITUATION_FIELDS:
+            errs.append(f"situation.md:{n}: unknown key `{key}`; expected {', '.join(SITUATION_FIELDS)}; fix: remove it or use an existing key")
+        elif key in card:
+            errs.append(f"situation.md:{n}: duplicate key `{key}`; fix: keep one line")
+        else:
+            card[key] = value
+            if not re.fullmatch(SITUATION_FIELDS[key], value):
+                errs.append(f"situation.md:{n}: {key} value `{value}` is not allowed (`{SITUATION_FIELDS[key]}`); fix: correct the value")
+    for key in SITUATION_FIELDS:
+        if key not in card:
+            errs.append(f"situation.md: missing field {key}; fix: add `{key}: <value>`")
+    return card, errs
+
+
+def situation_branches(card):
+    """Branches selected from situation-card values; meanings are defined in BOUNDARY.md."""
+    source = card["work_source"].split(":")[0]
+    return {
+        "s02_work": "planned" if card["history"] == "none" else {"git": "git", "tracker": "tracker", "doc": "doc", "none": "ask"}[source],
+        "s02_chain": "pain" if card["flow_source"].startswith("doc:") or card["code_home"] != "." else "who",
+        "s03_labels": "skip" if card["history"] == "none" and card["prior_harness"] == "none" else "ask",
+        "s11": "new" if card["prior_harness"] == "none" else "handoff",
+        "step10": "ask" if card["tree_relation"] == "shared" else "skip",
+    }
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dir", default=str(Path(__file__).resolve().parent.parent / "kit"))
     ap.add_argument("--log", help="check a progress.log instead of a kit directory")
+    ap.add_argument("--situation", help="check a situation.md instead of a kit directory")
     a = ap.parse_args(argv)
+    if a.situation:
+        try:
+            card, errs = parse_situation(Path(a.situation).read_text(encoding="utf-8"))
+        except OSError as e:
+            card, errs = {}, [f"situation.md: cannot read file ({e})"]
+        for e in errs:
+            print(f"ERROR: {e}")
+        if errs:
+            print(f"{len(errs)} situation card errors.")
+            return 1
+        for k, v in situation_branches(card).items():
+            print(f"branch {k}={v}")
+        print("Situation card clean.")
+        return 0
     if a.log:
         try:
             errs = check_progress_log(Path(a.log).read_text(encoding="utf-8"))

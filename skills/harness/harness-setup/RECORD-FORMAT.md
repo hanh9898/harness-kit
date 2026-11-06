@@ -12,7 +12,7 @@ kind: tool            # tool | folder | team | delegation | role-profile | stand
 choice: <kit id and name, or "outside the kit">
 reason: <why this piece, one or two lines>
 check: <the exact command; for a generated file, its path>
-status: unverified    # unverified | passing | failing
+status: unverified    # unverified | passing | failing | adopted | needs-change
 verified_on:          # date; empty until the check ran
 check_scope:          # optional; "structural" on team entries
 verified_platform:    # optional; hook entries: platform, event, matcher, date, or "not verified on <platform>"
@@ -29,13 +29,29 @@ gate_approved: user   # always "user"; an entry without it is not written
 <command, exit code, pasted output; empty until run>
 ```
 
-Entries written before the gate existed have no `gate_*` keys. Read them as `gate: not run`; never delete or reject them. Run the gate for such an entry before you change it, then add the keys.
-
-Entries of `kind: delegation` (one per role) and `kind: role-profile` (one per role, named `role-<role>`) use the same keys. Their body is set out in [DELEGATION.md](DELEGATION.md) and [ROLES.md](ROLES.md); the `check` of a role profile tests that every pointer exists. Older entries are read as before.
+Entries of `kind: delegation` (one per role) and `kind: role-profile` (one per role, named `role-<role>`) use the same keys. Their body is set out in [DELEGATION.md](DELEGATION.md) and [ROLES.md](ROLES.md); the `check` of a role profile tests that every pointer exists.
 
 `check_scope: structural` on a `kind: team` entry means the check proves the pattern exists in the kit and the folders exist; it does not prove the team works. `passing` on such an entry is never read as "the team runs".
 
 Entries of `kind: standard` and `kind: isolation` point at a section of `harness/STANDARDS.md` (see [STANDARDS-STEP.md](STANDARDS-STEP.md) and [ISOLATION.md](ISOLATION.md)); they never copy the rule text. An entry whose piece is a hook names the platform config file it was wired into in `check` and records `verified_platform` (see [WIRING.md](WIRING.md)).
+
+`adopted` and `needs-change` are for a `kind: folder` entry of a part that already existed (card: `prior_harness`): `adopted` meets the standard and stays; `needs-change` does not, gap in `reason`. Setup moves nothing; `harness-evolve` takes each `needs-change` entry as its change.
+
+## `situation.md`
+
+Step 1 writes nine lines, `field: value`, facts only, no prose; `python3 tools/check_kit.py --situation harness/situation.md` checks them.
+
+| Field | Value |
+|---|---|
+| `matt_config` | `present`, `partial` or `absent`: the `## Agent skills` block and `docs/agents/` |
+| `work_source` | `git`, `tracker:<name>`, `doc:<path>` or `none`: where finished work is found |
+| `code_home` | `.` or paths of the repos holding the product code, comma separated |
+| `flow_source` | `doc:<path>`, `sample` (one recent piece of work) or `asked` |
+| `prior_harness` | `none`, or paths of harness parts that already exist, comma separated |
+| `history` | `yes`, or `none` when no finished work can be named |
+| `tree_relation` | `shared`: harness files and product code in one tree; `apart`: the harness repo holds no product code |
+| `platform` | one word, the agent platform; `unknown` until S01 is answered |
+| `confirmed` | `no` while drafting, `yes` once the user says the card is right |
 
 ## `gate.md`
 

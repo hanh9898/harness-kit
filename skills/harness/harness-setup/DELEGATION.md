@@ -17,7 +17,7 @@ How much each role may decide for the user. Done after the tracer-bullet entries
 
 Write each question from its sheet at the end of this file, in the forms of [ASKING.md](ASKING.md). Say "axis", "level" and the 70 percent threshold in plain words; they are your working terms. The list of roles and the table below are the same questions as before, only worded from the sheets.
 
-Stage 4 is the longest, so **announce** it in the first question (ASKING.md, "Long stages"): for one role and one kind of decision it is about 6 questions (roles, the decision, undo and information in one confirmation, the level, the table, then the role's card), 8 if the level is 5 or higher; you take ONE kind of decision per role (the most recent one found in the history; more kinds can be added later in edit mode); the user may do one role first and stop. The undo and information questions (axes 1 and 2) are put in ONE confirmation turn (S16) when the pull request or commits give evidence for both; S17 is asked only for what S16 could not settle. Ask for the level (S18) with all seven levels shown in plain words.
+Stage 4 is the longest, so **announce** it in the first question (ASKING.md, rule 19): for one role and one kind of decision it is about 6 questions (roles, the decision, undo and information in one confirmation, the level, the table, then the role's card), 8 if the level is 5 or higher; you take ONE kind of decision per role (the most recent one found in the history; more kinds can be added later in edit mode); the user may do one role first and stop. The undo and information questions (axes 1 and 2) are put in ONE confirmation turn (S16) when the pull request or commits give evidence for both; S17 is asked only for what S16 could not settle. Ask for the level (S18) with all seven levels shown in plain words.
 
 First ask the user to name the roles (propose from the flow in step 1 and the team shape of step 4; the log may name none). The first `delegation` log line lists all of them in `roles=`. For each role, list the kinds of decision it makes (a few, in the user's words). For each pair (role, decision kind):
 
@@ -47,7 +47,7 @@ awk -F'|' '/^## Levels by kind/{t=1;next} t&&/^\|/{n++; if(n>2){rows++; for(i=2;
 
 A check with `|` or quotes goes in the YAML key as a block scalar (`check: |-`).
 
-Append a `delegation-draft` log line after each answer that settles a field of a table row (format in RECORD-FORMAT.md), so that stopping in the middle loses nothing. On resume in the middle of a stage, the first question uses the full form (ASKING.md) and starts with one sentence saying what was kept. Append one `delegation` log line per entry, after the check result (no separate `record` or `check` lines for it). The run is done when every role in `roles=` has such a line; resume with the roles that lack one.
+Append a `delegation-draft` log line after each answer that settles a field of a table row (format in RECORD-FORMAT.md), so that stopping in the middle loses nothing. Append one `delegation` log line per entry, after the check result (no separate `record` or `check` lines for it). The run is done when every role in `roles=` has such a line; resume with the roles that lack one.
 
 ## Switching on or off
 

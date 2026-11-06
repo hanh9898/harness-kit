@@ -30,7 +30,7 @@ def _sheets():
 def test_asking_exists_with_required_sections():
     text = (SETUP / "ASKING.md").read_text(encoding="utf-8")
     for needle in ("## Overview message", "## Full form", "## Compact form", "## Rules", "## Confirming a chain",
-                   "## Repo with no history", "## List question", "## Incomplete answers"):
+                   "## Incomplete answers"):
         assert needle in text, needle
 
 
@@ -92,7 +92,7 @@ def test_level_scale_describes_all_seven_levels():
 
 def test_asking_has_the_ticket_22_rules():
     text = _asking()
-    for needle in ("## Words the user sees", "## Long stages", "## Contradiction between git and the account",
+    for needle in ("## Words the user sees", "## Contradiction between git and the account",
                    "## Echo the user's own choice"):
         assert needle in text, needle
 

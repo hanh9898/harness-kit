@@ -60,19 +60,11 @@ def test_record_format_states_revision_convention():
     assert "never edited" in t and "check_kit.py --log" in t
 
 
-def test_point1_refactor_branch():
-    p, s = read("PROPOSALS.md"), read("SKILL.md")
-    assert "MOVE-PLAN.md" in p and "needs refactor, not done" in p
-    assert "kind: folder" in p and "status: unverified" in p
-    assert "MOVE-PLAN.md" in s or "rearrang" in s.lower()
-
-
-def test_point2_control_repo_branches():
-    b = read("BOUNDARY.md")
-    assert "docs/agents/issue-tracker.md" in b and "project-flow" in b
-    assert "code lives in another repo" in b
-    assert "which step of the flow hurts most" in b
-    assert "code lives in another repo" in read("ASKING.md")
+def test_point1_existing_harness_is_handed_over_not_moved():
+    p, r, e = read("PROPOSALS.md"), read("RECORD-FORMAT.md"), (SETUP.parent / "harness-evolve" / "SKILL.md").read_text(encoding="utf-8")
+    assert "kind: folder" in p and "adopted" in p and "needs-change" in p and "harness-evolve" in p
+    assert "adopted" in r and "needs-change" in r
+    assert "needs-change" in e
 
 
 def test_point3_step0_agent_skills_block():

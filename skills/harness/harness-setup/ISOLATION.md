@@ -1,6 +1,6 @@
 # Isolation (step 10)
 
-Ask the user in one turn: do you want the harness kept out of the product's commits, comments and PRs? This is a question, not a label from step 1. Do not assume the answer. Write every question from the sheets below, in the forms of [ASKING.md](ASKING.md).
+Ask the user in one turn (skipped when the card's `step10` branch is `skip`, BOUNDARY.md): do you want the harness kept out of the product's commits, comments and PRs? This is a question, not a label from step 1. Do not assume the answer. Write every question from the sheets below, in the forms of [ASKING.md](ASKING.md).
 
 - **No.** Write no entry. Log `isolation outcome=none`.
 - **Yes.** Propose, then wait. Three parts, one turn each, user chooses among options for each:
@@ -9,10 +9,6 @@ Ask the user in one turn: do you want the harness kept out of the product's comm
   3. **Review.** A line for a reviewer or review skill to check what a script cannot (comments and PR text). The user may decline it.
 
 Write the rule and checker into `harness/STANDARDS.md` as a section, and record `isolation-<slug>` with `kind: isolation`: `choice` is the chosen option, `check` the checker command. After the user agrees to the check, run it on a real case, on a throwaway branch you delete afterwards (a throwaway commit that contains a breach must be reported; a clean one must not), paste both outputs, and only then set `status`. Gate keys as in step 9, except `gate_source`: the `--help` or docs page of the tool the checker uses, read this turn.
-
-## The product's coding standards
-
-If the product has a coding-standards file, propose one line for the user to add to it, saying those standards do not apply to changes under `harness/`. Show the exact text and the file. Never edit or create that file yourself; the user decides and edits. Record in the entry body that the line was proposed and whether the user said they would add it.
 
 ## Question sheets (step 10)
 
