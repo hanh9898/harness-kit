@@ -29,7 +29,7 @@ Before the first question send the overview message (ASKING.md), short. Everythi
 
 ### 0. Preflight
 
-Setup is a prerequisite. Look for an `## Agent skills` block in `AGENTS.md` or `CLAUDE.md` and for `docs/agents/`. Missing either: tell the user to run `setup-matt-pocock-skills` first, then stop. Write nothing.
+Setup is a prerequisite. Look for an `## Agent skills` block in `AGENTS.md` or `CLAUDE.md` and for `docs/agents/`. Missing either: tell the user to run `setup-matt-pocock-skills` first, then stop. Write nothing. One case differs: `docs/agents/` is complete (it has `issue-tracker.md`) but the guidance file lacks the `## Agent skills` heading. Propose a block in the standard form (three sub-headings: Issue tracker, Triage labels, Domain docs; each one summary line plus a pointer to its file under `docs/agents/`, by that file's own naming), show the draft, write it only after the user approves, and change nothing else in the file. This does not relax the prerequisite: the block must exist before step 1.
 
 Then read where the last run stopped. `harness/progress.log` exists: read its last line, say aloud which step it logged and that you continue after it. Resume at the first step without a log line (a recorded entry with no `check` line resumes at step 6; every entry checked but no `delegation` line resumes at step 7 (a `delegation-draft` line for a role without its `delegation` line: continue at the first field not yet settled, and say what was kept); a `delegation` line but no `roles` line, step 8; then the first of steps 9 to 12 without its log line), taking platform, flow, labels and approved gate evidence (`harness/gate.md`) from the files; ask nothing a logged line already answers.
 
@@ -53,7 +53,7 @@ Take **one** need from the flow, the one the user names or the most painful. Loo
 <skill-dir>/../../../kit/scripts/kit show <id>       # one piece in full
 ```
 
-(`<skill-dir>` is the folder holding this SKILL.md as you were given it; the kit command is `kit/scripts/kit` in the same plugin, three levels up. Substitute the real folder before running.) Pick the piece whose `needed_when` matches. No piece fits: record `outside the kit`. Ask which need hurts most (S07, in ASKING.md), then show the user the need and the piece (or `outside the kit`) and wait for a yes (S08). Append the log line for `need-to-piece`.
+(`<skill-dir>` is the folder holding this SKILL.md as you were given it; the kit command is `kit/scripts/kit` in the same plugin, three levels up. Substitute the real folder before running.) Run `kit list` for every group that could touch the need, not one group, and tell the user the group names you looked at. Groups easy to forget when the user says "automatic" (background jobs, notifications, recovery) or "several document sources". Pick the piece whose `needed_when` matches. No piece fits: record `outside the kit`. Ask which need hurts most (S07, in ASKING.md), then show the user the need and the piece (or `outside the kit`) and wait for a yes (S08). Append the log line for `need-to-piece`.
 
 ### 3. Simplicity gate
 
@@ -63,7 +63,7 @@ Show the user the whole evidence list as an evidence block (ASKING.md; sheet S09
 
 ### 4. Propose, one part at a time
 
-Three parts, in this order: tools to install (with their rung), folder layout, agent team shape. Propose one, wait for the user to settle it, then move on. The tools were gated in step 3; folder and team items go through the gate as you propose them, evidence shown with the proposal. Method and sheets S10 to S12: [PROPOSALS.md](PROPOSALS.md). Append one log line per settled part.
+Three parts, in this order: tools to install (with their rung), folder layout, agent team shape. Propose one, wait for the user to settle it, then move on. The tools were gated in step 3; folder and team items go through the gate as you propose them, evidence shown with the proposal. Method and sheets S10 to S12: [PROPOSALS.md](PROPOSALS.md). The user wants an existing harness rearranged: PROPOSALS.md says how (one item "needs refactor, not done", never a move plan inside setup). Append one log line per settled part.
 
 ### 5. Record
 
