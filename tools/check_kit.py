@@ -142,20 +142,25 @@ def effective_lines(text):
 
 def check_progress_log(text, groups=None):
     """A revised= line must reference an earlier timestamp with the same step.
+    Superseded lines are not checked again; the log remains append-only.
     observe requires work= and correctly formatted labels=. need-to-piece requires groups= with comma-separated inspected group letters, validated against groups when supplied."""
     rows, errs = _parse_log(text)
+    superseded = {f["revised"] for _, _, f in rows if f.get("revised")}
     seen = {}
     for n, ts, f in rows:
+        if ts in superseded:
+            seen.setdefault(ts, f.get("step"))
+            continue
         if f.get("step") == "observe":
             if not f.get("work"):
-                errs.append(f"progress.log:{n}: observe missing work=; fix: record the S02 turn-1 work item, for example work=PROJ-12")
+                errs.append(f"progress.log:{n}: observe missing work=; fix: record the S02 turn-1 work item, for example work=PROJ-12; preserve the old line and append a revised= replacement")
             if not labels_ok(f.get("labels", "")):
-                errs.append(f"progress.log:{n}: labels={f.get('labels', '')} has invalid format; fix: use labels=shared=a,b;project=c,d, omit empty sides, or labels=none")
+                errs.append(f"progress.log:{n}: labels={f.get('labels', '')} has invalid format; fix: use labels=shared=a,b;project=c,d, omit empty sides, or labels=none; preserve the old line and append a revised= replacement")
         if f.get("step") == "need-to-piece":
             looked = [g for g in f.get("groups", "").split(",") if g]
             unknown = [g for g in looked if groups is not None and g not in groups]
             if not looked:
-                errs.append(f"progress.log:{n}: need-to-piece missing groups=; fix: record every inspected kit group, for example groups=A,J")
+                errs.append(f"progress.log:{n}: need-to-piece missing groups=; fix: record every inspected kit group, for example groups=A,J; preserve the old line and append a revised= replacement")
             elif unknown:
                 errs.append(f"progress.log:{n}: groups= contains unknown groups {', '.join(unknown)}; fix: use group letters from `kit list`")
         rev = f.get("revised")

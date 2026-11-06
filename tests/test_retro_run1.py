@@ -77,3 +77,29 @@ def test_point3_step0_agent_skills_block():
 def test_point5_overrun_rule():
     a = read("ASKING.md")
     assert "longer than expected" in a and "questions left" in a
+
+
+OLD_FORMAT_LOG = """\
+2026-01-01T00:00:00Z step=observe platform=x flow=a labels=everything
+2026-01-01T00:01:00Z step=need-to-piece need=n piece=B08
+"""
+
+
+def test_line_in_old_format_fails_until_revised():
+    errs = check_kit.check_progress_log(OLD_FORMAT_LOG)
+    assert any("missing work=" in e for e in errs)
+    assert any("missing groups=" in e for e in errs)
+
+
+def test_revised_line_supersedes_old_format_line():
+    log = OLD_FORMAT_LOG + (
+        "2026-01-01T01:00:00Z step=observe platform=x work=w flow=a labels=none revised=2026-01-01T00:00:00Z\n"
+        "2026-01-01T01:01:00Z step=need-to-piece need=n piece=B08 groups=A,J revised=2026-01-01T00:01:00Z\n"
+    )
+    assert check_kit.check_progress_log(log) == []
+
+
+def test_revised_line_is_itself_checked():
+    log = OLD_FORMAT_LOG + "2026-01-01T01:00:00Z step=observe platform=x flow=a labels=none revised=2026-01-01T00:00:00Z\n"
+    errs = check_kit.check_progress_log(log)
+    assert any("progress.log:3: observe missing work=" in e for e in errs)
