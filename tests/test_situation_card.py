@@ -10,10 +10,10 @@ SETUP = ROOT / "skills" / "harness" / "harness-setup"
 KINDS = ["code-repo", "control-repo", "new-repo", "existing-harness"]
 
 EXPECTED = {
-    "code-repo": dict(s02_work="git", s02_chain="who", s03_labels="ask", s11="new", step10="ask"),
-    "control-repo": dict(s02_work="tracker", s02_chain="pain", s03_labels="ask", s11="new", step10="skip"),
-    "new-repo": dict(s02_work="planned", s02_chain="who", s03_labels="skip", s11="new", step10="ask"),
-    "existing-harness": dict(s02_work="git", s02_chain="who", s03_labels="ask", s11="handoff", step10="ask"),
+    "code-repo": dict(s02_work="git", s02_chain="who", s03_labels="ask", s11="new"),
+    "control-repo": dict(s02_work="tracker", s02_chain="pain", s03_labels="ask", s11="new"),
+    "new-repo": dict(s02_work="planned", s02_chain="who", s03_labels="skip", s11="new"),
+    "existing-harness": dict(s02_work="git", s02_chain="who", s03_labels="ask", s11="handoff"),
 }
 
 

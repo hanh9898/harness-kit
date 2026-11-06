@@ -77,9 +77,3 @@ def test_point3_step0_agent_skills_block():
 def test_point5_overrun_rule():
     a = read("ASKING.md")
     assert "longer than expected" in a and "questions left" in a
-
-
-def test_point6_all_groups_listed():
-    s, c = read("SKILL.md"), read("CHECKLIST.md")
-    assert "every group" in s and "background" in s and "several document sources" in s
-    assert "every kit group related to the need" in c

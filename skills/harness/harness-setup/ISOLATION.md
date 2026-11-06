@@ -1,6 +1,6 @@
 # Isolation (step 10)
 
-Ask the user in one turn (skipped when the card's `step10` branch is `skip`, BOUNDARY.md): do you want the harness kept out of the product's commits, comments and PRs? This is a question, not a label from step 1. Do not assume the answer. Write every question from the sheets below, in the forms of [ASKING.md](ASKING.md).
+Ask the user in one turn, whatever the card says: do you want the harness kept out of the product's commits, comments and PRs? This is a question, not a label from step 1. Do not assume the answer. Write every question from the sheets below, in the forms of [ASKING.md](ASKING.md).
 
 - **No.** Write no entry. Log `isolation outcome=none`.
 - **Yes.** Propose, then wait. Three parts, one turn each, user chooses among options for each:

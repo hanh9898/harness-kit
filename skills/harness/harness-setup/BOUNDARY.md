@@ -5,7 +5,7 @@ Classify every item the flow turned up (tool, document, data, role, script). Two
 - `shared`: names nothing about this project; works unchanged in another project.
 - `project`: carries this project's name, data, paths, tools or roles. Business documents, data snapshots and tools that process them are `project` harness too.
 
-Write each question from its sheet below, in the forms of [ASKING.md](ASKING.md). Put these to the user in order, one per turn, for the items not yet settled; stop at the first answer that settles each item. A suggested label is a proposal until the user answers.
+Write each question from its sheet below, in the forms of [ASKING.md](ASKING.md). For a row of the label list the user disputes or you cannot suggest (`s03_labels`), put these in order, one per turn; stop at the first answer that settles the item. A suggested label is a proposal until the user answers.
 
 1. **Own names or values?** Project name, machine path, entry from a project log, project-only tool or role. Yes: `project`.
 2. **Delete test.** Carry it into another project: still true and still runs? Yes: `shared`.
@@ -21,15 +21,14 @@ A `shared` tool stays under `harness/tools/` and the record notes it as a candid
 
 | Branch | Value: what the sheets do |
 |---|---|
-| `s02_work` | `git`: the recent piece of work comes from git history. `tracker`: from the tracker `work_source` names, never this repo's git. `doc`: from the flow document. `ask`: from the user. `planned`: no finished work; ask for one planned piece, in the future tense, drop S02 turn 6; any sheet whose Ask names a past piece of work uses the planned one and drops a Suggest that needs git |
-| `s02_chain` | `who`: S02 turns 2 to 5 (one confirmation when git is clear). `pain`: one question instead, which step of the flow hurts most, built from the steps of the flow document |
-| `s03_labels` | `ask`: S03 to S05 per unsettled item. `skip`: one line saying there is nothing to label yet, log `labels=none` |
+| `s02_work` | `git`: the recent piece of work comes from git history. `tracker`: the latest closed ticket assigned to the user in the tracker `work_source` names, never this repo's git. `doc`: from the flow document. `ask`: from the user. `planned`: no finished work; ask for one planned piece, in the future tense, drop S02 turn 6; any sheet whose Ask names a past piece of work uses the planned one and drops a Suggest that needs git |
+| `s02_chain` | `who`: S02 turns 2 to 5 (one confirmation when git is clear). `pain`: S02 turn 1, then S07 (ASKING.md) with the steps of the flow document as its choices, instead of turns 2 to 6; step 2 reuses the answer |
+| `s03_labels` | `ask`: one list-accepting question (ASKING.md): every unsettled item with a suggested label and a one-line reason drawn from S03 to S05; then S03 to S05 only per row the user disputes or you cannot suggest. `skip`: one line saying there is nothing to label yet, log `labels=none` |
 | `s11` | `new`: S11 as written. `handoff`: existing parts, see PROPOSALS.md |
-| `step10` | `ask`: ISOLATION.md. `skip`: log `isolation outcome=none` |
 
 ## Question sheets (step 1)
 
-Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02-S06 are compact. Order: S01, S02, then S03-S05 per unsettled item (see `s03_labels`), then S06. User-facing labels are "shared across projects" and "specific to this project"; the log retains `shared` and `project`.
+Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02-S06 are compact. Order: S01, S02, labels (see `s03_labels`), S06. User-facing labels are "shared across projects" and "specific to this project"; the log retains `shared` and `project`.
 
 ### [S01] Which agent app the team uses
 
@@ -39,7 +38,7 @@ Forms and rules: [ASKING.md](ASKING.md). Stage 1 opens with S01 (full form); S02
 - Why: folders and settings differ from one agent app to another
 - Ask: Which agent app did your team use for the last piece of work in this repo? (`planned`: "...use for the work you plan?")
 - Terms: agent app = the program in which an AI agent works on your code; if you name a folder such as the settings folder of the app, say what it is
-- Enough: one name
+- Enough: one name, and the host it runs through if any (recorded `<app>@<host>`)
 - Unsure: say "not sure"; I use the app named under Suggest and tell you which; with no Suggest (empty repo, no config folder), I record no app yet and ask again at stage 5 when files are wired
 - Suggest: "The repo has <config folder> and commits signed <trailer>, so I think it is <app>. Is that right?" Look at config folders and commit trailers first; the platform of the answer is what the log records. Leave out the trailer part when git has none
 

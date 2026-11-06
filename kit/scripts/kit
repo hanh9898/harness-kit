@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """kit: retrieve individual building blocks without loading the entire store.
 
-  kit list              groups and piece counts
+  kit list              groups with names (groups.csv) and piece counts
   kit list <group>      one line per piece (ID, rung, name, summary)
   kit show <id|name>    every column of exactly one piece
   kit list P            one line per team architecture pattern (patterns.md)
@@ -27,6 +27,12 @@ from pathlib import Path
 def load(kit_dir):
     with (kit_dir / "legos.csv").open(encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
+
+
+def load_groups(kit_dir):
+    """{group ID: name} from groups.csv."""
+    with (kit_dir / "groups.csv").open(encoding="utf-8", newline="") as f:
+        return {r["id"]: r["name"] for r in csv.DictReader(f)}
 
 
 def load_patterns(kit_dir):
@@ -104,7 +110,7 @@ def cmd_list_rules(rules, gates, topic):
     return 0
 
 
-def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None):
+def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, names=None):
     if group is not None and group.lower() == "rules":
         return cmd_list_rules(*(rules or ([], {})), topic)
     if group is not None and group.lower() == "delegation":
@@ -124,9 +130,9 @@ def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None):
         return 0
     if group is None:
         for g, n in sorted(Counter(r["group"] for r in rows).items()):
-            print(f"{g}\t{n} pieces")
+            print(f"{g}\t{(names or {}).get(g, '')}\t{n} pieces")
         if patterns:
-            print(f"P\t{len(patterns)} team architecture patterns")
+            print(f"P\tTeam patterns\t{len(patterns)} team architecture patterns")
         print("Next step: kit list <group> to see pieces, kit show <id> to see one piece.")
         return 0
     picked = [r for r in rows if r["group"].lower() == group.lower()]
@@ -187,14 +193,14 @@ def main(argv=None):
     sub.add_parser("show").add_argument("query")
     a = ap.parse_args(argv)
     try:
-        rows = load(Path(a.dir))
+        rows, names = load(Path(a.dir)), load_groups(Path(a.dir))
     except OSError as e:
-        return fail(f"Cannot read legos.csv in {a.dir} ({e}).")
+        return fail(f"Cannot read legos.csv or groups.csv in {a.dir} ({e}).")
     patterns, head = load_patterns(Path(a.dir))
     deleg = load_delegation(Path(a.dir))
     rules = load_rules(Path(a.dir))
     if a.cmd == "list":
-        return cmd_list(rows, a.group, patterns, deleg, rules, a.topic)
+        return cmd_list(rows, a.group, patterns, deleg, rules, a.topic, names)
     return cmd_show(rows, a.query, patterns, head, deleg, rules)
 
 

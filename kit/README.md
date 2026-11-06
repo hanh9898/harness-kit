@@ -2,7 +2,7 @@
 
 Read-only store of lego pieces for building an agent harness, plus the rules, team patterns and delegation framework that go with them. Terms (harness, record, rung) are defined once, in the project's harness glossary; this kit only adds the ones below.
 
-**The CSV files are the source of truth.** Edit `legos.csv` and `rules.csv` directly. They were generated once from research reports; nothing regenerates them, and the generator refuses to overwrite them (see "Where the data came from").
+**The CSV files are the source of truth.** Edit `legos.csv`, `groups.csv` and `rules.csv` directly. They were generated once from research reports; nothing regenerates them, and the generator refuses to overwrite them (see "Where the data came from").
 
 ## Vocabulary
 
@@ -21,21 +21,20 @@ Read-only store of lego pieces for building an agent harness, plus the rules, te
 
 | File | What it holds | Rows |
 |---|---|---|
-| `legos.csv` | Pieces, 14 groups (columns in [COLUMNS.md](COLUMNS.md)) | 163 |
+| `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 163 |
+| `groups.csv` | Group letter and name of the pieces; `scripts/kit list` prints both | 14 |
 | `rules.csv` | Rules for skills, agent documents, prompts, configuration, workflow, tools, testing | 213 |
 | `patterns.md` | Team architecture patterns | 14 |
 | `delegation.md` | Delegation framework: four axes and a seven-step scale, all `partial` | 4 axes, 7 steps |
 
 Row counts differ from the first plan in one place (14 patterns, not 13); see `docs/generation-notes.md` at the repository root.
 
-Groups: A Intake, B Knowledge and context, C Agent behavior, D Enforcement and safety, E State and progress, F Tools and connections, G Communication and coordination, H Check and measure, I Learn and improve, J Operations and schedules, K Team organization and distribution, L Environment and isolation, M Observation and interface, N Written output and writing standard.
-
 In `sources`, `note:R24` means "research note 24", an internal note, not a link. `practice:` means the piece is supported only by observed use. In `rules.csv`, a bare source id such as `K08` is the id used in the research; most carry a link next to them.
 
 ## Look something up
 
 ```
-scripts/kit list            # groups and piece counts
+scripts/kit list            # groups: letter, name, piece count
 scripts/kit list A          # one line per piece in group A
 scripts/kit show B01        # one piece in full, by id or exact name
 scripts/kit list P          # team patterns, one line each; scripts/kit show P6 for one
@@ -47,7 +46,7 @@ There is no command that prints the whole store, on purpose. Ask for a group, th
 
 ## Where the data came from
 
-A one-time script, `skills/harness/harness-evolve/scripts/generate_kit.py`, read the research reports and wrote the four data files. Numbers, ids, certainty and source links are parsed from the reports. The free text was Vietnamese, so it was translated by hand block by block into `skills/harness/harness-evolve/scripts/seed/`; the script stops if a seed block does not match a report id or count. Run it again only into an empty directory:
+A one-time script, `skills/harness/harness-evolve/scripts/generate_kit.py`, read the research reports and wrote the five data files. Numbers, ids, certainty and source links are parsed from the reports. The free text was Vietnamese, so it was translated by hand block by block into `skills/harness/harness-evolve/scripts/seed/`; the script stops if a seed block does not match a report id or count. Run it again only into an empty directory:
 
 ```
 python3 skills/harness/harness-evolve/scripts/generate_kit.py --reports <reports dir> --dest <new dir>

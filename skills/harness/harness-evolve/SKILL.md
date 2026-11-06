@@ -35,7 +35,7 @@ Then read, in this order: `harness/record/index.md`, the entries, the last lines
 
 - **Drift**: an entry says one thing, the real file says another. Report each one and ask whether to fix the record or fix reality. Never fix either on your own.
 - **Overdue or failing**: entries whose `verified_on` is older than the limit in DRIFT.md, or whose check fails now.
-- **Needs change**: entries with `status: needs-change`, handed over by setup. Offer each as the change of step 1; when it is done, the entry becomes `adopted`.
+- **Needs change**: entries with `status: needs-change`, handed over by setup. Offer them first, ahead of the other findings, as the change of step 1; when it is done, the entry becomes `adopted`.
 - **Unfinished work**: the log shows a `change` without its `update`. Ask: continue that, or start a new change.
 
 Show the user one list of findings and ask what to do first (V01; V02 to V04 in DRIFT.md). Append the log line for `read`.

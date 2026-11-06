@@ -35,7 +35,7 @@ Entries of `kind: delegation` (one per role) and `kind: role-profile` (one per r
 
 Entries of `kind: standard` and `kind: isolation` point at a section of `harness/STANDARDS.md` (see [STANDARDS-STEP.md](STANDARDS-STEP.md) and [ISOLATION.md](ISOLATION.md)); they never copy the rule text. An entry whose piece is a hook names the platform config file it was wired into in `check` and records `verified_platform` (see [WIRING.md](WIRING.md)).
 
-`adopted` and `needs-change` are for a `kind: folder` entry of a part that already existed (card: `prior_harness`): `adopted` meets the standard and stays; `needs-change` does not, gap in `reason`. Setup moves nothing; `harness-evolve` takes each `needs-change` entry as its change.
+`adopted` and `needs-change` are for a `kind: folder` entry of a part that already existed (card: `prior_harness`): `adopted` meets the standard and stays; `needs-change` does not, gap in `reason`. Setup moves nothing; `harness-evolve` takes the `needs-change` entries first, on its first run after setup.
 
 ## `situation.md`
 
@@ -50,7 +50,7 @@ Step 1 writes nine lines, `field: value`, facts only, no prose; `python3 tools/c
 | `prior_harness` | `none`, or paths of harness parts that already exist, comma separated |
 | `history` | `yes`, or `none` when no finished work can be named |
 | `tree_relation` | `shared`: harness files and product code in one tree; `apart`: the harness repo holds no product code |
-| `platform` | one word, the agent platform; `unknown` until S01 is answered |
+| `platform` | the agent app, or `<app>@<host>` when it runs through a host (schedules depend on it); `unknown` until S01 is answered |
 | `confirmed` | `no` while drafting, `yes` once the user says the card is right |
 
 ## `gate.md`
@@ -75,7 +75,7 @@ Append only; one line per finished step, never edited:
 <UTC timestamp from `date -u +%FT%TZ`> step=<observe|need-to-piece|gate|proposal|record|check|delegation-draft|delegation|roles|standards|isolation|wiring|final> <key=value ...>
 ```
 
-`observe` carries `platform=`, `flow=` and `labels=`; `need-to-piece` carries `need=` and `piece=`; `gate` carries `items=` (approved) and `dropped=`; `proposal` carries `part=` (tools, folders or team) and `outcome=`; `record` and `check` carry `entry=` (`check` also `result=`); `standards` and `isolation` carry `entry=` (or `outcome=none`) and `result=`; `wiring` carries `map=`, `block=` and `hooks=`; `final` carries `entries=` and `result=`; `delegation-draft` is the one line written in the middle of step 7, after each answer that settles a field of a table row: `role=`, `kind=` and the fields settled so far (`undo=`, `info=`, `level=`, `zone=`, `stop=`); it lets a later run continue inside a stage without asking again; `delegation` and `roles` carry `entry=` and `result=`, and the first `delegation` line also `roles=` (all role names). Always take the timestamp from running `date -u`, never from memory. Before logging a step, read the last line: a line for the same step and the same entry (or, for `need-to-piece`, the same need) already there is not logged again.
+`observe` carries `platform=`, `flow=` and `labels=`; `need-to-piece` carries `need=`, `piece=` and `groups=` (letters of every kit group looked at, comma separated); `gate` carries `items=` (approved) and `dropped=`; `proposal` carries `part=` (tools, folders or team) and `outcome=`; `record` and `check` carry `entry=` (`check` also `result=`); `standards` and `isolation` carry `entry=` (or `outcome=none`) and `result=`; `wiring` carries `map=`, `block=` and `hooks=`; `final` carries `entries=` and `result=`; `delegation-draft` is the one line written in the middle of step 7, after each answer that settles a field of a table row: `role=`, `kind=` and the fields settled so far (`undo=`, `info=`, `level=`, `zone=`, `stop=`); it lets a later run continue inside a stage without asking again; `delegation` and `roles` carry `entry=` and `result=`, and the first `delegation` line also `roles=` (all role names). A value with spaces goes in double quotes (`flow="ticket, code, review"`). Always take the timestamp from running `date -u`, never from memory. Before logging a step, read the last line: a line for the same step and the same entry (or, for `need-to-piece`, the same need) already there is not logged again.
 
 **Revising a decision.** The log is never edited. When the user changes a decision already logged, append a new line with the same `step=` (and the same `part=` or `entry=`) and `revised=<timestamp of the old line>`; leave the old line alone. For each (step, part) the line in force is the last one. `python3 tools/check_kit.py --log harness/progress.log` checks that every `revised=` points to the timestamp of an earlier line with the same step, and lists the line in force for each (step, part) by the same rule.
 

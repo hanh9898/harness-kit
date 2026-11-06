@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""generate_kit: one-time conversion of research reports into kit data (legos.csv, rules.csv, patterns.md, delegation.md).
+"""generate_kit: one-time conversion of research reports into kit data (legos.csv, groups.csv, rules.csv, patterns.md, delegation.md).
 
   generate_kit.py --reports DIR --dest DIR
 
@@ -22,7 +22,7 @@ PARTIAL_REPORTS = {"17", "27", "28"}
 RUNGS = ("instruction-file", "skill", "script-cli", "mcp")
 TOPICS = {1: "skill-writing", 2: "agent-docs", 3: "prompts-and-roles", 4: "configuration",
           5: "workflow", 6: "tools-and-cli", 7: "testing-and-review"}
-OUTPUTS = ("legos.csv", "rules.csv", "patterns.md", "delegation.md")
+OUTPUTS = ("legos.csv", "groups.csv", "rules.csv", "patterns.md", "delegation.md")
 LEGO_COLUMNS = ["id", "group", "name", "summary", "needed_when", "rung", "certainty", "sources", "detail"]
 RULE_COLUMNS = ["id", "topic", "rule", "source", "certainty", "check", "verified_on"]
 PREFIX = {"C": "https://code.claude.com/docs/en/", "X": "https://learn.chatgpt.com/docs/"}
@@ -110,6 +110,15 @@ def build_legos(reports):
         _, name, summary, needed, rung, detail = seed[p["id"]]
         rows.append({**p, "name": name, "summary": summary, "needed_when": needed, "rung": rung, "detail": detail})
     return rows
+
+
+def build_groups(reports):
+    """English group names from seed/groups-en.txt, matched to report 25 group headings."""
+    letters = re.findall(r"^### Nh\xf3m ([A-N])\. ", read(reports / "research" / "25-lego-catalog.md"), re.M)
+    seed = dict(line.split(" || ", 1) for line in read(SEED / "groups-en.txt").splitlines() if line.strip())
+    if sorted(seed) != sorted(letters):
+        raise GenError(f"seed/groups-en.txt groups {sorted(seed)} differ from report 25 groups {sorted(letters)}; fix: align the seed")
+    return [{"id": g, "name": seed[g].strip()} for g in letters]
 
 
 # ---------- rules (synthesis.md) ----------
@@ -229,13 +238,14 @@ def main(argv=None):
               "fix: edit those files manually or rerun with --dest pointing to another directory.", file=sys.stderr)
         return 1
     try:
-        legos, rules = build_legos(reports), build_rules(reports)
+        legos, groups, rules = build_legos(reports), build_groups(reports), build_rules(reports)
         patterns, delegation = build_patterns(reports), build_delegation(reports)
     except GenError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 2
     dest.mkdir(parents=True, exist_ok=True)
     write_csv(dest / "legos.csv", LEGO_COLUMNS, legos)
+    write_csv(dest / "groups.csv", ["id", "name"], groups)
     write_csv(dest / "rules.csv", RULE_COLUMNS, rules)
     (dest / "patterns.md").write_text(patterns, encoding="utf-8")
     (dest / "delegation.md").write_text(delegation, encoding="utf-8")

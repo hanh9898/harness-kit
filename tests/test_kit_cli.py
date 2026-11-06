@@ -10,11 +10,20 @@ def kit(tmp_path, *args):
     return run(KIT_CLI, "--dir", root, *args)
 
 
-def test_list_without_group_shows_groups_with_counts_not_pieces(tmp_path):
+def test_list_without_group_shows_group_names_with_counts_not_pieces(tmp_path):
     r = kit(tmp_path, "list")
     assert r.returncode == 0
-    assert "A" in r.stdout and "2" in r.stdout and "B" in r.stdout
+    lines = r.stdout.splitlines()
+    assert lines[0].split("\t")[:2] == ["A", "Group A"] and "2" in lines[0]
+    assert lines[1].split("\t")[:2] == ["B", "Group B"]
     assert "Alpha hook" not in r.stdout and "Detail A01" not in r.stdout
+
+
+def test_real_kit_list_names_every_group():
+    r = run(KIT_CLI, "list")
+    first = r.stdout.splitlines()[0].split("\t")
+    assert first[:2] == ["A", "Intake"]
+    assert all(l.split("\t")[1] for l in r.stdout.splitlines() if "\t" in l)
 
 
 def test_list_group_shows_only_that_group_one_line_each(tmp_path):
