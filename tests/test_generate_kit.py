@@ -16,7 +16,7 @@ GEN = ROOT / "skills" / "harness" / "harness-evolve" / "scripts" / "generate_kit
 SEED = GEN.parent / "seed"
 NOTES = ROOT / "docs" / "generation-notes.md"
 REPORTS = Path(os.environ.get("HARNESS_REPORTS", "/Users/hanhnt2/Desktop/hbu-1976-control/.scratch/harness-standards-suite"))
-# Rows added AFTER initial generation (ticket 07 plus six shared rules: 1.33, 2.25, 2.26, 3.23, 7.33, 7.34). CSV is authoritative;
+# Rows added AFTER initial generation: count rules by their practice: source (see kit/README.md); H18 was added manually. CSV is authoritative;
 # the generator and seeds do NOT add these rows, so source report counts remain 162/211.
 ADDED_AFTER_GENERATION = {"legos": 1, "rules": sum(r["source"].startswith("practice:") for r in csv.DictReader((ROOT / "kit" / "rules.csv").open(encoding="utf-8", newline="")))}
 NOMINAL = {"legos": 162, "rules": 211, "patterns": 13}
