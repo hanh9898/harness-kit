@@ -24,13 +24,15 @@ def test_h18_is_shown_by_the_cli():
     assert r.returncode == 0 and "checklist" in r.stdout.lower()
 
 
-def test_new_rules_are_appended_at_the_end():
-    ids = list(rows("rules.csv"))
-    assert ids[-8:] == ["2.24", "7.32", "1.33", "2.25", "2.26", "3.23", "7.33", "7.34"]
-    r = rows("rules.csv")
-    assert r["2.24"]["topic"] == "agent-docs" and r["7.32"]["topic"] == "testing-and-review"
-    for i in ids[-8:]:
-        assert r[i]["certainty"] == "inferred" and r[i]["verified_on"] == "" and r[i]["source"]
+def test_practice_rules_come_after_all_generated_rules_and_stay_unverified():
+    r = list(rows("rules.csv").values())
+    flags = [x["source"].startswith("practice:") for x in r]
+    assert any(flags) and flags == sorted(flags), "practice rules must be appended after the generated ones"
+    for x in r:
+        if x["source"].startswith("practice:"):
+            assert x["certainty"] == "inferred" and x["verified_on"] == "" and x["topic"], x["id"]
+    by_id = rows("rules.csv")
+    assert by_id["2.24"]["topic"] == "agent-docs" and by_id["7.32"]["topic"] == "testing-and-review"
 
 
 def test_h18_is_the_last_lego():

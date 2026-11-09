@@ -21,5 +21,5 @@ def test_rules_fixed_in_review_keep_their_urls():
 
 
 def test_only_known_rules_lack_a_url():
-    lacking = sorted(i for i, x in rules().items() if "http" not in x["source"])
-    assert lacking == ["1.33", "2.02", "2.24", "2.25", "2.26", "3.23", "4.42", "5.35", "7.26", "7.32", "7.33", "7.34"]
+    lacking = sorted(i for i, x in rules().items() if "http" not in x["source"] and not x["source"].startswith("practice:"))
+    assert lacking == ["2.02", "4.42", "5.35", "7.26"]

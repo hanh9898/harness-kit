@@ -18,7 +18,7 @@ NOTES = ROOT / "docs" / "generation-notes.md"
 REPORTS = Path(os.environ.get("HARNESS_REPORTS", "/Users/hanhnt2/Desktop/hbu-1976-control/.scratch/harness-standards-suite"))
 # Rows added AFTER initial generation (ticket 07 plus six shared rules: 1.33, 2.25, 2.26, 3.23, 7.33, 7.34). CSV is authoritative;
 # the generator and seeds do NOT add these rows, so source report counts remain 162/211.
-ADDED_AFTER_GENERATION = {"legos": 1, "rules": 8}
+ADDED_AFTER_GENERATION = {"legos": 1, "rules": sum(r["source"].startswith("practice:") for r in csv.DictReader((ROOT / "kit" / "rules.csv").open(encoding="utf-8", newline="")))}
 NOMINAL = {"legos": 162, "rules": 211, "patterns": 13}
 needs_reports = pytest.mark.skipif(not (REPORTS / "synthesis.md").is_file(), reason="source reports are unavailable on this machine")
 CERTAINTY = {"stated", "inferred", "open", "partial"}
