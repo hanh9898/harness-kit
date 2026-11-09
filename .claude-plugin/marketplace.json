@@ -1,0 +1,14 @@
+{
+  "name": "harness-kit",
+  "owner": {
+    "name": "harness-kit"
+  },
+  "description": "Local marketplace for the harness-kit plugin.",
+  "plugins": [
+    {
+      "name": "harness-kit",
+      "source": "./",
+      "description": "harness-setup and harness-evolve with the read-only kit."
+    }
+  ]
+}
