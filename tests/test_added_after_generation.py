@@ -26,10 +26,10 @@ def test_h18_is_shown_by_the_cli():
 
 def test_new_rules_are_appended_at_the_end():
     ids = list(rows("rules.csv"))
-    assert ids[-2:] == ["2.24", "7.32"]
+    assert ids[-8:] == ["2.24", "7.32", "1.33", "2.25", "2.26", "3.23", "7.33", "7.34"]
     r = rows("rules.csv")
     assert r["2.24"]["topic"] == "agent-docs" and r["7.32"]["topic"] == "testing-and-review"
-    for i in ("2.24", "7.32"):
+    for i in ids[-8:]:
         assert r[i]["certainty"] == "inferred" and r[i]["verified_on"] == "" and r[i]["source"]
 
 

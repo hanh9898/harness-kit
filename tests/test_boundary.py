@@ -30,3 +30,32 @@ def test_tokens_come_from_file(tmp_path):
 def test_missing_tokens_file_exit_2(tmp_path):
     kitdir = write_kit(tmp_path / "kit", [row("A01")])
     assert run(CHECK_BOUNDARY, "--root", kitdir, "--tokens", tmp_path / "none.txt").returncode == 2
+
+
+def _tree(root, files, tokens="Foo  # proper name\nre:\\bL\\d{3}\\b  # ledger ID\n"):
+    toks = root / "toks.txt"
+    toks.write_text(tokens, encoding="utf-8")
+    scan = root / "scan"
+    for rel, body in files.items():
+        p = scan / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(body, encoding="utf-8")
+    return scan, toks
+
+
+def test_regex_token(tmp_path):
+    scan, toks = _tree(tmp_path, {"a.md": "code L123 and LL1234\n"})
+    r = run(CHECK_BOUNDARY, "--root", scan, "--tokens", toks, "--strict")
+    assert r.returncode == 1 and "a.md:1" in r.stdout
+
+
+def test_every_hit_is_listed(tmp_path):
+    scan, toks = _tree(tmp_path, {"a.md": "Foo\n", "b.md": "x\nFoo\n"})
+    r = run(CHECK_BOUNDARY, "--root", scan, "--tokens", toks)
+    assert "a.md:1" in r.stdout and "b.md:2" in r.stdout
+
+
+def test_tests_dir_is_skipped_and_clean_dir_passes_strict(tmp_path):
+    scan, toks = _tree(tmp_path, {"tests/t.py": "Foo L123\n", "ok.md": "clean\n"})
+    r = run(CHECK_BOUNDARY, "--root", scan, "--tokens", toks, "--strict")
+    assert r.returncode == 0, r.stdout

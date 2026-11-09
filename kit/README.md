@@ -23,7 +23,7 @@ Read-only store of lego pieces for building an agent harness, plus the rules, te
 |---|---|---|
 | `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 163 |
 | `groups.csv` | Group letter and name of the pieces; `scripts/kit list` prints both | 14 |
-| `rules.csv` | Rules for skills, agent documents, prompts, configuration, workflow, tools, testing | 213 |
+| `rules.csv` | Rules for skills, agent documents, prompts, configuration, workflow, tools, testing | 219 |
 | `patterns.md` | Team architecture patterns | 14 |
 | `delegation.md` | Delegation framework: four axes and a seven-step scale, all `partial` | 4 axes, 7 steps |
 
