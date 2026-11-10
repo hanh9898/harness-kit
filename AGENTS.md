@@ -4,6 +4,13 @@ Write repository files, comments, examples, commit messages, issues, pull reques
 and GitHub metadata in English. Run the language checker before committing;
 review unaccented prose for English meaning as well.
 
+Keep session notes, as-is snapshots, and unfinished design drafts in `.scratch/`.
+Document implemented behavior and accepted decisions; update the affected documentation in the same change.
+
+## Design principle
+
+Design every capability, the software factory and harness-kit's own behavior included, as kit pieces that a project assembles: each function offers alternative pieces, the kit fixes only conditional mandatory requirements, and the project records its chosen pieces and values with the reason. See `docs/adr/0005-assemble-harnesses-from-pieces.md`.
+
 ## Agent skills
 
 ### Issue tracker

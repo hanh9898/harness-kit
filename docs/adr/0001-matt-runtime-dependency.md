@@ -1,0 +1,5 @@
+# Reuse Matt skills as runtime dependencies
+
+Harness-kit depends on Matt skills and reuses the workflows appropriate to the user's intent, including interviewing, domain modeling, implementing changes, and retrospectives, adding harness-specific guidance and the shared kit library. This avoids maintaining separate copies of the general processes, at the cost of requiring compatible Matt skills and verifying their invocation on each supported host. Harness-kit owns the harness-specific behavior and integration contract.
+
+Matt marks its orchestration entrypoints as user-only, so the host does not offer them to the agent. Setup removes that restriction from the installed Matt skills that evolve routes to, with the user's per-host permission, and checks it again after Matt updates. The agent then loads those skills through the host's native skill mechanism and chooses them itself; harness-kit never tells the agent to read or replay a skill file by path. Editing installed plugin metadata is not a documented host feature, and Matt updates undo it, but no host offers a documented setting that grants model invocation to a plugin skill.
