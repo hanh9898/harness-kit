@@ -1,0 +1,28 @@
+name: Repository checks
+
+on:
+  push:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pytest
+      - name: Check English source, history, commits, and pull request text
+        run: python tools/check_english.py --commits --history --all-refs --event-file "$GITHUB_EVENT_PATH"
+      - run: python tools/check_kit.py
+      - run: python tools/check_boundary.py --root skills --strict
+      - run: python tools/check_boundary.py --strict
+      - run: python -m pytest -q tests

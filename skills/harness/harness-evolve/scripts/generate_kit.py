@@ -34,6 +34,7 @@ class GenError(Exception):
 
 def certainty_for(reliability_text, source_ids):
     """Row certainty; references to reports 17, 27 or 28 always yield partial (R6)."""
+    # Escaped input-schema labels preserve compatibility with archived source reports.
     if any(s in {f"R{n}" for n in PARTIAL_REPORTS} or s in PARTIAL_REPORTS for s in source_ids):
         return "partial"
     t = reliability_text.strip().removeprefix("NGU\u1ed2N ")

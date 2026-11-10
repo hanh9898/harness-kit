@@ -1,5 +1,9 @@
 # harness-kit
 
+Write repository files, comments, examples, commit messages, issues, pull requests,
+and GitHub metadata in English. Run the language checker before committing;
+review unaccented prose for English meaning as well.
+
 ## Agent skills
 
 ### Issue tracker

@@ -1,6 +1,12 @@
 # harness-kit
 
-A lightweight harness plugin for Matt Pocock skills. Spec: /Users/hanhnt2/Desktop/hbu-1976-control/.scratch/harness-kit/spec.md
+A lightweight harness plugin for Matt Pocock skills.
+
+Repository source, documentation, examples, commits, issues, and pull requests use English.
+Enable local checks after cloning with `git config core.hooksPath .githooks`.
+Run `python3 tools/check_english.py --commits --history` to check source and history.
+CI also checks pull-request titles and bodies. The automated language check detects
+accented text; reviewers also verify that unaccented prose is English.
 
 ## Installation
 
