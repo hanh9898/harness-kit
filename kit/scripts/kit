@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """kit: retrieve individual building blocks without loading the entire store.
 
+  kit browse [category] top categories, child categories, or bounded resource summaries
+  kit inspect kind:id   full details of exactly one categorized resource
   kit list              groups with names (groups.csv) and piece counts
   kit list <group>      one line per piece (ID, rung, name, summary)
   kit show <id|name>    every column of exactly one piece
@@ -11,7 +13,7 @@
   kit show combine      the "How the axes combine" section of delegation.md
   kit list rules        gate rules (gates.csv, gate=yes), one line per rule: ID, topic, check
   kit list rules <topic>  all rules for a topic (gate rules marked *); `kit list rules all` lists topics
-  kit show <rule ID>    all columns of a rule (for example 4.06), with its verified quote when it is a gate rule
+  kit show <rule ID>    all columns of a rule (for example 1.03), with its verified quote when it is a gate rule
 
 Add --dir DIR to use another kit directory; default: the kit containing scripts/.
 Uses only the standard library.
@@ -23,6 +25,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from catalog import browse_lines, inspect_lines, load_patterns, load_delegation
+
 
 def load(kit_dir):
     with (kit_dir / "legos.csv").open(encoding="utf-8", newline="") as f:
@@ -33,44 +38,6 @@ def load_groups(kit_dir):
     """{group ID: name} from groups.csv."""
     with (kit_dir / "groups.csv").open(encoding="utf-8", newline="") as f:
         return {r["id"]: r["name"] for r in csv.DictReader(f)}
-
-
-def load_patterns(kit_dir):
-    """Table rows in patterns.md as {number: [cells...]}; empty if the file is absent."""
-    path = kit_dir / "patterns.md"
-    if not path.is_file():
-        return {}, []
-    head, out = [], {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
-        if line.startswith("| #"):
-            head = cells
-        elif line.startswith("| ") and cells[0].isdigit():
-            out[int(cells[0])] = cells
-    return out, head
-
-
-def load_delegation(kit_dir):
-    """Axis and level rows plus the combination section from delegation.md: (axes, steps, combine)."""
-    path = kit_dir / "delegation.md"
-    axes, steps, combine, heads = {}, {}, [], {}
-    if not path.is_file():
-        return axes, steps, combine, heads
-    in_combine = False
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("## "):
-            in_combine = line.startswith("## How the axes combine")
-            continue
-        if in_combine and line.strip():
-            combine.append(line)
-        cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
-        if line.startswith("| #"):
-            heads["axis"] = cells
-        elif line.startswith("| Step"):
-            heads["step"] = cells
-        elif line.startswith("| ") and cells[0].isdigit():
-            (axes if "axis" in heads and "step" not in heads else steps)[int(cells[0])] = cells
-    return axes, steps, combine, heads
 
 
 def load_rules(kit_dir):
@@ -191,7 +158,16 @@ def main(argv=None):
     lp.add_argument("group", nargs="?")
     lp.add_argument("topic", nargs="?")
     sub.add_parser("show").add_argument("query")
+    sub.add_parser("browse").add_argument("category", nargs="?")
+    sub.add_parser("inspect").add_argument("query")
     a = ap.parse_args(argv)
+    if a.cmd in {"browse", "inspect"}:
+        try:
+            lines = browse_lines(Path(a.dir), a.category) if a.cmd == "browse" else inspect_lines(Path(a.dir), a.query)
+        except (OSError, ValueError, csv.Error, KeyError, IndexError) as e:
+            return fail(str(e))
+        print("\n".join(lines))
+        return 0
     try:
         rows, names = load(Path(a.dir)), load_groups(Path(a.dir))
     except OSError as e:

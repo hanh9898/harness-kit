@@ -46,7 +46,7 @@ Read [BOUNDARY.md](BOUNDARY.md). Label the items as its `s03_labels` branch says
 
 ### 2. Need to piece
 
-Take **one** need from the flow, the one the user names or the most painful. Look it up in the kit, never by loading the store:
+For discovery across pieces, rules, delegation and workflows, start with `<skill-dir>/../../../kit/scripts/kit browse`, descend by category, and load one result with `inspect <kind:id>`; [the kit guide](../../../kit/README.md) defines source and verification limits. Take **one** need from the flow, the one the user names or the most painful. Look it up in the kit, never by loading the store:
 
 ```
 <skill-dir>/../../../kit/scripts/kit list            # groups

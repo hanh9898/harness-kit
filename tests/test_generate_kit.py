@@ -16,9 +16,7 @@ GEN = ROOT / "skills" / "harness" / "harness-evolve" / "scripts" / "generate_kit
 SEED = GEN.parent / "seed"
 NOTES = ROOT / "docs" / "generation-notes.md"
 REPORTS = Path(os.environ.get("HARNESS_REPORTS", "/Users/hanhnt2/Desktop/hbu-1976-control/.scratch/harness-standards-suite"))
-# Rows added AFTER initial generation: count rules by their practice: source (see kit/README.md); H18 was added manually. CSV is authoritative;
-# the generator and seeds do NOT add these rows, so source report counts remain 162/211.
-ADDED_AFTER_GENERATION = {"legos": 1, "rules": sum(r["source"].startswith("practice:") for r in csv.DictReader((ROOT / "kit" / "rules.csv").open(encoding="utf-8", newline="")))}
+# The importer describes its source reports; the curated catalog can rewrite or remove their entries.
 NOMINAL = {"legos": 162, "rules": 211, "patterns": 13}
 needs_reports = pytest.mark.skipif(not (REPORTS / "synthesis.md").is_file(), reason="source reports are unavailable on this machine")
 CERTAINTY = {"stated", "inferred", "open", "partial"}
@@ -90,12 +88,6 @@ def test_independent_counts_match_generated_or_difference_is_explained(tmp_path)
     levels = len(re.findall(r"^\| [1-7] \| (?:Tell|Sell|Consult|Agree|Advise|Inquire|Delegate) \|",
                             (out / "delegation.md").read_text(encoding="utf-8"), re.M))
     assert levels == count_levels() == 7
-
-
-@needs_reports
-def test_committed_kit_matches_counts():
-    assert len(rows(KIT / "legos.csv")) == count_legos() + ADDED_AFTER_GENERATION["legos"]
-    assert len(rows(KIT / "rules.csv")) == count_rules() + ADDED_AFTER_GENERATION["rules"]
 
 
 # ---- Partial certainty (R6). ----

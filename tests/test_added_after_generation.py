@@ -41,7 +41,7 @@ def test_h18_is_the_last_lego():
 
 def test_l08_detail_gives_checkable_completion_condition():
     d = rows("legos.csv")["L08"]["detail"]
-    assert "120000" in d and "absolute path" in d
+    assert "120000" in d and "git diff --summary" in d
 
 
 def test_i04_detail_lists_the_five_classes():
@@ -50,7 +50,7 @@ def test_i04_detail_lists_the_five_classes():
         assert f"{letter}." in d, letter
 
 
-def test_d04_detail_records_the_disagreement_without_picking_a_side():
+def test_completion_check_requires_explicit_policy_and_a_fallback():
     d = rows("legos.csv")["D04"]["detail"].lower()
-    assert "disagree" in d and "not settled" in d
-    assert "warn first" in d and "does not pick a side" in d
+    assert "warning or blocking" in d and "cap retries" in d
+    assert "cannot intercept" in d and "launcher or ci" in d

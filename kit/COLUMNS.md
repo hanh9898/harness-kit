@@ -1,4 +1,24 @@
-# Columns of legos.csv
+# Resource formats
+
+## Topic hierarchy and assignments
+
+`categories.csv` contains `id,parent,name`. Root identifiers are `01` through `05`; leaves use identifiers such as `1.3` and name their root in `parent`. Root rows have an empty parent. Resources are assigned to leaves.
+
+`catalog.csv` contains `kind,id,category,rationale`. The pair `kind,id` identifies one source resource; each source resource has exactly one primary category. A rationale explains the semantic fit without changing the resource's evidence or provider scope. Pieces use `lego`, numbered team patterns use `pattern` with identifiers such as `P6`, and delegation entries use `delegation` with `axis1`, `step3`, or `combine`. Rules use `rule`; richer resources use their declared kind.
+
+## Guides and workflows
+
+`resources.json` is an array of resource objects. Each object carries:
+
+- `id`: stable lowercase slug; `kind`: `guide`, `workflow`, `rule`, or `piece`.
+- `name`, `summary`, `when_to_use`: identity, purpose, and applicability.
+- `prerequisites`, `instructions`, `applicable_standards`, `verification`: arrays describing the resource contract.
+- `sources`: primary-source URLs; `certainty`: `stated`, `inferred`, or `partial`.
+- `checked_on`: date the documentation was checked; `host_scope` and `limitations`: applicability and evidence limits.
+
+Category assignments live only in the catalog. Verification arrays are instructions for checking the resource, not evidence that those checks have run. Core catalog validation checks references, unique identifiers, assignments, and field structure; content quality still requires review.
+
+## Columns of legos.csv
 
 | Column | Meaning |
 |---|---|

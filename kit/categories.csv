@@ -1,0 +1,35 @@
+id,parent,name
+01,,Agentic Architecture & Orchestration
+1.1,01,Agentic Loops
+1.2,01,Multi-Agent Orchestration
+1.3,01,Subagent Invocation and Context Passing
+1.4,01,Workflow Enforcement and Handoff
+1.5,01,Hooks
+1.6,01,Task Decomposition Strategies
+1.7,01,Session State and Resumption
+02,,Tool Design & MCP Integration
+2.1,02,Tool Interface Design
+2.2,02,Structured Error Responses
+2.3,02,Tool Distribution & Tool Choice
+2.4,02,MCP Server Integration
+2.5,02,Built-in Tools
+03,,Agent Configuration & Workflows
+3.1,03,"Instruction Hierarchy, Scoping, and Modular Organisation"
+3.2,03,Custom Commands and Skills
+3.3,03,Path-Specific Rules for Conditional Convention Loading
+3.4,03,Iterative Refinement Techniques
+3.5,03,CI/CD Integration
+04,,Prompt Engineering & Structured Output
+4.1,04,System Prompts with Explicit Criteria
+4.2,04,Few-Shot Prompting
+4.3,04,Structured Output with Tool Use
+4.4,04,"Validation, Retry, and Feedback Loops"
+4.5,04,Batch Processing Strategies
+4.6,04,Multi-Instance and Multi-Pass Review
+05,,Context Management & Reliability
+5.1,05,Context Window Management
+5.2,05,Escalation & Ambiguity Resolution
+5.3,05,Error Propagation in Multi-Agent Systems
+5.4,05,Codebase Exploration & Context Degradation
+5.5,05,Human Review & Confidence Calibration
+5.6,05,Information Provenance & Multi-Source Synthesis

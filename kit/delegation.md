@@ -6,12 +6,12 @@ How much an agent may decide on a person's behalf. It has four axes and one seve
 
 ## The four axes
 
-| # | Axis | Question to ask | What the sources say | Certainty | Sources |
+| # | Axis | Question to ask | Guidance | Certainty | Sources |
 |---|---|---|---|---|---|
-| 1 | Reversibility | Can the outcome be undone cheaply? | Split choices into one-way doors (consequential, hard to reverse) and two-way doors (changeable). Two-way choices can be made quickly by a person or small group with good judgment; one-way choices use a heavier process. Observed agent use shows most actions are low-risk and reversible, and few are irreversible. Default blocks in a permission classifier include production deploys, force pushes and irreversible file destruction. | partial | Type 1 / Type 2 framing; agent autonomy measurement; Claude Code permission modes; auto mode write-up; Codex approvals page |
-| 2 | Information level | Does the agent know enough to decide? | Decide with roughly 70 percent of the information wanted, then disagree and commit. When criteria are vague or the agent cannot ask a clarifying question, route to a person instead of guessing. Agents themselves stop to ask more often as tasks get harder. | partial | Shareholder-letter rule on 70 percent; autonomy measurement; AI-approvals FAQ; Cynefin domain definitions (inferred as a related axis) |
+| 1 | Reversibility | Can the outcome be undone cheaply? | Identify the consequences, restoration path, and cost of reversing the action. Assign consequential or hard-to-reverse choices to a person unless the granted scope explicitly delegates them; allow reversible work within the authority already granted. | partial | Type 1 / Type 2 framing; agent autonomy measurement; Claude Code permission modes; auto mode write-up; Codex approvals page |
+| 2 | Information level | Does the agent know enough to decide? | Identify missing evidence that could change the chosen action. Ask when that evidence or a required criterion is unavailable; otherwise proceed within scope and state any material assumption. A fixed information percentage does not establish readiness. | partial | Shareholder-letter rule on 70 percent; autonomy measurement; AI-approvals FAQ; Cynefin domain definitions (inferred as a related axis) |
 | 3 | Delegation scale (seven steps) | How is the choice shared between agent and person? | See the scale below. A matching ladder of five human roles exists (operator, collaborator, consultant, approver, observer), and a ten-step automation scale split by function type exists only as a substitute text. | partial | Delegation Poker; autonomy-levels paper; Sheridan-Verplank scale (substitute text) |
-| 4 | Permitted zone and escalation threshold | Where may the agent act alone, and when must it stop and ask? | Separate what is technically possible (sandbox, workspace, network) from when to ask (approval policy). Everything the agent chooses on its own is unauthorized until the person says otherwise. Escalate after a count of refusals: pause after 3 in a row or 20 in total; with no person available (headless), end the run. Writes inside the project directory can pass without a classifier call. | partial | Codex sandbox and approval policy; auto mode write-up; Claude Code permission modes |
+| 4 | Permitted zone and escalation threshold | Where may the agent act alone, and when must it stop and ask? | Define authorized actions, accessible resources, and the conditions that require escalation. Technical access does not grant authority; an existing authorization remains valid within its scope. Stop the affected operation when required authority is missing, including in unattended runs. Choose escalation thresholds for the task rather than inheriting a product default. | partial | Codex sandbox and approval policy; auto mode write-up; Claude Code permission modes |
 
 Also cited across axes: one accountable approver per choice (DACI), a record of each choice with its reason (decision records), and an audit log at the highest autonomy levels.
 
@@ -31,11 +31,11 @@ Steps are named from the Delegation Poker levels; the "typical use" column is in
 
 ## How the axes combine (inferred)
 
-1. Start from axis 1: hard-to-reverse choices stay at steps 1 to 3 whatever the agent knows.
-2. Apply axis 2: if information or criteria are lacking, drop one step toward the person, or pick the lowest-risk default and keep going while recording the gap.
-3. Set axis 4: name the zone and the refusal count that triggers escalation; cap how far up the scale an agent may go by task type.
+1. Start from axis 1: choose the authority needed for the consequences and reversibility of the action, honoring scope already granted.
+2. Apply axis 2: escalate missing information that could change the action; otherwise keep working within the chosen scope and record material assumptions.
+3. Set axis 4: name the authorized scope and conditions that trigger escalation; cap how far up the scale an agent may go by task type.
 4. Raise a step only after the agent has a record of correct choices for that type of work (situational-leadership reading: ability and willingness for a specific task).
-5. Turning delegation off means moving the whole scale to step 3 or lower; turning it on means moving to step 6 for reversible choices. The tools stay the same.
+5. Turning delegation off returns the affected choices to the person; granting it selects the scope and reporting behavior for that task. Tool availability alone does not determine the level.
 
 ## Not read
 

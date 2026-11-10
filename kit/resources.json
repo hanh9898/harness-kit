@@ -1,0 +1,480 @@
+[
+  {
+    "name": "Separate MCP protocol and execution errors",
+    "kind": "guide",
+    "summary": "Preserve the distinction between malformed protocol requests and recoverable tool failures.",
+    "when_to_use": "An MCP adapter hides failures or retries every failure identically.",
+    "prerequisites": [
+      "A declared MCP protocol revision and captured example responses."
+    ],
+    "instructions": [
+      "Classify unknown tools and malformed requests as protocol failures.",
+      "Return tool execution failures with isError=true and concise corrective context.",
+      "Keep error classification visible through adapters; redact credentials.",
+      "Choose retry behavior from the failure cause, not from HTTP success alone."
+    ],
+    "applicable_standards": [
+      "MCP 2025-11-25: Tools, Error Handling."
+    ],
+    "verification": [
+      "A missing tool produces a protocol error; an invalid business value produces an execution error.",
+      "Neither fixture is recorded as a successful task result."
+    ],
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling"
+    ],
+    "certainty": "inferred",
+    "limitations": "The channel distinction is specified; adapter design and retry policy are synthesis. No implementation was exercised.",
+    "checked_on": "2026-11-10",
+    "host_scope": "MCP implementations using the named protocol revision.",
+    "id": "mcp-error-channel-contract"
+  },
+  {
+    "name": "Choose tool eligibility per workflow stage",
+    "kind": "workflow",
+    "summary": "Make tool selection explicit without confusing selection controls with authorization.",
+    "when_to_use": "A workflow selects irrelevant tools or omits a prerequisite lookup.",
+    "prerequisites": [
+      "A tool inventory, stage-specific permitted operations, and an executor that can enforce authorization."
+    ],
+    "instructions": [
+      "For each stage, declare whether no tool is valid, which lookup is required, and which operations are eligible.",
+      "Map those requirements to documented selection controls when available; otherwise expose only eligible tools through a gateway.",
+      "Enforce execution authorization independently of model selection.",
+      "If a required lookup did not succeed, stop dependent actions and report the unmet prerequisite.",
+      "Evaluate ambiguous requests, no-tool requests, and disallowed operations before rollout."
+    ],
+    "applicable_standards": [
+      "Application tool-selection policy and executor authorization contract."
+    ],
+    "verification": [
+      "A no-tool fixture completes without an unnecessary call.",
+      "A required-lookup fixture cannot reach the dependent action without its evidence.",
+      "A disallowed operation remains denied even if the model requests it."
+    ],
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling#tool-choice"
+    ],
+    "certainty": "inferred",
+    "limitations": "Selection controls and request fields vary by API. The neutral stage policy is synthesis from the cited provider example; no adapter was run.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Agent workflows with a tool executor and stage-specific capability routing.",
+    "id": "stage-tool-eligibility-policy"
+  },
+  {
+    "name": "Verify MCP HTTP authorization boundaries",
+    "kind": "workflow",
+    "summary": "Check discovery, audience binding, and scope failures before integrating a protected MCP server.",
+    "when_to_use": "An HTTP MCP connection needs OAuth or repeatedly fails authorization.",
+    "prerequisites": [
+      "An HTTP MCP endpoint and its selected authorization implementation."
+    ],
+    "instructions": [
+      "Record the protocol revision and discover protected-resource and authorization-server metadata.",
+      "Use the resource parameter and validate that received tokens target this server.",
+      "Implement PKCE and prevent token passthrough to downstream services.",
+      "Handle insufficient scope with a bounded reauthorization path; keep credentials out of logs."
+    ],
+    "applicable_standards": [
+      "MCP 2025-11-25 authorization; RFC 9728 metadata; RFC 8707 resource indicators."
+    ],
+    "verification": [
+      "A wrong-audience token is rejected.",
+      "A missing-scope request follows the intended challenge path.",
+      "Repeated authorization failures terminate instead of looping."
+    ],
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization"
+    ],
+    "certainty": "inferred",
+    "limitations": "This HTTP flow does not apply to stdio credential loading. Checklist synthesis; no OAuth exchange was run.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Protected HTTP MCP clients and servers.",
+    "id": "mcp-http-authorization-readiness"
+  },
+  {
+    "name": "Route file work through available built-in tools",
+    "kind": "guide",
+    "summary": "Select search, read, edit, and shell capabilities from the actual session inventory.",
+    "when_to_use": "A coding agent uses broad shell commands for narrow file tasks or assumes unavailable tools.",
+    "prerequisites": [
+      "The current host's tool inventory and permission rules."
+    ],
+    "instructions": [
+      "Inspect the available tool inventory and permission boundaries.",
+      "Use file-name search to locate candidates and content search to locate relevant text.",
+      "Read relevant content, make a targeted edit, and inspect the resulting diff.",
+      "Use shell execution for builds, tests, and capabilities absent from dedicated tools only when shell access is permitted.",
+      "If neither a dedicated tool nor an authorized command can perform a step, report the missing capability and stop that step."
+    ],
+    "applicable_standards": [
+      "Observed tool inventory, local permissions, and repository command conventions."
+    ],
+    "verification": [
+      "A search fixture locates the expected file and text.",
+      "An edit fixture changes only the intended content.",
+      "The route works with the observed inventory."
+    ],
+    "sources": [
+      "https://code.claude.com/docs/en/tools-reference"
+    ],
+    "certainty": "inferred",
+    "limitations": "Tool names and availability vary. The routing procedure is inferred from the cited tool reference; no live runner compatibility was tested.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Coding agents with authorized file inspection and editing capabilities.",
+    "id": "builtin-tool-routing"
+  },
+  {
+    "name": "Verify scoped instruction loading",
+    "kind": "workflow",
+    "summary": "Check that conditional rules load for matching files and stay absent elsewhere.",
+    "when_to_use": "Monorepo rules leak across components or fail to activate.",
+    "prerequisites": [
+      "A declared path-to-guide mapping and a runner with either conditional loading diagnostics or an explicit document router."
+    ],
+    "instructions": [
+      "Define a focused guide, its path scope, and a harmless marker that can establish whether it was loaded.",
+      "With conditional loading, configure the documented path rules and record how path roots are resolved.",
+      "Open a matching file in a fresh session and inspect loader diagnostics or the supplied context for the guide.",
+      "Repeat with a nonmatching file in another fresh session and confirm that the guide is absent.",
+      "If automatic loading cannot be observed, route guides explicitly from the task brief and record which guide was read; label automatic loading unverified."
+    ],
+    "applicable_standards": [
+      "Runner instruction-loading contract; explicit path-to-guide routing."
+    ],
+    "verification": [
+      "Matching and nonmatching fixtures produce the intended guide selection.",
+      "The check distinguishes observed loading from an agent claim that it remembers a rule.",
+      "Unavailable automatic loading is reported rather than presented as verified."
+    ],
+    "sources": [
+      "https://code.claude.com/docs/en/memory#path-specific-rules"
+    ],
+    "certainty": "inferred",
+    "limitations": "Instruction loading is context routing, not access enforcement. The procedure is synthesized from the cited implementation; no loader was exercised.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Runners with observable conditional instruction loading or an explicit document router.",
+    "id": "scoped-instruction-loading-check"
+  },
+  {
+    "name": "Build a bounded CI review job",
+    "kind": "workflow",
+    "summary": "Define an event-driven review with explicit privileges, limits, and observable results.",
+    "when_to_use": "Agent review must run unattended in a repository pipeline.",
+    "prerequisites": [
+      "A CI runner, a noninteractive agent entry point, scoped credentials, and an accepted review scope."
+    ],
+    "instructions": [
+      "Choose an event and give the job a concrete review scope and output contract.",
+      "Set minimum job permissions and obtain credentials through the CI secret or identity mechanism.",
+      "Enforce a runtime timeout externally and any supported usage limits in the agent adapter; reject unsupported interactive requests.",
+      "Follow repository dependency-pinning policy and review executable action or runner code.",
+      "Keep required deterministic checks separate from model review and retain both outcomes.",
+      "If a noninteractive run cannot report failure or be cancelled, stop deployment of the review job."
+    ],
+    "applicable_standards": [
+      "CI job permission and timeout contracts; repository dependency-pinning policy."
+    ],
+    "verification": [
+      "A permitted event starts the job and an excluded event does not.",
+      "The timeout cancels excessive work and preserves a failure record.",
+      "A missing permission fails without hanging on a prompt.",
+      "Failing deterministic checks remain failing even if the model approves."
+    ],
+    "sources": [
+      "https://code.claude.com/docs/en/github-actions",
+      "https://docs.github.com/en/actions/reference/security/secure-use"
+    ],
+    "certainty": "inferred",
+    "limitations": "This is a synthesized workflow design, not a deployed job. Model tool eligibility is separate from job credentials and repository protections.",
+    "checked_on": "2026-11-10",
+    "host_scope": "CI systems with a bounded noninteractive agent runner.",
+    "id": "ci-bounded-review"
+  },
+  {
+    "name": "Build a representative few-shot example set",
+    "kind": "workflow",
+    "summary": "Demonstrate the intended output with examples that cover real judgments and edge cases.",
+    "when_to_use": "Instructions alone produce inconsistent labels, formats, or boundary judgments.",
+    "prerequisites": [
+      "An output contract and examples whose expected answers can be checked."
+    ],
+    "instructions": [
+      "Select a typical case, a boundary case, and an insufficient-information case when relevant.",
+      "Pair each input with an accepted output using consistent delimiters.",
+      "Vary incidental details so the examples do not accidentally teach an irrelevant shortcut.",
+      "Keep evaluation cases outside the prompt; compare results before and after adding examples."
+    ],
+    "applicable_standards": [
+      "Example-based prompting and held-out evaluation against an explicit output contract."
+    ],
+    "verification": [
+      "All examples satisfy the same output contract.",
+      "Held-out cases expose whether the examples improve the intended behavior.",
+      "No evaluation item appears in the prompt."
+    ],
+    "sources": [
+      "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
+    ],
+    "certainty": "inferred",
+    "limitations": "No universal example count or guaranteed accuracy gain is claimed; held-out evaluation is synthesized guidance.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Model prompting workflows that accept examples and can be evaluated on held-out cases.",
+    "id": "few-shot-example-set"
+  },
+  {
+    "name": "Validate structured MCP tool results",
+    "kind": "rule",
+    "summary": "Declare and validate the schema of server-produced tool data.",
+    "when_to_use": "Consumers parse tool prose or silently accept malformed structured results.",
+    "prerequisites": [
+      "An MCP tool returning structuredContent."
+    ],
+    "instructions": [
+      "Declare an outputSchema when consumers rely on a stable structure.",
+      "Return conforming structuredContent.",
+      "Also provide serialized JSON in a text block for backward compatibility.",
+      "Validate results before consumers use them."
+    ],
+    "applicable_standards": [
+      "MCP 2025-11-25 Tools: Structured Content and Output Schema."
+    ],
+    "verification": [
+      "A malformed result fails client validation.",
+      "Structured and text representations encode the same data."
+    ],
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-11-25/server/tools#structured-content"
+    ],
+    "certainty": "inferred",
+    "limitations": "Server-produced structuredContent differs from schema-constrained model generation. No live interoperability test was performed.",
+    "checked_on": "2026-11-10",
+    "host_scope": "MCP structured tool results.",
+    "id": "mcp-structured-result-validation"
+  },
+  {
+    "name": "Handle schema output, refusal, and incompletion separately",
+    "kind": "workflow",
+    "summary": "Validate generated data without treating every response as a successful schema instance.",
+    "when_to_use": "A structured-output consumer crashes on refusals or accepts semantically wrong data.",
+    "prerequisites": [
+      "An output schema, domain constraints, and an adapter that distinguishes successful, refused, incomplete, and failed responses."
+    ],
+    "instructions": [
+      "Map documented response states into explicit success, refusal, incomplete, and failure outcomes.",
+      "Parse complete successful output and validate it against the schema; use constrained generation only where supported.",
+      "Check domain constraints such as allowed identifiers and numeric bounds.",
+      "Represent incompatible input explicitly, bound repair attempts, and keep final failure visible.",
+      "If response completion cannot be established, withhold downstream actions and report an unresolved result."
+    ],
+    "applicable_standards": [
+      "Application output schema and response-state adapter contract."
+    ],
+    "verification": [
+      "Fixtures for success, refusal, incompletion, and a semantically invalid object reach distinct outcomes.",
+      "Invalid domain data never reaches the action executor."
+    ],
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/structured-outputs"
+    ],
+    "certainty": "inferred",
+    "limitations": "Schema conformity does not establish truth. Provider response fields and schema support vary; this neutral validation policy is synthesis and was not executed.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Model-output consumers with schema validation and explicit response-state handling.",
+    "id": "structured-output-terminal-states"
+  },
+  {
+    "name": "Reconcile batch results by request identity",
+    "kind": "workflow",
+    "summary": "Account for every asynchronous batch request without relying on output ordering.",
+    "when_to_use": "Many independent model requests can complete outside an interactive turn.",
+    "prerequisites": [
+      "An asynchronous execution service or worker queue and a durable manifest of unique request identifiers."
+    ],
+    "instructions": [
+      "Assign a unique request identifier and retain the mapping from identifier to input.",
+      "Submit requests using the service adapter and persist batch or job identifiers.",
+      "At completion, collect successful results, errors, and unresolved requests from every documented result channel.",
+      "Join by request identity, detect missing or duplicate identifiers, and preserve successful outputs.",
+      "Retry only eligible failed or unfinished items with linked attempt records.",
+      "If the service cannot correlate results to inputs, run requests individually with recorded job identities or stop batch execution."
+    ],
+    "applicable_standards": [
+      "Application request-identity and retry-accounting contract."
+    ],
+    "verification": [
+      "Shuffled outputs still map to the correct inputs.",
+      "Every manifest ID is successful, failed, or explicitly unresolved.",
+      "A retry excludes completed successes."
+    ],
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/batch"
+    ],
+    "certainty": "inferred",
+    "limitations": "Wire formats, result channels, limits, and expiration behavior vary by service. The neutral reconciliation policy is inferred from the cited batch example; no batch was submitted.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Asynchronous model APIs and worker queues with durable request correlation.",
+    "id": "batch-result-reconciliation"
+  },
+  {
+    "name": "Propagate failures through dependent tool steps",
+    "kind": "workflow",
+    "summary": "Preserve a failed dependency as failure instead of converting it into empty data or success.",
+    "when_to_use": "A multi-step agent continues with invented values after a lookup or tool failure.",
+    "prerequisites": [
+      "A dependency map and tool-call correlation identifiers."
+    ],
+    "instructions": [
+      "Preserve call identity, error category, safe diagnostics, and verified partial results.",
+      "Map each tool result to the documented adapter success or failure envelope without converting errors to successful empty values.",
+      "Mark dependent steps blocked until their required inputs are available.",
+      "Continue independent branches only when their own prerequisites hold.",
+      "Report partial completion and unresolved causes; retry within a declared budget.",
+      "If an adapter cannot expose reliable failure status, stop dependent side effects and record the result as unresolved."
+    ],
+    "applicable_standards": [
+      "Tool adapter result contract and application dependency policy."
+    ],
+    "verification": [
+      "A failed lookup never becomes an empty successful lookup.",
+      "A dependent mutation is not invoked after its input fails.",
+      "An independent branch may finish while the final report still exposes the failure."
+    ],
+    "sources": [
+      "https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls"
+    ],
+    "certainty": "inferred",
+    "limitations": "Dependency blocking and retry budgets are harness design choices, not guarantees supplied by the model or API.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Agent pipelines with correlated tool calls and explicit success or failure outcomes.",
+    "id": "tool-failure-propagation-contract"
+  },
+  {
+    "name": "Route uncertain findings to evidence-based review",
+    "kind": "workflow",
+    "summary": "Use missing evidence and contradictions to decide what needs human review.",
+    "when_to_use": "An agent is tempted to fill evidence gaps with a confident answer.",
+    "prerequisites": [
+      "An agreed evidence requirement and an identified reviewer or escalation route."
+    ],
+    "instructions": [
+      "Require a supporting source for each consequential claim.",
+      "Allow an explicit insufficient-evidence outcome.",
+      "Record missing facts, contradictory sources, and the decision those gaps affect.",
+      "Resolve gaps through targeted retrieval; send unresolved decision-relevant items to the reviewer.",
+      "Present a concise evidence packet and proposed next step."
+    ],
+    "applicable_standards": [
+      "Evidence sufficiency, citation verification, and explicit review routing."
+    ],
+    "verification": [
+      "An unsupported claim is removed, qualified, or escalated.",
+      "The reviewer can trace each disputed claim to evidence.",
+      "A confident tone alone never satisfies the evidence requirement."
+    ],
+    "sources": [
+      "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations"
+    ],
+    "certainty": "inferred",
+    "limitations": "The review route is synthesized. A model's verbal confidence is not established here as a calibrated probability.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Evidence-based agent workflows across hosts.",
+    "id": "evidence-based-review-routing"
+  },
+  {
+    "name": "Track provenance through multi-source synthesis",
+    "kind": "workflow",
+    "summary": "Connect claims to source versions, transformations, and responsible reviewers.",
+    "when_to_use": "A synthesis combines sources whose origin, date, or interpretation may differ.",
+    "prerequisites": [
+      "Accessible source documents and stable identifiers for claims and source versions."
+    ],
+    "instructions": [
+      "Record each source entity with its origin, version or retrieval date, and relevant locator.",
+      "For each claim, record source references and whether the claim is stated or inferred.",
+      "Record the synthesis activity and responsible agent or reviewer.",
+      "Keep conflicting claims visible and explain the basis for any resolution.",
+      "Preserve derivation links when a summary replaces the source text."
+    ],
+    "applicable_standards": [
+      "W3C PROV-DM concepts: entities, activities, agents, and derivation."
+    ],
+    "verification": [
+      "A reviewer can trace each consequential claim to a specific source version.",
+      "Changing a source identifies which derived claims need review.",
+      "Unresolved conflicts remain explicit."
+    ],
+    "sources": [
+      "https://www.w3.org/TR/prov-dm/"
+    ],
+    "certainty": "inferred",
+    "limitations": "This lightweight ledger adopts PROV concepts; it does not claim full PROV serialization or conformance.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Research, retrieval, and multi-agent synthesis workflows.",
+    "id": "claim-provenance-ledger"
+  },
+  {
+    "name": "Reconcile live state when resuming a session",
+    "kind": "workflow",
+    "summary": "Resume the intended conversation and verify external state before continuing its plan.",
+    "when_to_use": "Work spans sessions and files, branches, or external records may have changed.",
+    "prerequisites": [
+      "A recorded objective, remaining work, and either saved session access or a durable handoff."
+    ],
+    "instructions": [
+      "Select the intended saved session using its documented identifier; if unavailable, start a new session from the durable handoff.",
+      "Confirm the objective, working directory, and source revision.",
+      "Read current changes and the latest relevant external state.",
+      "Compare them with the saved plan and identify completed, invalidated, or ambiguous steps.",
+      "Continue from reconciled state and record a new checkpoint; pause ambiguous external side effects for review."
+    ],
+    "applicable_standards": [
+      "Session adapter contract and live-state reconciliation policy."
+    ],
+    "verification": [
+      "The selected session is the intended task.",
+      "Changes made since the prior session are acknowledged.",
+      "A completed external action is not repeated solely because the saved plan was stale."
+    ],
+    "sources": [
+      "https://code.claude.com/docs/en/common-workflows#resume-previous-conversations"
+    ],
+    "certainty": "inferred",
+    "limitations": "Restoring a conversation does not verify external state or undo side effects. The neutral reconciliation procedure is inferred from the cited session example; no session was resumed.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Long-running tasks with saved sessions or durable handoff records.",
+    "id": "resume-with-state-reconciliation"
+  },
+  {
+    "id": "bounded-exploration-evidence-checkpoint",
+    "name": "Bound code exploration and preserve evidence",
+    "kind": "workflow",
+    "summary": "Explore a concrete code question while preserving source evidence across compaction.",
+    "when_to_use": "Repository exploration repeats searches or loses findings as context grows.",
+    "prerequisites": [
+      "A code question, search tools, and persistent notes."
+    ],
+    "instructions": [
+      "Declare the code question, relevant subsystem, exploration budget, and stopping condition.",
+      "Search names and symbols, then read relevant definitions, callers, and tests.",
+      "Record findings with source locators, revision identity, uncertainty, and unanswered questions.",
+      "At the budget boundary, summarize supported findings and the next targeted search.",
+      "Before compaction or a session handoff, preserve the evidence map; afterward, reopen critical sources and check for changes."
+    ],
+    "applicable_standards": [
+      "Progressive retrieval, evidence checkpoints, and bounded repository exploration."
+    ],
+    "verification": [
+      "A fresh session recovers the question, findings, source locations, and remaining gaps from the checkpoint.",
+      "Changed source content invalidates the affected finding.",
+      "Budget exhaustion produces a bounded partial result."
+    ],
+    "sources": [
+      "https://www.anthropic.com/research/effective-context-engineering-for-ai-agents"
+    ],
+    "certainty": "inferred",
+    "limitations": "Budgeting and evidence-map fields are synthesized guidance. No compaction or session-restoration runtime was tested.",
+    "checked_on": "2026-11-10",
+    "host_scope": "Coding agents with file search and persistent notes; context compaction is optional."
+  }
+]

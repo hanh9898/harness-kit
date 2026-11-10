@@ -12,6 +12,7 @@ Print one legos.csv:line error per line; exit 1 on errors, 0 when clean.
 """
 import argparse
 import csv
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -21,6 +22,17 @@ RUNGS = ["instruction-file", "skill", "script-cli", "mcp"]
 GATE_COLUMNS = ["id", "gate", "verify_method", "verified_quote", "note"]
 GATE_METHODS = ["raw-grep", "webfetch", "unreadable"]
 ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def check_catalog(kit_dir):
+    """Validate taxonomy assignments when a kit declares a resource catalog."""
+    if not any((kit_dir / name).exists() for name in ("categories.csv", "catalog.csv")):
+        return []
+    source = Path(__file__).resolve().parent.parent / "kit" / "catalog.py"
+    spec = importlib.util.spec_from_file_location("harness_catalog", source)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.validate_catalog(kit_dir)
 
 
 def check(kit_dir):
@@ -251,7 +263,7 @@ def main(argv=None):
             print(f"ERROR: {e}")
         print(f"{len(errs)} log errors." if errs else "Log clean.")
         return 1 if errs else 0
-    errs = check(Path(a.dir)) + check_gates(Path(a.dir))
+    errs = check(Path(a.dir)) + check_gates(Path(a.dir)) + check_catalog(Path(a.dir))
     for e in errs:
         print(f"ERROR: {e}")
     print(f"{len(errs)} data errors." if errs else "Kit data clean.")

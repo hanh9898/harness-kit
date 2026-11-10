@@ -42,6 +42,7 @@ Show the user one list of findings and ask what to do first (V01; V02 to V04 in 
 
 ### 1. State the change
 
+Before forming a suggestion, use `<skill-dir>/../../../kit/scripts/kit browse` to find relevant categories across resource types, then `inspect <kind:id>` for selected resources. Carry their guidance into implementation and their applicable standards into review; [the kit guide](../../../kit/README.md) explains evidence limits.
 One sentence: what changes, which role, which piece (a kit id or a record entry). Ask for the latest snag (V05, in ASKING.md) and confirm the sentence (V06); the role and piece you look up yourself. The user names it, or picks from step 0. Look up the kit, never by loading the store:
 
 ```

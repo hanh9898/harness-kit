@@ -1,0 +1,351 @@
+kind,id,category,rationale
+lego,A01,2.4,Connects an external work tracker through a scoped MCP server.
+lego,A02,1.4,Routes classified requests into a defined next workflow step.
+lego,A03,1.6,Turns clarified requirements into independently assignable vertical slices.
+lego,A04,1.3,"Supplies a child agent with bounded goals, context, permissions, and completion criteria."
+lego,A05,4.1,Makes completion an explicit criterion that a separate party can verify.
+lego,A06,3.5,Starts automated work from external delivery and collaboration events.
+lego,A07,1.7,Continues or observes a running session through remote entry points.
+lego,B01,3.1,Places durable project conventions in a short always-loaded instruction layer.
+lego,B02,3.3,Loads conventions only for matching files or directories.
+lego,B03,3.1,Defines precedence across overlapping instruction layers.
+lego,B04,3.1,Separates personal and organization-wide instruction scopes from repository guidance.
+lego,B05,1.7,Carries reviewed learning and preferences into subsequent sessions.
+lego,B06,3.1,Uses a modular root router to locate task-specific guidance.
+lego,B07,3.1,Centralizes shared domain vocabulary and links it from root instructions.
+lego,B08,5.6,Maps original references for attributable lookup without copying them into every task.
+lego,B09,3.2,Packages lookup knowledge as an on-demand skill.
+lego,B10,5.1,Budgets context and controls which instructions survive compaction.
+lego,B11,5.1,Limits conversational tool output while preserving complete logs elsewhere.
+lego,B12,5.1,Keeps reusable prompt prefixes stable across a session.
+lego,B13,5.4,Uses symbol references and diagnostics to explore code accurately.
+lego,B14,5.6,Combines external research with citations and source-reading records.
+lego,C01,3.2,Defines the reusable skill package and its invocation description.
+lego,C02,3.2,Controls whether a skill is invoked by a person or selected by the model.
+lego,C03,3.2,Configures skill execution in isolated or dynamically populated context.
+lego,C04,3.2,Exposes a saved reusable prompt as a typed command.
+lego,C06,4.1,"Specifies persistent response role, tone, and format criteria."
+lego,C07,1.3,"Bundles the prompt, tools, and runtime settings used to invoke a role."
+lego,C08,1.3,Describes the situations in which a coordinator should invoke each role.
+lego,C09,1.3,Assigns model and reasoning settings when invoking a role.
+lego,C10,4.1,Provides shared standing behavioral instructions across role prompts.
+lego,C12,5.2,Determines whether a choice is delegated or escalated to a person.
+lego,C13,5.5,Makes human review of a proposed plan precede implementation.
+lego,C14,4.1,"Specifies a role's working sequence, checks, and known pitfalls."
+lego,D01,1.5,Attaches executable behavior to agent lifecycle events.
+lego,D02,1.5,Intercepts a pending tool action with a rejecting or rewriting hook.
+lego,D03,1.5,Runs checks after edits and returns their feedback to the agent.
+lego,D04,1.5,Checks completion at the stop event while preserving the unresolved blocking-policy choice.
+lego,D05,1.5,Prepares a session and injects bounded context at startup.
+lego,D06,1.5,Answers permission requests through a logged lifecycle hook.
+lego,D07,1.5,Observes lifecycle events without altering task behavior.
+lego,D09,1.4,"Enforces action permissions through explicit allow, ask, and deny precedence."
+lego,D10,5.2,Sets the session-wide boundary between automatic action and approval requests.
+lego,D11,5.5,Delegates permission judgment to a classifier with explicit review limits.
+lego,D12,1.4,Enforces filesystem and network boundaries outside model instructions.
+lego,D13,1.4,Constrains workflow actions to an explicitly allowed filesystem scope.
+lego,D14,2.3,Restricts each role to the tool definitions its job requires.
+lego,D15,1.2,Enforces permitted spawning depth and concurrency in an agent tree.
+lego,D16,5.2,Requires recorded user authorization before outward actions.
+lego,D17,2.4,Supplies integration credentials without placing secrets in agent context.
+lego,D18,5.5,Requires a person's trust decision before repository configuration executes.
+lego,D19,3.1,Applies an organization-controlled configuration layer above user choices.
+lego,D20,4.4,Promotes checks from warnings to blocking only after reviewing false alarms.
+lego,D21,4.4,Validates that shared artifacts do not leak private project terms.
+lego,D22,1.1,"Bounds autonomous execution by turns, budget, elapsed time, and agent count."
+lego,D23,5.2,Prevents delegated messages from substituting for user authorization.
+lego,E01,4.4,Tracks verifiable acceptance criteria while protecting their definitions from edits.
+lego,E02,1.7,Records completed work and next steps for a subsequent session.
+lego,E03,1.7,Separates initialization from incremental work across sessions.
+lego,E04,1.7,Reconstructs and verifies task state before a session continues work.
+lego,E05,1.4,Defines valid work states and their transitions.
+lego,E06,1.6,Splits work into claimable tasks with explicit dependencies.
+lego,E07,1.7,Maintains one current task-state record instead of accumulating stale summaries.
+lego,E08,5.5,"Records delegated choices, reasons, approvers, and review status."
+lego,E09,5.5,Places a human approval checkpoint before further action.
+lego,E10,4.3,Produces a schema-constrained result and validates it before consumption.
+lego,E11,1.7,Preserves recoverable file state for rewinding a session.
+lego,E12,1.7,"Names, resumes, and branches saved sessions."
+lego,E13,1.4,"Transfers a task with its current state, choices, and next action."
+lego,E15,5.6,Preserves the conversation and execution record for later evidence lookup.
+lego,E16,1.7,Controls retention and cleanup of persistent session artifacts.
+lego,E17,1.2,"Tracks agent identity, parentage, runtime status, and launch configuration."
+lego,F01,2.4,Registers scoped MCP servers for external tools and data.
+lego,F02,2.1,Defines a callable command interface with concise output and actionable errors.
+lego,F03,3.2,Bundles executable support inside an invocable skill.
+lego,F04,2.3,Distributes tools and related agent capabilities as an installable package.
+lego,F05,2.3,Publishes and versions installable capability packages.
+lego,F06,2.3,Distributes optional interface capabilities through platform extensions.
+lego,F07,1.1,Embeds bounded agent execution and run logging in application code.
+lego,F08,3.5,Provides non-interactive agent execution suitable for automation and CI.
+lego,F09,2.5,Uses browser or computer interaction tools to exercise and inspect interfaces.
+lego,F10,2.5,Uses a monitoring tool to stream background command events into the session.
+lego,F11,1.7,Supervises long-lived workspace processes and their runtime endpoints.
+lego,F12,1.3,"Assembles a role's prompt, tools, and permissions consistently at invocation."
+lego,F13,2.3,Pins distributed tool and skill dependencies for repeatable installation.
+lego,F14,2.3,Defers tool-schema loading until the agent needs the tool.
+lego,F15,2.2,Gives every tool error an explicit recovery action.
+lego,G01,1.3,Invokes an isolated worker with focused instructions and a summary return.
+lego,G02,1.2,Coordinates independent sessions with separate worktrees and result artifacts.
+lego,G03,1.2,Coordinates a lead and teammates through shared tasks and messaging.
+lego,G04,1.2,Uses a bounded orchestration script to coordinate many child agents.
+lego,G05,1.3,Passes self-contained context between agents without sharing conversation history.
+lego,G06,1.4,Delivers child results to the parent with a recorded delivery state.
+lego,G07,1.2,Defines and enforces hierarchy and width limits among coordinating roles.
+lego,G08,1.4,Routes maintenance work into a persistent inbox with a handled state.
+lego,G09,1.2,Coordinates roles across different agent providers.
+lego,G10,4.6,Obtains independent advisory perspectives on a difficult decision.
+lego,G12,1.2,Coordinates agents across machines with separate trust boundaries.
+lego,H01,4.4,Requires runnable verification evidence and feeds failure back into implementation.
+lego,H02,4.4,Evaluates harness behavior using graded representative tasks.
+lego,H03,4.6,Reviews a change separately and verifies findings before reporting them.
+lego,H04,4.6,Separates behavior-changing implementation from independent evaluation.
+lego,H05,4.4,Checks a proposed change for vulnerabilities and fixes detected failures.
+lego,H06,1.7,Detects when running agents retain outdated launch configuration.
+lego,H07,3.1,Makes effective configuration and scope precedence inspectable before launch.
+lego,H08,3.4,Audits instruction quality to guide configuration refinement.
+lego,H09,1.1,Measures execution cost and feeds it into run caps.
+lego,H10,5.6,Exports execution metrics and traces for attributable observation.
+lego,H11,4.4,Checks harness commands against passing and failing behavioral examples.
+lego,H12,4.4,Turns observed incidents into repeatable regression checks.
+lego,H13,4.4,Revalidates behavior after model or instruction changes.
+lego,H14,5.6,Rechecks source state and distinguishes missing evidence from empty results.
+lego,H15,5.6,Labels evidence strength and ties claims to source artifacts or command output.
+lego,H16,3.5,Checks commit and pull-request metadata before integration.
+lego,H17,4.4,Verifies application behavior through an actual user interaction path.
+lego,I01,3.4,Uses a retrospective to propose reviewed improvements to agent configuration.
+lego,I02,3.4,Turns repeated corrections into persistent instruction improvements.
+lego,I03,1.4,Prefers enforceable structural safeguards over additional advisory prose.
+lego,I04,4.4,Groups observed failures to select and assess general preventive checks.
+lego,I05,3.4,Removes harness components experimentally and retains removals when quality holds.
+lego,I06,3.4,Refines prompts or skills using held-out scores and measured evaluation noise.
+lego,I07,3.4,Defines a measured maintenance loop for improving the harness.
+lego,J01,1.1,Repeats a prompt within an active agent session.
+lego,J02,1.1,Triggers bounded recurring agent runs independently of an open session.
+lego,J04,3.5,Runs bounded agent jobs within a delivery pipeline.
+lego,J05,1.1,Keeps unattended runs bounded and prevents unresolved permission prompts.
+lego,J06,1.7,Persists per-source progress markers for safe continuation of scheduled jobs.
+lego,J07,5.2,Notifies a person when work needs attention or reaches completion.
+lego,J08,1.1,Detects stalled or overlong runs and applies lifetime limits.
+lego,J09,1.7,Persists work state so interrupted jobs can resume after a restart.
+lego,J10,1.7,Keeps a remote session running beyond the local device's lifetime.
+lego,J11,3.5,Releases harness versions gradually with an available rollback.
+lego,J12,3.5,Rechecks configuration and behavior when upgrading delivered dependencies.
+lego,K01,3.1,Defines configuration scope and precedence for shared settings.
+lego,K02,3.1,Shares project configuration through version control while isolating personal overrides.
+lego,K03,3.1,Separates reusable instruction standards from project-specific overlays.
+lego,K05,5.6,Records attributable action and permission choices for later audit.
+lego,K06,1.4,Packages completed outputs and onboarding information for handoff to people.
+lego,K07,1.6,Partitions work by file ownership to avoid conflicting edits.
+lego,K08,1.4,Enforces organization membership boundaries around workflow capabilities.
+lego,L01,1.2,Isolates concurrent task changes in separate branches and worktrees.
+lego,L03,1.5,Runs setup and teardown actions at workspace lifecycle events.
+lego,L04,1.2,Allocates isolated resources and locks shared ones for concurrent tasks.
+lego,L05,5.6,Creates a dated local mirror of external source material.
+lego,L06,2.3,Vendors and versions external capabilities for repeatable use.
+lego,L07,1.4,Enforces an execution boundary with a disposable container or virtual machine.
+lego,L08,1.4,Checks merge boundaries to prevent tracked symlinks from overwriting real data.
+lego,M02,1.2,Gives a person a consolidated view of concurrent agent progress.
+lego,N01,1.3,Standardizes the context sent to workers and the results they return.
+lego,N02,5.6,"Requires research reports to expose sources, quotations, and uncertainty."
+lego,N03,4.1,Specifies concrete language and presentation criteria for agent output.
+lego,N04,5.6,Preserves architectural choices with their reasons and consequences.
+lego,N05,3.5,Standardizes commit and pull-request metadata used in integration.
+lego,N06,3.1,Keeps agent instructions modular with one authoritative home for each rule.
+lego,H18,4.6,Applies a consistent independent review rubric to changes in agent-steering artifacts.
+rule,1.01,3.2,Defines required and optional components of a skill package.
+rule,1.03,3.2,Defines skill-name constraints while preserving disagreement about field requirements.
+rule,1.04,3.2,Describes the skill metadata used to advertise its purpose and trigger.
+rule,1.05,3.2,Makes the skill description carry the invocation condition.
+rule,1.07,3.2,Makes skill names and descriptions distinctive enough for reliable invocation.
+rule,1.08,3.2,Prioritizes the trigger information retained in truncated skill listings.
+rule,1.12,5.1,Limits the size of a loaded skill body.
+rule,1.13,5.1,Records a skill context-size recommendation and uncertainty about its unit.
+rule,1.14,5.1,Loads skill guidance progressively instead of occupying context up front.
+rule,1.15,3.2,Keeps skill references discoverable without nested partial reads.
+rule,1.16,5.1,Avoids spending instruction context on knowledge the model already has.
+rule,1.17,3.4,Turns observed corrections into retained skill guidance.
+rule,1.19,5.1,Places essential skill instructions where compaction truncation retains them.
+rule,1.20,3.2,Writes persistent skill guidance for a body that is not reread every turn.
+rule,1.21,4.1,Calibrates instruction specificity to the fragility of each task component.
+rule,1.22,4.1,Explains instruction intent and the replacement action behind prohibitions.
+rule,1.23,4.1,Gives actionable default procedures instead of ambiguous option menus.
+rule,1.24,3.1,Keeps instructional vocabulary consistent and stale guidance identifiable.
+rule,1.25,3.2,Limits each skill to a coherent invocable job.
+rule,1.26,4.4,Checks skill packaging with dedicated validators.
+rule,1.27,3.2,Requires trust in the source of an installed skill.
+rule,1.29,3.2,Restricts a skill to explicit user invocation when automatic triggering is unnecessary.
+rule,1.31,3.2,Scopes attached skills to each agent and records platform packaging limits.
+rule,2.03,5.1,Distinguishes document organization from actual context savings.
+rule,2.05,4.1,"Requires specific, verifiable, mutually consistent instructions."
+rule,2.10,3.3,Uses path matching for conventions spanning multiple directories.
+rule,2.11,3.1,"Routes procedures, scoped conventions, and references into appropriate modular homes."
+rule,2.15,3.1,Assigns ownership and versioned review to shared project instructions.
+rule,2.17,5.1,States which facts compaction must preserve and where durable rules are reloaded.
+rule,2.19,5.1,Orders long aggregated input so essential findings are not lost in the middle.
+rule,2.20,5.4,Protects concrete case facts against degradation through repeated summarization.
+rule,2.21,5.6,Treats externally authored instructions and shared memory according to their provenance.
+rule,3.01,1.3,Defines a role's launch configuration separately from delegated task instructions.
+rule,3.02,4.1,States orchestration goals and quality criteria without overprescribing judgment steps.
+rule,3.03,1.3,"Supplies the objective, output contract, source guidance, and boundaries for a worker."
+rule,3.04,1.3,Passes required child-agent context explicitly rather than assuming shared history.
+rule,3.05,1.3,Makes the worker description identify a distinct delegation role.
+rule,3.06,4.1,Replaces vague confidence language with explicit review criteria.
+rule,3.07,4.2,Uses explained input-output examples to resolve ambiguous task interpretations.
+rule,3.08,3.4,Refines a minimal prompt from observed failures.
+rule,3.09,3.4,Revises model-sensitive prompt emphasis when it causes overtriggering.
+rule,3.10,1.2,Controls the circumstances and maximum extent of agent delegation.
+rule,3.11,5.6,Separates untrusted retrieved content from authoritative task instructions.
+rule,3.12,5.6,Preserves the provenance boundary between user text and tool-result content.
+rule,3.13,4.1,Qualifies output-length instructions by their effect on the target model's quality.
+rule,3.14,5.2,Requires explicit reporting when a role is blocked or cannot complete its task.
+rule,3.15,1.7,Separates initialization instructions from continuation instructions.
+rule,3.18,4.1,Avoids conflicting system criteria accumulated from separate contributors.
+rule,3.19,1.3,Makes model and effort choices explicit when configuring a role.
+rule,3.20,5.5,Reduces anchoring by separating human judgment from an agent's recommendation.
+rule,4.01,1.4,Enforces invariant behavior through mechanisms outside model discretion.
+rule,4.02,1.5,Distinguishes deterministic hook enforcement from model-based hook judgment.
+rule,4.04,1.5,Explains failure and timeout behavior at hook lifecycle events.
+rule,4.07,1.4,Assigns static access restrictions to permissions and dynamic checks to hooks.
+rule,4.08,1.5,Covers all relevant tool matchers when implementing a write-guard hook.
+rule,4.10,1.5,Keeps hook execution paths and JSON output reliable.
+rule,4.12,5.5,Requires review of extension code that runs with user privileges.
+rule,4.16,2.3,Distinguishes removing a tool definition from restricting command patterns.
+rule,4.17,1.4,Defines which actions are and are not covered by the execution sandbox.
+rule,4.18,1.4,Configures an unattended sandbox to reject unavailable or unsandboxed execution.
+rule,4.20,5.5,Keeps automatic permission handling distinct from sufficient human oversight.
+rule,4.24,1.2,"Bounds the depth, concurrency, and size of an agent tree."
+rule,4.25,1.1,Bounds agent turns and cost and specifies the incomplete result when limits are hit.
+rule,4.31,5.5,Subjects quality-affecting configuration defaults to deliberate review.
+rule,4.32,5.1,Preserves cache stability and compacts context at task boundaries.
+rule,4.33,2.4,Places MCP configuration and credential references in appropriate scopes.
+rule,4.35,2.4,Treats server connections and credential helpers as integration trust boundaries.
+rule,4.36,2.4,Injects service credentials outside the agent's execution boundary.
+rule,4.37,1.2,Isolates concurrently hosted agents from shared configuration and memory.
+rule,4.38,5.6,Records attributable telemetry without exposing prompt or tool content.
+rule,4.39,1.4,"Makes allowed actions, rollback, and versioned policy explicit in enforcement configuration."
+rule,4.40,5.5,Calibrates execution isolation to the amount of available human oversight.
+rule,4.41,3.2,Identifies repository skill installation as an authority and trust boundary.
+rule,5.01,5.2,Prepares a structured escalation for a person without access to the transcript.
+rule,5.02,1.7,Reconstructs a fresh session from a summary instead of carrying stale tool history.
+rule,5.03,1.7,Persists task progress and clean working state across successive sessions.
+rule,5.04,1.7,Chooses durable state formats suited to structured data and progress notes.
+rule,5.05,4.4,Protects acceptance criteria while allowing verified pass status to change.
+rule,5.06,1.7,Restores and verifies task context before continuing unfinished work.
+rule,5.07,1.7,Ends each focused session with recoverable progress and a runnable environment.
+rule,5.08,4.1,Defines completion criteria before implementation begins.
+rule,5.09,4.6,Separates the worker's context from the evaluator's judgment.
+rule,5.10,4.1,"Defines measurable completion, evidence, and constraints for a goal evaluator."
+rule,5.11,4.1,Expresses evaluation criteria as separately checkable rubric items.
+rule,5.13,4.4,Checks whether the verifier measures the intended outcome instead of merely passing tests.
+rule,5.14,4.6,Separates local and integration review passes and preserves unresolved prior findings.
+rule,5.15,5.5,Matches review authority to change risk and binds approval to the reviewed revision.
+rule,5.16,4.6,Bounds review rounds and focuses subsequent passes on changes and error classes.
+rule,5.17,5.5,Preserves independent human judgment rather than treating agreement as an independent check.
+rule,5.18,5.2,Prevents inter-agent messages from supplying user consent or changing authorization.
+rule,5.20,5.5,Separates authorship from authority to approve a pull request.
+rule,5.21,1.2,Adds orchestration complexity only when its benefits justify coordination costs.
+rule,5.22,1.6,Partitions work along context boundaries while limiting loss at handoffs.
+rule,5.23,1.4,Validates handoff inputs and preserves an identifiable output artifact before continuing.
+rule,5.24,1.3,Passes work through durable files when workers do not share conversation memory.
+rule,5.25,5.6,Keeps unattended source reads and uncertain external writes explicit in the evidence record.
+rule,5.26,5.1,Clears or compacts context at boundaries and isolates large reads.
+rule,5.27,3.4,Uses a planning phase to refine large changes with multiple possible directions.
+rule,5.28,3.4,Reassesses harness components when model capability changes.
+rule,5.29,3.5,Stages quality-sensitive releases with evaluation and a soak period.
+rule,5.30,5.6,Records dated harness changes so quality regressions can be traced.
+rule,5.31,1.3,Separates untrusted reading context from privileged acting context.
+rule,5.33,1.1,Defines a stopping condition for iterative agent execution.
+rule,6.01,2.1,Treats the tool description as part of its operational interface.
+rule,6.02,2.1,"Specifies tool purpose, selection conditions, parameter meanings, and limits."
+rule,6.03,2.1,Defines input examples and boundaries that distinguish overlapping tools.
+rule,6.04,2.1,Balances distinct tool purposes against interface consolidation without resolving the open boundary.
+rule,6.05,2.1,Names tool interfaces consistently with service and resource identifiers.
+rule,6.06,2.1,Returns concise tool results with stable identifiers for subsequent calls.
+rule,6.07,5.1,Bounds tool output and provides narrowing strategies when results are truncated.
+rule,6.08,2.2,Marks tool failures structurally and supplies an actionable recovery message.
+rule,6.09,2.2,Keeps access failures distinct from successful queries with no results.
+rule,6.10,2.2,Recovers from unambiguous call variations or returns a structured correction.
+rule,6.11,2.1,Keeps interface annotations accurate without confusing metadata with enforcement.
+rule,6.13,2.3,Limits visible tools and loads schemas on demand to improve selection.
+rule,6.15,2.1,Validates filesystem boundaries in the implementation of writing tools.
+rule,6.17,2.1,Keeps final authority in the server behind a narrow custom interface.
+rule,6.18,2.1,"Makes tool interfaces focused, self-contained, and resilient to errors."
+rule,6.20,2.4,Reuses existing MCP integrations before building custom servers.
+rule,6.21,3.5,Configures non-interactive CLI execution with machine-readable output for CI.
+rule,6.23,2.1,Prefers programmable interfaces with machine-readable results.
+rule,6.25,1.1,Makes automated runs observable and stops their processes gracefully.
+rule,6.26,1.5,Uses lifecycle hooks to attach session identity to tool-call audit records.
+rule,7.01,4.4,Separates capability measurement from regression checks after agent changes.
+rule,7.02,4.4,Builds balanced evaluation cases from observed failures.
+rule,7.03,5.5,Calibrates evaluation cases against independent expert agreement.
+rule,7.04,4.4,"Grades actual outcomes under clean, repeatable evaluation conditions."
+rule,7.05,4.4,Repeats evaluations to measure consistency while retaining uncertainty about trial counts.
+rule,7.06,5.5,Calibrates model graders against humans and preserves an uncertainty exit.
+rule,7.07,4.4,Uses execution traces to diagnose evaluation outcomes.
+rule,7.08,4.4,Measures evaluation noise and records the environment before accepting improvements.
+rule,7.09,3.4,Refines one change at a time using held-out evaluations and measured noise.
+rule,7.10,4.4,Protects evaluation integrity by separating the agent from hidden answers and grading criteria.
+rule,7.11,5.5,Interprets saturated evaluation scores cautiously and reviews their underlying evidence.
+rule,7.12,4.4,Revalidates instruction changes and adds regression coverage for incidents.
+rule,7.13,4.4,Evaluates small prompt changes broadly enough to detect behavioral regressions.
+rule,7.14,4.4,Checks that evaluations discriminate incorrect behavior and continue measuring real usage.
+rule,7.15,3.2,"Tests skill triggering against positive cases, negatives, and held-out queries."
+rule,7.16,4.4,Compares skill outputs against a baseline using concrete evidence-based assertions.
+rule,7.17,4.4,"Tests skill triggering, function, and improvement without treating aspirational thresholds as measured facts."
+rule,7.20,4.6,Uses a fresh reviewer context independent of the author's reasoning.
+rule,7.22,4.6,Controls review-panel complexity and reviews intent at larger scale.
+rule,7.23,4.4,Tests resistance to injected instructions in external content and tool output.
+rule,7.24,5.5,Calibrates conclusions using stratified samples instead of aggregate scores alone.
+rule,7.25,3.4,Refines implementation against a test prepared ahead of the fix.
+rule,7.26,1.5,Tests blocking hooks and related controls against actual forbidden actions.
+rule,7.27,5.1,Measures cache reuse and context consumption when assessing a harness.
+rule,7.28,3.2,Diagnoses skill triggering through its description and debug output.
+rule,2.24,3.1,Keeps documents focused on conventions and rationale instead of duplicating discoverable state.
+rule,7.32,4.4,Tests observable command behavior instead of matching document prose.
+rule,1.33,4.1,Keeps role instructions readable and moves branch-specific detail out of long sentences.
+rule,2.25,4.1,Makes path presentation consistent and unambiguous within shared output.
+rule,2.26,3.1,Gives each recurring trap one authoritative instruction home with references elsewhere.
+rule,3.23,1.4,Makes required cleanup and workflow steps executable instead of merely advisory.
+rule,7.33,5.5,Leaves semantic wording judgment to a reviewer while limiting fragile prose checks.
+pattern,P1,1.1,Uses one agent's tool loop as the simplest complete execution pattern.
+pattern,P2,1.4,Passes each fixed workflow step's output into the next step.
+pattern,P3,1.2,Runs independent workers concurrently and gathers their results.
+pattern,P4,1.2,Selects one specialist route from the initial input.
+pattern,P5,1.4,Transfers active control between peer agents as the required specialist changes.
+pattern,P6,1.2,"Keeps task division, delegation, and synthesis under one coordinating agent."
+pattern,P7,1.2,Organizes delegation across multiple orchestration levels.
+pattern,P8,4.6,Separates production from criteria-based evaluation in a bounded improvement loop.
+pattern,P9,1.1,Repeats work until a defined condition or iteration limit is reached.
+pattern,P10,1.2,"Coordinates several agents through a shared, often moderated discussion."
+pattern,P11,1.4,Encodes repeatable workflow order in a fixed control-flow graph.
+pattern,P12,1.6,Maintains a revisable task ledger for workers to claim and complete.
+pattern,P13,5.5,Places human judgment and approval at defined workflow checkpoints.
+pattern,P14,1.1,Alternates reasoning and tool actions with bounded autonomous step selection.
+delegation,axis1,5.5,Uses reversibility to calibrate the amount of human review a choice needs.
+delegation,axis2,5.2,Uses missing information or vague criteria as a reason to seek human judgment.
+delegation,axis3,5.5,Defines how decision authority is shared between the agent and a person.
+delegation,axis4,5.2,Sets the permitted action zone and thresholds that require escalation.
+delegation,step1,5.5,Leaves decision authority with the person while the agent executes.
+delegation,step2,5.5,Lets the agent propose a reasoned choice for a person to decide.
+delegation,step3,5.5,Obtains consultation while retaining the person's decision authority in the stated typical use.
+delegation,step4,5.5,Requires joint agreement before the choice proceeds.
+delegation,step5,5.5,Lets the agent decide after receiving the person's advice.
+delegation,step6,5.5,Places human review after an agent decision on a reversible choice.
+delegation,step7,5.5,Delegates choices within an explicitly bounded and logged zone.
+delegation,combine,5.2,"Combines reversibility, missing information, and permitted scope to select an escalation boundary."
+guide,mcp-error-channel-contract,2.2,Preserve the distinction between malformed protocol requests and recoverable tool failures.
+workflow,stage-tool-eligibility-policy,2.3,Make tool selection explicit without confusing selection controls with authorization.
+workflow,mcp-http-authorization-readiness,2.4,"Check discovery, audience binding, and scope failures before integrating a protected MCP server."
+guide,builtin-tool-routing,2.5,"Select search, read, edit, and shell capabilities from the actual session inventory."
+workflow,scoped-instruction-loading-check,3.3,Check that conditional rules load for matching files and stay absent elsewhere.
+workflow,ci-bounded-review,3.5,"Define an event-driven review with explicit privileges, limits, and observable results."
+workflow,few-shot-example-set,4.2,Demonstrate the intended output with examples that cover real judgments and edge cases.
+rule,mcp-structured-result-validation,4.3,Declare and validate the schema of server-produced tool data.
+workflow,structured-output-terminal-states,4.4,Validate generated data without treating every response as a successful schema instance.
+workflow,batch-result-reconciliation,4.5,Account for every asynchronous batch request without relying on output ordering.
+workflow,tool-failure-propagation-contract,5.3,Preserve a failed dependency as failure instead of converting it into empty data or success.
+workflow,evidence-based-review-routing,5.5,Use missing evidence and contradictions to decide what needs human review.
+workflow,claim-provenance-ledger,5.6,"Connect claims to source versions, transformations, and responsible reviewers."
+workflow,resume-with-state-reconciliation,1.7,Resume the intended conversation and verify external state before continuing its plan.
+workflow,bounded-exploration-evidence-checkpoint,5.4,Explore a concrete code question while preserving source evidence across compaction.

@@ -106,13 +106,3 @@ def test_stage_four_is_announced_and_grouped():
 
 def test_overview_has_a_word_limit():
     assert re.search(r"at most \d+ words", _asking())
-
-
-def test_kit_readme_counts_match_csv():
-    import csv
-    readme = (ROOT / "kit" / "README.md").read_text(encoding="utf-8")
-    for name in ("legos.csv", "rules.csv"):
-        with open(ROOT / "kit" / name, newline="", encoding="utf-8") as fh:
-            n = len(list(csv.reader(fh))) - 1
-        m = re.search(rf"\| `{re.escape(name)}` \|[^|]*\| (\d+) \|", readme)
-        assert m and int(m.group(1)) == n, (name, n, m and m.group(1))

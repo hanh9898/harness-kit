@@ -2,6 +2,19 @@
 
 A lightweight harness plugin for Matt Pocock skills.
 
+## Resource library
+
+Browse pieces, rules, patterns, delegation guidance, and researched workflows through five topic families and their subcategories:
+
+```
+kit/scripts/kit browse
+kit/scripts/kit browse 01
+kit/scripts/kit browse 1.3
+kit/scripts/kit inspect lego:A04
+```
+
+Category listings expose summaries; inspection loads one resource with its source and classification. See [the kit guide](kit/README.md) for resource formats, source certainty, and verification limits.
+
 Repository source, documentation, examples, commits, issues, and pull requests use English.
 Enable local checks after cloning with `git config core.hooksPath .githooks`.
 Run `python3 tools/check_english.py --commits --history` to check source and history.

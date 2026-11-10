@@ -1,8 +1,35 @@
 # Kit
 
-Read-only store of lego pieces for building an agent harness, plus the rules, team patterns and delegation framework that go with them. Terms (harness, record, rung) are defined once, in the project's harness glossary; this kit only adds the ones below.
+Resource library for designing, building, and reviewing an agent harness. It includes pieces, rules, team patterns, delegation guidance, and source-backed guides and workflows. The retrieval CLI is read-only.
 
-**The CSV files are the source of truth.** Edit `legos.csv`, `groups.csv` and `rules.csv` directly. They were generated once from research reports; nothing regenerates them, and the generator refuses to overwrite them (see "Where the data came from").
+## Discover by topic
+
+Start with the five topic families, descend into one subcategory, then inspect one resource:
+
+```
+scripts/kit browse
+scripts/kit browse 01
+scripts/kit browse 1.3
+scripts/kit inspect lego:A04
+```
+
+`categories.csv` defines the topic hierarchy. `catalog.csv` assigns each resource to one primary subcategory with a classification rationale. A resource's exact key is `kind:id`, so a category such as `1.1` cannot be confused with a rule identifier. Source group and topic labels remain resource metadata; the browse hierarchy comes from the catalog.
+
+Browse lists bounded summaries. Inspect prints one resource's fields, sources, and classification. Classification does not increase source certainty or prove that a host supports the resource. Topic families describe concerns shared across agent environments.
+
+## Source and verification
+
+Retained resources keep their identifiers unless the identifier itself names a product-specific recipe. `resources.json` holds guides and workflows with explicit applicability, prerequisites, instructions, standards, verification steps, sources, and capability scope. `checked_on` records a documentation check; verification steps describe work to perform, not successful runtime results. A synthesized workflow is marked `inferred` even when its individual source facts are directly documented.
+
+## Host-independent guidance
+
+Normative content states a concrete behavior, its conditions, and the evidence needed to check it. Capability-dependent resources require checking that capability in the actual environment. Product-specific command names, configuration keys, fixed limits, and incidental implementation behavior belong to the environment's current documentation. Remove a resource when stripping those details leaves no useful guidance beyond another resource.
+
+Source URLs and source labels retain their provenance, including product names. They do not turn a source's implementation detail into a universal requirement. Generalizations from a product-specific source are marked `inferred` (or retain a weaker evidence status); a changed rule loses any gate claim that its previous exact quotation supported.
+
+Use applicable resources before forming interview suggestions, carry their guidance into implementation, and supply their standards to review. When a resource is incomplete or unsupported for the current host, expose the gap rather than treating its presence as proof.
+
+Edit each resource in its source file and update its catalog assignment when its primary topic changes. Content is not copied into the catalog. The maintained core catalog is checked with `python3 tools/check_kit.py` from the repository root. This validator is not a personal-resource approval workflow.
 
 ## Vocabulary
 
@@ -17,21 +44,9 @@ Read-only store of lego pieces for building an agent harness, plus the rules, te
   - `partial`: support comes from a source that was read only in part. A row with such a source is never marked higher than `partial`.
 - **Verified on**: date a rule was last re-checked against its source. Empty until someone checks it.
 
-## Files
-
-| File | What it holds | Rows |
-|---|---|---|
-| `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 163 |
-| `groups.csv` | Group letter and name of the pieces; `scripts/kit list` prints both | 14 |
-| `rules.csv` | Rules for skills, agent documents, prompts, configuration, workflow, tools, testing | 219 |
-| `patterns.md` | Team architecture patterns | 14 |
-| `delegation.md` | Delegation framework: four axes and a seven-step scale, all `partial` | 4 axes, 7 steps |
-
-Row counts differ from the first plan in one place (14 patterns, not 13); see `docs/generation-notes.md` at the repository root.
-
 In `sources`, `note:R24` means "research note 24", an internal note, not a link. `practice:` means the piece is supported only by observed use. In `rules.csv`, a bare source id such as `K08` is the id used in the research; most carry a link next to them.
 
-## Look something up
+## Source-specific lookups
 
 ```
 scripts/kit list            # groups: letter, name, piece count
@@ -42,7 +57,7 @@ scripts/kit list delegation # four axes and seven steps, one line each
 scripts/kit show axis1      # one axis; step3 for one step; combine for how the axes combine
 ```
 
-There is no command that prints the whole store, on purpose. Ask for a group, then a piece. Rules have their own commands: `kit list rules` (gate rules only), `kit list rules <topic>`, `kit show <rule id>` (for example `4.06`). Do not load `rules.csv` whole.
+There is no command that prints the whole store. Rules also have focused commands: `kit list rules` (gate rules only), `kit list rules <topic>`, `kit show <rule id>` (for example `1.03`). An empty gate list means no current rule has the evidence required for that gate status; browse the applicable topics instead. Use taxonomy browsing when a need spans resource types.
 
 ## Where the data came from
 

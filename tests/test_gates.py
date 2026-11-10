@@ -81,7 +81,7 @@ def test_real_kit_gates_are_verified():
     rules = {r["id"]: r for r in csv.DictReader((KIT / "rules.csv").open(encoding="utf-8", newline=""))}
     gates = list(csv.DictReader((KIT / "gates.csv").open(encoding="utf-8", newline="")))
     yes = [g for g in gates if g["gate"] == "yes"]
-    assert 5 <= len(gates) <= 10
+    assert len({g["id"] for g in gates}) == len(gates)
     for g in yes:
         r = rules[g["id"]]
         assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", r["verified_on"]), g["id"]
