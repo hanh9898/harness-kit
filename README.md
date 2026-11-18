@@ -1,13 +1,47 @@
 # harness-kit
 
-A lightweight plugin of composable harness guidance for Matt Pocock skills.
+Composable harness skills for Codex, Claude Code and Pi, using Matt Pocock methods.
 The supplied catalog, rules and references support project onboarding, harness
 improvement and reusable resources. Original methods need their own available
 provider; this kit does not bundle an autonomous execution service.
 
 ## Installation
 
-The repository is both a Claude Code plugin and a local marketplace:
+Keep a complete checkout in a stable location: skill references and helpers depend
+on the adjacent `kit/` tree. Register the original methods you intend to use through
+the same host; they are separate dependencies. Choose your host below.
+
+### Codex — project-local skills
+
+Codex discovers `.agents/skills/` and follows symlinked skill directories. Link
+these three entries from the consuming project to the full kit checkout
+(macOS/Linux shell):
+
+```sh
+harness_kit="/absolute/path/to/harness-kit"
+project="/absolute/path/to/your-project"
+mkdir -p "$project/.agents/skills"
+for skill in harness-setup harness-evolve harness-library; do
+  link="$project/.agents/skills/$skill"
+  if [ -e "$link" ] || [ -L "$link" ]; then
+    printf 'Already exists; inspect its target: %s\n' "$link"
+  else
+    ln -s "$harness_kit/skills/harness/$skill" "$link"
+  fi
+done
+```
+
+Start Codex in the consuming project. Use `/skills` or mention `$harness-setup`,
+`$harness-evolve` or `$harness-library` in your prompt. Restart Codex if the new
+entries do not appear. Existing entries are left untouched by the commands above;
+inspect any reported conflict. Resolve supporting paths from the symlink's real
+target directory, as the skills specify. For personal scope, Codex also discovers
+`~/.agents/skills/`; choose that scope explicitly instead of changing it as part
+of project setup. See the [Codex skill documentation](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills).
+
+### Claude Code — plugin
+
+The repository includes a Claude Code plugin manifest and local marketplace:
 
 ```sh
 claude plugin marketplace add <absolute-path-to-harness-kit>
@@ -17,11 +51,28 @@ claude plugin install harness-kit@harness-kit
 Restart Claude Code and invoke `/harness-kit:harness-setup`,
 `/harness-kit:harness-evolve` or `/harness-kit:harness-library`.
 For session-only use, pass `claude --plugin-dir <absolute-path-to-harness-kit>`.
-Keep the full kit tree intact so relative references and helpers resolve.
+The `.claude-plugin/` metadata is specific to this registration route; Codex and
+Pi load the same skill source through their own interfaces.
 
-Other hosts need their own skill registration and original-method access.
-Registration and model-selection eligibility do not establish correct execution,
-write authority or support for every host and installation route.
+### Pi — explicit skill directory
+
+From the consuming project, start the already installed Pi with the full skills
+root:
+
+```sh
+pi --skill /absolute/path/to/harness-kit/skills/harness
+```
+
+Invoke `/skill:harness-setup`, `/skill:harness-evolve` or
+`/skill:harness-library`. Add another `--skill` for each required original-method
+file or directory. Pi also discovers project/user `.agents/skills/` directories;
+use `/reload` after changing skill content in an active session. See Pi's
+[skills](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md)
+and [CLI resource options](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/cli.md#resource-options).
+
+These are registration and invocation instructions. Each host, configuration and
+selected task retains its own access grants and behavioral qualification; loading
+a skill does not establish all-host support or authorize its effects.
 
 ## Skills
 
