@@ -11,7 +11,27 @@ Keep a complete checkout in a stable location: skill references and helpers depe
 on the adjacent `kit/` tree. Register the original methods you intend to use through
 the same host; they are separate dependencies. Choose your host below.
 
-### Codex — project-local skills
+### Codex — plugin
+
+Codex accepts this repository's existing Claude-compatible plugin manifest and
+marketplace. Register the full checkout and install the plugin with Codex CLI:
+
+```sh
+codex plugin marketplace add /absolute/path/to/harness-kit
+codex plugin add harness-kit@harness-kit
+```
+
+Start a new Codex session after installation. Use `/plugins` to inspect installed
+plugins and `/skills` or the `$` skill picker to select a bundled harness skill.
+In supported desktop clients, use the plugin browser after registering the local
+marketplace. The plugin keeps all three skills, references and kit helpers together.
+See [OpenAI's plugin packaging and compatibility documentation](https://developers.openai.com/plugins/build/plugins)
+and [plugin usage](https://learn.chatgpt.com/docs/plugins).
+
+#### Alternative: project-local skill links
+
+Use this route when you want direct skill discovery instead of a plugin install.
+Choose one registration route for a given project to avoid duplicate skill entries.
 
 Codex discovers `.agents/skills/` and follows symlinked skill directories. Link
 these three entries from the consuming project to the full kit checkout
@@ -51,8 +71,8 @@ claude plugin install harness-kit@harness-kit
 Restart Claude Code and invoke `/harness-kit:harness-setup`,
 `/harness-kit:harness-evolve` or `/harness-kit:harness-library`.
 For session-only use, pass `claude --plugin-dir <absolute-path-to-harness-kit>`.
-The `.claude-plugin/` metadata is specific to this registration route; Codex and
-Pi load the same skill source through their own interfaces.
+The `.claude-plugin/` manifest is also accepted by Codex through its compatibility
+route above. Pi loads the same skill source through its native skill interface.
 
 ### Pi — explicit skill directory
 
