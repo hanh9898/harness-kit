@@ -11,6 +11,45 @@ Use this composition reference from the owning workflow; it does not change that
 | Authority | Which effects and choices are granted, how reversible are they, and which interaction or review requirements still apply? |
 | Target | Which host and consumer will use the result, and which providers and invocation routes are actually available there? |
 
+## Kit selection before dependent action
+
+Select by the work you will actually perform, including supporting edits and
+operations. Calling a task "already set up", "maintenance" or "babysitting" does
+not remove prerequisites for its new effects. Use the owning entry's kit CLI:
+inspect relevant summaries, then `kit show <id>` for the determining sources.
+Reuse complete source reads already available in this context when their identity
+and applicability are unchanged; a summary or remembered ID is not that read.
+
+| Proposed work | Read before the dependent recommendation or action |
+| --- | --- |
+| Construct or review agent-read guidance, including a small pointer | `N06` and current original writing-for-agents; its skill-mechanics reference for a skill |
+| Change current state or choice history | `E07`, `E08` and [UPDATE.md](UPDATE.md); record edits also follow the applicable writing discipline |
+| Create or change unattended work or a background schedule | `J05`, `D22` and the applicable [flow controls](../../../kit/team-workflow/FLOW.md) |
+| Read changing sources incrementally on a schedule | `J06`; decide how existing source state and read failures are handled |
+| Report background completion or a need for human attention | `J07`; establish the available delivery route and its limits |
+
+These triggers cover supporting effects as well as the main deliverable; use
+other relevant kit groups for the requested capability. A required unreadable
+source blocks its dependent work. A suggested mechanism is not mandatory tooling
+or an effect grant: retain the source's applicability and certainty, and use an
+adequate existing facility where it meets the requirement.
+
+Keep a concise selection trace in the conversation for advice, or reuse the
+required pre-action record for effects: kit IDs actually read, the choice or
+constraint each supplied, and how the proposed result will be checked. Report
+uncovered needs and material departures with their reasons. Inventory only the
+proposed work; do not justify every unused catalog group or create a new log
+schema. Inspect source-read evidence and actual use rather than treating a written
+ID as proof. Group actions with the same sources and criteria into one decision
+trace rather than logging every tool call. On continuation, revisit only changed
+work or evidence.
+
+**Done:** each distinct harness change has applicable sources and methods loaded and a
+traceable choice/check, or an explicit dependent blocker. State this selection
+before effects; local guidance and an adequate legacy foundation complement it.
+
+## Original methods
+
 Browse available original descriptions and kit summaries, then load the selected sources through the host's supported mechanism. Use native invocation when available. In hosts that support skills by reading their source, read the original SKILL.md and applicable references. Native delivery of the complete skill source is also loading; a file listing or echoed method name is not. Loading is evidence of access, not proof that the method's interaction and completion requirements were performed.
 
 | Work | Applicable discipline |
@@ -42,8 +81,6 @@ Selection alone does not grant installation or invocation-policy edits. Reuse su
 ## Standards and handoffs
 
 Carry applicable project knowledge, language/content criteria, grants, selected source references, relevant live state, evidence and continuation into each method. Use substantive kit material in suggestions, construction and review, including when changing this kit. N06 informs single-source guidance and pointers; E07 informs current state; E08 informs consequential-choice history. Their applicability and certainty still matter; selecting a resource does not require building its suggested tool.
-
-For agent-guidance construction or review, retrieve `N06` with the kit CLI. For a current-state or choice-history change, retrieve `E07` and `E08` too. Complete this focused source read before the dependent edit; the summaries above locate the resources but do not replace their source, applicability and certainty. Carry the applicable content into the edit and its check.
 
 The [STE-inspired writing scope](../../../kit/instruction-response/WRITING.md) complements writing-for-agents: strict structure for English agent instructions and handoffs, flavored guidance for human documentation, and structural habits for Vietnamese conversation. Read it when constructing or reviewing these artifacts. Preserve the consumer's language/content criteria. This is not formal certification or adoption of a source dictionary or linter.
 

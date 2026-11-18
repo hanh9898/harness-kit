@@ -25,8 +25,10 @@ answers; its linked design-writeback check applies only where that method was us
 For each remaining consuming target, reopen actual provider availability,
 invocation policy, grants and useful checks. Complete independent authorized
 work while missing access blocks only dependent effects. Preserve per-target
-results and an exact next trigger. A fully satisfied live foundation needs no
-new files, history events or repeated demonstration unless its evidence changed.
+results and an exact next trigger. When the requested work and its evidence are
+unchanged, a fully satisfied live foundation needs no new files, history events or repeated demonstration. New
+guidance, record or operation requests still pass the entry's kit selection and
+pre-action checks; preserve the adequate foundation while handling that new work.
 
 ## Reading legacy material
 
