@@ -7,7 +7,7 @@ description: Onboard a project into harness-kit or resume incomplete onboarding.
 
 Deliver an adapted minimum foundation, an actual initial-use demonstration and usable discovery/evolve continuation. Apply progressive onboarding: explain the immediate value, disclose choices at the point of need and preserve a revisitable route. The scope of the result determines the work, not a stage count or catalog tour.
 
-Complete kit selection before recommending or applying a foundation change, including supporting record edits and scheduled operations. Read-only reconciliation can proceed first; establishment still requires the shared pre-action record.
+Complete kit selection before recommending or applying a foundation change, including supporting record edits and scheduled operations. Read-only reconciliation can proceed first. Resolve open buy/build choices with the human before establishment, which still requires the shared pre-action record.
 
 ## Reconcile and discover
 
@@ -45,7 +45,13 @@ For a selected tool/integration operation, use [tool operations](../../../kit/TO
 
 Read [FOUNDATION.md](FOUNDATION.md) and account for every required semantic outcome, using existing authoritative references where adequate. Read [DISCOVERY.md](DISCOVERY.md) to expose all twelve outcomes through a revisitable pointer with examples and readiness limits. Select only what the initial use needs; teams, telemetry and unattended operation remain optional.
 
-**Done:** the selection trace identifies the kit IDs actually read, their effect on each distinct foundation change and its check, plus any material uncovered need or unavailable prerequisite. Required original methods are loaded; the smallest sufficient foundation and initial-use criteria are explicit. Existing sufficient authority needs no additional approval ceremony. A required unavailable provider blocks dependent work, not independent discovery.
+**Done:** the selection trace identifies the kit IDs actually read, their effect on each distinct foundation change and its check, plus any material uncovered need or unavailable prerequisite. Required original methods are loaded; the smallest sufficient foundation and initial-use criteria are explicit. Reuse sufficient existing authority; resolve any open solution choice with the human in the next step. A required unavailable provider blocks dependent work, not independent discovery.
+
+## Choose buy or build with the human
+
+Follow [the shared buy-before-build checkpoint](../harness-evolve/BUY-OR-BUILD.md) before adding or replacing a foundation capability. Compare adequate existing arrangements and available external solutions with any justified custom work. Present concrete options and a recommendation; obtain the human's choice before dependent implementation. Reuse specific applicable choices already made rather than repeating an approval interview.
+
+**Done to proceed:** the foundation route, scope and applicable human decision are recoverable. A pending or deferred choice pauses its implementation; independent authorized discovery can continue. An adequate existing foundation does not decide how to add a new capability.
 
 ## Establish and demonstrate
 
