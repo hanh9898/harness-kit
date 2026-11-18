@@ -86,10 +86,10 @@ From the consuming project, register a local checkout in that project's settings
 pi install --local /absolute/path/to/harness-kit
 ```
 
-Or install the current review branch directly from Git:
+Or install the repository from Git:
 
 ```sh
-pi install --local git:github.com/hanh9898/harness-kit@integration/spec-15
+pi install --local git:github.com/hanh9898/harness-kit@main
 ```
 
 Use a reviewed commit or tag instead of the branch name when you need a fixed
