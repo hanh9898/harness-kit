@@ -67,11 +67,6 @@ def test_point1_existing_harness_is_handed_over_not_moved():
     assert "needs-change" in e
 
 
-def test_point3_step0_agent_skills_block():
-    s = read("SKILL.md")
-    assert "Issue tracker" in s and "Triage labels" in s and "Domain docs" in s
-    assert "draft" in s and "does not relax" in s
-    assert len(s.splitlines()) <= 100
 
 
 def test_point5_overrun_rule():

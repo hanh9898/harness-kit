@@ -1,2 +1,11 @@
 __pycache__/
 .pytest_cache/
+
+# Local execution artifacts belong outside the source repository.
+/checks/
+/artifacts/
+/.artifacts/
+/docs/spec-15-*
+/docs/ticket-*-result.md
+/docs/*-dispatch*.json
+/docs/*-completed*.json

@@ -16,9 +16,9 @@ GEN = ROOT / "skills" / "harness" / "harness-evolve" / "scripts" / "generate_kit
 SEED = GEN.parent / "seed"
 NOTES = ROOT / "docs" / "generation-notes.md"
 REPORTS = Path(os.environ.get("HARNESS_REPORTS", "/Users/hanhnt2/Desktop/hbu-1976-control/.scratch/harness-standards-suite"))
-# Rows added AFTER initial generation: count rules by their practice: source (see kit/README.md); H18 was added manually. CSV is authoritative;
+# Rows added AFTER initial generation: H18, G13/G14, N07/N08, D24 and J13. CSV is authoritative.
 # the generator and seeds do NOT add these rows, so source report counts remain 162/211.
-ADDED_AFTER_GENERATION = {"legos": 1, "rules": sum(r["source"].startswith("practice:") for r in csv.DictReader((ROOT / "kit" / "rules.csv").open(encoding="utf-8", newline="")))}
+ADDED_AFTER_GENERATION = {"legos": 7, "rules": sum(r["source"].startswith("practice:") for r in csv.DictReader((ROOT / "kit" / "rules.csv").open(encoding="utf-8", newline="")))}
 NOMINAL = {"legos": 162, "rules": 211, "patterns": 13}
 needs_reports = pytest.mark.skipif(not (REPORTS / "synthesis.md").is_file(), reason="source reports are unavailable on this machine")
 CERTAINTY = {"stated", "inferred", "open", "partial"}

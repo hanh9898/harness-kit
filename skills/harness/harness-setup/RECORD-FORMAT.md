@@ -1,3 +1,7 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Record format
 
 Files `harness-setup` writes under `harness/`.
@@ -35,7 +39,7 @@ Entries of `kind: delegation` (one per role) and `kind: role-profile` (one per r
 
 Entries of `kind: standard` and `kind: isolation` point at a section of `harness/STANDARDS.md` (see [STANDARDS-STEP.md](STANDARDS-STEP.md) and [ISOLATION.md](ISOLATION.md)); they never copy the rule text. An entry whose piece is a hook names the platform config file it was wired into in `check` and records `verified_platform` (see [WIRING.md](WIRING.md)).
 
-`adopted` and `needs-change` are for a `kind: folder` entry of a part that already existed (card: `prior_harness`): `adopted` meets the standard and stays; `needs-change` does not, gap in `reason`. Setup moves nothing; `harness-evolve` takes the `needs-change` entries first, on its first run after setup.
+`adopted` and `needs-change` are for a `kind: folder` entry of a part that already existed (card: `prior_harness`): `adopted` meets the standard and stays; `needs-change` does not, gap in `reason`. Setup moves nothing; `harness-evolve` reconciles relevant `needs-change` entries within the requested scope.
 
 ## `situation.md`
 

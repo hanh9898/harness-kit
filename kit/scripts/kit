@@ -6,7 +6,7 @@
   kit show <id|name>    every column of exactly one piece
   kit list P            one line per team architecture pattern (patterns.md)
   kit show P<number>    every column of exactly one pattern, for example P6
-  kit list delegation   four axes and seven delegation levels, one entry per line (delegation.md)
+  kit list delegation   historical four axes/seven levels; current authority: kit show D24
   kit show axis<number> one axis (1 to 4); kit show step<number> one level (1 to 7)
   kit show combine      the "How the axes combine" section of delegation.md
   kit list rules        gate rules (gates.csv, gate=yes), one line per rule: ID, topic, check
@@ -110,6 +110,11 @@ def cmd_list_rules(rules, gates, topic):
     return 0
 
 
+LEGACY_NOTICE = ("Historical partial delegation material; current recommended authority: "
+                 "kit show D24 (kit/authority/DESIGN.md). Reconcile selected legacy rules "
+                 "under prior adoption authority before replacement.")
+
+
 def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, names=None):
     if group is not None and group.lower() == "rules":
         return cmd_list_rules(*(rules or ([], {})), topic)
@@ -117,6 +122,7 @@ def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, nam
         axes, steps = (deleg or ({}, {}, [], {}))[:2]
         if not axes:
             return fail("delegation.md is missing from the kit directory.")
+        print(LEGACY_NOTICE)
         for n, c in axes.items():
             print(f"axis{n}\t{c[1]}\t{c[2]}")
         for n, c in steps.items():
@@ -147,6 +153,7 @@ def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
     q = query.strip().lower()
     axes, steps, combine, heads = deleg or ({}, {}, [], {})
     if q == "combine" and combine:
+        print(LEGACY_NOTICE)
         print("\n".join(combine))
         return 0
     for kind, table in (("axis", axes), ("step", steps)):
@@ -154,6 +161,7 @@ def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
             n = int(q[len(kind):])
             if n not in table:
                 return fail(f"`{query}` does not match.\nNext step: run `kit list delegation` to see axes and levels.")
+            print(LEGACY_NOTICE)
             for k, v in zip(heads[kind], table[n]):
                 print(f"{k}: {v}")
             return 0

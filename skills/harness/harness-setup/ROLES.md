@@ -1,3 +1,7 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Roles and profiles (step 8)
 
 One profile per role. A profile is a map of four cells; each cell points to something that exists now.

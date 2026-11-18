@@ -35,8 +35,9 @@ def test_practice_rules_come_after_all_generated_rules_and_stay_unverified():
     assert by_id["2.24"]["topic"] == "agent-docs" and by_id["7.32"]["topic"] == "testing-and-review"
 
 
-def test_h18_is_the_last_lego():
-    assert list(rows("legos.csv"))[-1] == "H18"
+def test_post_generation_additions_retain_their_original_order():
+    ids = list(rows("legos.csv"))
+    assert ids.index("H18") < ids.index("G13") < ids.index("G14")
 
 
 def test_l08_detail_gives_checkable_completion_condition():

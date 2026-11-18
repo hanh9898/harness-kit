@@ -1,0 +1,409 @@
+#!/usr/bin/env python3
+"""Scoped reusable drafts. JSON input/output; see kit/LIBRARY.md for the contract.
+
+Use an explicitly authorized --store. This records grants; host permissions enforce them.
+"""
+import argparse
+import csv
+import difflib
+import hashlib
+import json
+import re
+import sqlite3
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+CONSUMPTION = "Requires checking conditions and gaps; saving is not adoption."
+
+
+def unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"Ambiguous duplicate JSON field: {key}.")
+        result[key] = value
+    return result
+
+
+def validate(resource):
+    if not isinstance(resource, dict):
+        raise ValueError("Input must be a resource object.")
+    for key in ("id", "name", "owner", "scope", "kind", "content", "continuation"):
+        if not isinstance(resource.get(key), str) or not resource[key].strip():
+            raise ValueError(f"Missing or ambiguous {key}; supply it before saving.")
+    if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._-]*", resource["id"]):
+        raise ValueError("Use a stable resource id containing letters, numbers, dots, underscores or hyphens.")
+    scope = resource["scope"]
+    if scope != "personal" and not (scope.startswith("project:") and Path(scope[8:]).is_absolute()):
+        raise ValueError("Scope must be personal or project:<absolute project path>.")
+    if resource["kind"] not in ("piece", "rule", "workflow"):
+        raise ValueError("Kind must be piece, rule or workflow.")
+    for key in ("conditions", "gaps", "evidence"):
+        if not isinstance(resource.get(key), list) or not all(isinstance(v, str) for v in resource[key]):
+            raise ValueError(f"{key} must be a list of strings; an empty list is allowed.")
+    if not isinstance(resource.get("sources"), list):
+        raise ValueError("sources must be a list; an empty list is allowed.")
+    for source in resource["sources"]:
+        if (not isinstance(source, dict) or not isinstance(source.get("reference"), str)
+                or not source["reference"].strip() or source.get("certainty") not in ("stated", "inferred", "open", "partial")):
+            raise ValueError("Each source needs a reference and stated/inferred/open/partial certainty.")
+    if "origin" not in resource:
+        raise ValueError("Supply origin or null for unknown/new material.")
+    origin = resource["origin"]
+    if origin is not None and (not isinstance(origin, dict) or not all(
+            isinstance(origin.get(k), str) and origin[k].strip() for k in ("reference", "revision", "snapshot"))):
+        raise ValueError("Origin needs reference, revision and snapshot; use null and record a gap when unknown.")
+    decision = resource.get("decision")
+    if not isinstance(decision, dict) or not all(isinstance(decision.get(k), str) and decision[k].strip()
+                                               for k in ("authority", "rationale")):
+        raise ValueError("Record actual authority and rationale before saving; this is not a permission grant.")
+    for key in ("methods", "standards"):
+        if not isinstance(decision.get(key), list) or not all(isinstance(v, str) for v in decision[key]):
+            raise ValueError(f"decision.{key} must list selected references (or be empty if inapplicable).")
+
+
+def warnings(resource):
+    result = []
+    if not resource.get("sources"):
+        result.append("Sources missing: research the unresolved claim or retain it as unverified.")
+    if not resource.get("conditions"):
+        result.append("Consumption conditions missing: describe applicability and prerequisites before use.")
+    if resource.get("gaps"):
+        result.append("Incomplete guidance: resolve the recorded gaps before dependent consumption.")
+    if not resource.get("evidence"):
+        result.append("No execution evidence: exercise a representative use before claiming qualification.")
+    assessment = resource.get("origin_update")
+    if isinstance(assessment, dict) and assessment.get("outcome") in ("partial", "blocked"):
+        result.append("Origin update unresolved: inspect origin_update comparison/review and continuation before dependent use.")
+    return result
+
+
+def view(row):
+    resource = json.loads(row[2])
+    assessment = resource.get("origin_update", {})
+    consumption = CONSUMPTION
+    if (isinstance(assessment, dict) and assessment.get("outcome") in ("partial", "blocked")
+            and isinstance(assessment.get("review"), dict)
+            and assessment["review"].get("prior_selection_valid") is False):
+        consumption = "Blocked: prior selection is not valid; recover content from history and resolve the recorded contract conflict."
+    return dict(id=row[0], revision=row[1], resource=resource, warnings=warnings(resource),
+                consumption=consumption)
+
+
+def compare(row, candidate):
+    if not isinstance(candidate, dict) or not all(
+            isinstance(candidate.get(k), str) and candidate[k].strip()
+            for k in ("reference", "revision", "snapshot")):
+        raise ValueError("Candidate needs reference, revision and the complete snapshot.")
+    resource = json.loads(row[2])
+    origin = resource["origin"]
+    def diff(before, after, label):
+        return "".join(difflib.unified_diff(before.splitlines(keepends=True),
+                                          after.splitlines(keepends=True),
+                                          fromfile="old-origin", tofile=label))
+    token = hashlib.sha256(json.dumps([row[0], row[1], resource, candidate],
+                                     sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    return dict(id=row[0], revision=row[1], token=token,
+                basis="available" if origin else "missing", old_origin=origin,
+                customization=resource["content"], candidate=candidate,
+                unknowns=[] if origin else ["Old origin snapshot is unknown; local differences cannot be attributed."],
+                diffs={"customization": diff(origin["snapshot"], resource["content"], "customization") if origin else None,
+                       "origin": diff(origin["snapshot"], candidate["snapshot"], "candidate") if origin else None,
+                       "selection_to_candidate": diff(resource["content"], candidate["snapshot"], "candidate")},
+                semantic_compatibility="unchecked")
+
+
+def update(db, row, request):
+    if not isinstance(request, dict):
+        raise ValueError("Update input must be an object.")
+    comparison = compare(row, request.get("candidate"))
+    if request.get("comparison_token") != comparison["token"]:
+        raise ValueError("Comparison changed or missing; compare the live resource and candidate again.")
+    review = request.get("review")
+    if not isinstance(review, dict) or not isinstance(review.get("summary"), str) or not review["summary"].strip():
+        raise ValueError("Supply a semantic review summary; a textual merge is insufficient.")
+    for key in ("checks", "compatible_changes", "conflicts", "unknowns"):
+        if not isinstance(review.get(key), list) or not all(isinstance(v, str) and v.strip() for v in review[key]):
+            raise ValueError(f"review.{key} must be a list of substantive strings.")
+    if not review["checks"] or type(review.get("prior_selection_valid")) is not bool:
+        raise ValueError("Record actual contract checks and whether the retained prior selection is valid.")
+    outcome, mode = request.get("outcome"), request.get("mode")
+    if mode not in ("update", "replace-parent", "carry-forward") or outcome not in ("complete", "partial", "blocked"):
+        raise ValueError("Unsupported update mode or outcome.")
+    resource = json.loads(row[2])
+    if mode != "replace-parent" and resource["origin"] and resource["origin"]["reference"] != request["candidate"]["reference"]:
+        raise ValueError("Different origin reference requires deliberate whole-parent replacement.")
+    unresolved = review["conflicts"] + review["unknowns"]
+    if mode != "replace-parent":
+        unresolved += comparison["unknowns"]
+    if outcome == "complete" and (unresolved or not review["compatible_changes"]):
+        raise ValueError("Complete updates require checked compatible changes without unresolved conflicts/unknowns.")
+    if mode == "replace-parent":
+        if outcome != "complete" or request.get("content") != request["candidate"]["snapshot"]:
+            raise ValueError("Whole-parent replacement selects the exact candidate snapshot, without old child transplantation.")
+    if mode == "carry-forward":
+        carry = request.get("carry_forward")
+        if outcome != "complete" or request["candidate"] != resource["origin"]:
+            raise ValueError("Carry-forward requires the current selected origin and a resolved compatible contract.")
+        if (not isinstance(carry, dict) or type(carry.get("from_revision")) is not int
+                or not 0 < carry["from_revision"] < row[1] or not all(
+                    isinstance(carry.get(k), str) and carry[k].strip()
+                    for k in ("customization", "target", "contract_check"))):
+            raise ValueError("Carry-forward needs a historical revision, exact customization excerpt, target excerpt and contract check.")
+        previous = db.execute("SELECT resource FROM revisions WHERE id=? AND revision=?",
+                              (row[0], carry["from_revision"])).fetchone()
+        if previous is None or carry["customization"] not in json.loads(previous[0])["content"]:
+            raise ValueError("Requested customization is absent from that historical revision; inspect history.")
+        if carry["target"] not in resource["origin"]["snapshot"]:
+            raise ValueError("Carry-forward target is absent from the new assembly; reconcile its contract first.")
+    if outcome == "partial" and (not unresolved or not review["compatible_changes"] or not review["prior_selection_valid"]):
+        raise ValueError("Partial updates need compatible changes, unresolved issues and a valid retained selection.")
+    if outcome == "blocked" and (not unresolved or request.get("content") != resource["content"]):
+        raise ValueError("Blocked updates retain existing content and record the unresolved condition.")
+    resource["content"] = request.get("content")
+    if outcome == "complete":
+        resource["origin"] = request["candidate"]
+    resource["decision"] = request.get("decision")
+    resource["continuation"] = request.get("continuation")
+    resource["origin_update"] = dict(mode=request["mode"], outcome=request["outcome"],
+                                     comparison=comparison, review=review,
+                                     prior_revision=row[1])
+    if mode == "carry-forward":
+        resource["origin_update"]["carry_forward"] = request["carry_forward"]
+    validate(resource)
+    return resource
+
+
+
+def has_table(db, name):
+    return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)).fetchone() is not None
+
+
+def selection_records(db, source, identity):
+    if db is None or not has_table(db, "selection_revisions"):
+        return []
+    return [json.loads(row[0]) for row in db.execute(
+        "SELECT record FROM selection_revisions WHERE source=? AND id=? ORDER BY revision",
+        (source, identity))]
+
+
+def resource_snapshot(db, kit_dir, source, identity):
+    if source == "saved":
+        if db is None or not has_table(db, "revisions"):
+            return None
+        row = db.execute("SELECT revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1",
+                         (identity,)).fetchone()
+        return dict(revision=row[0], resource=json.loads(row[1])) if row else None
+    hits = []
+    for filename, kind in (("legos.csv", "piece"), ("rules.csv", "rule")):
+        with (kit_dir / filename).open(encoding="utf-8", newline="") as stream:
+            for row in csv.DictReader(stream):
+                if row["id"] == identity:
+                    hits.append(dict(kind=kind, resource=row, reference=f"{filename}#{identity}"))
+    if len(hits) > 1:
+        raise ValueError("Ambiguous supplied identity; reconcile the distribution before changing selection.")
+    if not hits and re.fullmatch(r"P[1-9][0-9]*|axis[1-4]|step[1-7]|combine", identity):
+        filename = "patterns.md" if identity.startswith("P") else "delegation.md"
+        if not (kit_dir / filename).is_file():
+            return None
+        result = subprocess.run([sys.executable, "-I", str(Path(__file__).with_name("kit")),
+                                 "--dir", str(kit_dir), "show", identity], capture_output=True, text=True)
+        if result.returncode:
+            raise ValueError(f"Cannot inspect supplied resource: {result.stderr.strip()}")
+        hits.append(dict(kind="pattern" if filename == "patterns.md" else "delegation",
+                         reference=f"{filename}#{identity}", resource=result.stdout))
+    if not hits:
+        return None
+    snapshot = hits[0]
+    snapshot["sha256"] = hashlib.sha256(json.dumps(snapshot, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    return snapshot
+
+
+def selection_view(db, kit_dir, source, identity):
+    records = selection_records(db, source, identity)
+    record = records[-1] if records else None
+    snapshot = resource_snapshot(db, kit_dir, source, identity)
+    enabled = record["enabled"] if record else True
+    return dict(source=source, id=identity, revision=record["revision"] if record else 0,
+                enabled=enabled, available=snapshot is not None, effective=enabled and snapshot is not None,
+                record=record, current_snapshot=snapshot,
+                consumption="Selection only; applied consumers remain unchanged. Check conditions before use.")
+
+
+def read_selection(store, kit_dir, source, identity, history=False):
+    if not store.exists():
+        return [] if history else selection_view(None, kit_dir, source, identity)
+    with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
+        return selection_records(db, source, identity) if history else selection_view(db, kit_dir, source, identity)
+
+
+def change_selection(args):
+    facts = json.loads(args.input.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+    if not isinstance(facts, dict):
+        raise ValueError("Selection input must be an object.")
+    # Reuse the existing attributable-record contract without making a content revision.
+    validate(dict(facts, id=args.id, name=args.id, kind="piece", content="Selection decision",
+                  origin=None, sources=[], conditions=[], gaps=[]))
+    if args.expect_selection_revision < 0:
+        raise ValueError("Expected selection revision must be zero or the inspected revision.")
+    before = read_selection(args.store, args.kit_dir, args.source, args.id)
+    if not before["available"]:
+        raise ValueError("Resource unavailable; inspect its source and identity before changing selection.")
+    mode = "rwc" if args.expect_selection_revision == 0 and args.command == "disable" else "rw"
+    with sqlite3.connect(args.store.resolve().as_uri() + "?mode=" + mode, uri=True) as db:
+        db.execute("PRAGMA synchronous=FULL")
+        db.execute("BEGIN IMMEDIATE")
+        current = selection_view(db, args.kit_dir, args.source, args.id)
+        if current["revision"] != args.expect_selection_revision:
+            raise ValueError(f"Selection revision conflict: expected {args.expect_selection_revision}, found {current['revision']}; inspect selection/history before retry.")
+        if not current["available"]:
+            raise ValueError("Resource unavailable; selection remains unchanged.")
+        enabled = args.command == "restore"
+        if current["enabled"] == enabled:
+            raise ValueError("Selection already has the requested state; retain it rather than append a duplicate effect.")
+        prior = current["record"]
+        if prior:
+            for key in ("owner", "scope"):
+                if prior[key] != facts[key]:
+                    raise ValueError(f"Changing selection {key} requires a separately authorized store/identity.")
+        record = dict(facts, source=args.source, id=args.id, revision=current["revision"] + 1,
+                      enabled=enabled, action=args.command, snapshot=current["current_snapshot"],
+                      saved_at=datetime.now(timezone.utc).isoformat())
+        payload = json.dumps(record, ensure_ascii=False, allow_nan=False)
+        db.execute("CREATE TABLE IF NOT EXISTS selection_revisions (source TEXT, id TEXT, revision INTEGER, record TEXT NOT NULL, PRIMARY KEY (source, id, revision))")
+        db.execute("INSERT INTO selection_revisions VALUES (?, ?, ?, ?)",
+                   (args.source, args.id, record["revision"], payload))
+    return read_selection(args.store, args.kit_dir, args.source, args.id)
+
+
+def search(store, kit_dir, query, limit, include_disabled=False):
+    if not query.strip() or not 1 <= limit <= 50:
+        raise ValueError("Supply a focused nonempty query and a limit from 1 to 50.")
+    needle = query.casefold()
+    matches = []
+    for filename, kind in (("legos.csv", "piece"), ("rules.csv", "rule")):
+        with (kit_dir / filename).open(encoding="utf-8", newline="") as source:
+            for row in csv.DictReader(source):
+                if needle in " ".join(row.values()).casefold():
+                    matches.append(dict(id=row["id"], name=row.get("name", row.get("rule")),
+                                        kind=kind, origin="supplied", certainty=row["certainty"],
+                                        sources=row.get("sources", row.get("source")),
+                                        retrieve=f"kit show {row['id']}"))
+    states = {}
+    if store.exists():
+        with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
+            if has_table(db, "selection_revisions"):
+                for source, identity, payload in db.execute("SELECT source, id, record FROM selection_revisions s WHERE revision=(SELECT MAX(revision) FROM selection_revisions WHERE source=s.source AND id=s.id)"):
+                    states[(source, identity)] = json.loads(payload)["enabled"]
+            rows = db.execute("SELECT id, revision, resource FROM revisions r WHERE revision=(SELECT MAX(revision) FROM revisions WHERE id=r.id) ORDER BY id") if has_table(db, "revisions") else []
+            for row in rows:
+                resource = json.loads(row[2])
+                if needle in " ".join(str(resource.get(k, "")) for k in ("id", "name", "content", "sources", "gaps")).casefold():
+                    matches.append(dict(id=row[0], revision=row[1], name=resource["name"],
+                                        kind=resource["kind"], owner=resource["owner"], scope=resource["scope"],
+                                        origin="saved", retrieve=f"library --store {store} show {row[0]}"))
+    for match in matches:
+        match["enabled"] = states.get((match["origin"], match["id"]), True)
+    excluded = sum(not match["enabled"] for match in matches)
+    matches = [match for match in matches if include_disabled or match["enabled"]]
+    return dict(excluded=excluded, matches=matches[:limit], total=len(matches), truncated=len(matches) > limit,
+                coverage="Supplied pieces/rules and this store only. Use kit list P/delegation for those references.")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--store", required=True, type=Path)
+    sub = ap.add_subparsers(dest="command", required=True)
+    save = sub.add_parser("save", help="Create at revision 0 or edit the inspected revision")
+    save.add_argument("--input", required=True, type=Path)
+    save.add_argument("--expect-revision", required=True, type=int)
+    sub.add_parser("show").add_argument("id")
+    sub.add_parser("history").add_argument("id")
+    comparison = sub.add_parser("compare", help="Read old origin, customization and candidate; semantics remain unchecked")
+    comparison.add_argument("id")
+    comparison.add_argument("--candidate", required=True, type=Path)
+    change = sub.add_parser("update", help="Record and apply a checked origin update at the inspected revision")
+    change.add_argument("id")
+    change.add_argument("--input", required=True, type=Path)
+    change.add_argument("--expect-revision", required=True, type=int)
+    find = sub.add_parser("search", help="Focused supplied and saved resource summaries")
+    find.add_argument("query")
+    find.add_argument("--kit-dir", type=Path, default=Path(__file__).resolve().parent.parent)
+    find.add_argument("--limit", type=int, default=12)
+    find.add_argument("--include-disabled", action="store_true", help="Inspect excluded matches without restoring them")
+    for command in ("selection", "selection-history", "disable", "restore"):
+        parser = sub.add_parser(command, help="Inspect or explicitly change effective library selection")
+        parser.add_argument("id")
+        parser.add_argument("--source", required=True, choices=("supplied", "saved"))
+        parser.add_argument("--kit-dir", type=Path, default=Path(__file__).resolve().parent.parent)
+        if command in ("disable", "restore"):
+            parser.add_argument("--input", required=True, type=Path)
+            parser.add_argument("--expect-selection-revision", required=True, type=int)
+    args = ap.parse_args()
+    try:
+        if args.command == "search":
+            result = search(args.store, args.kit_dir, args.query, args.limit, args.include_disabled)
+        elif args.command in ("selection", "selection-history"):
+            result = read_selection(args.store, args.kit_dir, args.source, args.id, args.command == "selection-history")
+        elif args.command in ("disable", "restore"):
+            result = change_selection(args)
+        elif args.command in ("show", "history", "compare"):
+            with sqlite3.connect(args.store.resolve().as_uri() + "?mode=ro", uri=True) as db:
+                row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (args.id,)).fetchone()
+                if row is None:
+                    raise ValueError("Resource not found; inspect the intended store and identity.")
+                if args.command == "compare":
+                    result = compare(row, json.loads(args.candidate.read_text(encoding="utf-8"), object_pairs_hook=unique_object))
+                else:
+                    result = view(row) if args.command == "show" else [view(r) for r in db.execute(
+                        "SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision", (args.id,))]
+                if args.command == "show":
+                    result["selection"] = selection_view(db, None, "saved", args.id)
+        elif args.command == "update":
+            request = json.loads(args.input.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+            with sqlite3.connect(args.store.resolve().as_uri() + "?mode=rw", uri=True) as db:
+                db.execute("PRAGMA synchronous=FULL")
+                db.execute("BEGIN IMMEDIATE")
+                row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (args.id,)).fetchone()
+                if row is None or row[1] != args.expect_revision:
+                    raise ValueError("Revision conflict or missing resource; read show/history and reconcile.")
+                resource = update(db, row, request)
+                payload = json.dumps(resource, ensure_ascii=False, allow_nan=False)
+                db.execute("INSERT INTO revisions VALUES (?, ?, ?, ?)",
+                           (args.id, row[1] + 1, payload, datetime.now(timezone.utc).isoformat()))
+                result = view((args.id, row[1] + 1, payload))
+        else:
+            resource = json.loads(args.input.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+            validate(resource)
+            if args.expect_revision < 0:
+                raise ValueError("Expected revision must be zero (create) or the inspected revision.")
+            payload = json.dumps(resource, ensure_ascii=False, allow_nan=False)
+            mode = "rwc" if args.expect_revision == 0 else "rw"
+            with sqlite3.connect(args.store.resolve().as_uri() + "?mode=" + mode, uri=True) as db:
+                db.execute("PRAGMA synchronous=FULL")
+                db.execute("BEGIN IMMEDIATE")
+                db.execute("CREATE TABLE IF NOT EXISTS revisions (id TEXT, revision INTEGER, resource TEXT NOT NULL, saved_at TEXT NOT NULL, PRIMARY KEY (id, revision))")
+                previous = db.execute("SELECT revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (resource["id"],)).fetchone()
+                current = previous[0] if previous else 0
+                if current != args.expect_revision:
+                    raise ValueError(f"Revision conflict: expected {args.expect_revision}, found {current}; read show/history and reconcile.")
+                if previous:
+                    prior = json.loads(previous[1])
+                    for key in ("scope", "owner", "origin"):
+                        if prior[key] != resource[key]:
+                            raise ValueError(f"Changing {key} changes identity/provenance; save a separately identified resource with an explicit relationship instead.")
+                revision = current + 1
+                db.execute("INSERT INTO revisions VALUES (?, ?, ?, ?)",
+                           (resource["id"], revision, payload, datetime.now(timezone.utc).isoformat()))
+            result = view((resource["id"], revision, payload))
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+    except (OSError, ValueError, sqlite3.Error) as exc:
+        print(f"ERROR: {exc}\nNext: inspect the live store before retry; no successful save is claimed.", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

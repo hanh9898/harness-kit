@@ -1,98 +1,64 @@
 ---
 name: harness-setup
-description: Set up a project's harness: observe how work really flows, turn a need into a kit piece, record it, run its check. Run after setup-matt-pocock-skills.
-disable-model-invocation: true
+description: Onboard a project into harness-kit or resume incomplete onboarding. Discover its environment, reuse adequate foundations, enable selected capabilities and demonstrate initial use. Discovery advice alone belongs to harness-evolve; ordinary work keeps its existing route.
 ---
 
 # Harness Setup
 
-Build the project's **harness** (the frame around a coding agent that adds capability) one **tracer bullet** at a time: one need, one kit piece, one record entry, one check that has actually run. Terms: **kit** is the shared read-only store of pieces (**legos**); **record** is `harness/record/`, this project's harness choices, one file per entry; both are defined in the kit README. Speak to the user in their own language. Ask **one question per turn**, then wait. Read [ASKING.md](ASKING.md) before your first message: overview message, question forms, rules, sheets S01 to S31. Each step names its sheets; write every question from its sheet.
+Deliver an adapted minimum foundation, an actual initial-use demonstration and usable discovery/evolve continuation. Apply progressive onboarding: explain the immediate value, disclose choices at the point of need and preserve a revisitable route. The scope of the result determines the work, not a stage count or catalog tour.
 
-Stages (the "k/6" of every question; the overview message lists them first):
+## Reconcile and discover
 
-| Stage | Plain name | Steps | The user |
-|---|---|---|---|
-| 1 | Understand how your team works | 0, 1 | tells one recent piece of work, names the agent app, labels items, confirms the flow |
-| 2 | Pick one thing to improve and the lightest way to do it | 2, 3, 4 | picks a need, approves evidence, settles tools, folders, team shape |
-| 3 | Record it and try it out | 5, 6 | agrees one check and sees it run |
-| 4 | Decide who may decide what | 7, 8 | names roles, gives a recent decision per role, picks levels and profiles |
-| 5 | Rules, keeping the tooling apart from your product, wiring it in | 9, 10, 11 | picks rules, says yes or no to isolation, confirms hook files |
-| 6 | Final check | 12 | reads the report; no question |
+Read the request, existing guidance, current records/history and relevant live targets. Reuse supplied facts, grants and settled choices. Default effects to the current repository; this is a boundary, not blanket write authority. Wider repositories, user settings, installations and shared targets need actual applicable grants, which may already be supplied. A one-call grant can cover lasting effects without authorizing future calls.
 
-Before the first question send the overview message (ASKING.md), short. Everything you say is in the user's words: the rule on words not to say is in ASKING.md, once. The user may ask to start at stage 5 (steps 9 to 12).
+Read [ENVIRONMENT.md](ENVIRONMENT.md) to identify the work, harness, optional control plane, scope and per-target readiness. An invoking host is not necessarily an intended consuming host. Separate installed, configured, active and intended facts; preserve unknowns. A project without a control plane or Git is valid.
 
-## Process
+For incomplete onboarding or a legacy installation, read [RESUME.md](RESUME.md). Inspect actual effects before retries, preserve adequate applied guidance and personal material, and reuse its authoritative records. Absence of a prescribed folder or setup-provider heading is not a reason to restart onboarding.
 
-### 0. Preflight and resume
+Route by the requested result: onboarding remains owned here, including mixed reusable saves via [harness-library](../harness-library/SKILL.md). Discovery advice alone, scoped improvement or assessment belongs to [harness-evolve](../harness-evolve/SKILL.md); ordinary work retains its ordinary route. Advice alone does not authorize adoption or new records.
 
-Setup is a prerequisite: look for an `## Agent skills` block in `AGENTS.md` or `CLAUDE.md` and for `docs/agents/`. Both there: `matt_config: present`. Neither: tell the user to run `setup-matt-pocock-skills` first, write nothing, stop. `docs/agents/issue-tracker.md` there but no `## Agent skills` heading: `matt_config: partial`; propose a block (sub-headings Issue tracker, Triage labels, Domain docs; one summary line and a pointer to each file under `docs/agents/`), show the draft, write it only after the user approves, change nothing else in the file. This does not relax the prerequisite: the block must exist before step 1.
+**Done:** the immediate objective, target roles, actual authority and unresolved material facts are understood. Ask only consequential unanswered questions, explain the consequence and recommendation, and continue independent work. Use the user's language and concrete work rather than a fixed questionnaire.
 
-`harness/progress.log` exists: read its last line, say which step it logged and that you continue after it. Take platform, flow, labels, the card and approved gate evidence (`harness/gate.md`) from the files; ask nothing a logged line already answers. Resume at the first step without its log line, except:
+## Choose a useful minimum
 
-| The log shows | Resume at |
-|---|---|
-| a `record` line, no `check` line | 6 |
-| every entry checked, no `delegation` line | 7 (a `delegation-draft` line without its `delegation` line: continue at the first field not settled, say what was kept) |
-| a `delegation` line, no `roles` line | 8 |
-| `roles` done | the first of 9 to 12 without its line |
-
-`harness/record/` exists: **edit mode**. Ask only what differs from the record; start at step 2 for the new need unless the flow changed; if the user names a later step (9 to 12), start there. Otherwise **fresh mode**.
-
-### 1. Observe
-
-Learn how work really flows here. Draft `harness/situation.md`, the situation card: nine lines `field: value`, facts you looked up ([RECORD-FORMAT.md](RECORD-FORMAT.md)), with `platform: unknown` and `confirmed: no`. Before the first question read `AGENTS.md`, `docs/agents/`, the repo and the top of each local folder in `code_home` (listing, README, recent git log), ask only what they leave open, and run `python3 <skill-dir>/../../../tools/check_kit.py --situation harness/situation.md` (again after each edit): it prints the branch each sheet takes (meanings in BOUNDARY.md), hence the question count of stage 1. Ask which agent app the team uses (S01) and write it into the card.
-
-Read [BOUNDARY.md](BOUNDARY.md). Label the items as its `s03_labels` branch says; you suggest, the user decides. Every item ends as `shared` or `project`. Learn the flow (S02, in BOUNDARY.md), then read its description back (S06), labels and card included. Set `confirmed: yes` when the user says it is right. Append the log line for `observe` (keys in RECORD-FORMAT.md) and run `check_kit.py --log harness/progress.log`, so a later run resumes from the log alone.
-
-### 2. Need to piece
-
-Take **one** need from the flow, the one the user names or the most painful. Look it up in the kit, never by loading the store:
+Inspect relevant kit summaries, then only determining detail:
 
 ```
-<skill-dir>/../../../kit/scripts/kit list            # groups
-<skill-dir>/../../../kit/scripts/kit list <group>    # one line per piece
-<skill-dir>/../../../kit/scripts/kit show <id>       # one piece in full
+<skill-dir>/../../../kit/scripts/kit list
+<skill-dir>/../../../kit/scripts/kit list <group>
+<skill-dir>/../../../kit/scripts/kit show <id>
 ```
 
-(`<skill-dir>` is the folder holding this SKILL.md as you were given it, three levels below the plugin root; substitute it before running.) Run `kit list` for every group that could touch the need ("automatic" touches schedules too) and tell the user the group names you looked at. Pick the piece whose `needed_when` matches; none fits: `outside the kit`. Ask which need hurts most (S07, in ASKING.md; branch `pain` asked it in stage 1: take the `pain=` of the `observe` line, never ask again), show the need and the piece and wait for a yes (S08). Append the log line for `need-to-piece`, with the letters of the groups you looked at.
+Substitute this skill's actual folder for `<skill-dir>`. Reuse adequate conventions, native facilities, resources and provider arrangements. Recommend a small assembly with concrete value, relevant prerequisites, consequential alternatives and maintenance cost. An adequate existing foundation may need only demonstration and evidence. Retain source certainty; catalog selection is not qualification.
 
-### 3. Simplicity gate
+Read [the shared method selection](../harness-evolve/CHANGE-FLOW.md) before dependent authoring. Select original methods by intent, clarity, artifact, size, authority and targets; preserve their complete contracts, including original writing-for-agents for agent-read artifacts. Load N06 before guidance edits, and E07/E08 before current/history edits as required there. After an applicable interview or resumed design, use its linked writeback reference to reconcile actual glossary/ADR artifacts. No universal interview/specification/ticket chain applies.
 
-Nothing is recorded or installed until it passes the gate. Items: the pieces of step 2, the folder and team items of step 4 when proposed, and in edit mode every item you add or change. For **each** item, find the next lighter step on the ladder (instruction file, skill, script/CLI, MCP) and the evidence that it is not enough. Read the platform's docs or `--help` now, never from memory. Write url or command, date and the answer. Method and format: [GATE.md](GATE.md). Show the whole evidence list as an evidence block (ASKING.md; S09 in GATE.md) and wait; only the user approves it. An item without approved evidence is dropped, not recorded. Append the log line for `gate`.
+For authority model construction, delegated-choice review/calibration, concrete effect grants or legacy delegation migration, read [authority design](../../../kit/authority/DESIGN.md). Deliver the requested result independently; preserve actual grants, selected controls and the prior adoption procedure.
 
-### 4. Propose, one part at a time
+For the initial use's source selection and task-specific access, read [context guidance](../harness-evolve/CONTEXT.md). Reuse its material, access constraints and representative-use check within onboarding.
 
-Three parts, in this order: tools to install (with their rung), folder layout, agent team shape. Propose one, wait for the user to settle it, then move on. The tools were gated in step 3; folder and team items go through the gate as you propose them, evidence shown with the proposal. Method and sheets S10 to S12: [PROPOSALS.md](PROPOSALS.md); the card's `s11` branch says how an existing harness is handled. Append one log line per settled part.
+For role or reviewer design, read [team arrangements](../../../kit/team-workflow/TEAM.md); for task contracts, review timing, transitions, flow or trackers, read [task workflows](../../../kit/team-workflow/TASKS.md). Narrow team/workflow requests use evolve independently. For an explicitly selected factory, read [optional factory arrangement](../../../kit/FACTORY.md) to connect services, tasks and readiness. Factory is optional; preserve the calling entry's grants, method and record procedure.
 
-### 5. Record
+For a selected tool/integration operation, use [tool operations](../../../kit/TOOL-OPERATIONS.md) to establish prerequisites, input/output/effects and actual verification. Direct operation-only requests use evolve.
 
-Write each settled item as an entry and update the index as set out in [RECORD-FORMAT.md](RECORD-FORMAT.md): temp file first, then rename. Status starts `unverified`. A `kind: team` entry carries `check_scope: structural`. Check for an existing entry for this need first and update it in place. Append the log line for `record` per entry.
+Read [FOUNDATION.md](FOUNDATION.md) and account for every required semantic outcome, using existing authoritative references where adequate. Read [DISCOVERY.md](DISCOVERY.md) to expose all twelve outcomes through a revisitable pointer with examples and readiness limits. Select only what the initial use needs; teams, telemetry and unattended operation remain optional.
 
-### 6. Install and run the check
+**Done:** the smallest sufficient foundation, initial-use criteria, selected methods/standards and missing prerequisites are explicit. Existing sufficient authority needs no additional approval ceremony. A required unavailable provider blocks dependent work, not independent discovery.
 
-Create what the settled parts name (the script, the folders) and nothing else. Then propose one check per entry (S13, in ASKING.md; one command each, and say the number of entries first): a command that proves the piece works (start from the piece's `detail`; with `outside the kit`, design it with the user). Run only the command the user agreed to, no probe commands to "see what happens". Paste the real output into the entry. Set `status: passing` and `verified_on` only after the check ran and passed; a failure is `failing`. A piece the kit marks as unchecked on this platform needs its own check before `passing`. Append the log line for `check` once, after the final result.
+## Establish and demonstrate
 
-### 7. Delegation
+Before application effects, use [the shared durable-state contract](../harness-evolve/UPDATE.md): establish discoverable current state, distinct choice history, required pre-action capture/readback and safe serialized updates. Reuse an adequate store; local uncommitted records cannot promise survival after runner disposal. A persistence failure blocks dependent effects unless an authorized qualified alternative satisfies the same contract.
 
-Its own step, never mixed into the team shape. It is the longest stage: announce its length first (DELEGATION.md). For each role and each kind of decision, ask the four axes and agree one level from 1 to 7. Fetch the framework piece by piece, never the whole file. Write one `delegation-<role>` entry per role. Turning delegation on or off later is changing a level, nothing rebuilt. Method, format and sheets S14 to S20: [DELEGATION.md](DELEGATION.md). Append the log line for `delegation` per entry.
+Apply only the missing foundation within the prior grants/change procedure and selected timing. For selected provider activation or updates, read [ACTIVATION.md](ACTIVATION.md) before touching host configuration. Carry project knowledge, selected standards, scope, authority, evidence and continuation through composed methods. Provider selection does not supply installation permission or bypass invocation restrictions.
 
-### 8. Roles and profiles
+Perform the selected initial use through its real route. Read the effective guidance, produce the requested small result, inspect it against the selected criteria and inspect protected targets. A file, command exit or narrated example alone is not the demonstration. Record actual invocation, result, conditions and gaps per consuming target; invoking-host success does not qualify a different intended host or a fresh session.
 
-One `role-<role>` entry per role, four cells (tools, docs, skills, delegation level), each pointing to something that exists. A cell pointing at nothing sends you back to fix it; the entry is never `passing` until every pointer resolves. Method and sheet S21: [ROLES.md](ROLES.md). Append the log line for `roles` per entry.
+**Done:** each required outcome is delivered and checked, or the result is partial with precise per-target blockers. Retain valid completed work, failed observations and uncertainty; improvement needs comparison evidence beyond successful initial use.
 
-### 9. Standards
+## Hand over and continue
 
-Choose the checkable standard for the pieces chosen, from the kit's rules, never by loading them. Write `harness/STANDARDS.md` (first line: it applies only to changes under `harness/`) and one `standard-*` entry per chosen rule, each pointing at its section. Method and sheet S22: [STANDARDS-STEP.md](STANDARDS-STEP.md). Append the log line for `standards`.
+Update the authoritative current view and linked history under the shared record contract. Make project context, applicable criteria/authority, effective resources/providers, initial-use/evolve/discovery routes, observed evidence and next actions recoverable. Link the capability guide rather than copy its contents into every record. Provide a few task-relevant examples, including a later discovery/advice request and an evolve request.
 
-### 10. Isolation
+Report the outcome first: what is usable, what was preserved, what actually ran and which targets remain unqualified. Attribute only material resources. Populate actual exceptions (outside-kit dependency, unfollowed recommendation and reason, or missing prerequisite); provide a resource/contribution/evidence trace when requested. Keep installation, eligibility, invocation, applied effects and improvement separate.
 
-Its own question, always asked: should the harness stay out of the product's commits, comments and PRs? If yes, propose rule, checker and review; the user chooses. Suggest, never edit, a scope line for the product's coding standards. Method and sheets S23 to S27: [ISOLATION.md](ISOLATION.md). Append the log line for `isolation`.
-
-### 11. Map, entry point and hooks
-
-Register the contexts in `GLOSSARY-MAP.md`, create the harness glossary and ADR folder, replace the block between the two markers in `AGENTS.md` or `CLAUDE.md`, and wire and trigger every hook. Method and sheets S28 to S31: [WIRING.md](WIRING.md). Append the log line for `wiring`.
-
-### 12. Final check
-
-List every entry in `record/` with its status. Verify with a command, not from memory, that each `passing` entry has a pasted check result with a date, and re-run any that does not. An entry whose check cannot run stays `unverified` or `failing`, and you say so. Append the log line for `final`, then report: entry paths, check results, and the log's last line.
-
+**Done:** the user can start the demonstrated use and revisit discovery; another authorized agent can find the current state and resume remaining work without reconstructing this chat. A completed reconciliation is a no-op unless live changes invalidate its evidence. [CHECKLIST.md](CHECKLIST.md) defines scoped qualification, not another onboarding tour.

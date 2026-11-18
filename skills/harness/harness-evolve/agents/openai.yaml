@@ -1,5 +1,5 @@
 interface:
   display_name: "Harness Evolve"
-  short_description: "Change and maintain a project's harness, one checked change at a time"
+  short_description: "Improve a harness or provide scoped advice, assessment and learning"
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

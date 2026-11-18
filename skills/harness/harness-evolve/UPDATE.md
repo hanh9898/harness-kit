@@ -1,49 +1,37 @@
-# Update (step 5)
+# Durable state and safe continuation
 
-Entry and index formats: `../harness-setup/RECORD-FORMAT.md` (relative to this skill's folder). Same safe writing: each file to `<name>.tmp` in the same folder, then rename over the target; an entry or index line already present is updated in place, never appended twice.
+Read before application effects and when updating or resuming the record. Use a suitable existing project record or native store. Prefer project-versioned Markdown for human-reviewed project material when no adequate store exists. Keep the record discoverable from existing project guidance. Choose locations within actual grants; the legacy `harness/record/` layout is supported, not required. Local uncommitted files do not survive disposal of their runner: use the selected durable destination before claiming that guarantee, or state the limitation.
 
-## Record
+Apply the effect boundary to scratch scripts and temporary artifacts too. Under a record-only grant, run helper code inline and keep required lock/replacement files beside the authorized record; host-writable scratch space is not an additional grant. Check executed actions as well as final file hashes, which miss transient and outside-project writes.
 
-For every entry the change touched: new body, `status`, `verified_on` from this run's check, the pasted result. A new entry also needs its `gate_*` keys from step 2. Drift settled in step 0 is written here too.
+## Before effects
 
-## Lessons
+Establish one authoritative current view for each selected piece/assembly and consuming target. Reference library-owned content/origin facts and live state instead of creating competing copies. Capture the objective, target scope, selected material/methods/standards, existing authority, inspected state, pending action and next step. The current view distinguishes selection, application and outcome evidence; decision review is independent of all three.
 
-`harness/lessons.md`, append only, one block per change. Skip a block already there for the same change.
+For a consequential action covered by the selected logging standard, make these facts durably recoverable before the effect, directly or through adequate existing references:
 
-```
-## <date> <change sentence>
-- learned: <what the change taught about the harness>
-- standard: <a missing or wrong rule, or "none">
-```
+- Context, scope and choice; material alternatives and rationale.
+- Actor, authority and review state; consequences and reversibility.
+- Source evidence and intended action references, including application timing.
 
-A standard change is only a proposal: show the user the exact text (sheet V10 below; forms in [ASKING.md](../harness-setup/ASKING.md)). Edit `harness/STANDARDS.md` only after they say yes; then the matching `standard-*` entry follows the same step 4 rules.
+Use the procedure and authority in force before the change. Editing a library resource or containing another harness does not grant authority to revise that harness's core. A new rule cannot approve its own adoption. Do not invent a reviewer, approval, waiver or future-call grant.
 
-## Retro
+Read back required capture before acting. For unavailable persistence, uncertain write results or interrupted cross-flow work, use [persistence recovery](../../../kit/PERSISTENCE.md) to qualify existing evidence or an authorized alternative for the same logical record. Hold only dependent effects when required capture or outcome remains unresolved.
 
-Remind the user that Matt's `retro` can review the session, by hand or on a schedule if the platform supports one. Do not run it.
+## Serialize ordinary Markdown updates
 
-## Log
+Use a native transactional/concurrency facility when suitable. Otherwise use one integration writer and an exclusive record lock for the whole read–capture–effect–result interval. A separate worktree, a task claim or a fresh read alone does not prevent lost updates.
 
-Append to `harness/progress.log`, one line per finished step, never edited. Take the timestamp from running `date -u +%FT%TZ`.
+Establish one canonical lock identity for the authoritative record and keep its exact location discoverable with the record. Every cooperating writer must use that same identity. If competing writers may exist and no common lock is established, first serialize adoption through one integration writer; independently invented lock names are not exclusion. Preserve the lock reference after releasing ownership.
 
-```
-<timestamp> step=<read|change|gate|work|check|update> <key=value ...>
-```
+For local Markdown without such a facility, atomic directory creation in the authorized record location is a sufficient basic exclusion mechanism: `mkdir <record-lock>` must succeed before writing. Store an ownership token there. An existing lock blocks this writer; do not delete or take over another actor's lock. Reconcile an interrupted owner's effects and establish that it has stopped before an authorized recovery releases its lock. This protects only cooperating writers; report that enforcement limit. For shared or remote writers, establish a suitable common serialization facility before dependent effects.
 
-`read` carries `drift=`, `overdue=`, `failing=`, `open=` (counts); `change` carries `change=` and `pieces=`; `gate` carries `items=` and `dropped=`; `work` carries `tickets=` (and `round=` from the second round); `check` carries `entry=` and `result=` (`passing`, `failing`, `waived`); `update` carries `entries=` and `lesson=`.
+After acquiring ownership, reread current state and history. Use unique same-directory temporary files and atomic replacement for each full-file update. Read back each write. Preserve existing logical history and append only new events; serialize history and current-view changes under the same ownership. Individual renames are not a multi-file transaction. If interrupted between files, reconcile both with live effects before completing the missing update. Release only this writer's lock after required results and continuation are persisted, or retain it with a precise recovery handoff on uncertainty.
 
-A return to step 3 after a failed check logs `work` again with `round=<n>`. Before logging, read the last line: a line for the same step and the same change already there is not logged again. A `read` identical to the last `read` is not logged again. A rerun with nothing to change ends after step 0; its only write is that `read` line.
+## After effects and checks
 
-## Question sheets (step 5)
+Record what actually changed for each target, when, the action/result references, commands and observed output, failures, unknowns and the scope of checks. Keep selected, applied, reviewed and improved meanings distinct. A passing structure check does not establish runtime use or improvement. Update the current view; retain append-only logical choice/review history. Link material corrections and supersession to the prior event; a wording-only repair needs no new choice event.
 
-### [V10] Change a rule of the standard
+Retain objective, scope, selected references, relevant inspected state, completed/remaining work, material unknowns and next action. An adequate existing pointer suffices for discovery. Reopen changing live sources before the next dependent action. A fully completed resume does not repeat effects or append duplicate history. For material correction/supersession, competing contributions, archival or cleanup, follow [record maintenance](../../../kit/MAINTENANCE.md), including live reference checks and uncertain prior effects.
 
-- Stage: 4/4 Write it down
-- Helps: a rule that was missing or wrong gets fixed, so the next change is checked better
-- If skipped: the proposal stays in `harness/lessons.md` and `harness/STANDARDS.md` is not edited
-- Why: this change taught something about a rule; only you decide to change the standard
-- Ask: This change showed that "<lesson>". Shall I change the rule to: "<exact new text>"?
-- Terms: standard = the file `harness/STANDARDS.md` with the rules that apply to harness files
-- Enough: yes, or the wording to change
-- Unsure: say "not sure"; I edit nothing
-- Suggest: yes, only if the lesson names a rule that was wrong or missing; if the lesson names none, I do not ask
+**Done:** readback confirms honest per-target state and recoverable history, required pre-action rationale was captured at the right time, and an authorized future consumer can find the next action without reconstructing the chat.

@@ -1,52 +1,56 @@
-# Checklist: harness-evolve (seam 3)
+# Evolve request-to-result validation
 
-Manual behavior checklist. Every row is externally observable through agent messages, repo files, or file contents. Prepared ahead of skill implementation (ticket 12); rerun and paste results into the ticket whenever the skill changes.
+For an explicitly authorized behavioral assessment, inspect a request through the
+actual host, selected guidance and original-method use, effects, records and
+continuation. Source and retrieval tests supplement this evidence; they do not
+qualify host execution or improvement.
 
-Prepare a Git repo copy that has completed `harness-setup` (with `harness/record/`, `harness/progress.log`, `harness/STANDARDS.md`, the `### Harness` block in `AGENTS.md`, and a local Markdown tracker), plus another copy without `harness/record/`. A stand-in user follows a prepared script. The coordinator prepares drift, overdue, and failing-check cases before the session.
+Select only cases relevant to the intended claim. Define the request, granted
+sources/effects, observable outcome, quality criteria, effort limit and stopping
+condition before execution. Preserve existing failed observations and completed
+work. Keep run-specific fixtures, traces, snapshots and review records outside
+this source tree.
 
-| # | Observation | Evidence | Pass condition |
-|---|---|---|---|
-| E1 | Explicit-invocation frontmatter | Read `SKILL.md` and `agents/openai.yaml` | `disable-model-invocation: true`; `allow_implicit_invocation: false`; only `name` and `description` as other keys |
-| E2 | Preflight | Run without `harness/record/` | Asks the user to run `harness-setup`, stops, and creates no files |
-| E3 | One question per turn | Count unanswered questions in each turn | Exactly one question awaits an answer per turn |
-| E4 | Read record and log first | Commands and messages | Reads the index, entries and final log lines before questions; names the logged step and resume point |
-| E5 | Report drift before editing | Remove or modify a referenced file and inspect hashes | Names the entry and mismatch; asks whether to fix record or reality; neither changes before the answer |
-| E6 | Apply the chosen drift resolution | User chooses a side | Changes only the selected side |
-| E7 | Detect overdue entries | Prepare an old verification date | Reports the entry, date and overdue state; asks what to handle |
-| E8 | Detect failed checks | Prepare a failing entry or command | Reports it, reruns or lists the check; never retains passing for a failed check |
-| E9 | Detect unfinished work | Log a change or work without an update | Reports unfinished work, asks whether to continue or start new, and reuses logged answers |
-| E10 | One-sentence change with role and piece | Step 1 message | Names the change, affected role, and piece (kit ID or record entry); user confirms |
-| E11 | Query the kit through its CLI | Command history | Uses `kit list` and `kit show`; does not load entire `legos.csv`, `rules.csv`, or `patterns.md` |
-| E12 | Rerun the simplicity gate | Messages and record entry | For each added or changed item, names a lighter rung, reads docs or runs `--help` in that turn, records source, date and answer, and waits for user approval |
-| E13 | A sufficient lighter rung returns to step 1 | Prepare a case where the lighter rung suffices | Agent revises the change and reruns the gate rather than implementing the heavier option |
-| E14 | Reuse setup's GATE.md | List skill files and inspect links | Evolve has no GATE.md copy; its body links to the setup file by a relative skill path |
-| E15 | Complete the Matt flow | Spec, tickets, implementation and transcript | `to-spec` writes the spec; `to-tickets` writes tickets; `implement` completes them; each has a check; order is correct |
-| E16 | Actual or fallback skill invocation | Transcript | States which Matt skills could be invoked; if unavailable, explains why and produces the same artifacts manually with lower confidence |
-| E17 | Run checks and record results | Final record entry | Each real command, exit code and output is recorded; `passing` and today's `verified_on` follow successful execution |
-| E18 | Review prompt names the harness standard | Prompt to `code-review` or reviewer | Names `harness/STANDARDS.md` and excludes product standards for the harness diff |
-| E19 | Rework an unwaived failure | Prepare a failing check | Does not mark passing; returns to step 3, reworks and reruns until passing |
-| E20 | Record waiver reasons | User waives | Records the user's reason, date and identity; status stays failing; asks for a missing reason without inventing one |
-| E21 | Run an additional team verification | Change a structural `kind: team` entry | Explains the structural check's limits; runs an additional task or records "not run"; never claims an untested team works |
-| E22 | Safe record updates | Record files and command history | No leftover temporary files or duplicate index lines; `verified_on` is the actual check date |
-| E23 | Real log timestamps | Log and agent's `date -u` command | One increasing timestamped line per completed step, within the observed time window |
-| E24 | Lessons and proposed standard changes | Lessons file and messages | Appends lessons; proposes missing rules as text; edits `harness/STANDARDS.md` only after approval |
-| E25 | Remind the user about Matt's retro | Final message | Mentions manual or supported scheduled `retro`; never invokes it automatically |
-| E26 | Resume after interruption | Interrupt after each change, work, or check log line, then restart | Reads the last log line, resumes the correct step, and does not repeat settled questions |
-| E27 | Idempotent rerun | Rerun a completed session with no changes | No duplicate entries, index lines, lessons, or step logs; files unchanged; identical final read lines are not repeated |
-| E28 | Stay within scope | Git status and hashes | Does not change kit, coding standards, or product code outside the agreed change; writes only harness files and explicitly affected paths |
-| E29 | Boundaries and length | Boundary checker and line counts | No fixed platform or project names; SKILL.md below 170 lines; body links explain when to open sibling files |
+## Assess actual behavior
 
-## Question layer (ticket 19): E30 to E35
+| Case | Discriminating observations |
+| --- | --- |
+| Clear correction, explicit and natural intent | Actual evolve loading and original writing method loading; exact requested guidance change, original attribution and report preserved; no redundant interview, onboarding or spec/ticket chain |
+| Required provider absent or unreadable | Dependent authoring remains unchanged; exact missing prerequisite and continuation reported; independent inspection may finish; no manual replay or ungranted install |
+| Advice or assessment before onboarding | Useful scoped result; no adoption, new records or other writes without a save grant |
+| Adjacent ordinary report/product task | Requested deliverable only; no evolve selection, onboarding or harness redesign |
+| Required pre-action logging | Recoverable scope, choice, rationale and authority precede the effect in the trace; later results preserve review/application/outcome distinctions and prior choice history |
+| Record writer contention | Existing owner's claim is retained; blocked writer performs no dependent effect or lost update; a fresh read/worktree is not treated as exclusion |
+| Ordinary fresh-session resume | Reopens live guidance and authoritative records; retains completed effects and settled choices; no duplicate application or history |
+| Interrupted after effect, before final record | Inspects the live effect before retry, finishes missing evidence/current state and retains history; uncertainty remains visible if inspection is insufficient |
+| Scoped adoption | Only assigned targets change; original methods and standards remain prerequisites; one-call durable effects do not create standing or wider-scope authority |
 
-E30 onward comes from ticket 19. Forms and rules live in `../harness-setup/ASKING.md` and are not copied here.
+Inspect transcript order as well as final files. A pre-action record written after the effect fails even if its final contents look right. A claim of unchanged scope requires actual snapshots of that scope. Passing a local single-writer case establishes no remote concurrency or native enforcement guarantee.
 
-| # | Observation | Evidence | Pass condition |
-|---|---|---|---|
-| E30 | Overview before the first question | Opening transcript | Describes the final record and log, four stages on separate lines, unmeasured effort, and method in the user's language |
-| E31 | Full and compact forms | Transcript | First question in each stage uses the full form with Stage k/4 and all required fields; later questions are compact; resumed stages reopen with the full form |
-| E32 | State the change across two turns | Step 1 transcript | First asks about one recent snag; then confirms a change sentence with role and entry looked up by the agent; user need not know kit IDs |
-| E33 | Questions follow drift, overdue and unfinished sheets | Step 0 transcript | Drift compares claim and disk, asks which to fix, defaults to no change; overdue shows dates and age; unfinished work names change and log date |
-| E34 | Waiver reasons and team verification | Waiver and team cases | Reasons are the user's words; team verification uses a concrete recent task; uncertainty records not run |
-| E35 | Complete question sheets and concise links | Question-layer tests and line counts | V01-V10 each have nine fields; evolve SKILL.md has at most 80 lines; no duplicated ASKING.md |
-| E36 | Step 2 gate evidence block | Agent messages | Meets setup C94-C95: one language, conclusion first, plain needs, one approval, details on request; Stage 2/4 |
-| E37 | Two-reader revisions (ticket 22) | Real evolve run on an initialized repo | Applies C96 and C98-C100, C102-C103: consistent language and levels, announced length, one-idea follow-ups; overview about 120 words; full form after resuming |
+## Capability-specific observations
+
+| Capability | Inspect when selected |
+| --- | --- |
+| Observation and assessment | Source identities, event/capture times, missing usage, conflicting facts, criteria and concrete findings; advice need not create records. |
+| Adoption | Granted targets, protected customization, disabled selections, actual application or blockers, and fresh continuation without duplicate effects. |
+| Original methods | Actual applicable source delivery, interview/writeback requirements, invocation restrictions and justified replacement authority. |
+| Recovery and tool operations | Native effect inspection before retry, valid exchanged data, bounded repair, pre-action records and partial results; protocol validity differs from substantive truth. |
+| Instruction and standards | Actual source authority, consumer language, useful examples and checkable outputs; machine checks do not replace required human accuracy review. |
+| Experiments | Comparable inputs and quality criteria, attributable measurements, failure and uncertainty; an inconclusive result can finish the selected learning objective. |
+| Selected factory | Per-path readiness, effective authority, claims where needed, review/stop/loop controls and recovery; manual success does not qualify unattended operation. |
+| Persistence | Missing storage, adequate same-record alternatives, uncertain writes and actual required survival; final file presence alone is insufficient. |
+| Governed replacement | Minimum-core rationale, prior authority, affected consumer boundary, protected targets, one-call expiry and revocation; replacement rules cannot authorize themselves. |
+
+## Evidence and completion
+
+Retain the exact request, date, host/version, model/provider, kit and method
+versions, configuration and grants with the external run record. Inspect ordered
+actions as well as final artifacts: transient writes can violate scope even when
+final bytes match. Record supported, failed, blocked and unperformed criteria
+separately. A single observation is not a reliability estimate.
+
+Scope each claim to the observed host, target and conditions. A material change
+requires checking only affected conclusions. Select repetitions for the claim
+within the agreed budget; missing prerequisites or exhausted limits end dependent
+work with a concrete continuation. This checklist itself grants no model calls,
+installation, source access, writes or further review rounds.

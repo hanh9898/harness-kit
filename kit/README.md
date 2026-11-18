@@ -1,6 +1,6 @@
 # Kit
 
-Read-only store of lego pieces for building an agent harness, plus the rules, team patterns and delegation framework that go with them. Terms (harness, record, rung) are defined once, in the project's harness glossary; this kit only adds the ones below.
+Supplied store of lego pieces for building an agent harness, plus the rules, team patterns and delegation framework that go with them. Terms (harness, record, rung) are defined once, in the project's harness glossary; this kit only adds the ones below.
 
 **The CSV files are the source of truth.** Edit `legos.csv`, `groups.csv` and `rules.csv` directly. They were generated once from research reports; nothing regenerates them, and the generator refuses to overwrite them (see "Where the data came from").
 
@@ -21,11 +21,11 @@ Read-only store of lego pieces for building an agent harness, plus the rules, te
 
 | File | What it holds | Rows |
 |---|---|---|
-| `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 163 |
+| `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 169 |
 | `groups.csv` | Group letter and name of the pieces; `scripts/kit list` prints both | 14 |
 | `rules.csv` | Rules for skills, agent documents, prompts, configuration, workflow, tools, testing | 219 |
 | `patterns.md` | Team architecture patterns | 14 |
-| `delegation.md` | Delegation framework: four axes and a seven-step scale, all `partial` | 4 axes, 7 steps |
+| `delegation.md` | Historical four-axis/seven-step material with migration notice; current route: D24 | 4 axes, 7 steps |
 
 Row counts differ from the first plan in one place (14 patterns, not 13); see `docs/generation-notes.md` at the repository root.
 
@@ -38,11 +38,57 @@ scripts/kit list            # groups: letter, name, piece count
 scripts/kit list A          # one line per piece in group A
 scripts/kit show B01        # one piece in full, by id or exact name
 scripts/kit list P          # team patterns, one line each; scripts/kit show P6 for one
-scripts/kit list delegation # four axes and seven steps, one line each
+scripts/kit show D24        # current authority design, review/calibration and effect grants
+scripts/kit list delegation # historical partial four axes/seven steps, with migration notice
 scripts/kit show axis1      # one axis; step3 for one step; combine for how the axes combine
 ```
 
 There is no command that prints the whole store, on purpose. Ask for a group, then a piece. Rules have their own commands: `kit list rules` (gate rules only), `kit list rules <topic>`, `kit show <rule id>` (for example `4.06`). Do not load `rules.csv` whole.
+
+## Team and workflow guidance
+
+G13 provides [responsibilities and reviewers](team-workflow/TEAM.md). G14 provides [task contracts and workflows](team-workflow/TASKS.md), with selected flow and tracker references. Both are inferred supplied guidance, useful independently through setup/evolve. See [provenance](team-workflow/SOURCES.md) for source scope and limits.
+
+## Optional factory
+
+J13 provides a [connected factory arrangement](FACTORY.md) only when selected. It composes existing capability contracts and service choices, with design, authorized application and observed unattended readiness kept separate. Manual work remains independent. [Provenance](FACTORY-SOURCES.md) retains original-method and source limits.
+
+## Authority
+
+D24 delivers [authority design and effect grants](authority/DESIGN.md), with the
+recommended ten-level PSW reference, delegated-choice review and evidence-based
+calibration. It reuses team/task and assessment ownership. Selected grants,
+controls and prior adoption authority remain binding; legacy rows stay available
+with explicit historical status. [Sources](authority/SOURCES.md) distinguish
+research from adaptation; these sources do not establish host qualification.
+
+## Tool operations
+
+[Operation guidance](TOOL-OPERATIONS.md) composes F02/F15 and existing native facilities through setup/evolve. It distinguishes exchanged-data validity, observed effects and model-result truth, with operation-specific prerequisites and continuation.
+
+[Coordinated recovery](RECOVERY.md) connects actual task dependencies, observation,
+assessment and bounded local repair. Valid independent work remains usable;
+restoration, recreation, compensation and partial blockers remain distinct.
+[Persistence recovery](PERSISTENCE.md) qualifies existing evidence or an authorized
+alternate for the same logical record when storage is unavailable or write outcome
+is uncertain. Unknown required durability remains a dependent blocker.
+
+## Instruction and response guidance
+
+N07 provides [instruction and response design](instruction-response/DESIGN.md)
+through setup/evolve. It includes source reconciliation, scoped writing guidance,
+examples and external content/form criteria, with exchanged tool protocol
+validity assessed separately. The procedure is inferred from accepted product
+requirements; those requirements establish no host-specific precedence or
+runtime support. See the reference's source scope; actual host behavior needs its own evidence.
+
+## Standards guidance
+
+N08 provides [standards selection](standards/SELECT.md) through setup/evolve, with six document-check families and honest machine/human evidence. Selected criteria, performed checks and satisfied requirements are separate; team/workflow retain review ownership and assessment interprets evidence.
+
+## Personal and project resources
+
+Use the public `harness-library` skill to retrieve, research, save or edit reusable drafts, and disable or explicitly restore resources. [Library operations](LIBRARY.md) describes focused search, explicit storage scope, attributable saves and revision-safe editing. Supplied CSVs stay authoritative for supplied material; saved drafts are separate and do not adopt into projects.
 
 ## Where the data came from
 

@@ -4,19 +4,23 @@ from conftest import CHECK_BOUNDARY, ROOT, TOKENS, run
 SKILL = ROOT / "skills" / "harness" / "harness-setup"
 
 
-def test_skill_is_hand_typed_only():
-    head = (SKILL / "SKILL.md").read_text(encoding="utf-8").split("---")[1]
+def assert_setup_eligibility(body, registration):
+    """Packaging eligibility only; supported loading still requires host evidence."""
+    head = body.split("---")[1]
     keys = {l.split(":")[0] for l in head.strip().splitlines()}
-    assert keys == {"name", "description", "disable-model-invocation"}
-    assert "disable-model-invocation: true" in head
-    assert "allow_implicit_invocation: false" in (SKILL / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    assert {"name", "description"} <= keys
+    assert "disable-model-invocation: true" not in head
+    assert "allow_implicit_invocation: true" in registration
 
 
-def test_body_short_and_every_sibling_pointed_to():
+def test_setup_is_eligible_for_explicit_and_model_selected_use():
+    assert_setup_eligibility((SKILL / "SKILL.md").read_text(encoding="utf-8"),
+                             (SKILL / "agents" / "openai.yaml").read_text(encoding="utf-8"))
+
+
+def test_runtime_reference_branches_are_packaged():
     body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
-    assert len(body.splitlines()) <= 170
-    for sib in ("BOUNDARY.md", "RECORD-FORMAT.md", "GATE.md", "PROPOSALS.md", "DELEGATION.md", "ROLES.md",
-                "STANDARDS-STEP.md", "ISOLATION.md", "WIRING.md"):
+    for sib in ("ENVIRONMENT.md", "FOUNDATION.md", "DISCOVERY.md", "ACTIVATION.md", "RESUME.md"):
         assert (SKILL / sib).is_file() and f"]({sib})" in body
 
 

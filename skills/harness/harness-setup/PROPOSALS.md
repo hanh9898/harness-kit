@@ -1,3 +1,7 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Proposals, one part at a time
 
 Three parts, in order. Write each proposal from its sheet below, in the forms of [ASKING.md](ASKING.md); the evidence of a part goes in one "Because" line, with the full evidence block only when the user asks. Present a part, wait, change it until the user settles it, then start the next. Never present two together. Tools were gated in step 3. Every folder or team item, and anything new that comes up while proposing, goes through the gate ([GATE.md](GATE.md)) before the part is settled: show the evidence with the proposal, and append the approved blocks to `harness/gate.md` once the user settles the part.
@@ -13,7 +17,7 @@ Three parts, in order. Write each proposal from its sheet below, in the forms of
 
 (Substitute `<skill-dir>` as in SKILL.md.) The patterns favour the simplest shape. Start from the single agent, show `Use when` and `Avoid when` of the pattern you propose, and pick a heavier one only if the flow you observed matches its `Use when`. A team may combine patterns, each tied to the part of the flow that matches its `Use when`. State any condition the pattern carries (some are experimental on their platform).
 
-**Existing harness (card branch `s11`).** `new`: nothing exists yet; lay out the files in S11. `handoff`: `prior_harness` lists parts that already exist. Setup moves, renames and reorders nothing and plans no move. For each listed part write one `kind: folder` entry with `status: adopted` (it meets the standard) or `needs-change` (it does not; the gap in `reason`, in the user's words), then ask S11 only for the new files. Tell the user in plain words that moving what exists is its own piece of work, done with `harness-evolve`, which takes every `needs-change` entry first, on its first run after setup. Log the part as `proposal part=folders outcome=handoff`; if the user changes their mind later, append a line with `revised=`.
+**Existing harness (card branch `s11`).** `new`: nothing exists yet; lay out the files in S11. `handoff`: `prior_harness` lists parts that already exist. Setup moves, renames and reorders nothing and plans no move. For each listed part write one `kind: folder` entry with `status: adopted` (it meets the standard) or `needs-change` (it does not; the gap in `reason`, in the user's words), then ask S11 only for the new files. Tell the user in plain words that moving what exists is its own piece of work, done with `harness-evolve`, which reconciles relevant `needs-change` entries within the requested scope. Log the part as `proposal part=folders outcome=handoff`; if the user changes their mind later, append a line with `revised=`.
 
 Settled parts are logged one line each (`proposal part=tools|folders|team`). A part the user rejects entirely is logged with `outcome=none`.
 

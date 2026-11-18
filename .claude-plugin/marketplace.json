@@ -3,12 +3,12 @@
   "owner": {
     "name": "harness-kit"
   },
-  "description": "Local marketplace for the harness-kit plugin.",
+  "description": "Local marketplace for the harness-kit plugin in Claude Code and compatible Codex clients.",
   "plugins": [
     {
       "name": "harness-kit",
       "source": "./",
-      "description": "harness-setup and harness-evolve with the read-only kit."
+      "description": "Progressive harness-setup, scoped harness-evolve and reusable-resource harness-library with the shared kit."
     }
   ]
 }

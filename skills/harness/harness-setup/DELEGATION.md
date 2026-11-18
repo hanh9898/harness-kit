@@ -1,3 +1,7 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Delegation (step 7)
 
 How much each role may decide for the user. Done after the tracer-bullet entries are recorded and checked, so there is something to delegate over. Separate from the team shape: the team says who exists, this says who decides what.

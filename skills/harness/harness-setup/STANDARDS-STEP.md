@@ -1,3 +1,7 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Standards (step 9)
 
 The harness has its own standard, separate from the product's. It holds only rules a machine can check, and it applies only to changes under `harness/`.

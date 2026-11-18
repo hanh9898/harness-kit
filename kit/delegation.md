@@ -1,3 +1,24 @@
+# Authority guidance and historical delegation
+
+For the current recommended model, independent review/calibration and concrete
+effect grants, use [D24: authority design](authority/DESIGN.md). PSW with
+Shavit recording/review and Lee–See calibration replaces the supplied default
+below. The four axes and Delegation Poker remain historical, partially sourced
+material, not active replacement instructions.
+
+## Migration notice
+
+The following original body is preserved unchanged for provenance. Its numeric
+heuristics, step conversions and claims about platform defaults have not been
+requalified and do not control the new model. An explicitly selected legacy
+consumer obligation remains binding until authorized replacement under its prior
+procedure. Preserve valid applied work and personal customizations; reconcile
+concrete function behavior, grants, review, timing and revocation before adoption.
+Fresh primary-source research is in [authority sources](authority/SOURCES.md);
+it does not retroactively change the historical certainty or "Not read" list.
+
+## Historical source body
+
 # Delegation framework
 
 How much an agent may decide on a person's behalf. It has four axes and one seven-step scale. Setting delegation on or off is moving along the scale; nothing else needs to be rebuilt.
