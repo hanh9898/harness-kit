@@ -7,6 +7,8 @@ description: Improve an existing agent harness or way of working. Use for recurr
 
 Deliver the requested improvement, or the narrower context, observation, advice, assessment or learning result. Use a proportional Plan-Do-Study-Act loop for improvement: reconcile, choose, act, assess and continue. A routine correction needs focused execution and checks, not an experiment.
 
+Complete step 2 before recommending a change or taking an application effect, including a supporting record edit or schedule creation. Read-only reconciliation can proceed first; step 3 owns the required pre-action capture.
+
 ## 1. Reconcile the request and relevant state
 
 Identify the requested result, affected guidance or capability, consuming targets and scope. Reuse facts, reasoning, criteria and grants already supplied. Default effects to the current repository; this boundary is not blanket write permission. Another repository, host installation or user-level configuration needs an actual applicable grant. A one-call grant can cover lasting effects without granting future calls.
@@ -35,13 +37,11 @@ For assessment-only or criterion-level outcome judgments, read [ASSESS.md](ASSES
 
 For cost/latency diagnosis or a deliberate bounded experiment, read [EXPERIMENT.md](EXPERIMENT.md). Establish comparable evidence, test one scoped change and preserve selected quality; a rejected or inconclusive candidate can complete learning without adoption.
 
-**Done:** the objective, relevant live state, target boundary and authority are understood. Ask only for consequential unresolved information; a clear authorized correction proceeds without another interview or confirmation.
+**Done:** the objective, relevant live state, target boundary and authority are understood. A clear authorized correction proceeds to source selection in step 2 without another interview or confirmation; reconciliation alone does not complete the prerequisites for effects.
 
 ## 2. Select evidence and applicable methods
 
-For a clear correction, use the settled choice and a check that distinguishes the requested result from plausible wrong results. For an unclear recurring problem, inspect representative failures and diagnose before proposing a remedy. For an improvement claim, capture a suitable baseline and regression criteria. For a bounded experiment, retain its learning objective, limits and adoption boundary; rejection may be success.
-
-Consult relevant kit summaries before suggestions or questions, then load only determining detail:
+Start source selection with relevant kit summaries, then load determining detail before recommendations or dependent effects. Read-only inspection needed to identify the request and targets may precede this selection:
 
 ```
 <skill-dir>/../../../kit/scripts/kit list
@@ -51,9 +51,11 @@ Consult relevant kit summaries before suggestions or questions, then load only d
 
 Resolve the loaded `SKILL.md` to its physical filesystem location before substituting its parent folder for `<skill-dir>` (for example, Python `Path(skill_path).resolve().parent`). A project skill symlink is a registration route; its apparent parent is not the kit root. If the computed kit path is missing, inspect the link target before declaring the source unavailable. Never load the whole catalog.
 
+For a clear correction, use the settled choice and a check that distinguishes the requested result from plausible wrong results. For an unclear recurring problem, inspect representative failures and diagnose before proposing a remedy. For an improvement claim, capture a suitable baseline and regression criteria. For a bounded experiment, retain its learning objective, limits and adoption boundary; rejection may be success.
+
 Reuse adequate native facilities and existing project material. Justify an addition by fit, adoption effort, context, integration, verification and maintenance cost, rather than a fixed delivery ladder. Selected standards and satisfied standards are different claims.
 
-Read [CHANGE-FLOW.md](CHANGE-FLOW.md) to select and load applicable original methods, including current writing-for-agents for agent-read authoring. Preserve each selected method's prerequisites and completion contract. Check required providers before dependent effects; an unreadable source or unavailable invocation blocks only that work. Do not recreate a required unavailable method manually.
+Read [CHANGE-FLOW.md](CHANGE-FLOW.md), complete its action-based kit selection, and load applicable original methods, including current writing-for-agents for agent-read authoring. Preserve each selected method's prerequisites and completion contract. Check required providers before dependent effects; an unreadable source or unavailable invocation blocks only that work. Do not recreate a required unavailable method manually.
 
 For team responsibilities or reviewer identity/context/authority/independence, read [team arrangements](../../../kit/team-workflow/TEAM.md). For task contracts, review timing, transitions, handoffs, flow controls or tracker choices, read [task workflows](../../../kit/team-workflow/TASKS.md) and its applicable branches. Deliver team-only and workflow-only results independently; factory setup is optional.
 
@@ -61,7 +63,7 @@ For direct standards selection, conflicting requirements or document-quality che
 
 For instruction conflicts, agent handoffs or model-output contracts, read [instruction and response design](../../../kit/instruction-response/DESIGN.md). Deliver usable guidance, examples and content/form checks independently; keep exchanged tool protocol validity separate.
 
-**Done:** the selected change or learning path, applicable methods/standards, check and material limits are clear. Existing adequate evidence and grants suffice; no universal spec, tickets, approval or installation chain applies.
+**Done:** the selection trace identifies the kit IDs actually read, their effect on each distinct harness change and its check, plus any material uncovered need or unavailable prerequisite. Required original methods are loaded. Use this trace to select the change or learning path and its limits before step 3; adequate existing evidence and grants need no new approval chain.
 
 ## 3. Capture and execute within scope
 
@@ -77,6 +79,6 @@ Read [CHECK-STEP.md](CHECK-STEP.md). Run the agreed checks against the actual re
 
 Update the current foundation, evidence and linked choice history using [UPDATE.md](UPDATE.md). For a resume, inspect uncertain effects before retry, retain valid completed work and avoid duplicate application or repeated settled questions.
 
-Report the requested outcome first, then determining resources, performed checks and limits. Include populated exceptions: an outside-kit dependency, an unfollowed recommendation with reason, or unverified work with its missing condition. Give the discoverable record and precise next action. Provide a Resource / What it changed / Evidence table when requested. Advice-only work may finish in the conversation without writes.
+Report the requested outcome first, then the consulted kit IDs and their material contributions, performed checks and limits. Include populated exceptions: an outside-kit dependency, an unfollowed recommendation with reason, or unverified work with its missing condition. Give the discoverable record and precise next action. Provide a Resource / What it changed / Evidence table when requested. Advice-only work may finish in the conversation without writes.
 
 **Done:** the result is assessed within its actual evidence, records distinguish selected/applied/observed state, and remaining work is discoverable. Actual host qualification procedures and their limits are in [CHECKLIST.md](CHECKLIST.md).
