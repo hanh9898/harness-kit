@@ -74,10 +74,33 @@ For session-only use, pass `claude --plugin-dir <absolute-path-to-harness-kit>`.
 The `.claude-plugin/` manifest is also accepted by Codex through its compatibility
 route above. Pi loads the same skill source through its native skill interface.
 
-### Pi — explicit skill directory
+### Pi — package
 
-From the consuming project, start the already installed Pi with the full skills
-root:
+Pi's package mechanism bundles skills and other resources. This repository's
+`package.json` declares the same three skill directories as the compatible
+Codex/Claude plugin; the shared `kit/` remains alongside them.
+
+From the consuming project, register a local checkout in that project's settings:
+
+```sh
+pi install --local /absolute/path/to/harness-kit
+```
+
+Or install the current review branch directly from Git:
+
+```sh
+pi install --local git:github.com/hanh9898/harness-kit@integration/spec-15
+```
+
+Use a reviewed commit or tag instead of the branch name when you need a fixed
+revision. `--local` writes the package declaration to `.pi/settings.json`; Pi loads
+project packages after project trust is granted. Omitting `--local` selects personal
+scope. `pi list` shows configured packages. This repository is not published to npm.
+See [Pi packages](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/packages.md).
+
+#### Alternative: one-session skill directory
+
+For one session without registering a package, start Pi from the consuming project:
 
 ```sh
 pi --skill /absolute/path/to/harness-kit/skills/harness
