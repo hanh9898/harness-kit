@@ -1,3 +1,7 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Map, entry point and hooks (step 11)
 
 Three parts; do them in order. Every write is a temp file then rename. Every part can run again: it converges, it never appends a second copy.

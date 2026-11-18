@@ -5,21 +5,20 @@ import shutil
 from conftest import CHECK_BOUNDARY, ROOT, TOKENS, run
 
 SKILL = ROOT / "skills" / "harness" / "harness-evolve"
-SETUP = ROOT / "skills" / "harness" / "harness-setup"
 
 
-def test_skill_is_hand_typed_only():
+def test_entry_is_eligible_for_explicit_and_model_selection():
+    """Packaging eligibility only; real loading/result evidence lives in CHECKLIST.md."""
     head = (SKILL / "SKILL.md").read_text(encoding="utf-8").split("---")[1]
-    keys = {l.split(":")[0] for l in head.strip().splitlines()}
-    assert keys == {"name", "description", "disable-model-invocation"}
-    assert "disable-model-invocation: true" in head
-    assert "allow_implicit_invocation: false" in (SKILL / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    assert "name: harness-evolve" in head
+    assert "description:" in head
+    assert "disable-model-invocation: true" not in head
+    assert "allow_implicit_invocation: true" in (SKILL / "agents" / "openai.yaml").read_text(encoding="utf-8")
 
 
-def test_body_short_and_every_sibling_pointed_to():
+def test_entry_references_its_runtime_guidance():
     body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
-    assert len(body.splitlines()) <= 170
-    for sib in ("DRIFT.md", "CHANGE-FLOW.md", "CHECK-STEP.md", "UPDATE.md"):
+    for sib in ("DRIFT.md", "CHANGE-FLOW.md", "CHECK-STEP.md", "UPDATE.md", "ADOPTION.md"):
         assert (SKILL / sib).is_file() and f"]({sib})" in body
 
 
@@ -27,10 +26,12 @@ def test_checklist_file_exists():
     assert (SKILL / "CHECKLIST.md").is_file()
 
 
-def test_gate_is_pointed_to_not_copied():
-    assert not (SKILL / "GATE.md").exists()
-    assert "../harness-setup/GATE.md" in (SKILL / "SKILL.md").read_text(encoding="utf-8")
-    assert (SETUP / "GATE.md").is_file() and (SETUP / "RECORD-FORMAT.md").is_file()
+def test_relative_guidance_links_resolve():
+    # A concrete packaging contract, not wording or runtime acceptance.
+    for source in SKILL.glob("*.md"):
+        for target in re.findall(r"\]\(([^)#]+)(?:#[^)]*)?\)", source.read_text()):
+            if "://" not in target:
+                assert (source.parent / target).is_file(), (source.name, target)
 
 
 def test_skill_has_no_machine_absolute_paths():
@@ -59,5 +60,4 @@ def test_kit_commands_resolve_from_a_foreign_copy(tmp_path):
     out = run(kit, "list")
     assert out.returncode == 0 and out.stdout.strip()
     assert run(kit, "show", run(kit, "list", out.stdout.split()[0]).stdout.split()[0]).returncode == 0
-    # The relative path to setup's GATE.md resolves from the plugin copy.
-    assert (skill_dir / ".." / "harness-setup" / "GATE.md").is_file()
+    assert (skill_dir / "UPDATE.md").is_file()

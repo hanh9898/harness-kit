@@ -1,5 +1,5 @@
 interface:
   display_name: "Harness Setup"
-  short_description: "Build a project's harness, one piece at a time"
+  short_description: "Onboard a project with an adapted foundation and demonstrated initial use"
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

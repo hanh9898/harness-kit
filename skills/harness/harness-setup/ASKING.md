@@ -1,6 +1,10 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Asking the user
 
-How `harness-setup` and `harness-evolve` talk to the user. Read this file before the first message of a run. Every message and question is in the user's own language; the forms below are in English with placeholders in `<angle brackets>`.
+How `harness-setup` talks to the user. Evolve uses its own proportional workflow. Read this file before the first message of a run. Every message and question is in the user's own language; the forms below are in English with placeholders in `<angle brackets>`.
 
 Two layers. Layer one: one **overview message** at the start of the run (where this is going). Layer two: every **question** says where it sits, what it buys the user, and what happens if skipped. The per-question data lives in **question sheets** next to the step they belong to; this file holds the forms and the rules.
 
@@ -10,7 +14,7 @@ Send once, before the first question, in plain words. Four parts, in this order:
 
 1. **Final result**: ONE sentence: what the user will see in the repo when the run ends, naming at most the folder `harness/` and one other file. Say what "harness" means in a few words (the rules, tools and checks around an agent in this repo); do not list record, log, glossary or other file names, they come up later when needed.
 2. **Stages**: one line per stage, taken from the stage table in the skill's `SKILL.md`: the plain name, then what the user does there. Say how many stages there are.
-3. **Effort**: `{effort}`. Not measured yet, so say so: "I have not timed this." Give no minutes and no count of questions you cannot back. Name what to have ready (setup: one piece of work finished recently; evolve: nothing).
+3. **Effort**: `{effort}`. Not measured yet, so say so: "I have not timed this." Give no minutes and no count of questions you cannot back. Name what to have ready (one piece of work finished recently).
 4. **How it goes**: one question per turn; "not sure" is an answer and I say which default I use; stop any time, the next run continues from `harness/progress.log`. Setup only: the user may ask to jump to stage 5.
 
 Setup overview, shape (at most 150 words; a reader run found 300 words and five unfamiliar file names too much; a later run needed 200 words because each stage line carried two clauses: write each stage line as its plain name plus at most six words of what the user does):
@@ -152,7 +156,7 @@ At most one follow-up per question, one question per turn:
 
 ## Evidence block
 
-The simplicity-gate evidence (setup step 3, evolve step 2) and any proposal that carries evidence (setup step 4) are shown to the user in this form, not as the raw block of `GATE.md`. It is a question too: full form at the first one of a stage, compact after. The record keeps its English keys (`gate_*`) exactly as before; only what you SAY to the user is in the user's language, and no English label (lighter rung, why not enough, source, answer) is spoken.
+The simplicity-gate evidence (setup step 3) and any proposal that carries evidence (setup step 4) are shown to the user in this form, not as the raw block of `GATE.md`. It is a question too: full form at the first one of a stage, compact after. The record keeps its English keys (`gate_*`) exactly as before; only what you SAY to the user is in the user's language, and no English label (lighter rung, why not enough, source, answer) is spoken.
 
 ```
 ❓ **Q<n>** - **<short title in plain words>**
@@ -178,9 +182,9 @@ Rules for this block:
 
 ## Question sheets
 
-A sheet is the data of one question; the form is above. Sheets live in the sibling file of the step they belong to. Every sheet is a heading `### [Sxx] <title>` (setup) or `### [Vxx]` (evolve) followed by nine fields: Stage, Helps, If skipped, Why, Ask, Terms, Enough, Unsure, Suggest. Where a question has several turns, `Ask` lists them as numbered sub-bullets and each turn carries its own enough, unsure and suggest.
+A sheet is the data of one question; the form is above. Sheets live in the sibling file of the step they belong to. Every sheet is a heading `### [Sxx] <title>` (setup) followed by nine fields: Stage, Helps, If skipped, Why, Ask, Terms, Enough, Unsure, Suggest. Where a question has several turns, `Ask` lists them as numbered sub-bullets and each turn carries its own enough, unsure and suggest.
 
-Where each sheet is: S01 to S06 in `BOUNDARY.md`; S09 in `GATE.md`; S10 to S12 in `PROPOSALS.md`; S14 to S20 in `DELEGATION.md`; S21 in `ROLES.md`; S22 in `STANDARDS-STEP.md`; S23 to S27 in `ISOLATION.md`; S28 to S31 in `WIRING.md`; V01 to V04 in `../harness-evolve/DRIFT.md`; V08, V09 in `../harness-evolve/CHECK-STEP.md`; V10 in `../harness-evolve/UPDATE.md`. Steps that have no file of their own keep their sheets here, below.
+Where each sheet is: S01 to S06 in `BOUNDARY.md`; S09 in `GATE.md`; S10 to S12 in `PROPOSALS.md`; S14 to S20 in `DELEGATION.md`; S21 in `ROLES.md`; S22 in `STANDARDS-STEP.md`; S23 to S27 in `ISOLATION.md`; S28 to S31 in `WIRING.md`. Steps that have no file of their own keep their sheets here, below.
 
 ### [S07] Pick the need to work on (step 2)
 
@@ -217,40 +221,3 @@ Where each sheet is: S01 to S06 in `BOUNDARY.md`; S09 in `GATE.md`; S10 to S12 i
 - Enough: yes, or a different command
 - Unsure: say "not sure"; I do not run it and the entry stays unverified
 - Suggest: yes, the command that comes from the piece's description; say where it comes from
-
-### [V05] Latest snag (evolve step 1)
-
-- Stage: 2/4 Settle one small change
-- Helps: the change we make fixes the place where you were stuck, not something nearby
-- If skipped: I propose the first mismatch or failing check from stage 1; if there is none I stop and ask what you want to change
-- Why: the smallest change worth making is the one that fixes your latest snag
-- Ask: When was the last time this setup got you or an agent stuck, and what happened?
-- Terms: harness = the rules, tools and checks around an agent in this repo
-- Enough: one or two sentences telling what happened
-- Unsure: say "not sure"; I propose the first mismatch or failing check I found in stage 1
-- Suggest: "Latest I see: the check of '<entry>' has failed since <date>. Is that the spot?" If nothing failed, leave the suggestion out
-
-### [V06] Confirm the change sentence (evolve step 1)
-
-- Stage: 2/4 Settle one small change
-- Helps: I change exactly what you just described, no wider
-- If skipped: I keep the sentence as a draft and start nothing
-- Why: one sentence fixes what changes, for which role, in which entry; I look up role and entry myself
-- Ask: Is this the change you mean: "<what changes, for which role, in which entry>"?
-- Terms: entry = one file in `harness/record/` describing one choice
-- Enough: yes, or what to correct
-- Unsure: say "not sure"; I keep the draft and start nothing
-- Suggest: yes; the role and entry are taken from the record, say which file
-- Note: when the change raises a level of freedom to 5 or more, the places it may act alone and the stop point are asked with sheet S19 of `DELEGATION.md` (compact form) before the change is settled; below 5 they stay "not needed". If the user is not sure, the level stays where it was and the change is kept as a draft in the log.
-
-### [V07] Approve the evidence list (evolve step 2)
-
-- Stage: 2/4 Settle one small change
-- Helps: nothing heavier than needed is added; you see why a lighter way does not do
-- If skipped: items without your approval are dropped and not recorded
-- Why: for every item this change adds or alters I read the documentation today; only you approve what I found
-- Ask: Do you approve this evidence for "<item list>"?
-- Terms: lighter way = a simpler way to do the job (for example a rule in a text file instead of a script); evidence = the page or command output I read today, with its date
-- Enough: ok, or name the items to edit or reject
-- Unsure: say "not sure"; I treat those items as not approved: nothing is recorded or installed for them
-- Suggest: ok for the items whose source clearly says what I claim; point out any item whose source says less

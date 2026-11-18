@@ -1,0 +1,39 @@
+# Selected provider activation
+
+Read only when the selected initial use needs a provider installation,
+registration, invocation-policy change or provider update. First inspect actual
+availability and current host-specific documentation/help. Reuse adequate native
+facilities; no universal manifest syntax or setup-provider prerequisite applies.
+
+Identify the concrete target host/configuration, current effective settings,
+selected original method and intended invocation route. Follow the provider
+contract in [CHANGE-FLOW.md](../harness-evolve/CHANGE-FLOW.md), including nested
+prerequisites and explicit-only restrictions. Reading a restricted source is not
+an invocation unlock. A required missing source blocks dependent authoring.
+
+Resolve the exact installation/configuration effect against actual grants and
+prior adoption procedure. An outer setup call does not itself invoke an
+explicit-only child, and selection is not a settings-write grant. If scope is
+missing, preserve configuration and record the exact grant/source/access needed;
+continue independent discovery. Do not ask again when sufficient authority exists.
+
+Before granted effects, capture/read back the choice, target, rationale,
+authority, expected change, timing and reversible recovery reference using
+[UPDATE.md](../harness-evolve/UPDATE.md). Preserve unrelated configuration and
+customization. Prefer a minimal semantic edit; retain the old effective state
+for review/recovery under the same scope, without leaking credentials into records.
+
+After the change or provider update, inspect effective settings and recheck
+eligibility/loading and an actual invocation through the affected route. Exercise
+the selected method's useful result, not an echo of its name. If the host requires
+a restart or fresh session, that verification remains pending until actually run.
+Do not launch another agent without authority; hand over a precise invocation
+and evidence requirement when the needed session or access is unavailable.
+
+Compare protected settings and affected target behavior; keep existing unrelated
+providers working within the observed checks. A failed activation is partial,
+not ready. Restore only within actual authority and after inspecting uncertain
+effects; preserve the failure and recovery scope. Retain per-target host/version,
+model, provider/resource revision, configuration/grant conditions, observed use,
+missing conditions and next action. Material changes invalidate affected evidence,
+not unrelated qualified uses.

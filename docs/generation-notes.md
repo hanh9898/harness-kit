@@ -38,6 +38,20 @@ Free text in the reports is Vietnamese. The generator does not translate. Names,
 
 Rows added after the first generation, all at the end of the file so later merges stay clean: lego `H18` (review checklist), rules `2.24` and `7.32`, giving 163 legos and 213 rules in the committed kit. The extra detail text on `D04`, `L08` and `I04` was edited in place. The independent count test still compares the generator against the source reports (162 and 211); only the committed-kit check adds `ADDED_AFTER_GENERATION`.
 
+Later capability additions append G13/G14 (team/workflow, #26) and N07
+(instruction/response design, #23). The committed kit now has 166 pieces;
+the original generation count and source seeds remain unchanged.
+
 ## Known defect: a URL is lost when one source cell holds two codes
 
 In the rules synthesis, a source cell can list two codes next to one link. `generate_kit.py` gives a code a URL only when the code stands alone with a link somewhere in the table; otherwise the code is written without a URL. In the committed kit this hit rule `7.06` (`H02b`) and rule `7.11` (`E16`). Before the generator runs again on new reports, fix the parsing; until then, check every code in a new `source` cell for a URL by hand.
+
+## Authority migration (#25)
+
+D24 and N08 (#24) extend the earlier additions: 168 current pieces. The one-time
+generator and seed remain historical. `kit/delegation.md` retains its original
+body/partial certainty beneath a migration notice; retrieval marks legacy rows
+as historical and points to D24. Fresh PSW/Shavit/Lee–See research and inferred
+operating guidance live in `kit/authority/`; original row counts remain valid.
+
+J13 (#30) adds explicitly selected factory composition after generation: 169 current pieces. It reuses the task/flow and authority sources; original seed/report counts remain unchanged.

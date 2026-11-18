@@ -1,19 +1,21 @@
-"""Question layer: asking document, skill pointers and 41 complete sheets; behavior is covered by CHECKLIST.md."""
+"""Retained historical question-sheet integrity, not current onboarding behavior.
+
+The sheets explain existing artifacts; current setup has no mandatory questionnaire.
+"""
 import re
 
 from conftest import ROOT
 
 SETUP = ROOT / "skills" / "harness" / "harness-setup"
-EVOLVE = ROOT / "skills" / "harness" / "harness-evolve"
 
 FIELDS = ("Stage", "Helps", "If skipped", "Why", "Ask", "Terms", "Enough", "Unsure", "Suggest")
-HEAD = re.compile(r"^###\s+\[([SV]\d\d)\]", re.M)
+HEAD = re.compile(r"^###\s+\[(S\d\d)\]", re.M)
 
 
 def _sheets():
-    """Return {ID: sheet body} for every Sxx or Vxx question in both skills."""
+    """Return {ID: sheet body} for every Sxx question in setup."""
     out = {}
-    for skill in (SETUP, EVOLVE):
+    for skill in (SETUP,):
         for f in skill.glob("*.md"):
             text = f.read_text(encoding="utf-8")
             marks = list(HEAD.finditer(text))
@@ -34,19 +36,14 @@ def test_asking_exists_with_required_sections():
         assert needle in text, needle
 
 
-def test_both_skills_point_to_asking_and_stay_short():
-    setup = (SETUP / "SKILL.md").read_text(encoding="utf-8")
-    evolve = (EVOLVE / "SKILL.md").read_text(encoding="utf-8")
-    assert "](ASKING.md)" in setup
-    assert "](../harness-setup/ASKING.md)" in evolve
-    assert not (EVOLVE / "ASKING.md").exists()
-    assert len(setup.splitlines()) <= 110
-    assert len(evolve.splitlines()) <= 80
+def test_resume_can_locate_historical_question_meanings():
+    resume = (SETUP / "RESUME.md").read_text(encoding="utf-8")
+    assert "](ASKING.md)" in resume
 
 
-def test_all_41_questions_have_a_complete_sheet():
+def test_all_31_setup_questions_have_a_complete_sheet():
     sheets = _sheets()
-    want = {f"S{n:02d}" for n in range(1, 32)} | {f"V{n:02d}" for n in range(1, 11)}
+    want = {f"S{n:02d}" for n in range(1, 32)}
     assert set(sheets) == want, (want - set(sheets), set(sheets) - want)
     for sid, (f, body) in sheets.items():
         for field in FIELDS:
@@ -61,8 +58,6 @@ def test_each_step_file_points_back_to_asking():
     for f in ("BOUNDARY.md", "GATE.md", "PROPOSALS.md", "DELEGATION.md", "ROLES.md", "STANDARDS-STEP.md",
               "ISOLATION.md", "WIRING.md"):
         assert "](ASKING.md)" in (SETUP / f).read_text(encoding="utf-8"), f
-    for f in ("DRIFT.md", "CHECK-STEP.md", "UPDATE.md"):
-        assert "](../harness-setup/ASKING.md)" in (EVOLVE / f).read_text(encoding="utf-8"), f
 
 
 def test_questions_avoid_harness_words_in_why_and_ask():

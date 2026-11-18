@@ -1,3 +1,7 @@
+> Historical reference for interpreting existing setup artifacts. Current onboarding
+> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
+> prerequisites below are not requirements for new or resumed onboarding.
+
 # Isolation (step 10)
 
 Ask the user in one turn, whatever the card says: do you want the harness kept out of the product's commits, comments and PRs? This is a question, not a label from step 1. Do not assume the answer. Write every question from the sheets below, in the forms of [ASKING.md](ASKING.md).

@@ -1,47 +1,23 @@
-# Check (step 4)
+# Assess the requested result
 
-## Run
+Use the criteria selected for this request. Inspect actual target effects, records, untouched scope and continuation. Run meaningful checks through the consuming interface and retain command, exit status and observed output with their conditions. Record a check as passing only after it ran successfully; not-run, failed and uncertain remain distinct.
 
-Run each ticket's check and each affected entry's check. Paste command, exit code and output into the entry's `## Check result`. Mark `passing` and set `verified_on` (`date -u +%F`) only after the check ran and passed; a failure is `failing`.
+For criterion-level conclusions, use [ASSESS.md](ASSESS.md). For operating facts and usage coverage, use [OBSERVE.md](OBSERVE.md). These results are independently useful through evolve; neither requires adoption or telemetry.
 
-## Review with `code-review`
+For a routine correction, check the intended change and relevant regressions. For quality, cost or elapsed-work improvement, compare a suitable baseline with the changed result under stated conditions. Current quality alone proves no improvement; unknown usage is not zero. For experiments, report the learning result and adoption boundary. Advice/assessment/retro concludes at the requested scope.
 
-When the change touches `harness/`, review it with `code-review`. That skill has no standards parameter, so put it in the prompt: name `harness/STANDARDS.md` as the standard for this change, and say the product's coding standards do not apply to harness files. Also give the absolute path of the repo (the review may start in another folder) and a fixed point that makes the diff non-empty, such as the last commit before the change. For a product-code diff, say nothing about the harness standard.
+For tool/integration effects, use [tool operations](../../../kit/TOOL-OPERATIONS.md) to classify the exchange and reconcile the target before repair. Keep model-result judgments with their selected instruction/content checks.
 
-## Fail
+## Review and failure
 
-A check fails and is not waived: do not write `passing`. Go back to step 3 with the failing output, rework, run the check again. Repeat until it passes or the user waives.
+Use the applicable original review method and the actual selected standards. Include relevant project and kit criteria, source references, target scope and a fixed comparison point when needed. Agent guidance review uses current writing-for-agents; code uses its applicable code review method. Resolve conflicting standards before dependent consumption rather than assuming all product standards are irrelevant to harness files.
 
-## Waiver
+A failed check stays failed. Repair within the authorized scope and selected stop bounds, then rerun the affected check. When results remain inconclusive, report uncertainty and the smallest useful next evidence step. A user's waiver records their actual identity, reason and time but does not convert failure to passing. If a team/tool path was only checked structurally, retain the missing real-use check as an explicit gap.
 
-Only the user waives. Ask for the reason (sheet V09 below; forms in [ASKING.md](../harness-setup/ASKING.md)); never write one on their behalf. Record in the entry: `waived_on` (date), `waived_reason` (the user's words), `waived_by: user`. The entry keeps `status: failing`; a waived entry is never `passing`. Say in the final report which entries are waived.
+## Evidence scope
 
-## Team entries
+For real-host evidence retain host/version, model/provider, kit and selected method revisions, configuration, effective grants, request, loading/invocation trace, effects and outcome. Distinguish installed, registered, eligible, loaded, applied and improved. A method name in the final answer or a file on disk establishes neither loading nor execution.
 
-An entry with `kind: team` and `check_scope: structural` only proves the pattern and the folders exist. When the change touches one, ask the user for one verification that actually runs outside that check (sheet V08 below) (for example, run a small task through the team and look at the result). Run it and paste the result into the entry. If the user cannot run it now, write `not run` in the entry and do not describe the team as working.
+Automatic selection, explicit invocation, fresh-session continuation and other hosts are separate claims. Mark unavailable or untested routes precisely. A material host/provider/resource/grant change requires focused reassessment before reasserting the affected claim. Instruction-following observations establish no native enforcement guarantee.
 
-## Question sheets (step 4)
-
-### [V08] A real run of the team
-
-- Stage: 3/4 Do it and check it
-- Helps: you learn whether the team really works, not only that its files exist
-- If skipped: I write "not run" in the entry and do not say the team works
-- Why: the automatic check only proves that the pattern and folders exist
-- Ask: Shall we run one small task through the team now, for example "<small task from the latest piece of work>", and look at the result?
-- Terms: team = the agents set up together for this repo; structural check = proves only that files and folders exist
-- Enough: yes, or another task
-- Unsure: say "not sure"; I write "not run"
-- Suggest: yes, with a small task taken from the latest piece of work
-
-### [V09] The reason for waiving a failing check
-
-- Stage: 3/4 Do it and check it
-- Helps: the record shows honestly why a failure was accepted
-- If skipped: there is no waiver; the entry stays failing and we go back to rework
-- Why: only you may waive, and the reason is written in your words
-- Ask: The check `<command>` fails with "<one line of output>". In your own words, why do you accept that for now?
-- Terms: waive = accept a failing check knowingly; the entry stays "failing", marked as waived
-- Enough: one sentence in your words
-- Unsure: say "not sure"; no waiver is written
-- Suggest: none; I never write a reason for you. I may say what the failure seems to be
+**Done:** the requested result has attributable evidence and limits, unrelated scope remains intact, and actual state and the next action are captured under [UPDATE.md](UPDATE.md).
