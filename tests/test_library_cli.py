@@ -190,3 +190,18 @@ def test_edit_of_missing_store_does_not_create_an_empty_store(tmp_path):
     target = tmp_path / "missing.sqlite3"
     r = save(tmp_path, draft(), expected=1, store=target)
     assert r.returncode != 0 and not target.exists(), r.stderr
+
+
+def test_save_fails_when_store_symlink_target_goes_missing(tmp_path):
+    target = tmp_path / "library.sqlite3"
+    created = save(tmp_path, draft(), store=target)
+    assert created.returncode == 0, created.stderr
+    link = tmp_path / "store-link"
+    link.symlink_to(target.name)
+    target.rename(tmp_path / "offline.sqlite3")
+
+    failed = save(tmp_path, draft(id="another-rule"), store=link)
+    assert failed.returncode == 2, failed.stdout
+    assert not failed.stdout
+    assert f"Store symlink target is missing: {link}" in failed.stderr
+    assert link.is_symlink() and not target.exists()
