@@ -1,8 +1,11 @@
 """Durable resource selection through the confirmed public operation seam."""
 import csv
 import json
+import os
 import re
+import shlex
 import shutil
+import subprocess
 
 import pytest
 
@@ -53,6 +56,20 @@ def update_supplied(root):
     with path.open('w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=rows[0].keys())
         writer.writeheader(); writer.writerows(rows)
+
+
+def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
+    skill = ROOT / 'skills/harness/harness-library/SKILL.md'
+    template, = re.findall(r'`(library (?:[^`\n]+ )?selection [^`\n]+)`',
+                           skill.read_text(encoding='utf-8'))
+    store = tmp_path / 'selected library.sqlite3'
+    command = template.replace('<selected-path>', shlex.quote(str(store))).replace('<id>', 'H14')
+    monkeypatch.setenv('PATH', str(CLI.parent), prepend=os.pathsep)
+
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)['effective'] is True
 
 
 def test_exclusion_survives_supplied_update_and_explicit_restore_preserves_provenance(tmp_path):
