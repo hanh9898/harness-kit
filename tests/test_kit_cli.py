@@ -122,6 +122,23 @@ def test_patterns_list_missing_file(tmp_path):
     assert r.stderr == "ERROR: patterns.md is missing from the kit directory.\n"
 
 
+def test_pattern_row_without_summary(tmp_path):
+    root = write_kit(tmp_path / "k", [row("A01")])
+    (root / "patterns.md").write_text(
+        "| # | Pattern | Also called | What it is |\n"
+        "|---|---|---|---|\n"
+        "| 1 | Router | Dispatcher |\n",
+        encoding="utf-8",
+    )
+    r = run(KIT_CLI, "--dir", root, "show", "P1")
+    assert r.returncode == 0, r.stderr
+    assert r.stdout == "#: 1\nPattern: Router\nAlso called: Dispatcher\n"
+
+    r = run(KIT_CLI, "--dir", root, "list", "P")
+    assert r.returncode == 0, r.stderr
+    assert r.stdout == "P1\tRouter\t\n"
+
+
 def test_pattern_unknown_fails_with_next_step():
     r = run(KIT_CLI, "show", "P99")
     assert r.returncode != 0 and "kit list P" in r.stderr and r.stdout == ""
