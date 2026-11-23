@@ -95,7 +95,14 @@ pi install --local git:github.com/hanh9898/harness-kit@main
 Use a reviewed commit or tag instead of the branch name when you need a fixed
 revision. `--local` writes the package declaration to `.pi/settings.json`; Pi loads
 project packages after project trust is granted. Omitting `--local` selects personal
-scope. `pi list` shows configured packages. This repository is not published to npm.
+scope.
+
+`pi list` can report `No packages installed.` after a successful local install if
+Pi does not yet trust the project. After reviewing the project's Pi configuration
+and package sources, run `pi list --approve` from that project if you choose to
+trust it for this command. The flag does not save a trust decision.
+
+This repository is not published to npm.
 See [Pi packages](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/packages.md).
 
 #### Alternative: one-session skill directory
