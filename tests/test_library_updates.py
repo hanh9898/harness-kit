@@ -44,6 +44,52 @@ def test_comparison_exposes_actual_three_versions_and_missing_basis_without_writ
     assert missing["unknowns"] and read(other)["revision"] == 1
 
 
+def test_comparison_separates_unterminated_diff_lines(tmp_path):
+    old = dict(OLD, snapshot="Old review")
+    candidate = dict(NEW, snapshot="New review")
+    content = "Local review"
+    assert save(tmp_path, draft(origin=old, content=content)).returncode == 0
+
+    result = operation(tmp_path, "compare", candidate)
+    assert result.returncode == 0, result.stderr
+    comparison = json.loads(result.stdout)
+    marker = "\\ No newline at end of file\n"
+    assert comparison["diffs"] == {
+        "customization": "--- old-origin\n+++ customization\n@@ -1 +1 @@\n"
+                         f"-Old review\n{marker}+Local review\n{marker}",
+        "origin": "--- old-origin\n+++ candidate\n@@ -1 +1 @@\n"
+                  f"-Old review\n{marker}+New review\n{marker}",
+        "selection_to_candidate": "--- old-origin\n+++ candidate\n@@ -1 +1 @@\n"
+                                  f"-Local review\n{marker}+New review\n{marker}",
+    }
+    assert comparison["old_origin"] == old
+    assert comparison["customization"] == content
+    assert comparison["candidate"] == candidate
+    saved = read(tmp_path, "history")
+    assert len(saved) == 1 and saved[0]["resource"]["origin"] == old
+    assert saved[0]["resource"]["content"] == content
+
+
+def test_comparison_distinguishes_adding_and_removing_only_final_newline(tmp_path):
+    snapshot = "Review facts.\r\nPublish weekly."
+    old = dict(OLD, snapshot=snapshot)
+    candidate = dict(NEW, snapshot=snapshot)
+    assert save(tmp_path, draft(origin=old, content=snapshot + "\n")).returncode == 0
+
+    result = operation(tmp_path, "compare", candidate)
+    assert result.returncode == 0, result.stderr
+    diffs = json.loads(result.stdout)["diffs"]
+    hunk = "@@ -1,2 +1,2 @@\n Review facts.\r\n"
+    marker = "\\ No newline at end of file\n"
+    assert diffs == {
+        "customization": f"--- old-origin\n+++ customization\n{hunk}"
+                         f"-Publish weekly.\n{marker}+Publish weekly.\n",
+        "origin": "",
+        "selection_to_candidate": f"--- old-origin\n+++ candidate\n{hunk}"
+                                  f"-Publish weekly.\n+Publish weekly.\n{marker}",
+    }
+
+
 def plan(tmp_path, **changes):
     comparison = json.loads(operation(tmp_path, "compare", NEW).stdout)
     value = dict(candidate=NEW, comparison_token=comparison["token"], mode="update",
