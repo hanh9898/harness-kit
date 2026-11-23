@@ -14,6 +14,7 @@
   kit show <rule ID>    all columns of a rule (for example 4.06), with its verified quote when it is a gate rule
 
 Add --dir DIR to use another kit directory; default: the kit containing scripts/.
+For patterns and delegation references, show exits 3 if the entry is absent.
 Uses only the standard library.
 """
 import argparse
@@ -22,6 +23,9 @@ import re
 import sys
 from collections import Counter
 from pathlib import Path
+
+
+MARKDOWN_ENTRY_NOT_FOUND = 3
 
 
 def load(kit_dir):
@@ -35,13 +39,19 @@ def load_groups(kit_dir):
         return {r["id"]: r["name"] for r in csv.DictReader(f)}
 
 
+def optional_markdown_lines(path):
+    try:
+        return path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return []
+    except (OSError, UnicodeError) as exc:
+        raise ValueError(f"Cannot read {path}: {exc}") from exc
+
+
 def load_patterns(kit_dir):
     """Table rows in patterns.md as {number: [cells...]}; empty if the file is absent."""
-    path = kit_dir / "patterns.md"
-    if not path.is_file():
-        return {}, []
     head, out = [], {}
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in optional_markdown_lines(kit_dir / "patterns.md"):
         cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
         if line.startswith("| #"):
             head = cells
@@ -52,12 +62,9 @@ def load_patterns(kit_dir):
 
 def load_delegation(kit_dir):
     """Axis and level rows plus the combination section from delegation.md: (axes, steps, combine)."""
-    path = kit_dir / "delegation.md"
     axes, steps, combine, heads = {}, {}, [], {}
-    if not path.is_file():
-        return axes, steps, combine, heads
     in_combine = False
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in optional_markdown_lines(kit_dir / "delegation.md"):
         if line.startswith("## "):
             in_combine = line.startswith("## How the axes combine")
             continue
@@ -152,7 +159,10 @@ def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, nam
 def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
     q = query.strip().lower()
     axes, steps, combine, heads = deleg or ({}, {}, [], {})
-    if q == "combine" and combine:
+    if q == "combine":
+        if not combine:
+            return fail(f"`{query}` does not match.\nNext step: run `kit list delegation` to inspect delegation references.",
+                        code=MARKDOWN_ENTRY_NOT_FOUND)
         print(LEGACY_NOTICE)
         print("\n".join(combine))
         return 0
@@ -160,7 +170,8 @@ def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
         if q.startswith(kind) and q[len(kind):].isdigit():
             n = int(q[len(kind):])
             if n not in table:
-                return fail(f"`{query}` does not match.\nNext step: run `kit list delegation` to see axes and levels.")
+                return fail(f"`{query}` does not match.\nNext step: run `kit list delegation` to see axes and levels.",
+                            code=MARKDOWN_ENTRY_NOT_FOUND)
             print(LEGACY_NOTICE)
             for k, v in zip(heads[kind], table[n]):
                 print(f"{k}: {v}")
@@ -168,7 +179,8 @@ def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
     if q[:1] == "p" and q[1:].isdigit():
         n = int(q[1:])
         if n not in (patterns or {}):
-            return fail(f"`{query}` matches no pattern.\nNext step: run `kit list P` to see patterns.")
+            return fail(f"`{query}` matches no pattern.\nNext step: run `kit list P` to see patterns.",
+                        code=MARKDOWN_ENTRY_NOT_FOUND)
         for k, v in zip(head, patterns[n]):
             print(f"{k}: {v}")
         return 0
@@ -204,8 +216,11 @@ def main(argv=None):
         rows, names = load(Path(a.dir)), load_groups(Path(a.dir))
     except OSError as e:
         return fail(f"Cannot read legos.csv or groups.csv in {a.dir} ({e}).")
-    patterns, head = load_patterns(Path(a.dir))
-    deleg = load_delegation(Path(a.dir))
+    try:
+        patterns, head = load_patterns(Path(a.dir))
+        deleg = load_delegation(Path(a.dir))
+    except ValueError as e:
+        return fail(e)
     rules = load_rules(Path(a.dir))
     if a.cmd == "list":
         return cmd_list(rows, a.group, patterns, deleg, rules, a.topic, names)
