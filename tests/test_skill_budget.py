@@ -44,6 +44,26 @@ def test_json_output(tmp_path):
     assert {x["dir"]: x["name_mismatch"] for x in d["dirs"]} == {".claude/skills": 0, ".agents/skills": 1}
 
 
+def test_json_top_limits_rows_per_directory_without_changing_totals_or_warnings(tmp_path):
+    make(tmp_path)
+    skill(tmp_path, ".claude/skills", "z", "---\nname: z\ndescription: biggest\n---\n")
+    skill(tmp_path, ".agents/skills", "empty", "---\nname: empty\n---\n")
+    args = ("--root", tmp_path, "--json", "--strict", "--max-total", "31")
+    full = run(*args)
+    limited = run(*args, "--top", "1")
+    assert limited.returncode == full.returncode == 1
+    full_report = json.loads(full.stdout)
+    limited_report = json.loads(limited.stdout)
+    assert {d["dir"]: [row["folder"] for row in d["rows"]] for d in limited_report["dirs"]} == {
+        ".claude/skills": ["z"],
+        ".agents/skills": ["a"],
+    }
+    for report in (full_report, limited_report):
+        for directory in report["dirs"]:
+            del directory["rows"]
+    assert limited_report == full_report
+
+
 def test_strict_exits_1_on_warning_default_0(tmp_path):
     make(tmp_path)
     assert run("--root", tmp_path).returncode == 0

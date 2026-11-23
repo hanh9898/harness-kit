@@ -152,6 +152,11 @@ def main(argv=None):
     if mism_total:
         warnings.append(f"{mism_total} folders have a name/folder mismatch. Next step: inspect the name column and decide whether to rename folders or names; this tool only measures.")
 
+    if a.top or not a.json:
+        for d in report:
+            ranked = sorted(d["rows"], key=lambda r: (-r["chars"], r["folder"]))
+            d["rows"] = ranked[: a.top or None]
+
     if a.json:
         print(json.dumps({"total_chars": total, "total_tokens_est": total // CHARS_PER_TOKEN,
                           "dirs": report, "warnings": warnings}, ensure_ascii=False, indent=2))
@@ -159,8 +164,7 @@ def main(argv=None):
         for d in report:
             print(f"== {d['dir']}: {d['skills']} skills, {d['chars']} characters (~{d['chars'] // CHARS_PER_TOKEN} tokens), "
                   f"name/folder mismatches: {d['name_mismatch']}, missing name: {d['name_missing']}")
-            rows = sorted(d["rows"], key=lambda r: (-r["chars"], r["folder"]))
-            for r in rows[: a.top or None]:
+            for r in d["rows"]:
                 flag = f"  [name={r['name']}]" if r["name"] not in (None, r["folder"]) else ""
                 print(f"{r['chars']:>6}  {r['folder']}{flag}" + (f"  ({r['problem']})" if r["problem"] else ""))
         print(f"TOTAL: {total} characters (~{total // CHARS_PER_TOKEN} estimated tokens, characters/{CHARS_PER_TOKEN})")
