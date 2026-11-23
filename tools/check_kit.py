@@ -15,6 +15,7 @@ import argparse
 import csv
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 COLUMNS = ["id", "group", "name", "summary", "needed_when", "rung", "certainty", "sources", "detail"]
@@ -88,8 +89,14 @@ def check_gates(kit_dir):
         if g["gate"] not in ("yes", "no"):
             errs.append(f"gates.csv:{n}: {gid} gate `{g['gate']}` is not yes | no; fix: choose yes or no")
         elif g["gate"] == "yes":
-            if not ISO_DATE.fullmatch((r.get("verified_on") or "").strip()):
+            verified_on = (r.get("verified_on") or "").strip()
+            if not ISO_DATE.fullmatch(verified_on):
                 errs.append(f"gates.csv:{n}: {gid} is a gate but rules.csv lacks YYYY-MM-DD verified_on; fix: record a verification date or set gate=no")
+            else:
+                try:
+                    date.fromisoformat(verified_on)
+                except ValueError:
+                    errs.append(f"gates.csv:{n}: {gid} rules.csv verified_on `{verified_on}` is not a calendar date; fix: record a valid YYYY-MM-DD date or set gate=no")
             if r.get("certainty") != "stated":
                 errs.append(f"gates.csv:{n}: {gid} is a gate but certainty `{r.get('certainty')}` is not stated; fix: set gate=no")
             if not (g["verified_quote"] or "").strip():
