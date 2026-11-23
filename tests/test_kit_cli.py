@@ -3,7 +3,7 @@ import os
 import re
 import subprocess
 
-from conftest import KIT, KIT_CLI, run, row, write_kit
+from conftest import CHECK_KIT, KIT, KIT_CLI, run, row, write_kit
 
 
 def kit(tmp_path, *args):
@@ -21,6 +21,16 @@ def test_list_without_group_shows_group_names_with_counts_not_pieces(tmp_path):
     assert lines[0].split("\t")[:2] == ["A", "Group A"] and "2" in lines[0]
     assert lines[1].split("\t")[:2] == ["B", "Group B"]
     assert "Alpha hook" not in r.stdout and "Detail A01" not in r.stdout
+
+
+def test_list_names_group_with_padded_id_accepted_by_checker(tmp_path):
+    root = write_kit(tmp_path, [row("B01", group="B")], groups={"B ": "Knowledge and context"})
+    checked = run(CHECK_KIT, "--dir", root)
+    assert checked.returncode == 0, checked.stdout + checked.stderr
+
+    listed = run(KIT_CLI, "--dir", root, "list")
+    assert listed.returncode == 0, listed.stderr
+    assert listed.stdout.splitlines()[0] == "B\tKnowledge and context\t1 pieces"
 
 
 def test_real_kit_list_names_every_group():

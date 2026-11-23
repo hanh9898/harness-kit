@@ -37,7 +37,7 @@ def load(kit_dir):
 def load_groups(kit_dir):
     """{group ID: name} from groups.csv."""
     with (kit_dir / "groups.csv").open(encoding="utf-8", newline="") as f:
-        return {r["id"]: r["name"] for r in csv.DictReader(f)}
+        return {(r["id"] or "").strip(): r["name"] for r in csv.DictReader(f)}
 
 
 def optional_markdown_lines(path):
