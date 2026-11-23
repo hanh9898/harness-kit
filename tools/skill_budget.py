@@ -35,6 +35,9 @@ def _scalar(lines, i):
         sep = " " if rest[0] == ">" else "\n"
         return sep.join(cont), j
     text = " ".join([rest] + cont) if cont else rest
+    quoted = re.match(r"""("(?:[^"\\]|\\.)*"|'(?:[^']|'')*')\s+#""", text)
+    if quoted:
+        text = quoted[1]
     if text.startswith('"'):
         try:
             return json.loads(text), j

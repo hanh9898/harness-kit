@@ -74,6 +74,25 @@ def test_quoted_comment_description_counts_as_text(tmp_path, quote):
     assert "TOTAL: 6 characters" in r.stdout
 
 
+@pytest.mark.parametrize(
+    ("quote", "description", "expected"),
+    [
+        ('"', r'Say \"hi\" #tag', 'Say "hi" #tag'),
+        ("'", "It''s a #tag", "It's a #tag"),
+    ],
+    ids=["double-quoted", "single-quoted"],
+)
+def test_trailing_comments_after_quoted_fields(tmp_path, quote, description, expected):
+    skill(
+        tmp_path, "skills", "example",
+        f"---\nname: {quote}example{quote} # display name\n"
+        f"description: {quote}{description}{quote} # ignored {quote}notes{quote}\n---\n",
+    )
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 0, r.stdout
+    assert f"TOTAL: {len(expected)} characters" in r.stdout
+
+
 def test_strict_discovers_flat_and_grouped_skills(tmp_path):
     skill(tmp_path, "skills", "a", "---\nname: a\ndescription: one\n---\n")
     skill(tmp_path, "skills/group", "b", "---\nname: b\ndescription: two\n---\n")
