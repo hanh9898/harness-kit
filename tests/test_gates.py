@@ -19,9 +19,9 @@ def gate(id, gate="yes", method="raw-grep", quote="Exact sentence from the page.
     return dict(id=id, gate=gate, verify_method=method, verified_quote=quote, note=note)
 
 
-def write(root, rules, gates):
+def write(root, rules, gates, *, rule_cols=RULE_COLS):
     write_kit(root, [row("A01")])
-    for name, cols, data in (("rules.csv", RULE_COLS, rules), ("gates.csv", GATE_COLS, gates)):
+    for name, cols, data in (("rules.csv", rule_cols, rules), ("gates.csv", GATE_COLS, gates)):
         with (root / name).open("w", encoding="utf-8", newline="") as f:
             w = csv.writer(f)
             w.writerow(cols)
@@ -39,6 +39,19 @@ def fails(tmp_path, rules, gates, needle):
 def test_good_gate_passes(tmp_path):
     r = run(CHECK_KIT, "--dir", write(tmp_path, [rule("9.01")], [gate("9.01")]))
     assert r.returncode == 0, r.stdout
+
+
+@pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
+@pytest.mark.parametrize("column", RULE_COLS)
+def test_missing_rule_column_rejected(tmp_path, column, with_gates):
+    header = [c for c in RULE_COLS if c != column]
+    root = write(tmp_path, [rule("9.01")], [gate("9.01")], rule_cols=header)
+    if not with_gates:
+        (root / "gates.csv").unlink()
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert f"rules.csv:1: missing columns {column};" in r.stdout
 
 
 @pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
