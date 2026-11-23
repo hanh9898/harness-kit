@@ -53,10 +53,15 @@ def load_patterns(kit_dir):
     """Table rows in patterns.md as {number: [cells...]}; empty if the file is absent."""
     head, out = [], {}
     for line in optional_markdown_lines(kit_dir / "patterns.md"):
-        cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
-        if line.startswith("| #"):
+        if not line.startswith("|"):
+            continue
+        cells = re.split(r"(?<!\\)\|", line.rstrip()[1:])
+        if not cells[-1]:
+            cells.pop()
+        cells = [c.strip() for c in cells]
+        if cells and cells[0] == "#":
             head = cells
-        elif line.startswith("| ") and cells[0].isdigit():
+        elif len(cells) >= 4 and cells[0].isdigit():
             out[int(cells[0])] = cells
     return out, head
 
