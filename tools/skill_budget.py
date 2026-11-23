@@ -58,15 +58,39 @@ def frontmatter(path):
     return out
 
 
+def _discover(folder):
+    """Find skill folders, without descending into a skill or following directory symlinks."""
+    try:
+        (folder / "SKILL.md").lstat()
+    except FileNotFoundError:
+        if not folder.is_symlink():
+            try:
+                children = sorted(folder.iterdir())
+            except OSError:
+                return
+            for child in children:
+                if child.is_dir():
+                    yield from _discover(child)
+        return
+    except OSError:
+        pass  # Let the reader report an inaccessible SKILL.md.
+    yield folder
+
+
 def measure(root, rel):
     base = root / rel
     rows = []
     if not base.is_dir():
         return rows
-    for d in sorted(base.iterdir()):
-        if not d.is_dir():
+    candidates = []
+    for child in sorted(base.iterdir()):
+        if not child.is_dir():
             continue
-        row = {"dir": rel, "folder": d.name, "name": None, "chars": 0, "problem": None}
+        # Preserve the missing SKILL.md warning for an unrecognized top-level folder.
+        candidates.extend(list(_discover(child)) or [child])
+    for d in candidates:
+        parent = rel if d.parent == base else str(Path(rel) / d.parent.relative_to(base))
+        row = {"dir": parent, "folder": d.name, "name": None, "chars": 0, "problem": None}
         try:
             fm = frontmatter(d / "SKILL.md")
         except (OSError, UnicodeDecodeError) as e:
@@ -107,7 +131,7 @@ def main(argv=None):
         noname = [r for r in rows if r["name"] is None and r["problem"] is None]
         for r in rows:
             if r["problem"]:
-                warnings.append(f"{rel}/{r['folder']}: {r['problem']}. Next step: check that skill's SKILL.md.")
+                warnings.append(f"{r['dir']}/{r['folder']}: {r['problem']}. Next step: check that skill's SKILL.md.")
         report.append({"dir": rel, "skills": len(rows), "chars": sum(r["chars"] for r in rows),
                        "name_mismatch": len(mism), "name_missing": len(noname), "rows": rows})
     total = sum(d["chars"] for d in report)
