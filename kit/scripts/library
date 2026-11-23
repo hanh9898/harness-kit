@@ -395,7 +395,7 @@ def main():
             if args.expect_revision < 0:
                 raise ValueError("Expected revision must be zero (create) or the inspected revision.")
             payload = json.dumps(resource, ensure_ascii=False, allow_nan=False)
-            mode = "rwc" if args.expect_revision == 0 else "rw"
+            mode = "rwc" if args.expect_revision == 0 and not store_exists(args.store) else "rw"
             with sqlite3.connect(args.store.resolve().as_uri() + "?mode=" + mode, uri=True) as db:
                 db.execute("PRAGMA synchronous=FULL")
                 db.execute("BEGIN IMMEDIATE")
