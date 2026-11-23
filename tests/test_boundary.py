@@ -35,6 +35,33 @@ def test_tokens_come_from_file(tmp_path):
     assert run(CHECK_BOUNDARY, "--root", kitdir, "--tokens", toks, "--strict").returncode == 0
 
 
+def test_selected_token_file_is_skipped_by_path(tmp_path):
+    config = tmp_path / "config"
+    config.mkdir()
+    toks = config / "forbidden.txt"
+    toks.write_text("InternalWidget\n", encoding="utf-8")
+
+    r = run(CHECK_BOUNDARY, "--root", tmp_path, "--tokens", toks, "--strict")
+    assert r.returncode == 0, r.stdout
+    assert r.stdout == "Boundary clean.\n"
+
+    (tmp_path / toks.name).write_text("InternalWidget\n", encoding="utf-8")
+    r = run(CHECK_BOUNDARY, "--root", tmp_path, "--tokens", toks, "--strict")
+    assert r.returncode == 1, r.stdout
+    assert "WARNING: forbidden.txt:1: forbidden token `InternalWidget`" in r.stdout
+    assert "1 boundary violations." in r.stdout
+
+
+def test_default_token_filename_is_still_skipped(tmp_path):
+    (tmp_path / TOKENS.name).write_text("HBU1976\n", encoding="utf-8")
+    (tmp_path / "example.md").write_text("HBU1976\n", encoding="utf-8")
+
+    r = run(CHECK_BOUNDARY, "--root", tmp_path, "--strict")
+    assert r.returncode == 1, r.stdout
+    assert "WARNING: example.md:1: forbidden token" in r.stdout
+    assert "1 boundary violations." in r.stdout
+
+
 def test_missing_tokens_file_exit_2(tmp_path):
     kitdir = write_kit(tmp_path / "kit", [row("A01")])
     assert run(CHECK_BOUNDARY, "--root", kitdir, "--tokens", tmp_path / "none.txt").returncode == 2
