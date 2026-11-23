@@ -2,6 +2,8 @@
 import csv
 import re
 
+import pytest
+
 from conftest import CHECK_KIT, KIT, run, row, write_kit
 
 RULE_COLS = ["id", "topic", "rule", "source", "certainty", "check", "verified_on"]
@@ -37,6 +39,18 @@ def fails(tmp_path, rules, gates, needle):
 def test_good_gate_passes(tmp_path):
     r = run(CHECK_KIT, "--dir", write(tmp_path, [rule("9.01")], [gate("9.01")]))
     assert r.returncode == 0, r.stdout
+
+
+@pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
+def test_duplicate_rule_id_rejected(tmp_path, with_gates):
+    root = write(tmp_path, [rule("9.01", certainty="inferred", verified_on=""), rule("9.01")],
+                 [gate("9.01")])
+    if not with_gates:
+        (root / "gates.csv").unlink()
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "rules.csv:3: duplicate id 9.01 from line 2" in r.stdout
 
 
 def test_gate_without_verified_on_rejected(tmp_path):

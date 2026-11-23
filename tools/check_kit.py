@@ -6,7 +6,8 @@
   check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
-IDs are unique and every group has a name in groups.csv (id,name). If gates.csv exists, gate=yes rules need an ISO verified_on date
+IDs in legos.csv and rules.csv are unique and every group has a name in groups.csv (id,name).
+If gates.csv exists, gate=yes rules need an ISO verified_on date
 in rules.csv, stated certainty, verify_method=raw-grep and a nonempty verified_quote; gate=no requires a note.
 When gates.csv exists, only rules with gate=yes may carry verified_on.
 Print one legos.csv:line error per line; exit 1 on errors, 0 when clean.
@@ -64,22 +65,34 @@ def check_groups(kit_dir, used):
             for g, n in sorted(used.items()) if not names.get(g)]
 
 
-def check_gates(kit_dir):
+def check_rules_and_gates(kit_dir):
+    rpath = kit_dir / "rules.csv"
     gpath = kit_dir / "gates.csv"
-    if not gpath.exists():
+    has_gates = gpath.exists()
+    if not has_gates and not rpath.exists():
         return []
+    errs, rules, rule_lines = [], {}, {}
     try:
-        with (kit_dir / "rules.csv").open(encoding="utf-8", newline="") as f:
-            rules = {r["id"]: r for r in csv.DictReader(f)}
+        with rpath.open(encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+            for r in reader:
+                rid, n = r["id"], reader.line_num
+                if rid in rule_lines:
+                    errs.append(f"rules.csv:{n}: duplicate id {rid} from line {rule_lines[rid]}; fix: keep one row per ID")
+                rule_lines.setdefault(rid, n)
+                rules[rid] = r
+        if not has_gates:
+            return errs
         with gpath.open(encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
             missing = [c for c in GATE_COLUMNS if c not in (reader.fieldnames or [])]
             if missing:
-                return [f"gates.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(GATE_COLUMNS)}"]
+                return errs + [f"gates.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(GATE_COLUMNS)}"]
             gates = list(reader)
     except (OSError, KeyError) as e:
-        return [f"gates.csv: cannot cross-check rules.csv ({e}); fix: provide rules.csv with an id column"]
-    errs = []
+        if has_gates:
+            return errs + [f"gates.csv: cannot cross-check rules.csv ({e}); fix: provide rules.csv with an id column"]
+        return errs + [f"rules.csv: cannot check rule IDs ({e}); fix: provide rules.csv with an id column"]
     for n, g in enumerate(gates, 2):
         gid, r = g["id"], rules.get(g["id"])
         if r is None:
@@ -271,7 +284,7 @@ def main(argv=None):
             print(f"ERROR: {e}")
         print(f"{len(errs)} log errors." if errs else "Log clean.")
         return 1 if errs else 0
-    errs = check(Path(a.dir)) + check_gates(Path(a.dir))
+    errs = check(Path(a.dir)) + check_rules_and_gates(Path(a.dir))
     for e in errs:
         print(f"ERROR: {e}")
     print(f"{len(errs)} data errors." if errs else "Kit data clean.")
