@@ -1,7 +1,6 @@
 """Durable resource selection through the confirmed public operation seam."""
 import csv
 import json
-import os
 import re
 import shlex
 import shutil
@@ -58,15 +57,17 @@ def update_supplied(root):
         writer.writeheader(); writer.writerows(rows)
 
 
-def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
-    skill = ROOT / 'skills/harness/harness-library/SKILL.md'
-    template, = re.findall(r'`(library (?:[^`\n]+ )?selection [^`\n]+)`',
-                           skill.read_text(encoding='utf-8'))
+def test_library_skill_selection_command_runs(tmp_path):
+    link = tmp_path / '.agents/skills/harness-library'
+    link.parent.mkdir(parents=True)
+    link.symlink_to(ROOT / 'skills/harness/harness-library', target_is_directory=True)
+    skill = (link / 'SKILL.md').resolve()
+    template, = re.findall(r'`([^`\n]+ selection [^`\n]+)`', skill.read_text(encoding='utf-8'))
     store = tmp_path / 'selected library.sqlite3'
-    command = template.replace('<selected-path>', shlex.quote(str(store))).replace('<id>', 'H14')
-    monkeypatch.setenv('PATH', str(CLI.parent), prepend=os.pathsep)
+    command = (template.replace('<skill-dir>', str(skill.parent))
+               .replace('<selected-path>', shlex.quote(str(store))).replace('<id>', 'H14'))
 
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    result = subprocess.run(command, cwd=tmp_path, shell=True, capture_output=True, text=True)
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)['effective'] is True
