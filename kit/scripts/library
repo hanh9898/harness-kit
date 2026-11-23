@@ -13,6 +13,7 @@ import sqlite3
 import subprocess
 import sys
 from datetime import datetime, timezone
+from io import StringIO
 from pathlib import Path
 
 CONSUMPTION = "Requires checking conditions and gaps; saving is not adoption."
@@ -100,9 +101,10 @@ def compare(row, candidate):
     resource = json.loads(row[2])
     origin = resource["origin"]
     def diff(before, after, label):
-        return "".join(difflib.unified_diff(before.splitlines(keepends=True),
-                                          after.splitlines(keepends=True),
-                                          fromfile="old-origin", tofile=label))
+        lines = difflib.unified_diff(StringIO(before).readlines(), StringIO(after).readlines(),
+                                     fromfile="old-origin", tofile=label)
+        return "".join(line if line.endswith("\n") else f"{line}\n\\ No newline at end of file\n"
+                       for line in lines)
     token = hashlib.sha256(json.dumps([row[0], row[1], resource, candidate],
                                      sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     return dict(id=row[0], revision=row[1], token=token,
