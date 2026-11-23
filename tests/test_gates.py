@@ -58,6 +58,16 @@ def test_gate_with_malformed_date_rejected(tmp_path):
     fails(tmp_path, [rule("9.01", verified_on="yesterday")], [gate("9.01")], "verified_on")
 
 
+def test_gate_with_impossible_date_rejected(tmp_path):
+    fails(tmp_path, [rule("9.01", verified_on="2026-02-29")], [gate("9.01")],
+          "rules.csv verified_on `2026-02-29` is not a calendar date")
+
+
+def test_gate_with_valid_leap_day_passes(tmp_path):
+    r = run(CHECK_KIT, "--dir", write(tmp_path, [rule("9.01", verified_on="2024-02-29")], [gate("9.01")]))
+    assert r.returncode == 0, r.stdout
+
+
 def test_gate_without_quote_rejected(tmp_path):
     fails(tmp_path, [rule("9.01")], [gate("9.01", quote="")], "verified_quote")
 
