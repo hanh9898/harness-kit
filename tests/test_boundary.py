@@ -11,6 +11,14 @@ def test_tokens_file_is_outside_the_kit():
     assert KIT not in TOKENS.parents and TOKENS.is_file()
 
 
+def test_missing_root_exit_2(tmp_path):
+    root = tmp_path / "missing"
+    r = run(CHECK_BOUNDARY, "--root", root, "--strict")
+    assert r.returncode == 2, r.stdout
+    assert f"--root is not a directory: {root}" in r.stderr
+    assert not r.stdout
+
+
 def test_sample_with_leak_is_reported_at_right_file_and_line(tmp_path):
     kitdir = write_kit(tmp_path / "kit", [row("A01"), row("A02", detail="used in HBU1976 once")])
     r = run(CHECK_BOUNDARY, "--root", kitdir, "--tokens", TOKENS, "--strict")
