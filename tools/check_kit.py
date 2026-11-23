@@ -5,7 +5,8 @@
   check_kit.py --log FILE        check a harness/progress.log for revised=, observe work=/labels=, need-to-piece groups= and double quotes
   check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
-Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
+Check required columns and cells; legos.csv and rules.csv rows must not exceed their headers.
+Rung must be instruction-file | skill | script-cli | mcp,
 IDs in legos.csv, rules.csv and gates.csv are unique and every group has a name in groups.csv (id,name).
 If gates.csv exists, gate=yes rules need an ISO verified_on date
 in rules.csv, stated certainty, verify_method=raw-grep and a nonempty verified_quote; gate=no requires a note.
@@ -40,6 +41,8 @@ def check(kit_dir):
             return [f"legos.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(COLUMNS)}"]
         errs, seen, used_groups = [], {}, {}
         for n, r in enumerate(reader, 2):
+            if None in r:
+                errs.append(f"legos.csv:{reader.line_num}: {r.get('id') or '?'} has extra cells beyond the header; fix: match the row to the header")
             for c in COLUMNS:
                 if not (r.get(c) or "").strip():
                     errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has an empty `{c}` cell; fix: supply a value")
@@ -85,6 +88,8 @@ def check_rules_and_gates(kit_dir):
                 return [f"rules.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(RULE_COLUMNS)}"]
             for r in reader:
                 rid, n = r["id"], reader.line_num
+                if None in r:
+                    errs.append(f"rules.csv:{n}: {rid or '?'} has extra cells beyond the header; fix: match the row to the header")
                 missing_cells = [c for c, value in r.items() if value is None]
                 if missing_cells:
                     errs.append(f"rules.csv:{n}: {rid or '?'} is missing cells for {', '.join(missing_cells)}; fix: include a cell for each column")

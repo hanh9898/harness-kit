@@ -1,4 +1,8 @@
 """Kit data validation through tools/check_kit.py on real data and invalid fixtures."""
+import csv
+
+import pytest
+
 from conftest import CHECK_KIT, KIT, COLUMNS, run, row, write_kit
 
 
@@ -9,6 +13,11 @@ def test_real_kit_is_valid():
 
 def test_good_sample_passes(tmp_path):
     root = write_kit(tmp_path, [row("A01"), row("A02", rung="skill"), row("A03", rung="mcp")])
+    assert run(CHECK_KIT, "--dir", root).returncode == 0
+
+
+def test_named_extra_column_passes(tmp_path):
+    root = write_kit(tmp_path, [row("A01", notes="quoted, comma")], header=[*COLUMNS, "notes"])
     assert run(CHECK_KIT, "--dir", root).returncode == 0
 
 
@@ -59,6 +68,18 @@ def test_truncated_row_reports_all_missing_cells(tmp_path):
         for column in COLUMNS[1:]
     ]
     assert r.stdout.splitlines() == [*expected, "8 data errors."]
+
+
+@pytest.mark.parametrize("extra", ["stray value", ""], ids=["nonempty", "empty"])
+def test_surplus_lego_cells_rejected(tmp_path, extra):
+    root = write_kit(tmp_path, [row("A01")])
+    overflow = row("A02")
+    with (root / "legos.csv").open("a", encoding="utf-8", newline="") as f:
+        csv.writer(f).writerow([*(overflow[c] for c in COLUMNS), extra])
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "legos.csv:3: A02 has extra cells beyond the header;" in r.stdout
 
 
 def test_missing_legos_file_reported(tmp_path):
