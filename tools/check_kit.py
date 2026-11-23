@@ -85,6 +85,9 @@ def check_rules_and_gates(kit_dir):
                 return [f"rules.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(RULE_COLUMNS)}"]
             for r in reader:
                 rid, n = r["id"], reader.line_num
+                missing_cells = [c for c, value in r.items() if value is None]
+                if missing_cells:
+                    errs.append(f"rules.csv:{n}: {rid or '?'} is missing cells for {', '.join(missing_cells)}; fix: include a cell for each column")
                 if rid in rule_lines:
                     errs.append(f"rules.csv:{n}: duplicate id {rid} from line {rule_lines[rid]}; fix: keep one row per ID")
                 rule_lines.setdefault(rid, n)
