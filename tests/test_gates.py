@@ -55,6 +55,20 @@ def test_missing_rule_column_rejected(tmp_path, column, with_gates):
 
 
 @pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
+def test_truncated_rule_row_rejected(tmp_path, with_gates):
+    root = write(tmp_path, [rule("9.01")], [gate("9.01")])
+    if not with_gates:
+        (root / "gates.csv").unlink()
+    incomplete = rule("9.02")
+    with (root / "rules.csv").open("a", encoding="utf-8", newline="") as f:
+        csv.writer(f).writerow([incomplete[c] for c in RULE_COLS[:-1]])
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "rules.csv:3: 9.02 is missing cells for verified_on;" in r.stdout
+
+
+@pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
 def test_duplicate_rule_id_rejected(tmp_path, with_gates):
     root = write(tmp_path, [rule("9.01", certainty="inferred", verified_on=""), rule("9.01")],
                  [gate("9.01")])
