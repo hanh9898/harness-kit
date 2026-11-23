@@ -55,13 +55,17 @@ def load_patterns(kit_dir):
     for line in optional_markdown_lines(kit_dir / "patterns.md"):
         if not line.startswith("|"):
             continue
-        cells = re.split(r"(?<!\\)\|", line.rstrip()[1:])
-        if not cells[-1]:
-            cells.pop()
-        cells = [c.strip() for c in cells]
-        if cells and cells[0] == "#":
+        line = line.rstrip()
+        # Consume escape pairs before matching column separators.
+        pipes = [m.start() for m in re.finditer(r"\\.|\|", line) if m[0] == "|"]
+        if pipes[-1] != len(line) - 1:
+            pipes.append(len(line))
+        cells = [line[start + 1:end].strip() for start, end in zip(pipes, pipes[1:])]
+        if not cells:
+            continue
+        if cells[0] == "#":
             head = cells
-        elif cells and cells[0].isdecimal():
+        elif cells[0].isdecimal():
             out[int(cells[0])] = cells
     return out, head
 

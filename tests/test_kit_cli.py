@@ -97,7 +97,7 @@ def test_patterns_list_and_show_unpadded_table(tmp_path):
         "|#|Pattern|Also called|What it is|\n"
         "|---|---|---|---|\n"
         "|1|Single agent||One agent does the work.|\n"
-        r"|2|Router|Dispatcher|Picks A \| B|" "\n",
+        r"|2|Router\\|Dispatcher|Picks A \| B|" "\n",
         encoding="utf-8",
     )
 
@@ -105,13 +105,13 @@ def test_patterns_list_and_show_unpadded_table(tmp_path):
     assert r.returncode == 0, r.stderr
     assert r.stdout.splitlines() == [
         "P1\tSingle agent\tOne agent does the work.",
-        "P2\tRouter\t" r"Picks A \| B",
+        "P2\t" r"Router\\" "\t" r"Picks A \| B",
     ]
 
     r = run(KIT_CLI, "--dir", root, "show", "P2")
     assert r.returncode == 0, r.stderr
     assert r.stdout.splitlines() == [
-        "#: 2", "Pattern: Router", "Also called: Dispatcher", r"What it is: Picks A \| B",
+        "#: 2", r"Pattern: Router\\", "Also called: Dispatcher", r"What it is: Picks A \| B",
     ]
 
 
