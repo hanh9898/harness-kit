@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 CONSUMPTION = "Requires checking conditions and gaps; saving is not adoption."
+MARKDOWN_ENTRY_NOT_FOUND = 3  # kit show found no matching pattern or delegation entry.
 
 
 def unique_object(pairs):
@@ -206,10 +207,10 @@ def resource_snapshot(db, kit_dir, source, identity):
         raise ValueError("Ambiguous supplied identity; reconcile the distribution before changing selection.")
     if not hits and re.fullmatch(r"P[1-9][0-9]*|axis[1-4]|step[1-7]|combine", identity):
         filename = "patterns.md" if identity.startswith("P") else "delegation.md"
-        if not (kit_dir / filename).is_file():
-            return None
         result = subprocess.run([sys.executable, "-I", str(Path(__file__).with_name("kit")),
                                  "--dir", str(kit_dir), "show", identity], capture_output=True, text=True)
+        if result.returncode == MARKDOWN_ENTRY_NOT_FOUND:
+            return None
         if result.returncode:
             raise ValueError(f"Cannot inspect supplied resource: {result.stderr.strip()}")
         hits.append(dict(kind="pattern" if filename == "patterns.md" else "delegation",

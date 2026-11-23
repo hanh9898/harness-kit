@@ -1,7 +1,10 @@
 """Durable resource selection through the confirmed public operation seam."""
 import csv
 import json
+import re
 import shutil
+
+import pytest
 
 from conftest import ROOT, run
 
@@ -90,6 +93,56 @@ def test_supplied_patterns_and_delegation_use_the_same_explicit_selection_bounda
         assert state['record']['snapshot']
         assert change(tmp_path, 'restore', 1, id=identity).returncode == 0
         assert selection(tmp_path, id=identity)['effective']
+
+
+@pytest.mark.parametrize('identity, filename, entry', [
+    ('P6', 'patterns.md', r'^\| 6 \|.*\n'),
+    ('axis1', 'delegation.md', r'^\| 1 \| Reversibility.*\n'),
+    ('step2', 'delegation.md', r'^\| 2 \| Sell.*\n'),
+    ('combine', 'delegation.md', r'^## How the axes combine.*\n(?s:.*?)(?=^## |\Z)'),
+])
+def test_exclusion_survives_removed_markdown_entry(tmp_path, identity, filename, entry):
+    supplied(tmp_path)
+    disabled = change(tmp_path, 'disable', 0, id=identity)
+    assert disabled.returncode == 0, disabled.stderr
+    before = json.loads(disabled.stdout)
+    path = tmp_path / 'kit' / filename
+    original = path.read_text(encoding='utf-8')
+    without_entry, removed = re.subn(entry, '', original, flags=re.MULTILINE)
+    assert removed == 1
+    path.write_text(without_entry, encoding='utf-8')
+
+    state = selection(tmp_path, id=identity)
+    assert state == {**before, 'available': False, 'effective': False, 'current_snapshot': None}
+    failed = change(tmp_path, 'restore', 1, id=identity)
+    assert failed.returncode == 2 and 'Resource unavailable' in failed.stderr and not failed.stdout
+    assert selection(tmp_path, id=identity, history=True) == [before['record']]
+
+    path.write_text(original, encoding='utf-8')
+    assert selection(tmp_path, id=identity) == before
+    restored = change(tmp_path, 'restore', 1, id=identity)
+    assert restored.returncode == 0, restored.stderr
+    after = json.loads(restored.stdout)
+    assert after['revision'] == 2 and after['effective']
+    assert selection(tmp_path, id=identity, history=True) == [before['record'], after['record']]
+
+
+@pytest.mark.parametrize('damage', ['invalid-text', 'directory'])
+def test_selection_fails_when_pattern_catalog_cannot_be_read(tmp_path, damage):
+    supplied(tmp_path)
+    assert change(tmp_path, 'disable', 0, id='P6').returncode == 0
+    path = tmp_path / 'kit/patterns.md'
+    if damage == 'invalid-text':
+        path.write_bytes(b'\xff')
+    else:
+        path.unlink()
+        path.mkdir()
+
+    failed = invoke(tmp_path, 'selection', 'P6', '--source', 'supplied', '--kit-dir', tmp_path / 'kit')
+    assert failed.returncode == 2 and not failed.stdout
+    assert 'Cannot inspect supplied resource' in failed.stderr
+    assert 'patterns.md' in failed.stderr
+    assert len(selection(tmp_path, id='P6', history=True)) == 1
 
 
 def test_content_edits_and_colliding_saved_ids_do_not_clear_supplied_exclusion(tmp_path):
