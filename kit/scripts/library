@@ -236,8 +236,18 @@ def selection_view(db, kit_dir, source, identity):
                 consumption="Selection only; applied consumers remain unchanged. Check conditions before use.")
 
 
+def store_exists(store):
+    try:
+        store.stat()
+    except FileNotFoundError:
+        if store.is_symlink():
+            raise ValueError(f"Store symlink target is missing: {store}") from None
+        return False
+    return True
+
+
 def read_selection(store, kit_dir, source, identity, history=False):
-    if not store.exists():
+    if not store_exists(store):
         return [] if history else selection_view(None, kit_dir, source, identity)
     with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
         return selection_records(db, source, identity) if history else selection_view(db, kit_dir, source, identity)
@@ -296,7 +306,7 @@ def search(store, kit_dir, query, limit, include_disabled=False):
                                         kind=kind, origin="supplied", certainty=row["certainty"],
                                         sources=row.get("sources", row.get("source")), retrieve=retrieve))
     states = {}
-    if store.exists():
+    if store_exists(store):
         with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
             if has_table(db, "selection_revisions"):
                 for source, identity, payload in db.execute("SELECT source, id, record FROM selection_revisions s WHERE revision=(SELECT MAX(revision) FROM selection_revisions WHERE source=s.source AND id=s.id)"):
