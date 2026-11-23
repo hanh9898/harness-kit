@@ -142,14 +142,23 @@ def effective_lines(text):
 
 def check_progress_log(text, groups=None):
     """A revised= line must reference an earlier timestamp with the same step.
-    Superseded lines are not checked again; the log remains append-only.
+    Superseded lines skip field checks, but their revision links are still checked.
     observe requires work= and correctly formatted labels=. need-to-piece requires groups= with comma-separated inspected group letters, validated against groups when supplied."""
     rows, errs = _parse_log(text)
-    superseded = {f["revised"] for _, _, f in rows if f.get("revised")}
-    seen = {}
+    seen, superseded = {}, set()
     for n, ts, f in rows:
-        if ts in superseded:
-            seen.setdefault(ts, f.get("step"))
+        step, rev = f.get("step"), f.get("revised")
+        if rev is not None:
+            target_line, target_step = seen.get(rev, (None, None))
+            if not LOG_TS.fullmatch(rev) or target_step is None:
+                errs.append(f"progress.log:{n}: revised={rev} does not reference an earlier timestamp; fix: copy the original timestamp exactly")
+            elif target_step != step:
+                errs.append(f"progress.log:{n}: revised={rev} points to step={target_step}, not step={step}; fix: keep the replacement on the same step")
+            else:
+                superseded.add(target_line)
+        seen.setdefault(ts, (n, step))
+    for n, _, f in rows:
+        if n in superseded:
             continue
         if f.get("step") == "observe":
             if not f.get("work"):
@@ -163,14 +172,6 @@ def check_progress_log(text, groups=None):
                 errs.append(f"progress.log:{n}: need-to-piece missing groups=; fix: record every inspected kit group, for example groups=A,J; preserve the old line and append a revised= replacement")
             elif unknown:
                 errs.append(f"progress.log:{n}: groups= contains unknown groups {', '.join(unknown)}; fix: use group letters from `kit list`")
-        rev = f.get("revised")
-        if rev is not None:
-            target = seen.get(rev)
-            if not LOG_TS.fullmatch(rev) or target is None:
-                errs.append(f"progress.log:{n}: revised={rev} does not reference an earlier timestamp; fix: copy the original timestamp exactly")
-            elif target != f.get("step"):
-                errs.append(f"progress.log:{n}: revised={rev} points to step={target}, not step={f.get('step')}; fix: keep the replacement on the same step")
-        seen.setdefault(ts, f.get("step"))
     return errs
 
 

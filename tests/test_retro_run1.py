@@ -33,9 +33,11 @@ def test_revised_pointing_nowhere_is_caught():
 
 def test_revised_pointing_forward_or_to_other_step_is_caught():
     forward = "2026-01-01T00:00:00Z step=observe work=w labels=none revised=2026-01-01T00:05:00Z\n2026-01-01T00:05:00Z step=gate items=a\n"
-    assert check_kit.check_progress_log(forward)
-    other = "2026-01-01T00:00:00Z step=observe work=w labels=none\n2026-01-01T00:05:00Z step=gate revised=2026-01-01T00:00:00Z\n"
-    assert check_kit.check_progress_log(other)
+    assert any("progress.log:1:" in e and "earlier timestamp" in e for e in check_kit.check_progress_log(forward))
+    other = "2026-01-01T00:00:00Z step=observe labels=none\n2026-01-01T00:05:00Z step=gate revised=2026-01-01T00:00:00Z\n"
+    errs = check_kit.check_progress_log(other)
+    assert any("progress.log:2:" in e and "points to step=observe" in e for e in errs)
+    assert any("progress.log:1: observe missing work=" in e for e in errs)
 
 
 def test_last_line_per_step_and_part_wins():
@@ -52,6 +54,17 @@ def test_cli_checks_a_log_file(tmp_path):
     assert run(CHECK_KIT, "--log", f).returncode == 0
     f.write_text(GOOD_LOG.replace("revised=2026-01-01T00:05:00Z", "revised=nope"), encoding="utf-8")
     assert run(CHECK_KIT, "--log", f).returncode == 1
+
+
+def test_cli_rejects_self_revision(tmp_path):
+    f = tmp_path / "progress.log"
+    f.write_text(
+        "2026-01-01T00:00:00Z step=observe work=w labels=none revised=2026-01-01T00:00:00Z\n",
+        encoding="utf-8",
+    )
+    result = run(CHECK_KIT, "--log", f)
+    assert result.returncode == 1, result.stdout
+    assert "progress.log:1: revised=2026-01-01T00:00:00Z does not reference an earlier timestamp" in result.stdout
 
 
 def test_record_format_states_revision_convention():
@@ -92,6 +105,35 @@ def test_revised_line_supersedes_old_format_line():
         "2026-01-01T01:01:00Z step=need-to-piece need=n piece=B08 groups=A,J revised=2026-01-01T00:01:00Z\n"
     )
     assert check_kit.check_progress_log(log) == []
+
+
+def test_valid_revision_chain_supersedes_old_fields():
+    log = (
+        "2026-01-01T00:00:00Z step=observe labels=everything\n"
+        "2026-01-01T00:01:00Z step=observe labels=none revised=2026-01-01T00:00:00Z\n"
+        "2026-01-01T00:02:00Z step=observe work=w labels=none revised=2026-01-01T00:01:00Z\n"
+    )
+    assert check_kit.check_progress_log(log) == []
+
+
+def test_superseded_line_still_needs_a_valid_revision_link():
+    log = (
+        "2026-01-01T00:00:00Z step=observe labels=everything revised=2026-01-01T00:00:00Z\n"
+        "2026-01-01T00:01:00Z step=observe work=w labels=none revised=2026-01-01T00:00:00Z\n"
+    )
+    errs = check_kit.check_progress_log(log)
+    assert len(errs) == 1
+    assert "progress.log:1: revised=2026-01-01T00:00:00Z does not reference an earlier timestamp" in errs[0]
+
+
+def test_revision_only_supersedes_the_target_row():
+    log = (
+        "2026-01-01T00:00:00Z step=observe labels=everything\n"
+        "2026-01-01T00:00:00Z step=observe labels=none revised=2026-01-01T00:00:00Z\n"
+    )
+    errs = check_kit.check_progress_log(log)
+    assert len(errs) == 1
+    assert "progress.log:2: observe missing work=" in errs[0]
 
 
 def test_revised_line_is_itself_checked():
