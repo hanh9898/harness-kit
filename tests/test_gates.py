@@ -53,6 +53,14 @@ def test_duplicate_rule_id_rejected(tmp_path, with_gates):
     assert "rules.csv:3: duplicate id 9.01 from line 2" in r.stdout
 
 
+def test_duplicate_gate_id_rejected(tmp_path):
+    root = write(tmp_path, [rule("9.01"), rule("9.02")],
+                 [gate("9.01"), gate("9.02"), gate("9.01", quote="Another exact sentence.")])
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "gates.csv:4: duplicate id 9.01 from line 2" in r.stdout
+
+
 def test_gate_without_verified_on_rejected(tmp_path):
     fails(tmp_path, [rule("9.01", verified_on="")], [gate("9.01")], "verified_on")
 

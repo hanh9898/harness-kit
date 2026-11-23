@@ -6,7 +6,7 @@
   check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
-IDs in legos.csv and rules.csv are unique and every group has a name in groups.csv (id,name).
+IDs in legos.csv, rules.csv and gates.csv are unique and every group has a name in groups.csv (id,name).
 If gates.csv exists, gate=yes rules need an ISO verified_on date
 in rules.csv, stated certainty, verify_method=raw-grep and a nonempty verified_quote; gate=no requires a note.
 When gates.csv exists, only rules with gate=yes may carry verified_on.
@@ -89,13 +89,18 @@ def check_rules_and_gates(kit_dir):
             missing = [c for c in GATE_COLUMNS if c not in (reader.fieldnames or [])]
             if missing:
                 return errs + [f"gates.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(GATE_COLUMNS)}"]
-            gates = list(reader)
+            gates = [(reader.line_num, g) for g in reader]
     except (OSError, KeyError) as e:
         if has_gates:
             return errs + [f"gates.csv: cannot cross-check rules.csv ({e}); fix: provide rules.csv with an id column"]
         return errs + [f"rules.csv: cannot check rule IDs ({e}); fix: provide rules.csv with an id column"]
-    for n, g in enumerate(gates, 2):
-        gid, r = g["id"], rules.get(g["id"])
+    gate_lines = {}
+    for n, g in gates:
+        gid = g["id"]
+        if gid in gate_lines:
+            errs.append(f"gates.csv:{n}: duplicate id {gid} from line {gate_lines[gid]}; fix: keep one row per ID")
+        gate_lines.setdefault(gid, n)
+        r = rules.get(gid)
         if r is None:
             errs.append(f"gates.csv:{n}: {gid} is absent from rules.csv; fix: use an existing ID")
             continue
@@ -123,9 +128,8 @@ def check_rules_and_gates(kit_dir):
                 errs.append(f"gates.csv:{n}: {gid} has gate=no but rules.csv retains verified_on; fix: clear verified_on")
         if g["verify_method"] not in GATE_METHODS:
             errs.append(f"gates.csv:{n}: {gid} verify_method `{g['verify_method']}` is not in {' | '.join(GATE_METHODS)}; fix: choose a listed value")
-    gate_row_ids = {g["id"] for g in gates}
     for rid, r in rules.items():
-        if rid not in gate_row_ids and (r.get("verified_on") or "").strip():
+        if rid not in gate_lines and (r.get("verified_on") or "").strip():
             errs.append(f"rules.csv: {rid} has no gate row but retains verified_on; fix: clear verified_on")
     return errs
 
