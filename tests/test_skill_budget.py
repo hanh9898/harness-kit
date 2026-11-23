@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 TOOL = Path(__file__).resolve().parent.parent / "tools" / "skill_budget.py"
 
 
@@ -53,6 +55,23 @@ def test_strict_clean_and_max_total(tmp_path):
     assert run("--root", tmp_path, "--dir", ".agents/skills", "--strict").returncode == 0
     r = run("--root", tmp_path, "--dir", ".agents/skills", "--max-total", "2", "--strict")
     assert r.returncode == 1 and "exceeds limit" in r.stdout
+
+
+def test_comment_only_description_warns(tmp_path):
+    skill(tmp_path, "skills", "example", "---\nname: example\ndescription: # TODO\n---\n")
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 1, r.stdout
+    assert "TOTAL: 0 characters" in r.stdout
+    assert "WARNING: skills/example: missing description" in r.stdout
+    assert run("--root", tmp_path, "--dir", "skills").returncode == 0
+
+
+@pytest.mark.parametrize("quote", ["'", '"'])
+def test_quoted_comment_description_counts_as_text(tmp_path, quote):
+    skill(tmp_path, "skills", "example", f"---\nname: example\ndescription: {quote}# TODO{quote}\n---\n")
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 0, r.stdout
+    assert "TOTAL: 6 characters" in r.stdout
 
 
 def test_strict_discovers_flat_and_grouped_skills(tmp_path):

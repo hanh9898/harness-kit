@@ -27,8 +27,8 @@ PARTIAL_REPORTS = ("17", "27", "28")
 VIET = re.compile(r"[\xe0\xe1\u1ea1\u1ea3\xe3\xe2\u1ea7\u1ea5\u1ead\u1ea9\u1eab\u0103\u1eb1\u1eaf\u1eb7\u1eb3\u1eb5\xe8\xe9\u1eb9\u1ebb\u1ebd\xea\u1ec1\u1ebf\u1ec7\u1ec3\u1ec5\xec\xed\u1ecb\u1ec9\u0129\xf2\xf3\u1ecd\u1ecf\xf5\xf4\u1ed3\u1ed1\u1ed9\u1ed5\u1ed7\u01a1\u1edd\u1edb\u1ee3\u1edf\u1ee1\xf9\xfa\u1ee5\u1ee7\u0169\u01b0\u1eeb\u1ee9\u1ef1\u1eed\u1eef\u1ef3\xfd\u1ef5\u1ef7\u1ef9\u0111]", re.I)
 
 
-def gen(dest, *extra):
-    return subprocess.run([sys.executable, "-I", str(GEN), "--reports", str(REPORTS), "--dest", str(dest), *extra],
+def gen(dest, *extra, reports=REPORTS):
+    return subprocess.run([sys.executable, "-I", str(GEN), "--reports", str(reports), "--dest", str(dest), *extra],
                           capture_output=True, text=True)
 
 
@@ -179,12 +179,14 @@ def test_rerun_refuses_to_overwrite_hand_edited_kit(tmp_path):
     assert gen(other).returncode == 0 and (other / "rules.csv").is_file()
 
 
-@needs_reports
 def test_refuses_when_any_single_target_exists_and_writes_nothing(tmp_path):
+    reports = tmp_path / "reports"
+    reports.mkdir()
     out = tmp_path / "out"
     out.mkdir()
     (out / "patterns.md").write_text("mine", encoding="utf-8")
-    r = gen(out)
-    assert r.returncode != 0
+    r = gen(out, reports=reports)
+    assert r.returncode == 1, r.stderr
+    assert "already contains patterns.md; CSV is authoritative and will not be overwritten." in r.stderr
     assert sorted(p.name for p in out.iterdir()) == ["patterns.md"]
     assert (out / "patterns.md").read_text(encoding="utf-8") == "mine"

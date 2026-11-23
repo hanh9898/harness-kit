@@ -22,6 +22,8 @@ CHARS_PER_TOKEN = 4
 def _scalar(lines, i):
     """Read the YAML scalar at lines[i]; return (value, next line index)."""
     rest = lines[i].split(":", 1)[1].strip()
+    if rest.startswith("#"):
+        rest = ""
     j = i + 1
     cont = []
     while j < len(lines) and (lines[j].startswith((" ", "\t")) or not lines[j].strip()):

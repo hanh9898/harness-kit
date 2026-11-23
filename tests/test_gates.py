@@ -43,6 +43,17 @@ def test_gate_without_verified_on_rejected(tmp_path):
     fails(tmp_path, [rule("9.01", verified_on="")], [gate("9.01")], "verified_on")
 
 
+def test_rule_without_gate_row_cannot_carry_verified_on(tmp_path):
+    fails(tmp_path, [rule("9.01"), rule("9.02")], [gate("9.01")],
+          "9.02 has no gate row but retains verified_on")
+
+
+def test_rule_without_gate_row_can_leave_verified_on_empty(tmp_path):
+    r = run(CHECK_KIT, "--dir", write(tmp_path, [rule("9.01"), rule("9.02", verified_on="")],
+                                    [gate("9.01")]))
+    assert r.returncode == 0, r.stdout
+
+
 def test_gate_with_malformed_date_rejected(tmp_path):
     fails(tmp_path, [rule("9.01", verified_on="yesterday")], [gate("9.01")], "verified_on")
 
