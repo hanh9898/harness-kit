@@ -27,7 +27,11 @@ def _scalar(lines, i):
     j = i + 1
     cont = []
     while j < len(lines) and (lines[j].startswith((" ", "\t")) or not lines[j].strip()):
-        cont.append(lines[j].strip())
+        line = lines[j].strip()
+        if rest:
+            cont.append(line)
+        elif line and not line.startswith("#"):
+            rest = line
         j += 1
     while cont and not cont[-1]:
         cont.pop()
@@ -38,6 +42,8 @@ def _scalar(lines, i):
     quoted = re.match(r"""("(?:[^"\\]|\\.)*"|'(?:[^']|'')*')\s+#""", text)
     if quoted:
         text = quoted[1]
+    elif not text.startswith(('"', "'")):
+        text = re.split(r"[ \t]#", text, maxsplit=1)[0].rstrip(" \t")
     if text.startswith('"'):
         try:
             return json.loads(text), j
