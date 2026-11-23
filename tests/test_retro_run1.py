@@ -160,6 +160,26 @@ def test_same_second_revision_cannot_target_a_different_need():
     assert "progress.log:2:" in errs[0] and "does not identify an earlier row for this decision" in errs[0]
 
 
+def test_shared_timestamp_cannot_hide_an_unrelated_need():
+    log = (
+        "2026-01-01T00:00:00Z step=gate items=a\n"
+        "2026-01-01T00:00:00Z step=need-to-piece need=a piece=B08\n"
+        "2026-01-01T00:01:00Z step=need-to-piece need=b piece=J03 groups=J revised=2026-01-01T00:00:00Z\n"
+    )
+    errs = check_kit.check_progress_log(log)
+    assert any("progress.log:2: need-to-piece missing groups=" in e for e in errs)
+    assert any("progress.log:3:" in e and "does not identify an earlier row for this decision" in e for e in errs)
+
+
+def test_revision_supersedes_repeated_rows_for_the_same_need():
+    log = (
+        "2026-01-01T00:00:00Z step=need-to-piece need=a piece=B08\n"
+        "2026-01-01T00:00:00Z step=need-to-piece need=a piece=B08\n"
+        "2026-01-01T00:01:00Z step=need-to-piece need=a piece=B08 groups=B revised=2026-01-01T00:00:00Z\n"
+    )
+    assert check_kit.check_progress_log(log) == []
+
+
 def test_revised_line_is_itself_checked():
     log = OLD_FORMAT_LOG + "2026-01-01T01:00:00Z step=observe platform=x flow=a labels=none revised=2026-01-01T00:00:00Z\n"
     errs = check_kit.check_progress_log(log)

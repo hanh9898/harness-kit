@@ -160,14 +160,17 @@ def check_progress_log(text, groups=None):
                 errs.append(f"progress.log:{n}: revised={rev} points to step={target_step}, not step={step}; fix: keep the replacement on the same step")
             else:
                 candidates = earlier[step]
-                if decision in candidates:
-                    superseded.add(candidates[decision])
-                elif len(candidates) == 1 and ts != rev:
-                    superseded.add(next(iter(candidates.values())))
+                target_lines = candidates.get(decision)
+                if target_lines is None and len(earlier) == len(candidates) == 1 and ts != rev:
+                    (only_lines,) = candidates.values()
+                    if len(only_lines) == 1:
+                        target_lines = only_lines
+                if target_lines:
+                    superseded.update(target_lines)
                 else:
                     errs.append(f"progress.log:{n}: revised={rev} does not identify an earlier row for this decision; fix: keep the replacement on the same part, entry, role, or need")
         if "step" in f:
-            seen.setdefault(ts, {}).setdefault(step, {})[decision] = n
+            seen.setdefault(ts, {}).setdefault(step, {}).setdefault(decision, []).append(n)
     for n, _, f in rows:
         if n in superseded:
             continue
