@@ -38,6 +38,8 @@ def _scalar(lines, i):
     quoted = re.match(r"""("(?:[^"\\]|\\.)*"|'(?:[^']|'')*')\s+#""", text)
     if quoted:
         text = quoted[1]
+    elif not text.startswith(('"', "'")):
+        text = re.split(r"[ \t]#", text, maxsplit=1)[0].rstrip(" \t")
     if text.startswith('"'):
         try:
             return json.loads(text), j

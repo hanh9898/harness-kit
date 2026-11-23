@@ -93,6 +93,27 @@ def test_trailing_comments_after_quoted_fields(tmp_path, quote, description, exp
     assert f"TOTAL: {len(expected)} characters" in r.stdout
 
 
+@pytest.mark.parametrize(
+    ("folder", "name", "description", "expected"),
+    [
+        ("demo", "demo # display name", "Useful. # public description", "Useful."),
+        (
+            "demo#v2",
+            "demo#v2\t# display name",
+            "C# and https://example.com/#docs\t# ignored",
+            "C# and https://example.com/#docs",
+        ),
+        ("demo", "demo", "Useful\n  documentation. # ignored", "Useful documentation."),
+    ],
+    ids=["space-before-comment", "tab-with-literal-hashes", "multiline"],
+)
+def test_trailing_comments_after_plain_fields(tmp_path, folder, name, description, expected):
+    skill(tmp_path, "skills", folder, f"---\nname: {name}\ndescription: {description}\n---\n")
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 0, r.stdout
+    assert f"TOTAL: {len(expected)} characters" in r.stdout
+
+
 def test_strict_discovers_flat_and_grouped_skills(tmp_path):
     skill(tmp_path, "skills", "a", "---\nname: a\ndescription: one\n---\n")
     skill(tmp_path, "skills/group", "b", "---\nname: b\ndescription: two\n---\n")
