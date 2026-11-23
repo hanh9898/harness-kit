@@ -14,6 +14,8 @@ python3 tools/skill_budget.py --root <repo-root> --json          # machine-reada
 python3 tools/skill_budget.py --root <repo-root> --max-total 20000 --strict
 ```
 
+Each skill directory can contain skill folders directly or group them in nested directories, as the bundled `skills` directory does. Discovery stops at each `SKILL.md`; symlinked skill folders are measured, but symlinked groups are not traversed.
+
 By default it warns with exit 0; `--strict` exits 1 on warnings (name/folder mismatch, missing `description`, unreadable SKILL.md, or totals exceeding `--max-total`). Every warning gives a next step. Exit 2 means `--root` is not a directory. Token counts use characters / 4, not a model tokenizer.
 
 ## Reading the output

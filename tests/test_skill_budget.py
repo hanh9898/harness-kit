@@ -55,6 +55,29 @@ def test_strict_clean_and_max_total(tmp_path):
     assert r.returncode == 1 and "exceeds limit" in r.stdout
 
 
+def test_strict_discovers_flat_and_grouped_skills(tmp_path):
+    skill(tmp_path, "skills", "a", "---\nname: a\ndescription: one\n---\n")
+    skill(tmp_path, "skills/group", "b", "---\nname: b\ndescription: two\n---\n")
+    skill(tmp_path, "skills/group/b/references", "example", "---\nname: example\ndescription: skip me\n---\n")
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 0, r.stdout
+    assert "== skills: 2 skills, 6 characters" in r.stdout
+
+
+def test_nested_skill_warning_reports_full_path(tmp_path):
+    skill(tmp_path, "skills/group/team", "a", "---\nname: a\n---\n")
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 1
+    assert "skills/group/team/a: missing description" in r.stdout
+
+
+def test_flat_skill_without_skill_md_still_warns(tmp_path):
+    (tmp_path / "skills" / "a" / "references").mkdir(parents=True)
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 1
+    assert "skills/a: cannot read SKILL.md (FileNotFoundError)" in r.stdout
+
+
 def test_missing_description_and_bad_root(tmp_path):
     skill(tmp_path, ".agents/skills", "a", "---\nname: a\n---\n")
     r = run("--root", tmp_path, "--dir", ".agents/skills")
