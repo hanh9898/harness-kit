@@ -142,21 +142,32 @@ def effective_lines(text):
 
 def check_progress_log(text, groups=None):
     """A revised= line must reference an earlier timestamp with the same step.
+    A shared timestamp can be disambiguated by the decision's part or need.
     Superseded lines skip field checks, but their revision links are still checked.
     observe requires work= and correctly formatted labels=. need-to-piece requires groups= with comma-separated inspected group letters, validated against groups when supplied."""
     rows, errs = _parse_log(text)
     seen, superseded = {}, set()
     for n, ts, f in rows:
-        step, rev = f.get("step"), f.get("revised")
+        step, part = _log_key(f)
+        decision = f.get("need", "") if step == "need-to-piece" else part
+        rev = f.get("revised")
         if rev is not None:
-            target_line, target_step = seen.get(rev, (None, None))
-            if not LOG_TS.fullmatch(rev) or target_step is None:
+            earlier = seen.get(rev)
+            if not LOG_TS.fullmatch(rev) or not earlier:
                 errs.append(f"progress.log:{n}: revised={rev} does not reference an earlier timestamp; fix: copy the original timestamp exactly")
-            elif target_step != step:
+            elif step not in earlier:
+                target_step = next(iter(earlier))
                 errs.append(f"progress.log:{n}: revised={rev} points to step={target_step}, not step={step}; fix: keep the replacement on the same step")
             else:
-                superseded.add(target_line)
-        seen.setdefault(ts, (n, step))
+                candidates = earlier[step]
+                if decision in candidates:
+                    superseded.add(candidates[decision])
+                elif len(candidates) == 1 and ts != rev:
+                    superseded.add(next(iter(candidates.values())))
+                else:
+                    errs.append(f"progress.log:{n}: revised={rev} does not identify an earlier row for this decision; fix: keep the replacement on the same part, entry, role, or need")
+        if "step" in f:
+            seen.setdefault(ts, {}).setdefault(step, {})[decision] = n
     for n, _, f in rows:
         if n in superseded:
             continue

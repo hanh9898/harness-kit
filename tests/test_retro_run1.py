@@ -136,6 +136,30 @@ def test_revision_only_supersedes_the_target_row():
     assert "progress.log:2: observe missing work=" in errs[0]
 
 
+def test_revisions_distinguish_needs_logged_in_the_same_second():
+    log = (
+        "2026-01-01T00:00:00Z step=need-to-piece need=a piece=B08\n"
+        "2026-01-01T00:00:00Z step=need-to-piece need=b piece=J03\n"
+        "2026-01-01T00:01:00Z step=need-to-piece need=b piece=J03 groups=J revised=2026-01-01T00:00:00Z\n"
+    )
+    errs = check_kit.check_progress_log(log)
+    assert len(errs) == 1
+    assert "progress.log:1: need-to-piece missing groups=" in errs[0]
+
+    log += "2026-01-01T00:02:00Z step=need-to-piece need=a piece=B08 groups=B revised=2026-01-01T00:00:00Z\n"
+    assert check_kit.check_progress_log(log) == []
+
+
+def test_same_second_revision_cannot_target_a_different_need():
+    log = (
+        "2026-01-01T00:00:00Z step=need-to-piece need=a piece=B08 groups=B\n"
+        "2026-01-01T00:00:00Z step=need-to-piece need=b piece=J03 groups=J revised=2026-01-01T00:00:00Z\n"
+    )
+    errs = check_kit.check_progress_log(log)
+    assert len(errs) == 1
+    assert "progress.log:2:" in errs[0] and "does not identify an earlier row for this decision" in errs[0]
+
+
 def test_revised_line_is_itself_checked():
     log = OLD_FORMAT_LOG + "2026-01-01T01:00:00Z step=observe platform=x flow=a labels=none revised=2026-01-01T00:00:00Z\n"
     errs = check_kit.check_progress_log(log)
