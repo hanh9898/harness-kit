@@ -77,6 +77,7 @@ def test_exclusion_survives_supplied_update_and_explicit_restore_preserves_prove
     consumer = tmp_path / 'consumer.md'
     consumer.write_text('Applied original hook policy\n')
     assert selection(tmp_path)['enabled'] is True
+    assert selection(tmp_path, history=True) == []
     assert not (tmp_path / 'library.sqlite3').exists()
     disabled = change(tmp_path, 'disable', 0)
     assert disabled.returncode == 0, disabled.stderr
@@ -98,6 +99,29 @@ def test_exclusion_survives_supplied_update_and_explicit_restore_preserves_prove
     assert history[1]['owner'] == 'Report author'
     assert history[1]['continuation'] == 'Inspect selection before further changes.'
     assert consumer.read_text() == 'Applied original hook policy\n'
+
+
+@pytest.mark.parametrize('command', ['selection', 'selection-history', 'search'])
+def test_reads_fail_when_store_symlink_target_goes_missing(tmp_path, command):
+    supplied(tmp_path)
+    disabled = change(tmp_path, 'disable', 0)
+    assert disabled.returncode == 0, disabled.stderr
+    store = tmp_path / 'library.sqlite3'
+    link = tmp_path / 'store-link'
+    link.symlink_to(store.name)
+    args = (command, 'H14', '--kit-dir', tmp_path / 'kit')
+    if command != 'search':
+        args += ('--source', 'supplied')
+
+    live = run(CLI, '--store', link, *args)
+    assert live.returncode == 0, live.stderr
+
+    store.rename(tmp_path / 'offline.sqlite3')
+    failed = run(CLI, '--store', link, *args)
+    assert failed.returncode == 2, failed.stdout
+    assert not failed.stdout
+    assert f'Store symlink target is missing: {link}' in failed.stderr
+    assert not store.exists()
 
 
 def test_supplied_patterns_and_delegation_use_the_same_explicit_selection_boundary(tmp_path):
