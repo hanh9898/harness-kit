@@ -7,7 +7,7 @@
 
 Check required columns and cells; rung must be instruction-file | skill | script-cli | mcp,
 IDs are unique and every group has a name in groups.csv (id,name). If gates.csv exists, gate=yes rules need an ISO verified_on date
-in rules.csv, stated certainty, a valid verify_method and a nonempty verified_quote; gate=no requires a note.
+in rules.csv, stated certainty, verify_method=raw-grep and a nonempty verified_quote; gate=no requires a note.
 Print one legos.csv:line error per line; exit 1 on errors, 0 when clean.
 """
 import argparse
@@ -93,8 +93,8 @@ def check_gates(kit_dir):
                 errs.append(f"gates.csv:{n}: {gid} is a gate but certainty `{r.get('certainty')}` is not stated; fix: set gate=no")
             if not (g["verified_quote"] or "").strip():
                 errs.append(f"gates.csv:{n}: {gid} is a gate with an empty verified_quote; fix: copy the exact quote from the original source")
-            if g["verify_method"] not in GATE_METHODS[:2]:
-                errs.append(f"gates.csv:{n}: {gid} verify_method `{g['verify_method']}` is insufficient for a gate; fix: use raw-grep or webfetch")
+            if g["verify_method"] != "raw-grep":
+                errs.append(f"gates.csv:{n}: {gid} verify_method `{g['verify_method']}` is insufficient for a gate; fix: use raw-grep")
         else:
             if not (g["note"] or "").strip():
                 errs.append(f"gates.csv:{n}: {gid} has gate=no without a note; fix: explain why it is not a gate")
