@@ -131,6 +131,10 @@ Saved material is separate from adoption into a consumer.
 
 ## Building blocks
 
+See the [architecture diagram](docs/architecture/harness-kit.png)
+([PlantUML source](docs/architecture/harness-kit.puml)) for the package, helper
+and consumer-state boundaries.
+
 Start with the [catalog and retrieval interface](kit/README.md). Capability
 references include [context](skills/harness/harness-evolve/CONTEXT.md),
 [instruction design](kit/instruction-response/DESIGN.md),
