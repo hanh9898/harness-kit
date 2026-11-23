@@ -21,6 +21,7 @@ from pathlib import Path
 
 COLUMNS = ["id", "group", "name", "summary", "needed_when", "rung", "certainty", "sources", "detail"]
 RUNGS = ["instruction-file", "skill", "script-cli", "mcp"]
+RULE_COLUMNS = ["id", "topic", "rule", "source", "certainty", "check", "verified_on"]
 GATE_COLUMNS = ["id", "gate", "verify_method", "verified_quote", "note"]
 GATE_METHODS = ["raw-grep", "webfetch", "unreadable"]
 ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -76,6 +77,9 @@ def check_rules_and_gates(kit_dir):
     try:
         with rpath.open(encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
+            missing = [c for c in RULE_COLUMNS if c not in (reader.fieldnames or [])]
+            if missing:
+                return [f"rules.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(RULE_COLUMNS)}"]
             for r in reader:
                 rid, n = r["id"], reader.line_num
                 if rid in rule_lines:
