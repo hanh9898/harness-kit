@@ -46,6 +46,21 @@ def test_empty_required_cell_reported(tmp_path):
     assert r.returncode != 0 and "summary" in r.stdout + r.stderr
 
 
+def test_truncated_row_reports_all_missing_cells(tmp_path):
+    root = write_kit(tmp_path, [row("A01")])
+    with (root / "legos.csv").open("a", encoding="utf-8") as f:
+        f.write("Z99\n")
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1
+    assert not r.stderr, r.stderr
+    expected = [
+        f"ERROR: legos.csv:3: Z99 has an empty `{column}` cell; fix: supply a value"
+        for column in COLUMNS[1:]
+    ]
+    assert r.stdout.splitlines() == [*expected, "8 data errors."]
+
+
 def test_missing_legos_file_reported(tmp_path):
     r = run(CHECK_KIT, "--dir", tmp_path)
     assert r.returncode != 0 and "legos.csv" in r.stdout + r.stderr
