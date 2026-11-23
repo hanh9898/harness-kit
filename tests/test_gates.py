@@ -51,6 +51,11 @@ def test_gate_without_quote_rejected(tmp_path):
     fails(tmp_path, [rule("9.01")], [gate("9.01", quote="")], "verified_quote")
 
 
+def test_gate_with_webfetch_rejected(tmp_path):
+    fails(tmp_path, [rule("9.01")], [gate("9.01", method="webfetch")],
+          "verify_method `webfetch` is insufficient for a gate; fix: use raw-grep")
+
+
 def test_gate_with_unknown_method_rejected(tmp_path):
     fails(tmp_path, [rule("9.01")], [gate("9.01", method="vibes")], "verify_method")
 
@@ -70,6 +75,12 @@ def test_gate_value_must_be_yes_or_no(tmp_path):
 def test_demoted_rule_is_not_a_gate(tmp_path):
     ok = run(CHECK_KIT, "--dir", write(tmp_path, [rule("9.01", certainty="open", verified_on="")],
                                        [gate("9.01", gate="no", method="unreadable", quote="", note="page unreachable")]))
+    assert ok.returncode == 0, ok.stdout
+
+
+def test_non_gate_with_webfetch_passes(tmp_path):
+    ok = run(CHECK_KIT, "--dir", write(tmp_path, [rule("9.01", certainty="open", verified_on="")],
+                                       [gate("9.01", gate="no", method="webfetch", note="summary only")]))
     assert ok.returncode == 0, ok.stdout
 
 
