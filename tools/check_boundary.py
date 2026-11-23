@@ -7,7 +7,8 @@ Scan text files under --root (default: the repo's kit/ directory), excluding tes
 --tokens selects the forbidden list; default: boundary-tokens.txt at the repo root, outside kit/.
 Each line is literal text or a regex prefixed with re:; inline comments follow whitespace and #.
 # starts a comment. Report file:line, token and fix guidance. Defaults to warnings with exit 0;
---strict exits 1 for violations; exit 2 means the token list is unreadable. Uses only the standard library.
+--strict exits 1 for violations; exit 2 means the root is not a directory or the token list is unreadable.
+Uses only the standard library.
 """
 import argparse
 import re
@@ -61,6 +62,10 @@ def main(argv=None):
     a = ap.parse_args(argv)
 
     root = Path(a.root)
+    if not root.is_dir():
+        print(f"ERROR: --root is not a directory: {a.root}.", file=sys.stderr)
+        return 2
+
     tokens_file = Path(a.tokens) if a.tokens else REPO / TOKENS_NAME
     try:
         tokens = load_tokens(tokens_file)
