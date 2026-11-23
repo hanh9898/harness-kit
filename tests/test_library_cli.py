@@ -1,7 +1,9 @@
 """Library operations through the public subprocess seam, with disposable stores."""
 import json
+import os
+import subprocess
 
-from conftest import ROOT, run
+from conftest import ROOT, row, run, write_kit
 
 CLI = ROOT / "kit/scripts/library"
 
@@ -22,6 +24,14 @@ def save(tmp_path, value, expected=0, store=None):
     payload.write_text(json.dumps(value), encoding="utf-8")
     return run(CLI, "--store", store or tmp_path / "library.sqlite3", "save", "--input", payload,
                "--expect-revision", expected)
+
+
+def retrieve(match):
+    env = dict(os.environ, PATH=os.pathsep.join((str(CLI.parent), os.environ["PATH"])))
+    command = match["retrieve"]
+    result = subprocess.run(command, shell=True, capture_output=True, text=True, env=env)
+    assert result.returncode == 0, f"{command}\n{result.stderr}"
+    return result.stdout
 
 
 def test_unfinished_personal_rule_is_saved_with_attribution_and_continuation(tmp_path):
@@ -90,8 +100,37 @@ def test_focused_search_returns_supplied_and_personal_material_without_creating_
     assert r.returncode != 0
 
 
+def test_search_retrieve_uses_saved_store_with_spaces(tmp_path):
+    target = tmp_path / "my library.db"
+    resource = draft()
+    saved = save(tmp_path, resource, store=target)
+    assert saved.returncode == 0, saved.stderr
+
+    result = run(CLI, "--store", target, "search", resource["id"])
+    assert result.returncode == 0, result.stderr
+    match, = json.loads(result.stdout)["matches"]
+    assert match["origin"] == "saved"
+    retrieved = json.loads(retrieve(match))
+    assert retrieved["resource"] == resource
+    assert retrieved["revision"] == match["revision"]
+
+
+def test_search_retrieve_uses_selected_catalog(tmp_path):
+    piece = row("H99", "H", "Custom catalog hook", detail="Only in the selected catalog.")
+    kit = write_kit(tmp_path / "custom kit's catalog", [piece])
+    (kit / "rules.csv").write_text("id,rule,source,certainty\n", encoding="utf-8")
+
+    result = run(CLI, "--store", tmp_path / "absent.db", "search", piece["id"], "--kit-dir", kit)
+    assert result.returncode == 0, result.stderr
+    match, = json.loads(result.stdout)["matches"]
+    assert match["origin"] == "supplied" and match["id"] == piece["id"]
+    output = retrieve(match).splitlines()
+    assert f"id: {piece['id']}" in output
+    assert f"name: {piece['name']}" in output
+    assert f"detail: {piece['detail']}" in output
+
+
 def test_concurrent_edits_have_one_winner_and_no_lost_history(tmp_path):
-    import subprocess
     import sys
     assert save(tmp_path, draft()).returncode == 0
     writers = []

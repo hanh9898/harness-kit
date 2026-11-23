@@ -9,6 +9,7 @@ import difflib
 import hashlib
 import json
 import re
+import shlex
 import sqlite3
 import subprocess
 import sys
@@ -287,10 +288,10 @@ def search(store, kit_dir, query, limit, include_disabled=False):
         with (kit_dir / filename).open(encoding="utf-8", newline="") as source:
             for row in csv.DictReader(source):
                 if needle in " ".join(row.values()).casefold():
+                    retrieve = shlex.join(("kit", "--dir", str(kit_dir.absolute()), "show", row["id"]))
                     matches.append(dict(id=row["id"], name=row.get("name", row.get("rule")),
                                         kind=kind, origin="supplied", certainty=row["certainty"],
-                                        sources=row.get("sources", row.get("source")),
-                                        retrieve=f"kit show {row['id']}"))
+                                        sources=row.get("sources", row.get("source")), retrieve=retrieve))
     states = {}
     if store.exists():
         with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
@@ -301,9 +302,10 @@ def search(store, kit_dir, query, limit, include_disabled=False):
             for row in rows:
                 resource = json.loads(row[2])
                 if needle in " ".join(str(resource.get(k, "")) for k in ("id", "name", "content", "sources", "gaps")).casefold():
+                    retrieve = shlex.join(("library", "--store", str(store.absolute()), "show", row[0]))
                     matches.append(dict(id=row[0], revision=row[1], name=resource["name"],
                                         kind=resource["kind"], owner=resource["owner"], scope=resource["scope"],
-                                        origin="saved", retrieve=f"library --store {store} show {row[0]}"))
+                                        origin="saved", retrieve=retrieve))
     for match in matches:
         match["enabled"] = states.get((match["origin"], match["id"]), True)
     excluded = sum(not match["enabled"] for match in matches)
