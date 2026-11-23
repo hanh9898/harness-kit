@@ -20,6 +20,7 @@ Uses only the standard library.
 import argparse
 import csv
 import re
+import shlex
 import sys
 from collections import Counter
 from pathlib import Path
@@ -96,7 +97,7 @@ def fail(msg, code=2):
     return code
 
 
-def cmd_list_rules(rules, gates, topic):
+def cmd_list_rules(rules, gates, topic, dir_override=None):
     if not rules:
         return fail("rules.csv is missing from the kit directory.")
     if topic is None:
@@ -111,7 +112,11 @@ def cmd_list_rules(rules, gates, topic):
         return 0
     picked = [r for r in rules if r["topic"].lower() == topic.lower()]
     if not picked:
-        return fail(f"Topic `{topic}` does not exist.\nNext step: run `kit list rules all` to see topics.")
+        command = ["kit"]
+        if dir_override is not None:
+            command.extend(("--dir", str(Path(dir_override).absolute())))
+        command.extend(("list", "rules", "all"))
+        return fail(f"Topic `{topic}` does not exist.\nNext step: run `{shlex.join(command)}` to see topics.")
     for r in picked:
         print(f"{r['id']}{'*' if r['id'] in gates else ''}\t{r['check']}\t{r['rule']}")
     return 0
@@ -122,9 +127,9 @@ LEGACY_NOTICE = ("Historical partial delegation material; current recommended au
                  "under prior adoption authority before replacement.")
 
 
-def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, names=None):
+def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, names=None, *, dir_override=None):
     if group is not None and group.lower() == "rules":
-        return cmd_list_rules(*(rules or ([], {})), topic)
+        return cmd_list_rules(*(rules or ([], {})), topic, dir_override)
     if group is not None and group.lower() == "delegation":
         axes, steps = (deleg or ({}, {}, [], {}))[:2]
         if not axes:
@@ -205,13 +210,16 @@ def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--dir", default=str(Path(__file__).resolve().parent.parent))
+    ap.add_argument("--dir")
     sub = ap.add_subparsers(dest="cmd", required=True)
     lp = sub.add_parser("list")
     lp.add_argument("group", nargs="?")
     lp.add_argument("topic", nargs="?")
     sub.add_parser("show").add_argument("query")
     a = ap.parse_args(argv)
+    dir_override = a.dir
+    if dir_override is None:
+        a.dir = str(Path(__file__).resolve().parent.parent)
     try:
         rows, names = load(Path(a.dir)), load_groups(Path(a.dir))
     except OSError as e:
@@ -223,7 +231,7 @@ def main(argv=None):
         return fail(e)
     rules = load_rules(Path(a.dir))
     if a.cmd == "list":
-        return cmd_list(rows, a.group, patterns, deleg, rules, a.topic, names)
+        return cmd_list(rows, a.group, patterns, deleg, rules, a.topic, names, dir_override=dir_override)
     return cmd_show(rows, a.query, patterns, head, deleg, rules)
 
 
