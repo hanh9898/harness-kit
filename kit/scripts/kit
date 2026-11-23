@@ -53,10 +53,19 @@ def load_patterns(kit_dir):
     """Table rows in patterns.md as {number: [cells...]}; empty if the file is absent."""
     head, out = [], {}
     for line in optional_markdown_lines(kit_dir / "patterns.md"):
-        cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
-        if line.startswith("| #"):
+        if not line.startswith("|"):
+            continue
+        line = line.rstrip()
+        # Consume escape pairs before matching column separators.
+        pipes = [m.start() for m in re.finditer(r"\\.|\|", line) if m[0] == "|"]
+        if pipes[-1] != len(line) - 1:
+            pipes.append(len(line))
+        cells = [line[start + 1:end].strip() for start, end in zip(pipes, pipes[1:])]
+        if not cells:
+            continue
+        if cells[0] == "#":
             head = cells
-        elif line.startswith("| ") and cells[0].isdigit():
+        elif cells[0].isdecimal():
             out[int(cells[0])] = cells
     return out, head
 
@@ -144,7 +153,9 @@ def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, nam
         if not patterns:
             return fail("patterns.md is missing from the kit directory.")
         for n, c in patterns.items():
-            print(f"P{n}\t{c[1]}\t{c[3]}")
+            name = c[1] if len(c) > 1 else ""
+            summary = c[3] if len(c) > 3 else ""
+            print(f"P{n}\t{name}\t{summary}")
         return 0
     if group is None:
         for g, n in sorted(Counter(r["group"] for r in rows).items()):
