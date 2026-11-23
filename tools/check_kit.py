@@ -38,8 +38,8 @@ def check(kit_dir):
         missing = [c for c in COLUMNS if c not in (reader.fieldnames or [])]
         if missing:
             return [f"legos.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(COLUMNS)}"]
-        errs, seen, rows = [], {}, list(reader)
-        for n, r in enumerate(rows, 2):
+        errs, seen, used_groups = [], {}, {}
+        for n, r in enumerate(reader, 2):
             for c in COLUMNS:
                 if not (r.get(c) or "").strip():
                     errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has an empty `{c}` cell; fix: supply a value")
@@ -48,7 +48,10 @@ def check(kit_dir):
             if r["id"] in seen:
                 errs.append(f"legos.csv:{n}: duplicate id {r['id']} from line {seen[r['id']]}; fix: choose another ID")
             seen.setdefault(r["id"], n)
-        return errs + check_groups(kit_dir, {r["group"]: n for n, r in reversed(list(enumerate(rows, 2)))})
+            group = r["group"]
+            if group and group.strip():
+                used_groups.setdefault(group, n)
+        return errs + check_groups(kit_dir, used_groups)
 
 
 def read_groups(kit_dir):
