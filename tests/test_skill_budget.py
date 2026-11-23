@@ -114,6 +114,22 @@ def test_trailing_comments_after_plain_fields(tmp_path, folder, name, descriptio
     assert f"TOTAL: {len(expected)} characters" in r.stdout
 
 
+@pytest.mark.parametrize(
+    ("description", "expected"),
+    [
+        ("  # introduction\n  Useful. # ignored", "Useful."),
+        ('  "C# # docs" # ignored', "C# # docs"),
+        ("  |-\n    C# # docs", "C# # docs"),
+    ],
+    ids=["plain-after-comment", "quoted", "block"],
+)
+def test_description_can_start_below_key(tmp_path, description, expected):
+    skill(tmp_path, "skills", "demo", f"---\nname: demo\ndescription:\n{description}\n---\n")
+    r = run("--root", tmp_path, "--dir", "skills", "--strict")
+    assert r.returncode == 0, r.stdout
+    assert f"TOTAL: {len(expected)} characters" in r.stdout
+
+
 def test_strict_discovers_flat_and_grouped_skills(tmp_path):
     skill(tmp_path, "skills", "a", "---\nname: a\ndescription: one\n---\n")
     skill(tmp_path, "skills/group", "b", "---\nname: b\ndescription: two\n---\n")
