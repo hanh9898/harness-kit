@@ -4,7 +4,8 @@
   check_boundary.py [--root DIR] [--tokens FILE] [--strict]
 
 Scan text files under --root (default: the repo's kit/ directory), excluding tests/ directories.
---tokens selects the forbidden list; default: boundary-tokens.txt at the repo root, outside kit/.
+--tokens selects the forbidden list and excludes that file from scanning.
+The default list is boundary-tokens.txt at the repo root, outside kit/.
 Each line is literal text or a regex prefixed with re:; inline comments follow whitespace and #.
 # starts a comment. Report file:line, token and fix guidance. Defaults to warnings with exit 0;
 --strict exits 1 for violations; exit 2 means the root is not a directory or the token list is unreadable.
@@ -34,13 +35,16 @@ def load_tokens(path):
     return out
 
 
-def scan(root, tokens):
+def scan(root, tokens, tokens_path=None):
     hits = []
     for p in sorted(root.rglob("*")):
         rel = p.relative_to(root)
-        if not p.is_file() or rel.name == TOKENS_NAME:
+        if not p.is_file() or SKIP_DIRS & set(rel.parts[:-1]):
             continue
-        if SKIP_DIRS & set(rel.parts[:-1]):
+        if tokens_path is None:
+            if rel.name == TOKENS_NAME:
+                continue
+        elif p.resolve() == tokens_path:
             continue
         try:
             text = p.read_text(encoding="utf-8")
@@ -73,7 +77,7 @@ def main(argv=None):
         print(f"ERROR: cannot read forbidden token list {tokens_file} ({e}).\n"
               f"fix: create or repair {TOKENS_NAME}, or pass --tokens <file>.", file=sys.stderr)
         return 2
-    hits = scan(root, tokens)
+    hits = scan(root, tokens, tokens_file.resolve() if a.tokens else None)
     for rel, n, label, note in hits:
         why = f" ({note})" if note else ""
         print(f"WARNING: {rel}:{n}: forbidden token `{label}`{why}\n"
