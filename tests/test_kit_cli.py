@@ -1,4 +1,8 @@
 """The kit CLI: external subprocess behavior on small fixture kits."""
+import os
+import re
+import subprocess
+
 from conftest import KIT, KIT_CLI, run, row, write_kit
 
 
@@ -125,3 +129,29 @@ def test_rules_list_gate_rules_first_and_show_one_rule(tmp_path):
     assert r.returncode == 0 and "Quoted one" in r.stdout and "Rule plain two" not in r.stdout
     r = run(KIT_CLI, "--dir", root, "show", "9.99")
     assert r.returncode != 0 and "kit list rules" in r.stderr
+
+
+def test_unknown_rule_topic_hint_lists_the_selected_catalog(tmp_path, monkeypatch):
+    root = write_kit(tmp_path / "alternate's catalog", [row("A01")])
+    (root / "rules.csv").write_text(
+        "id,topic,rule,source,certainty,check,verified_on\n"
+        "1.01,alternate-only,Alternate rule,s,stated,review,\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    r = run(KIT_CLI, "--dir", root.name, "list", "rules", "missing-topic")
+    assert r.returncode == 2 and "Topic `missing-topic` does not exist." in r.stderr
+    hint = re.search(r"Next step: run `(.+)` to see topics\.", r.stderr)
+    assert hint, r.stderr
+
+    monkeypatch.setenv("PATH", str(KIT_CLI.parent), prepend=os.pathsep)
+    topics = subprocess.run(hint[1], shell=True, capture_output=True, text=True, cwd=KIT)
+    assert topics.returncode == 0, topics.stderr
+    assert topics.stdout == "alternate-only\t1 rules\n"
+
+
+def test_unknown_rule_topic_hint_without_override_is_unchanged():
+    r = run(KIT_CLI, "list", "rules", "missing-topic")
+    assert r.returncode == 2
+    assert r.stderr == (
+        "ERROR: Topic `missing-topic` does not exist.\n"
+        "Next step: run `kit list rules all` to see topics.\n"
+    )
