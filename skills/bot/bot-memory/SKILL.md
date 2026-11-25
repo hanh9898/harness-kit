@@ -5,10 +5,9 @@ description: Read or update scoped, durable Bot rules in an opted-in instance wi
 
 # Bot memory
 
-Use only when the Bot instance opts in. Read on start or resume, refresh before
-relying on an old session's view, and write only for a standing instruction
-or verified evidence. Resolve the exact skill and source, then use the qualified
-route for this caller in [HOST.md](HOST.md).
+Read on start or resume. Refresh before relying on an old session's view.
+Resolve the exact skill and source. Confirm opt-in and use the
+[qualified host route](HOST.md) before accessing a store.
 
 ## Keep storage scopes separate
 
@@ -25,20 +24,33 @@ transcripts, personal memory or in-flight task state into shared rules.
 
 ## Read and apply
 
-1. Before opening a file, check the caller's access to the Bot instance and
-   requested topic. Open only the synced revision of the index and authorized,
-   relevant topic files. If the store is absent, return no rules; never create
-   a store, file, directory or write-side sync on a read or unchanged request.
-2. Only auto-apply an in-scope, uncontested `high` rule. A `low` rule is a
-   candidate to verify, not an instruction. Treat other or missing confidence
-   as non-binding. Current scope, instructions and target authorization still
-   take precedence; memory does not grant access or permission to act.
+Resolve the binding for this Bot. Verify caller access and store identity
+before reading the published index and only the authorized, requested topic.
+
+| Store state | Read outcome |
+| --- | --- |
+| Confirmed unconfigured | No rules. |
+| Configuration unknown | `Blocked`. |
+| Configured store missing | `Blocked`. |
+| Configured store unreadable | `Blocked`. |
+| Configured store identity mismatch | `Blocked`. |
+| Ready store, no matching rule | No rules. |
+
+On `Blocked`, report the unmet requirement without disclosing store contents.
+Do not fall back to another store or a cached rule. On a read or unchanged
+request, never create a store, file, directory or write-side sync.
+
+Only auto-apply an in-scope, uncontested `high` rule. A `low` rule is a
+candidate to verify, not an instruction. Treat other or missing confidence
+as non-binding. Current scope, instructions and target authorization still
+take precedence. Memory does not grant access or permission to act.
 
 ## Record and reconcile
 
-1. Verify write authority for the owner, caller, instance and topic. The session
-   owning the original conversation records an authorized standing instruction
-   once. A worker receiving it in a forwarded message must not record it again.
+1. Write only to a ready store. Verify write authority for the owner, caller,
+   instance and topic. The session owning the original conversation records an
+   authorized standing instruction once. A worker receiving it in a forwarded
+   message must not record it again.
    Directly received corrections and verified evidence still need scoped write
    authority. Check existing rules and the original event before writing.
 2. Record one rule per entry with a source reference, ISO date and confidence,
@@ -50,9 +62,10 @@ transcripts, personal memory or in-flight task state into shared rules.
    instruction is temporary or the effective entry is unchanged, do not write.
 3. Prefer separate topic files or keys; serialize changes to `MEMORY.md`.
    Publish against the revision read. Sync one batch immediately per accepted
-   change, and verify the published revision and rule in a fresh authorized
-   worker before reporting it effective. If the outcome is `Unknown`, read
-   the destination revision and receipt before any further write; do not replay.
+   change. Use a fresh authorized worker on the same Bot instance, store, and topic
+   to verify the published revision, rule, and provenance before reporting the
+   rule effective. If the outcome is `Unknown`, check the same destination's
+   revision and receipt before any further write. Do not replay.
 4. On conflict, preserve the published revision and the local draft. Do not
    auto-apply or overwrite the disputed rule before reconciliation. Leave
    unrelated rules available. Have the scoped writer reconcile with the owner
