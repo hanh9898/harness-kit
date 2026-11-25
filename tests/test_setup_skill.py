@@ -103,6 +103,37 @@ def test_wrong_caller_and_ambiguity_are_not_missing_and_probes_are_scoped():
     assert "Probe each required route once per" in verify
 
 
+def test_project_overrides_are_templates_not_default_entries():
+    overrides = ROOT / "skills/overrides"
+    templates = {path.parent.name: path for path in overrides.glob("*/SKILL.md")}
+    assert set(templates) == {
+        "harness-project-to-spec", "harness-project-to-tickets", "harness-project-implement",
+    }
+    for skill_id, path in templates.items():
+        head = path.read_text(encoding="utf-8").split("---")[1]
+        assert f"name: {skill_id}" in head.splitlines()
+        assert not re.search(r"^disable-model-invocation:\s*true$", head, re.M)
+    claude = json.loads((ROOT / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))
+    pi = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["pi"]
+    for manifest in (claude, pi):
+        roots = [(ROOT / entry).resolve() for entry in manifest["skills"]]
+        assert not any(path.resolve().is_relative_to(root)
+                       for root in roots for path in templates.values())
+
+
+def test_h4_is_a_separate_registration_gate_and_pair_is_draft_only():
+    activation = (SKILL / "ACTIVATION.md").read_text(encoding="utf-8")
+    registration = activation.split("## Register the v1 implementation overrides on Devin", 1)[1]
+    registration = registration.split("\n## ", 1)[0]
+    assert "project administrator grant (H4)" in registration
+    assert "H3 does not authorize registration" in registration
+    assert "H4 does not authorize execution" in registration
+    assert "draft-only" in registration
+    assert "route-readiness" in registration
+    assert registration.index("First read back") < registration.index("permitted no-write probe")
+    assert "Do not require prior output evidence for the first probe" in registration
+
+
 def test_checklist_file_exists():
     assert (SKILL / "CHECKLIST.md").is_file()
 
