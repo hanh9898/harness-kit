@@ -2,6 +2,8 @@
 import json
 import re
 
+import pytest
+
 from conftest import ROOT, run
 
 SKILL = ROOT / "skills/bot/bot-memory"
@@ -54,9 +56,31 @@ def test_only_scoped_uncontested_high_rules_apply():
     assert "A `low` rule is a candidate to verify, not an instruction." in policy
     assert "never create a store, file, directory or write-side sync" in policy
     host = " ".join(section("HOST.md", "Store requirements").split())
-    assert "Enforce caller, instance and topic access before any read." in host
+    assert "Enforce caller, instance, and topic access before probing the store." in host
     assert "read-only refresh" in host
     assert "do not use a sync operation that could publish" in host
+
+
+@pytest.mark.parametrize(("store_state", "outcome"), [
+    ("Confirmed unconfigured", "No rules."),
+    ("Configuration unknown", "`Blocked`."),
+    ("Configured store missing", "`Blocked`."),
+    ("Configured store unreadable", "`Blocked`."),
+    ("Configured store identity mismatch", "`Blocked`."),
+    ("Ready store, no matching rule", "No rules."),
+])
+def test_store_state_distinguishes_no_rules_from_blocked(store_state, outcome):
+    policy = section("SKILL.md", "Read and apply")
+    assert f"| {store_state} | {outcome} |" in policy
+    assert "Do not fall back" in policy
+    assert "If the store is absent, return no rules" not in policy
+
+
+def test_store_authority_does_not_follow_shared_ownership():
+    host = " ".join(section("HOST.md", "Store requirements").split())
+    assert "same owner does not authorize reads or writes across Bot instances" in host
+    assert "canonical store target and continuity" in host
+    assert "Recheck write authority at publication" in host
 
 
 def test_rule_writes_are_scoped_deduplicated_and_conflict_safe():
@@ -66,12 +90,15 @@ def test_rule_writes_are_scoped_deduplicated_and_conflict_safe():
     assert "[source: <event>; added: YYYY-MM-DD; confidence: high]" in policy
     assert "Sync one batch immediately per accepted change" in policy
     assert "fresh authorized worker" in policy
+    assert "same Bot instance, store, and topic" in policy
+    assert "published revision, rule, and provenance" in policy
     assert "preserve the published revision and the local draft" in policy
     assert "Do not auto-apply or overwrite the disputed rule before reconciliation." in policy
 
     host = " ".join(section("HOST.md", "Store requirements").split())
     assert "only if its expected revision is still current" in host
     assert "check the authoritative receipt or history before sending another batch" in host
+    assert "A stale revision is a conflict, not permission to retry." in host
 
 
 def test_host_qualification_names_negative_cases_and_evidence():
@@ -81,10 +108,13 @@ def test_host_qualification_names_negative_cases_and_evidence():
     }
     qualification = " ".join(section("HOST.md", "Qualify on an isolated Bot").split())
     for case in (
-        "pinned source", "absent store", "audit zero store creation",
+        "pinned source", "confirmed unconfigured", "missing, unreadable, or has the wrong identity",
+        "Audit zero store creation",
         "Resume the old worker", "drop the response after a test write commits",
         "outbound attempts for zero resubmissions", "exactly one committed batch",
         "at most one sync batch", "not auto-applied", "stale conflicting write",
-        "out-of-scope read", "denied before disclosure", "synthetic private data",
+        "out-of-scope read", "denial before disclosure", "synthetic private data",
+        "read and a write across two Bots with the same owner",
+        "readback time", "no topics outside the requested scope",
     ):
         assert case in qualification
