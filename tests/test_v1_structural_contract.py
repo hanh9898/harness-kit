@@ -294,16 +294,19 @@ def test_default_opt_in_and_override_inventory():
 
 
 def test_checked_in_devin_registrations_only_expose_default_entries():
-    registry = Path(".devin/skills")
+    devin = Path(".devin")
+    registry = devin / "skills"
     entries = {path.relative_to(ROOT) for path in (ROOT / registry).glob("*/SKILL.md")}
     if entries and (ROOT / ".git").exists():
         indexed = subprocess.check_output(
-            ["git", "ls-files", "-z", "--", registry.as_posix()], cwd=ROOT,
+            ["git", "ls-files", "-z", "--", devin.as_posix()], cwd=ROOT,
         )
         tracked = {Path(os.fsdecode(path)) for path in indexed.split(b"\0") if path}
-        entries = {path for path in entries if {path, path.parent, registry} & tracked}
+        entries = {path for path in entries if not tracked.isdisjoint((path, *path.parents))}
     extra = {path.parent.name for path in entries} - {path.name for path in DEFAULT}
     assert not extra, f"Non-default Devin registrations in the source tree: {sorted(extra)}"
+    for entry in sorted(entries):
+        assert_skill_name(entry)
 
 
 @pytest.mark.parametrize(("source", "heading", "policy"), [
