@@ -69,11 +69,12 @@ grant (H7). The receiver reopens the authoritative records under the
 Resolve split approval through the draft and decision; do not add approval
 fields to the envelope or infer approval from `grant_ref`.
 
-Use the selected Harness destination's own instance, namespace and role,
-including for a durable local record that the receiver can read. Never
-publish to Product or switch destinations after an error. Read back the
-canonical ticket at the selected destination. A timeout after send is
-`Unknown`; reconcile there without resending.
+Use the selected Harness destination's own instance, namespace and role. A
+selected local Harness record must be durable and readable by the receiver.
+It is not a fallback after a tracker error. Never publish to Product or
+switch destinations after an error. Read back the canonical ticket at the
+selected destination. A timeout after send is `Unknown`; reconcile there
+without resending.
 
 ## Coordinator → Implement: `execute`
 
