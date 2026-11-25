@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "operation": "bot-setup",
+  "instance_id": "bot-12",
+  "template_ref": "software-factory@kit-4f02",
+  "contract_ref": "bot-template@kit-4f02",
+  "scope_ref": "harness-test/project-a",
+  "adapter_ref": "sandbox-profile-3",
+  "configuration_ref": "config-readback-19",
+  "evidence_refs": ["setup-record-10"],
+  "disabled_capabilities": ["schedule", "event-trigger"]
+}

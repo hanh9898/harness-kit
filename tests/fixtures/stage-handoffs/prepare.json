@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "operation": "prepare",
+  "request_ref": "req-7@3",
+  "scope_ref": "harness-test/project-a",
+  "decision_ref": "choice-11@4",
+  "acceptance": ["The destination rejects a stale assignment."],
+  "dependency_refs": [],
+  "needed_route_refs": ["route-tickets-2"],
+  "spec_ref": "spec-8@2"
+}

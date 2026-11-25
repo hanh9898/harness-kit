@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "operation": "result",
+  "assignment_ref": "assignment-82@2",
+  "target_ref": "sandbox-a/harness/work-17",
+  "target_revision": "41",
+  "effect_id": "effect-55",
+  "outcome": "Unknown",
+  "history_ref": "sandbox-a/effect-history",
+  "verification_refs": [],
+  "evidence_refs": ["attempt-log-62"],
+  "next_step": "Reconcile the effect against destination history before resuming."
+}
