@@ -7,7 +7,7 @@ description: Improve an existing agent harness or way of working. Use for recurr
 
 Deliver the requested improvement, or the narrower context, observation, advice, assessment or learning result. Use a proportional Plan-Do-Study-Act loop for improvement: reconcile, choose, act, assess and continue. A routine correction needs focused execution and checks, not an experiment.
 
-Complete step 2 before recommending a change or taking an application effect, including a supporting record edit or schedule creation. Read-only reconciliation can proceed first; step 3 owns the required pre-action capture.
+Complete step 2 before recommending a change or taking an application effect, including a supporting record edit or schedule creation. Read-only reconciliation can proceed first. Resolve open buy/build choices with the human in step 3; step 4 owns the required pre-action capture.
 
 ## 1. Reconcile the request and relevant state
 
@@ -63,9 +63,15 @@ For direct standards selection, conflicting requirements or document-quality che
 
 For instruction conflicts, agent handoffs or model-output contracts, read [instruction and response design](../../../kit/instruction-response/DESIGN.md). Deliver usable guidance, examples and content/form checks independently; keep exchanged tool protocol validity separate.
 
-**Done:** the selection trace identifies the kit IDs actually read, their effect on each distinct harness change and its check, plus any material uncovered need or unavailable prerequisite. Required original methods are loaded. Use this trace to select the change or learning path and its limits before step 3; adequate existing evidence and grants need no new approval chain.
+**Done:** the selection trace identifies the kit IDs actually read, their effect on each distinct harness change and its check, plus any material uncovered need or unavailable prerequisite. Required original methods are loaded. Use this trace to frame the change or learning path and its limits for step 3. Existing grants remain valid; they do not decide an open solution choice.
 
-## 3. Capture and execute within scope
+## 3. Choose buy or build with the human
+
+Follow [the shared buy-before-build checkpoint](BUY-OR-BUILD.md) for a new or replacement solution. Inspect existing facilities and suitable external options, present a bounded comparison and recommendation, and obtain the human's choice before dependent implementation. Reuse a specific applicable choice already made; a clear problem alone does not settle the solution.
+
+**Done to proceed:** the chosen route, scope and applicable human decision are recoverable. A pending or deferred choice pauses its implementation; continue only independent authorized work. Advice may finish with the comparison explicitly unadopted.
+
+## 4. Capture and execute within scope
 
 For application work, read [UPDATE.md](UPDATE.md) before effects. Establish a durable discoverable record and serialize its updates. Record actual selection and required rationale/authority before the affected action; preserve separate review, application and outcome meaning. Reuse adequate authoritative references. If required capture fails, block that action unless an authorized durable alternative satisfies the same contract; continue independent work.
 
@@ -73,7 +79,7 @@ Apply the selected original methods and standards to the authorized targets. Kee
 
 **Done:** the selected work is applied, or the dependent blocker and completed independent work are explicit. A library change does not itself adopt it into other consumers.
 
-## 4. Assess and preserve continuation
+## 5. Assess and preserve continuation
 
 Read [CHECK-STEP.md](CHECK-STEP.md). Run the agreed checks against the actual result and unchanged scope. Inspect effects, not just command success. Review with the applicable method and selected standards; preserve failures and uncertainty. Adapt within the request's limits, or stop with the smallest useful next evidence step. Do not turn a failed check into passing by waiver.
 
