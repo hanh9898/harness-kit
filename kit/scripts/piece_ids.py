@@ -35,7 +35,7 @@ class PieceAliases:
                     if None in row:
                         raise ValueError(f"{location}: extra cells; use one legacy_id,slug pair")
                     validate_slug(slug, reserved, location)
-                    if not LEGACY_ID.fullmatch(legacy) or legacy.lower() in reserved:
+                    if not LEGACY_ID.fullmatch(legacy) or reserved_selector(legacy.lower(), reserved):
                         raise ValueError(f"{location}: invalid or reserved legacy_id `{legacy}`")
                     if legacy in aliases.by_legacy:
                         raise ValueError(f"{location}: duplicate legacy_id `{legacy}`; map it to only one slug")
@@ -59,7 +59,11 @@ class PieceAliases:
         return self.by_legacy.get(identity.upper(), identity)
 
 
+def reserved_selector(identity, rule_ids):
+    return identity in rule_ids or MARKDOWN_SELECTOR.fullmatch(identity) is not None
+
+
 def validate_slug(slug, reserved, location):
-    if (not SLUG.fullmatch(slug) or MARKDOWN_SELECTOR.fullmatch(slug)
-            or LEGACY_ID.fullmatch(slug.upper()) or slug in reserved):
+    if (not SLUG.fullmatch(slug) or LEGACY_ID.fullmatch(slug.upper())
+            or reserved_selector(slug, reserved)):
         raise ValueError(f"{location}: invalid or reserved piece slug `{slug}`; choose a descriptive ID")

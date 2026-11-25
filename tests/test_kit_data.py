@@ -16,6 +16,8 @@ def test_real_kit_is_valid():
     ([("A01", "axis1")], "piece-aliases.csv:2", "invalid or reserved piece slug"),
     ([("A01", "a01")], "piece-aliases.csv:2", "invalid or reserved piece slug"),
     ([("A1", "valid-piece")], "piece-aliases.csv:2", "invalid or reserved legacy_id"),
+    ([("P10", "valid-piece")], "piece-aliases.csv:2", "invalid or reserved legacy_id"),
+    ([("P06", "valid-piece")], "piece-aliases.csv:2", "invalid or reserved legacy_id"),
     ([("A01", "valid-piece"), ("A01", "other-piece")], "piece-aliases.csv:3", "duplicate legacy_id"),
     ([("A01", "valid-piece"), ("A02", "valid-piece")], "piece-aliases.csv:3", "duplicate alias target"),
 ])
