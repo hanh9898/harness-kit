@@ -18,7 +18,7 @@ skills, open a Library store, or write to the checkout. For more local exercises
 see [draft a spec and tickets](examples/devin-prepare/README.md) and
 [inspect two disabled Bot setups](examples/bot-first-run/README.md).
 
-## Register skills in one project
+## Register skills for a project
 
 Pin a complete checkout to a reviewed commit. Keep each skill next to its
 references and the shared `kit/`; copying a skill directory alone can break its
@@ -36,8 +36,9 @@ A list of skills does not prove which copy Devin loaded.
 
 ### Codex: plugin
 
-With Codex CLI installed and these configuration changes approved, run from
-the root of the pinned Harness Kit checkout:
+These commands change the active Codex home (normally `~/.codex`), not the
+project checkout. If that scope is approved, run from the root of the pinned
+Harness Kit checkout:
 
 ```sh
 codex plugin marketplace add "$PWD"
