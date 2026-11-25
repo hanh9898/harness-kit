@@ -21,6 +21,10 @@ the same checks. If both are compatible, skip preparation; reuse the canonical
 ticket rather than publishing again. Do not convert obsolete or conflicting
 references into authority, or silently downgrade an invalid v1 handoff to legacy.
 
+If another session must pick up the change, use the
+[continuation handoff](../../../kit/PERSISTENCE.md#continuation-handoff) to
+point to the existing record and next step. Keep stage payloads separate.
+
 At `DesignReady`, send [`prepare`](../../../kit/STAGE-CONTRACTS.md#setup-or-evolve--implement-prepare)
 only for missing artifacts. Include only the needed route evidence and any
 compatible `spec_ref` or canonical `ticket_ref`; if both artifacts are missing,

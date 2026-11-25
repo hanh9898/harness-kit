@@ -32,3 +32,7 @@ and blockers; for writes, also return readback evidence or `Unknown`.
 Reading, saving, applying and executing are different effects. The consumer
 owns adoption and its evidence; do not apply a selection or record adoption
 in Library. An unverified store or identity blocks only dependent use.
+
+If work must continue in another session, use the
+[continuation handoff](../../../kit/PERSISTENCE.md#continuation-handoff) to
+point to authorized Library records without changing the selection handoff.
