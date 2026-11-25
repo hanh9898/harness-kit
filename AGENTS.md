@@ -29,6 +29,8 @@ Each gate has one owner and one `v1-gates` JSON block of `{id, requires}` record
 per owner. Keep alternative routes in separate leaves. A root is an observed
 fact, not authority by itself. When a contract intentionally changes, update
 its owner, caller links and the guard together.
+Use plain top-level frontmatter keys and a single-line `name:` for skill IDs
+so the guard can check them without a YAML dependency.
 
 | Rule | Check |
 | --- | --- |

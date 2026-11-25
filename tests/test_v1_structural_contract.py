@@ -236,10 +236,23 @@ def test_callers_link_canonical_gate(source, destination, anchor):
 
 def skill_name(path):
     header = re.match(r"\A---[ \t]*\n(.*?)\n---[ \t]*(?:\n|\Z)", read(path), re.S)
-    names = re.findall(r"^name:[ \t]*([^\n]*)$", header[1], re.M) if header else []
-    assert len(names) == 1, f"{path}: expected one skill name"
-    match = re.fullmatch(r"""(["']?)([a-z0-9-]+)\1(?:[ \t]+#[^\n]*)?[ \t]*""", names[0])
-    assert match, f"{path}: malformed skill name: {names[0]!r}"
+    assert header, f"{path}: missing skill frontmatter"
+    fields = {}
+    key = None
+    for line in header[1].splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line.startswith((" ", "\t")):
+            assert key and key != "name", f"{path}: expected a single-line skill name"
+            continue
+        field = re.fullmatch(r"([a-zA-Z][a-zA-Z0-9_-]*):(?:[ \t]+(.*))?", line)
+        assert field, f"{path}: expected a plain frontmatter key: {line!r}"
+        key, value = field.groups()
+        assert key not in fields, f"{path}: duplicate frontmatter key: {key}"
+        fields[key] = value
+    assert "name" in fields, f"{path}: expected one skill name"
+    match = re.fullmatch(r"""(["']?)([a-z0-9-]+)\1(?:[ \t]+#[^\n]*)?[ \t]*""", fields["name"] or "")
+    assert match, f"{path}: malformed skill name: {fields['name']!r}"
     return match[2]
 
 
