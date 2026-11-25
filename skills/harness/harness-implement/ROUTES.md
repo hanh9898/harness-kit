@@ -35,12 +35,18 @@ still apply.
 
 Use compatibility checks in [Prepare](WORK.md#prepare) before probing or invoking routes.
 
-| Compatible artifacts | Drafting routes, in order |
+| Compatible artifacts | Project override drafting routes, in order |
 | --- | --- |
 | Spec and ticket | None |
 | Spec only | `harness-project-to-tickets` |
 | Ticket only | `harness-project-to-spec` |
 | Neither | `harness-project-to-spec`, await spec approval, then `harness-project-to-tickets` |
+
+If the project has not adopted the overrides, keep its existing drafting
+routes. Use the corresponding original only if approved, compatible, and
+verified as agent-callable for the current caller and project. Apply the same
+artifact and approval checks. This does not establish new workflow readiness
+and is not a fallback for a missing or blocked override in an opted-in project.
 
 Check approval on the exact spec revision and basis before resolving the ticket
 drafting route. With a reusable ticket, keep it and check it against the new

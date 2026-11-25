@@ -60,6 +60,13 @@ def test_route_readiness_is_not_granted_by_registration_or_preparation():
     assert "](ROUTES.md#route-readiness)" in (IMPLEMENT / "EXECUTION.md").read_text(encoding="utf-8")
 
 
+def test_legacy_drafting_is_not_an_override_fallback():
+    prepare = section(IMPLEMENT / "ROUTES.md", "Prepare only missing artifacts")
+    assert "If the project has not adopted the overrides" in prepare
+    assert "verified as agent-callable for the current caller and project" in prepare
+    assert "not a fallback for a missing or blocked override in an opted-in project" in prepare
+
+
 @dataclass(frozen=True)
 class FixtureBinding:
     source: Path
