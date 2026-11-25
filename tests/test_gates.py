@@ -80,6 +80,18 @@ def test_surplus_rule_cells_rejected(tmp_path):
 
 
 @pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
+@pytest.mark.parametrize("rule_id", ["", " \t"], ids=["empty", "whitespace"])
+def test_blank_rule_id_rejected(tmp_path, with_gates, rule_id):
+    root = write(tmp_path, [rule("9.01"), rule(rule_id, verified_on="")], [gate("9.01")])
+    if not with_gates:
+        (root / "gates.csv").unlink()
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "rules.csv:3: ? has an empty `id` cell;" in r.stdout
+
+
+@pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
 def test_duplicate_rule_id_rejected(tmp_path, with_gates):
     root = write(tmp_path, [rule("9.01", certainty="inferred", verified_on=""), rule("9.01")],
                  [gate("9.01")])
