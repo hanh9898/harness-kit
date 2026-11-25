@@ -7,9 +7,10 @@ not use a real product tracker, production effects or global installation.
 
 ```mermaid
 flowchart TD
-  S["Setup: two passes, register needed overrides if authorized"] --> D["DesignReady: current scoped decision"]
+  S["Setup: check upstream methods; install missing ones only with authority"] --> N["Two passes of discovery"]
+  N --> D["DesignReady: current scoped decision"]
   E["Evolve: affected nodes, independently verify needed route"] --> D
-  D --> P["Prepare or reuse spec and draft tickets"]
+  D --> P["Verify needed routes; prepare or reuse spec and draft tickets"]
   P --> T{"Verified Harness destination and separate grant?"}
   T -->|No| U["Draft only; no product tracker fallback"]
   T -->|Yes| C["Publish and read back canonical ticket"]
@@ -36,19 +37,25 @@ to unrelated claims, trackers, repository writes or host configuration.
    Use distinct Harness and read-only product issue spaces. Exercise a
    canonical local Harness ticket and the external Harness route only if
    it is authorized and part of the intended qualification.
-2. Observe native loading by exact ID and source revision or digest. Test the
+2. On the new fixture, exercise Setup's
+   [upstream prerequisite check](../skills/harness/harness-setup/ACTIVATION.md#install-required-upstream-skills)
+   with missing originals. Check that no installation occurs without explicit
+   authority. With authority, use the documented Devin project install and
+   verify exact IDs and sources before dependent discovery or override authoring.
+   Record pending verification if a session reload is needed.
+3. Observe native loading by exact ID and source revision or digest. Test the
    expected output and an unavailable or ambiguous route. Confirm manual
    upstream routing is unaffected; verify a fresh or child session if that
    route is used. Compare the new and reused-artifact paths using observed
    loads, not estimated token savings.
-3. Exercise the allowed path and refusals: draft only, wrong namespace,
+4. Exercise the allowed path and refusals: draft only, wrong namespace,
    missing or stale assignment/authority, disabled or unreconciled Library
    selection, and an unsupervised non-atomic target. Confirm late revocation
    at the actual guarded target after the last caller read. Exercise an
    authorized supervised send only where policy allows it. Simulate a lost
    reply and reconcile once from receipts and destination history, without
    automatic retry or rollback.
-4. Save the **actual executed flow diagram** with request/assignment IDs,
+5. Save the **actual executed flow diagram** with request/assignment IDs,
    revisions, permission gates and observed outputs. Record target receipts,
    history and before/after effect counts from an independent read. Success
    means one intended effect, zero blocked effects and no product writes.

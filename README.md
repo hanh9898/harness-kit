@@ -8,8 +8,10 @@ dependencies. The kit does not bundle an execution service.
 ## Installation
 
 Keep a complete checkout in a stable location: skill references and helpers depend
-on the adjacent `kit/` tree. Register the original methods you intend to use through
-the same host; they are separate dependencies. Choose your host below.
+on the adjacent `kit/` tree. Original methods are separate dependencies.
+Harness Setup checks them and can [install missing prerequisites with explicit
+permission](skills/harness/harness-setup/ACTIVATION.md#install-required-upstream-skills).
+Choose your host below.
 
 ### Devin — project scope (v1 pilot)
 

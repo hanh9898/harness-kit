@@ -34,8 +34,10 @@ extensions, not prerequisites.
    scope/revision if qualification shows unchanged outputs, isolation and
    node-specific questions. Never call the user-only `grill-with-docs`,
    `wayfinder` or `/handoff` on the user's behalf. If a required route is
-   blocked, name it, point to the [upstream installation guide][install] and
-   hold dependent discovery. Do not install, copy or emulate it.
+   blocked, name it and hold dependent discovery. In Setup, return to the
+   [prerequisite check](ACTIVATION.md#install-required-upstream-skills) for a
+   missing original. In Evolve, report what is needed without running Setup
+   or installing. Do not copy or emulate a blocked method.
 3. Call `harness-library` internally with the current question, destination,
    store and scope. Search a few terms based on need, not translated node
    names. Open details and verify state only for viable candidates; reuse
@@ -65,4 +67,3 @@ explicitly covers that destination.
 
 [grilling]: https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/productivity/grilling/SKILL.md
 [domain]: https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/engineering/domain-modeling/SKILL.md
-[install]: https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/.agents/install-block.md

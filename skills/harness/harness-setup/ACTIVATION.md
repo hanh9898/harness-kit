@@ -1,5 +1,48 @@
 # Selected provider activation
 
+## Install required upstream skills
+
+1. On the host that will use them, check the original `grilling` and
+   `domain-modeling` before discovery. Before authoring overrides, check
+   `writing-for-agents` (unless a qualified replacement is selected), the
+   originals for the needed `to-spec`, `to-tickets`, `implement` or
+   `implement-spec` routes, and any methods those routes actually require.
+   Check exact IDs, source and invocation policy; reuse verified originals.
+   An ambiguous or disallowed route is not a missing installation.
+2. For missing originals, choose one install path for the actual host from
+   [upstream's installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
+   Prefer the documented managed route where supported and in scope. For Devin
+   use the project root and an explicit `--skill` list of missing IDs,
+   including `setup-matt-pocock-skills` if absent, as upstream directs. For
+   example, when all three are missing:
+
+   ```sh
+   npx skills@latest add mattpocock/skills -a devin --skill grilling domain-modeling setup-matt-pocock-skills
+   ```
+
+   Do not use `--global` for the Devin pilot. Check all destinations and side
+   effects, including bundled skills and installer metadata (on Devin, check
+   `.devin/skills/` and `skills-lock.json`). Do not install the same skill via
+   two routes or replace an existing source without authorization.
+3. Before running the installer, require explicit, current authority for
+   that host, command, scope and effects. If missing, present the exact plan
+   and request approval; selecting or invoking Setup is not permission.
+   Apply the [write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation),
+   including real-time confirmation for a permitted non-atomic send.
+   Run only within the grant; otherwise leave configuration unchanged and
+   record the blocked methods and next action. If the host requires the user
+   or an admin to install, hand them the exact approved route. Any needed
+   per-repo `setup-matt-pocock-skills` configuration is user-invoked, with
+   separate authorization for its writes.
+4. After installation, read back the installed IDs and check their resolved
+   source/path and revision or digest in the intended project. For
+   agent-callable methods, verify loading through the permitted host route;
+   for user-only originals, inspect their source and policy without invoking
+   them. If native loading requires a reload or new session, or the install
+   fails or is uncertain, hold dependent work until verified and continue
+   independent authorized work. Reconcile uncertain effects before retrying.
+   Installation alone does not verify an override.
+
 ## Register the v1 implementation overrides on Devin
 
 During discovery, plan only the needed `to-spec`, `to-tickets` and execution

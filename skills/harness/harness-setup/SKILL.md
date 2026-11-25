@@ -21,10 +21,12 @@ project scope; do not start a pilot or install anything by default.
    resources that could change the goal or its acceptance. Do not create a
    store for a read. Record the goal, acceptance and scope before the first
    node; lack of operational history does not block discovery.
-2. Follow the [discovery tree and node contract](DISCOVERY.md). Check that
-   the host permits both original foundation skills. In pass one, visit all
-   seven branches in order without opening child domains. Start with
-   Environment & authority: settle context boundaries, autonomy, where
+2. Check the original foundation methods and [install missing prerequisites
+   when authorized](ACTIVATION.md#install-required-upstream-skills) before
+   opening dependent discovery nodes. Follow the [discovery tree and node
+   contract](DISCOVERY.md). In pass one, visit all seven branches in order
+   without opening child domains. Start with Environment & authority: settle
+   context boundaries, autonomy, where
    authorized setup records and Harness Glossary/ADRs live, and which
    distinct issue spaces are for Harness and product work. Record each
    tracker role, system/instance, namespace, permission and confirming source;
@@ -48,10 +50,12 @@ project scope; do not start a pilot or install anything by default.
 
 ## Phase B: implement and verify
 
-1. For the approved Devin project, prepare and when authorized register the
-   needed `to-spec`, `to-tickets` and execution overrides via
-   [activation](ACTIVATION.md). Registration can use a separate authorized
-   bootstrap; it does not depend on an override that is not yet installed.
+1. [Check and install missing prerequisites for the selected routes when
+   authorized](ACTIVATION.md#install-required-upstream-skills) before authoring
+   their overrides. For the approved Devin project, prepare and when
+   authorized register the needed `to-spec`, `to-tickets` and execution
+   overrides via [activation](ACTIVATION.md). Registration can use a separate
+   authorized bootstrap; it does not depend on an override that is not yet installed.
    Keep a small catalog with actual resolution and invocation evidence.
 2. Invoke `harness-implement` by exact host ID with the operation, scoped
    `DesignReady` decision and required route references. Ask it to prepare or
