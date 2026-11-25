@@ -70,6 +70,9 @@ def test_setup_selects_mode_before_any_prerequisite_route():
     body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
     entry, design = body.split("## Phase A:", 1)
     design, implementation = design.split("## Phase B:", 1)
+    assert "Choose Inspect, Advice or Apply" in entry
+    assert "Default to Inspect" in entry
+    assert "Apply must be explicit" in entry
     assert "Inspect and Advice never install or activate anything" in entry
     assert "even with a prior install grant" in entry
     verify = "](ACTIVATION.md#verify-upstream-prerequisites)"
