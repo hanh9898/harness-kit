@@ -30,6 +30,13 @@ at its original identity. Compare intended data and authority references with
 what actually persisted, including each target's current bytes and checks.
 A matching label alone cannot establish identity or completed application.
 
+For a Bot route, use [host reconciliation](HOST-ADAPTERS.md) at the original
+target. A matching Applied receipt closes reconciliation, not verification or
+activation. Before reopening an absent effect, require authoritative evidence
+that the previous attempt cannot still apply late, then recheck live authority
+at the write gate. Keep the affected claim, checkpoint and wake unchanged
+while the outcome is `Unknown`; independent targets can continue.
+
 **Done:** each affected write/effect is observed completed, observed absent under
 a sufficient native view, or unresolved. Unknown outcomes stay explicit.
 

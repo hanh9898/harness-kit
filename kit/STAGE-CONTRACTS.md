@@ -123,12 +123,14 @@ improvement separate.
 ## Setup or Evolve → Bot operator: `bot-setup`
 
 Required: `instance_id`, pinned `template_ref` and `contract_ref`, `scope_ref`,
-`adapter_ref` (adapter profile and caller), `configuration_ref` (observed
-readback), `evidence_refs`, and `disabled_capabilities` (actual disabled
-capability IDs from readback).
+`adapter_ref` (observed [host binding](M2-CONFIG.md#route-binding) for the
+actual caller), `configuration_ref` (observed readback), `evidence_refs`, and
+`disabled_capabilities` (actual disabled capability IDs from readback).
 
 Emit only after an authorized change to a Bot target and actual configuration
-readback, never for a repo-only change. The operator evaluates activation;
-configuration and this handoff authorize no trigger. Read back the configuration,
-exercise a permitted manual route and verify fresh-worker resume and deduplication
-before obtaining a separate grant and reading back activation for each trigger.
+readback, never for a repo-only change. The operator uses the
+[adapter runbook](HOST-ADAPTERS.md) to qualify the actual route; a missing
+primitive, wrong source or unavailable caller grant blocks only its dependent
+capability. This handoff authorizes no trigger. Exercise a permitted manual
+route and verify fresh-worker resume and deduplication before obtaining a
+separate grant and reading back activation for each trigger.

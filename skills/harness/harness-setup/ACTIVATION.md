@@ -1,5 +1,19 @@
 # Selected provider activation
 
+## Bootstrap Harness on Devin
+
+If the four Harness entries are not registered, use the
+[project-local link quickstart](../../../README.md#devin--project-scope-v1-pilot)
+only with authority for that project and link path. Link the pinned full
+checkout; do not copy the skill folders or register globally. Probe all four
+exact IDs in the intended caller and verify the returned project source and
+content. A registration conflict exits 2; an unverified route is `Blocked`.
+Name the missing access or mismatched source and keep dependent work off.
+Do not reinstall to resolve an unverified source.
+
+Use the [adapter runbook](../../../kit/HOST-ADAPTERS.md) only for selected host
+capabilities. Do not install same-ID portable Inbox or Memory over native Devin.
+
 ## Install required upstream skills
 
 1. On the host that will use them, check the original `grilling` and

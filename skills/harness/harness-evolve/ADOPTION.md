@@ -142,14 +142,14 @@ separately in the bound store; either disabled, unavailable or unverified
 selection blocks adoption. Do not fall back to direct pins from a failed
 configured store.
 
-When changing hosts, confirm old triggers are off, drain or fence old work,
-and reconcile all `Unknown`
-effects before the owner rebinds and reads back the disabled configuration.
-While draining, the new host may only inspect or run isolated fixtures.
-Keep the instance only if the new host can reopen the approved authoritative
-records; otherwise an independently authorized new instance needs scope
-separation or a stopped old instance. Never copy secrets, grants, transcripts,
-or schedules. Do not allow two hosts to send effects for the same scope.
+When changing hosts, qualify the proposed caller and routes with the
+[adapter runbook](../../../kit/HOST-ADAPTERS.md). Follow the
+[drain and rebind gate](../../../kit/M2-CONFIG.md#readiness-and-authority-gates):
+shut off old triggers, drain or fence old work, reconcile `Unknown` effects
+and read back the disabled binding. During the drain, the new host can only
+inspect or run isolated fixtures. Report the missing source, access or
+primitive for each blocked capability; do not switch routes or reinstall to
+clear it.
 
 After applying and reading back the changed Bot configuration, hand the operator
 one [`bot-setup`](../../../kit/STAGE-CONTRACTS.md#setup-or-evolve--bot-operator-bot-setup)
