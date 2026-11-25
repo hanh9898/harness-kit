@@ -5,6 +5,10 @@ description: Read or update scoped, durable Bot rules in an opted-in instance wi
 
 # Bot memory
 
+Use the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md) before
+choosing an operation. A scoped start or resume that calls for a Memory
+read goes direct. A bare invocation is not opt-in to inspect a store.
+
 Read on start or resume. Refresh before relying on an old session's view.
 Resolve the exact skill and source. Confirm opt-in and use the
 [qualified host route](HOST.md) before accessing a store.
@@ -71,3 +75,16 @@ take precedence. Memory does not grant access or permission to act.
    auto-apply or overwrite the disputed rule before reconciliation. Leave
    unrelated rules available. Have the scoped writer reconcile with the owner
    against the current revision, preserving provenance, then verify readback.
+
+```v1-gates
+[
+  {"id": "memory.acl", "requires": []},
+  {"id": "memory.bound-ready", "requires": []},
+  {"id": "memory.cas", "requires": []},
+  {"id": "memory.confirmed-unconfigured", "requires": []},
+  {"id": "memory.no-row", "requires": []},
+  {"id": "memory.read.empty", "requires": ["memory.confirmed-unconfigured"]},
+  {"id": "memory.read.ready-empty", "requires": ["memory.bound-ready", "memory.no-row"]},
+  {"id": "memory.write", "requires": ["memory.bound-ready", "memory.acl", "memory.cas"]}
+]
+```

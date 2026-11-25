@@ -5,6 +5,9 @@ already exist. Find the authoritative current view and linked history from the
 project's existing pointers. Inspect live state that can affect the next action.
 Retain completed effects, adequate conventions, accepted scope and valid grants.
 
+Use the [continuation handoff](../../../kit/PERSISTENCE.md#continuation-handoff)
+to pass work across sessions or reopen its authoritative source.
+
 For a recorded Library binding, recover its original store, scope, owner and
 continuity before using [strict selection or history reads](../harness-library/READ.md).
 Use `--require-existing-store` before either subcommand. A ready store can

@@ -2,36 +2,84 @@
 
 Select a skill by the missing, verifiable output, not by title or trigger. Reuse a spec, ticket, reproduction or check that still matches the decision, revision and target. Use this reference for Setup's route catalog, Evolve's direct resolution and Implement's preflight.
 
-| Route | Required output and exclusions |
-| --- | --- |
-| `to-spec` | Draft spec and open questions from a settled decision. No posting, labeling or target effects. |
-| `to-tickets` | Draft slices and dependency graph from a valid spec. No posting, labeling or target effects. |
-| `implement` | Execute one eligible ticket and return assignment, effects and evidence. No implicit Git, tracker or host side effects. |
-| `implement-spec` | Coordinate a dependency graph when selected. Do not load a second coordinator over the same scope; a child may need the independent-ticket route in its own context. |
+## Project override routes
 
-Use the project-scoped Harness override when the upstream method is user-only; do not call the upstream route on behalf of the user. Originals that are already agent-callable and compatible may be reused when verified. See [upstream invocation rules](https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/.agents/invocation.md). Host or admin restrictions still apply. Do not turn source reading into simulated invocation.
+| Original | Project override ID | Contract |
+| --- | --- | --- |
+| `to-spec` | `harness-project-to-spec` | [Draft a missing spec](../../overrides/harness-project-to-spec/SKILL.md). |
+| `to-tickets` | `harness-project-to-tickets` | [Draft missing tickets from an approved spec](../../overrides/harness-project-to-tickets/SKILL.md). |
+| `implement` | `harness-project-implement` | [Apply one authorized effect](../../overrides/harness-project-implement/SKILL.md). |
+
+Use the verified project binding for the new Harness workflow. Do not
+substitute an upstream method for a missing binding, invoke a user-only original
+on behalf of the user, or count source inspection as invocation. Keep original
+manual routes intact. `implement-spec` remains supplemental coordination for a
+selected graph, not a substitute for the execution override. Do not load a
+second coordinator for the same scope.
+
+## Route readiness
+
+Require all three distinct, unshadowed project bindings to be verified in
+their intended caller contexts before reporting the new workflow execution-ready.
+Missing binding, duplicate ID, wrong caller, wrong resolved source (even
+with the same digest), revision mismatch or user-only policy blocks that
+route. Do not use precedence to accept a shadow.
+
+Two verified preparation bindings can return drafts under the existing
+preparation gates. The pair alone is not execution-ready. Registration
+readback alone does not qualify native routes. Even with all three routes
+qualified, spec approval and the [dispatch gates](WORK.md#dispatch-and-integrate)
+still apply.
 
 ## Prepare only missing artifacts
 
 Use compatibility checks in [Prepare](WORK.md#prepare) before probing or invoking routes.
 
-| Compatible artifacts | Drafting routes, in order |
+| Compatible artifacts | Project override drafting routes, in order |
 | --- | --- |
 | Spec and ticket | None |
-| Spec only | `to-tickets` |
-| Ticket only | `to-spec` |
-| Neither | `to-spec`, then `to-tickets` |
+| Spec only | `harness-project-to-tickets` after H5 |
+| Ticket only | `harness-project-to-spec` |
+| Neither | `harness-project-to-spec`, then `harness-project-to-tickets` after H5 |
 
-Resolve only the needed preparation routes and give them no authority to publish or apply effects. Accept a user-invoked route's artifact only after checking authorized invocation and compatibility.
+If the project has not adopted the overrides, keep its existing drafting
+routes. Use the corresponding original only if approved, compatible, and
+verified as agent-callable for the current caller and project. Apply the same
+artifact and approval checks. This does not establish new workflow readiness
+and is not a fallback for a missing or blocked override in an opted-in project.
+
+Pass [H5](WORK.md#spec-approval-h5) before resolving or invoking the ticket
+drafting route. With a reusable ticket, keep it and check it against the new
+spec and approval instead of drafting a replacement. Resolve only needed routes
+at their step. Preparation routes cannot publish or apply effects. Accept a
+user-invoked route's artifact only after checking authority and compatibility.
 
 ## Evidence and minimal handoff
 
-Inspect the actual project, host, effective configuration/manifest and invocation policy in the intended caller context. On Devin, probe by **exact skill ID** using the native skill tool and target project context, not by absolute file path as the name. Cross-check the resolved source/path and immutable revision or file digest. Listing/search can miss project-local routes; neither an empty list nor a frontmatter flag proves a route's availability. Check for collisions and test a separate child context only if this workflow uses it. A same-name project override needs proof of precedence and no change outside scope.
+Inspect the actual project, host, effective configuration and invocation
+policy in the intended caller context. On Devin, probe by **exact skill ID**
+with the native skill tool in the target project, not by absolute file path.
+Check resolved source, immutable revision or file digest, caller and policy.
+Neither a listing nor a frontmatter flag proves the effective binding.
+Test a separate child context only if the workflow uses it.
 
-Record only ID, source and override revision/digest, host, scope, caller context, expected output, selection/exclusion conditions, dependencies, allowed effects, status and evidence pointer. Status is `verified` for a current exact resolution with pertinent invocation/output evidence (use a no-write probe where possible); `ambiguous` for competing resolutions; `unavailable` for missing permission, route or evidence. Do not probe a route if the probe could write without authority. Keep independent work available when one route is blocked.
+Match the current binding before probing for output. A matching readback allows
+a permitted no-write probe without prior output evidence. It does not make the
+route `verified` or authorize an effect.
+
+Record ID, source and override revision/digest, host, scope, caller, effective
+invocation policy, expected output, selection/exclusion conditions, dependencies,
+allowed effects, status and evidence pointer. Use `verified` for a current
+exact resolution with pertinent invocation/output evidence, `ambiguous` for
+competing resolutions or `unavailable` for missing or mismatched evidence.
+Do not probe a route if the probe could write without authority. Keep
+independent work available when one route is blocked.
 
 Setup can pass the relevant entry from its verified catalog. Evolve can inspect and verify the needed step itself if no catalog exists or an entry is stale; do not rerun Setup or register a provider as part of resolution. Implement invokes the exact verified ID in the assigned context, checks what actually loaded and validates its output before continuing. A manual or existing artifact can eliminate the need for a preparation route, not the need to verify execution. Do not fall back to an unverifiable, colliding or user-only route.
 
-For `execute`, resolve `route_ref` against the current execution ID, resolved source and override, digest and caller. Preparation evidence or a successful load in another context is not execution evidence. Stop the dependent effect if actual resolution differs or cannot be proved.
+For the new workflow's `execute`, resolve `route_ref` against
+`harness-project-implement` and the current binding in the assigned context.
+Preparation evidence or a load in another context is not execution evidence.
+Stop the dependent effect if the actual resolution differs or cannot be proved.
 
 Record selected/reused/skipped step, ID/revision and reason, actual load status and result reference. Load only necessary instructions and data, not a bundle. Reuse a load only in the same context when scope/revision remains valid. Recheck affected routes after changes to host, configuration, scope, revision or authority. Do not infer token savings from number of calls.

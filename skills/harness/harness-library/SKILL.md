@@ -5,6 +5,10 @@ description: Find, verify or change reusable Harness resources in an authorized 
 
 # Harness Library
 
+Use the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md) before
+choosing an operation. A scoped request or focused caller question goes
+straight to the relevant Library path.
+
 Accept the requested operation, focused question or exact identity, consumer,
 store/scope and relevant authority or expected revision. Setup and Evolve call
 this skill internally when needed; Implement calls it before applying a
@@ -32,3 +36,7 @@ and blockers; for writes, also return readback evidence or `Unknown`.
 Reading, saving, applying and executing are different effects. The consumer
 owns adoption and its evidence; do not apply a selection or record adoption
 in Library. An unverified store or identity blocks only dependent use.
+
+If work must continue in another session, use the
+[continuation handoff](../../../kit/PERSISTENCE.md#continuation-handoff) to
+point to authorized Library records without changing the selection handoff.

@@ -62,17 +62,21 @@ Required: `draft_ref` (ID and revision), `target` (object with `instance`,
 `namespace` and `role` references), stable deduplication `work_id`, and
 `grant_ref` for this exact publish or update.
 
-Emit only for a specific approved draft under a live grant at the exact
-Harness destination. For a tracker, verify its Harness namespace (not a
-Product namespace or another view of it). For small work, a
-selected local Harness record can be the destination if it has a real
-instance, namespace and Harness role, and the record is durable and readable
-by the receiver. It is not a fallback for a failed tracker write; do not
-invent a binding.
+The checker validates shape only. Before sending, Setup or Evolve must verify
+the exact draft revision, the owner's decision on any material split (H6),
+and the separate exact publish grant (H7). If any check fails, keep the draft
+and return the blocker without emitting a `publish` handoff. The receiver
+reopens the authoritative records under the
+[publish gate](../skills/harness/harness-implement/WORK.md#publish-or-update).
+Resolve split approval through the draft and decision; do not add approval
+fields to the envelope or infer approval from `grant_ref`.
 
-Check prerequisites and the destination write gate. Return the canonical
-ticket only after reading back its ID, content and links. After a timeout,
-reconcile the same work ID at the destination instead of sending again.
+Use the selected Harness destination's own instance, namespace and role. A
+selected local Harness record must be durable and readable by the receiver.
+It is not a fallback after a tracker error. Never publish to Product or
+switch destinations after an error. Read back the canonical ticket at the
+selected destination. A timeout after send is `Unknown`; reconcile there
+without resending.
 
 ## Coordinator → Implement: `execute`
 
@@ -127,10 +131,10 @@ Required: `instance_id`, pinned `template_ref` and `contract_ref`, `scope_ref`,
 actual caller), `configuration_ref` (observed readback), `evidence_refs`, and
 `disabled_capabilities` (actual disabled capability IDs from readback).
 
-Emit only after an authorized change to a Bot target and actual configuration
-readback, never for a repo-only change. The operator uses the
-[adapter runbook](HOST-ADAPTERS.md) to qualify the actual route; a missing
-primitive, wrong source or unavailable caller grant blocks only its dependent
-capability. This handoff authorizes no trigger. Exercise a permitted manual
-route and verify fresh-worker resume and deduplication before obtaining a
-separate grant and reading back activation for each trigger.
+Emit one handoff per changed Bot after authorized configuration readback,
+never for a repo-only change. Resolve `instance_id` and all refs to one
+current `bots[]` entry; reject mixed Bot or stale binding refs. The
+[adapter runbook](HOST-ADAPTERS.md) qualifies routes without changing the
+envelope or authorizing any trigger. Follow the
+[Bot lifecycle gates](../skills/harness/harness-setup/ACTIVATION.md#configure-and-qualify-a-bot)
+for manual rehearsal, fresh-worker resume and per-trigger authority.

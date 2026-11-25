@@ -15,88 +15,12 @@ Choose your host below.
 
 ### Devin — project scope (v1 pilot)
 
-With permission to write `.devin/skills/` in the consuming project, link the four
-skills to a clean, full checkout at the approved commit. Do not copy the skill
-directories with `npx skills add <checkout>`: the copied Library skill cannot
-resolve `kit/scripts/library` from its real directory. Do not install globally.
-
-Set `KIT` and `PROJECT` to absolute directory paths and `KIT_COMMIT` to the
-approved full commit ID. The consuming project must be outside the pinned kit
-checkout so registration cannot dirty the source. Run in a shell with Git,
-`realpath` and Python 3:
-
-```sh
-(
-  blocked() { printf 'Blocked: %s\n' "$*" >&2; exit 2; }
-  check_link() {
-    src="$KIT/skills/harness/$1"
-    dst="$skills/$1"
-    actual=$(realpath "$dst") && expected=$(realpath "$src") &&
-      test -L "$dst" && test -r "$dst/SKILL.md" && test "$actual" = "$expected" ||
-      blocked "existing entry does not resolve to $src: $dst"
-  }
-  case "${KIT:-}" in /*) ;; *) blocked 'KIT must be an absolute checkout path';; esac
-  case "${PROJECT:-}" in /*) ;; *) blocked 'PROJECT must be an absolute project path';; esac
-  test -d "$PROJECT" || blocked "project not found: $PROJECT"
-  for tool in git realpath mkdir ln python3; do
-    command -v "$tool" >/dev/null || blocked "required executable not found: $tool"
-  done
-  kit_root=$(realpath "$KIT") || blocked "cannot resolve checkout: $KIT"
-  project_root=$(realpath "$PROJECT") || blocked "cannot resolve project: $PROJECT"
-  case "$project_root" in
-    "$kit_root"|"$kit_root"/*) blocked "PROJECT must be outside the pinned kit checkout: $project_root";;
-  esac
-  head=$(git -C "$KIT" rev-parse --verify HEAD) || blocked "cannot read checkout: $KIT"
-  test "$head" = "${KIT_COMMIT:-}" || blocked "checkout is not at the approved commit: $KIT"
-  state=$(git --no-optional-locks -C "$KIT" status --porcelain --untracked-files=normal) ||
-    blocked "cannot inspect checkout: $KIT"
-  test -z "$state" || blocked "checkout is not clean: $KIT"
-  test -x "$KIT/kit/scripts/library" || blocked "Library helper is missing or not executable: $KIT"
-
-  skills="$PROJECT/.devin/skills"
-  for dir in "$PROJECT/.devin" "$skills"; do
-    if [ -L "$dir" ] || { [ -e "$dir" ] && [ ! -d "$dir" ]; }; then
-      blocked "not a project-local directory: $dir"
-    fi
-  done
-  set -- harness-setup harness-evolve harness-implement harness-library
-  for id; do
-    test -r "$KIT/skills/harness/$id/SKILL.md" || blocked "cannot read the pinned $id/SKILL.md"
-    if [ -e "$skills/$id" ] || [ -L "$skills/$id" ]; then
-      check_link "$id"
-    fi
-  done
-
-  PYTHONDONTWRITEBYTECODE=1 "$KIT/kit/scripts/library" --help >/dev/null ||
-    blocked "cannot run the pinned Library helper with python3: $KIT"
-  mkdir -p "$skills" || blocked "cannot create $skills"
-  for id; do
-    if [ ! -e "$skills/$id" ] && [ ! -L "$skills/$id" ]; then
-      ln -s "$KIT/skills/harness/$id" "$skills/" || blocked "cannot link $skills/$id"
-    fi
-    check_link "$id"
-  done
-  check_link harness-library
-  test -x "$actual/../../../kit/scripts/library" || blocked "cannot resolve the linked Library helper"
-  PYTHONDONTWRITEBYTECODE=1 "$actual/../../../kit/scripts/library" --help ||
-    blocked "cannot run the linked Library helper: $actual"
-)
-```
-
-Registration errors exit 2 without replacing entries. If a write fails midway,
-inspect the existing links before completing the registration. Do not commit
-absolute links or remove another registration to clear a conflict.
-
-In the intended Devin project, run
-`skill_invoke({"skill":"harness-setup"})` and repeat for `harness-evolve`,
-`harness-implement` and `harness-library`. For each, verify the exact ID, the
-returned Source exists under the intended project, its real path is in the
-pinned checkout and its content matches the approved revision or digest.
-An equal digest from another project is not a match. If Devin resolves the
-wrong project, retry the probe in a new session with only the intended project.
-Until verified, report the missing access or mismatched ID/source as
-`Blocked`; do not reinstall. Library help proves local path resolution, not
-native loading. Use the [host adapters](kit/HOST-ADAPTERS.md) for Bot routes.
+In an approved project, expose the four skill directories from the full checkout
+as project-local skills under `.devin/skills/` using Devin's supported mechanism.
+Keep each `SKILL.md` with its references and preserve the adjacent kit paths.
+Verify by invoking the exact skill ID in the project and checking the resolved
+source and revision or digest; listing/search alone is not proof. Do not register
+globally by default.
 
 Setup registers project-scoped, agent-callable preparation and execution
 overrides only when authorized. The original user-only methods keep their own
@@ -157,16 +81,15 @@ of project setup. See the [Codex skill documentation](https://learn.chatgpt.com/
 The repository includes a Claude Code plugin manifest and local marketplace:
 
 ```sh
-claude plugin marketplace add /absolute/path/to/harness-kit
+claude plugin marketplace add <absolute-path-to-harness-kit>
 claude plugin install harness-kit@harness-kit
 ```
 
-Installation defaults to user scope. Obtain permission for the marketplace and
-settings writes; choose `--scope local` or `--scope project` if required and
-verify where each change landed.
 Restart Claude Code and invoke the relevant skill by its plugin-qualified name,
 such as `/harness-kit:harness-setup`.
-For session-only use, pass `claude --plugin-dir /absolute/path/to/harness-kit`.
+For session-only use, pass `claude --plugin-dir <absolute-path-to-harness-kit>`.
+The `.claude-plugin/` manifest is also accepted by Codex through its compatibility
+route above. Pi loads the same skill source through its native skill interface.
 
 ### Pi — package
 
@@ -186,8 +109,8 @@ Or install the repository from Git:
 pi install --local git:github.com/hanh9898/harness-kit@main
 ```
 
-Use a pinned local checkout instead of `@main` for qualification.
-`--local` writes the package declaration to `.pi/settings.json`; Pi loads
+Use a reviewed commit or tag instead of the branch name when you need a fixed
+revision. `--local` writes the package declaration to `.pi/settings.json`; Pi loads
 project packages after project trust is granted. Omitting `--local` selects personal
 scope.
 

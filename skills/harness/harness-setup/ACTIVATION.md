@@ -2,17 +2,13 @@
 
 ## Bootstrap Harness on Devin
 
-If the four Harness entries are not registered, use the
-[project-local link quickstart](../../../README.md#devin--project-scope-v1-pilot)
-only with authority for that project and link path. Link the pinned full
-checkout; do not copy the skill folders or register globally. Probe all four
-exact IDs in the intended caller and verify the returned project source and
-content. A registration conflict exits 2; an unverified route is `Blocked`.
-Name the missing access or mismatched source and keep dependent work off.
-Do not reinstall to resolve an unverified source.
-
-Use the [adapter runbook](../../../kit/HOST-ADAPTERS.md) only for selected host
-capabilities. Do not install same-ID portable Inbox or Memory over native Devin.
+Use the [adapter runbook](../../../kit/HOST-ADAPTERS.md#devin-project-links)
+to inspect the four Harness entries without writing, then link only in Apply
+with a grant for the exact project and paths. Verify the returned project
+Source, caller and pin before use. Missing access or unproven source blocks
+the route; do not reinstall to clear it. Resolve
+[internal routes on demand](../../../kit/HOST-ADAPTERS.md#load-internal-routes-on-demand);
+do not register the discovery or override directories by default.
 
 ## Verify upstream prerequisites
 
@@ -38,8 +34,9 @@ confirmed missing originals. Inspect and Advice report blockers without installi
 
 ## Install required upstream skills
 
-1. Confirm Setup is in Apply before entering this route. Present one scoped
-   install plan from the [upstream installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
+1. Confirm Setup is in Apply before entering this route. The
+   [entry gate](../../../kit/PROPOSAL-ENTRY.md#selection-h1) does not grant installation.
+   Present a scoped plan from the [upstream installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
    Require a fresh, explicit project administrator grant (H3) for this Apply.
    Bind the grant to the caller, host, project, exact missing IDs, installer
    version and upstream revision, command, destinations and lockfile effects.
@@ -68,36 +65,67 @@ confirmed missing originals. Inspect and Advice report blockers without installi
 
 ## Register the v1 implementation overrides on Devin
 
-During discovery, plan only the needed `to-spec`, `to-tickets` and execution
-routes. Follow the [route contracts](../harness-implement/ROUTES.md). At
-authorized bootstrap, use the narrowest host-supported project scope. On Devin,
-create project-local skill entries (the pilot used `.devin/skills/<id>/SKILL.md`)
-with distinct IDs, matching frontmatter names and narrow descriptions. Use the
-host's permitted project-skill mechanism; confirm loadability for this project
-before relying on it. Keep global installed skills unchanged.
+Plan only the needed [project override routes](../harness-implement/ROUTES.md#project-override-routes).
+The three source templates under `skills/overrides/` are not default entries. On
+Devin, register them at `.devin/skills/<id>/SKILL.md` in the intended project
+using the host's supported mechanism. Do not register them globally, reuse an
+original ID or change an upstream skill or its invocation policy.
 
 Before authoring or changing an override, use the
 [agent-read guidance contract](../harness-evolve/CHANGE-FLOW.md#authoring-an-override-in-a-new-project).
 If a required source or method cannot be used, leave the dependent override
 unchanged and report what would unblock it.
 
-For each selected override record the source revision/license and the limited
-contract changes. Preserve upstream notices when adapting material. Implement
-the required inputs, outputs, use and non-use conditions, dependencies and
-effect limits from the route contract; merely changing invocation metadata is
-not an override. Preparation routes return drafts; a ticket route checks the
-assignment and target gate. Remove implicit tracker and Git effects. Do not
-change an upstream skill or try to bypass invocation policy.
+Record the template revision, any adaptations and the upstream source revision
+and license. Preserve upstream notices if adapting material. Changing only
+invocation metadata is not an override.
 
-Treat registration as its own granted write, using the
-[late-write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation).
-Read back the configuration and probe by exact ID through the native tool in
-the intended Devin context. Verify the resolved path and revision/digest,
-real output and denial without permission. Confirm no route collision or
-change to upstream manual invocation outside scope. Verify a fresh or a child
-session only when needed for the route; do not claim either without evidence.
-Return the lightweight verified catalog; an unverified entry blocks only its
-dependent step. Evolve can verify its own route without this bootstrap.
+Only in Apply, require a separate project administrator grant (H4) for the
+exact template IDs, source revisions, project, destination writes, intended
+caller and invocation policy. H3 does not authorize registration. Use the
+[late-write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation)
+and verify that every destination resolves inside the project and the grant
+before writing. H4 does not authorize execution.
+
+First read back the effective configuration in the intended caller and project.
+Match exact ID, Source (resolved path), revision or digest, caller and effective
+invocation policy. Check that each ID has a single binding and that the
+originals retain their sources and manual invocation policy. Do not invoke a
+user-only original to check it.
+
+After matching the binding, resolve the exact ID with the native tool and
+recheck what loaded. Use a permitted no-write probe to collect output or denial
+evidence. Do not require prior output evidence for the first probe. Test a fresh
+or child context only when the route uses it.
+
+Record the verified binding and evidence for each route independently. A
+verified preparation pair without verified execution is draft-only. Apply the
+[route readiness checks](../harness-implement/ROUTES.md#route-readiness) before
+reporting execution readiness; registration and fixture readback alone do not
+qualify native routes. Evolve verifies its needed bindings without reinstalling.
+
+## Configure and qualify a Bot
+
+For a new Bot, verify the selected logical `bot_id` and intended host,
+workspace, owner and scope against its recorded intent. That intent is not a
+wake target or proof of an existing host binding. H19 authorizes configuring
+only that Bot with all triggers disabled. Read back the host identity, exact
+binding and disabled triggers before making the binding effective or returning
+one `bot-setup` handoff. Do not change a neighboring Bot.
+
+Before H14 rebind, disable and read back every trigger on the old binding,
+drain or fence its work, and reconcile all `Unknown` effects at their original
+targets. If reconciliation stalls, H13 is for an operator decision, not a
+retry or reassignment. Require the owner's approval of the exact new binding,
+read it back disabled and verify continuity of authorized records and occurrence
+dedupe. Never keep two active bindings for the same Bot.
+
+On either the initial or rebound binding, require its disabled readback and H15
+for the manual and fresh-worker pilot. Check authority, scope, checkpoints,
+fencing and the [automation wake contract](../../../kit/PERSISTENCE.md#automation-wake).
+Only after both pilot checks pass on that binding may H16 authorize enabling
+the exact trigger for that Bot. Read back that trigger before reporting it active.
+H19, H14 and H15 do not authorize activation.
 
 ## Other selected activation
 
@@ -138,3 +166,41 @@ effects; preserve the failure and recovery scope. Retain per-target host/version
 model, provider/resource revision, configuration/grant conditions, observed use,
 missing conditions and next action. Material changes invalidate affected evidence,
 not unrelated qualified uses.
+
+```v1-gates
+[
+  {"id": "authority.bot-config", "requires": []},
+  {"id": "authority.install", "requires": []},
+  {"id": "authority.pilot", "requires": []},
+  {"id": "authority.rebind", "requires": []},
+  {"id": "authority.trigger", "requires": []},
+  {"id": "bot.configure-disabled", "requires": ["bot.exact-target", "bot.disabled-config", "authority.bot-config"]},
+  {"id": "bot.disabled-config", "requires": []},
+  {"id": "bot.disabled-readback", "requires": []},
+  {"id": "bot.drain-fence", "requires": []},
+  {"id": "bot.exact-target", "requires": []},
+  {"id": "bot.old-disabled-readback", "requires": []},
+  {"id": "bot.pilot.initial", "requires": ["bot.configure-disabled", "bot.disabled-readback", "authority.pilot"]},
+  {"id": "bot.pilot.rebound", "requires": ["bot.rebind", "bot.disabled-readback", "authority.pilot"]},
+  {"id": "bot.rebind", "requires": ["bot.exact-target", "bot.old-disabled-readback", "bot.drain-fence", "bot.reconciled", "authority.rebind"]},
+  {"id": "bot.reconciled", "requires": []},
+  {"id": "method.domain-modeling", "requires": []},
+  {"id": "method.grilling", "requires": []},
+  {"id": "method.handoff", "requires": []},
+  {"id": "method.writing-for-agents", "requires": []},
+  {"id": "original.implement", "requires": []},
+  {"id": "original.to-spec", "requires": []},
+  {"id": "original.to-tickets", "requires": []},
+  {"id": "override.implement", "requires": []},
+  {"id": "override.to-spec", "requires": []},
+  {"id": "override.to-tickets", "requires": []},
+  {"id": "pilot.manual-fresh-worker", "requires": []},
+  {"id": "setup.author-overrides", "requires": ["method.writing-for-agents", "original.to-spec", "original.to-tickets", "original.implement"]},
+  {"id": "setup.discovery", "requires": ["method.grilling", "method.domain-modeling"]},
+  {"id": "setup.execution-ready", "requires": ["override.to-spec", "override.to-tickets", "override.implement"]},
+  {"id": "setup.install", "requires": ["entry.explicit-apply", "authority.install"]},
+  {"id": "trigger.enable.initial", "requires": ["bot.pilot.initial", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
+  {"id": "trigger.enable.rebound", "requires": ["bot.pilot.rebound", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
+  {"id": "trigger.exact-id", "requires": []}
+]
+```

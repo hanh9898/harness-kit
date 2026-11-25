@@ -112,3 +112,83 @@ storage conditions actually observed; unknown required durability stays blocked.
 
 Inferred application of [spec 15](https://github.com/hanh9898/harness-kit/issues/15),
 record requirements 26–30 and A17/A19, within [ticket 35](https://github.com/hanh9898/harness-kit/issues/35).
+
+## Continuation handoff
+
+Use one handoff for work that must continue in another session. Reuse the
+authoritative record and share references instead of copying specs, plans,
+tickets, or logs. Write or update the handoff only at the approved durable
+destination under its existing grant and serialization. Keep the six
+[v1 stage payloads](STAGE-CONTRACTS.md) unchanged. A continuation is not
+another stage envelope.
+
+For each reference, identify the original source and the exact revision or
+effect identity. Check the source's access controls and confirm the reference
+can be opened in the recipient's scope. Your own access is not enough. Do not
+include credentials, sensitive excerpts, or references the recipient is not
+authorized to receive. If required evidence is unreadable, keep any usable
+references, block the dependent step, and name the missing evidence.
+
+Record each applicable state separately, with its evidence and the exact next
+action, who can take it, and when:
+
+| State | Record |
+| --- | --- |
+| `Applied` | The observed effect and its receipt or authoritative readback. |
+| `Verified` | The criteria checked and accessible evidence of the result. Applying a change does not verify it. |
+| `Blocked` | The step that cannot proceed and the missing access, authority, or evidence. |
+| `Unknown` | The unresolved effect and where to reconcile it. Do not retry or report it as applied. |
+
+Resolve the original upstream `handoff` only when needed. Verify its exact ID,
+source, revision, caller, and host invocation policy. Invoke it once only if
+the caller has permission and the route can use the approved destination.
+Never invoke a user-only route on the user's behalf. The [pinned upstream
+route](https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/productivity/handoff/SKILL.md)
+is user-only and requires the OS temporary directory, not the workspace.
+Neither reading its source nor finding a temp file qualifies as a durable
+handoff.
+
+If the route is missing, restricted, or cannot use the approved destination,
+say why it was not used. Do not claim `handoff` was invoked. Return only an
+authorized, reopenable source reference, if available, and the exact next
+step. Do not create a substitute record or widen access. In the fresh
+session, reopen the original source and verify its identity and current
+state before taking the next step.
+
+## Automation wake
+
+Accept only an authenticated automation occurrence from an allowed schedule or
+integration source. Chat, @mentions, Bot messages, direct requests and Inbox
+replies never wake a Bot. Verify the exact `automation_id`, single
+`target_bot_id`, source, scope and current binding revision, and read back
+the exact trigger as active before claiming. Compare the bound caller and
+instance with the arrival context. A missing field, legacy Bot intent or
+mismatch has no default target, claim, positive ACK or dispatch.
+
+Commit the occurrence claim, durable uniqueness and resumable pending state
+against that Bot's occurrence key before acknowledging delivery. A duplicate
+can acknowledge only after reading the committed record for the same mapping.
+Do not claim or dispatch it again. A delivery ACK is not an effect receipt or
+a Tasks claim. For an `Unknown` effect, keep its checkpoint and reconcile at
+the original target; do not replay because delivery was acknowledged.
+
+Use `(bot_id, automation_id, source_id, occurrence_id)`: schedule occurrences
+use the scheduled UTC instant, integration events use the provider event ID.
+Fence application and resume with the Bot's current `instance_id` and
+`binding_revision`. Rebind preserves the Bot's occurrence ledger or keeps
+the trigger off; never copy ledger state to another Bot. See
+[automation binding](HOST-ADAPTERS.md#bind-automation-to-one-bot).
+
+```v1-gates
+[
+  {"id": "continuation.handoff", "requires": ["method.handoff", "evidence.access"]},
+  {"id": "evidence.access", "requires": []},
+  {"id": "wake.ack", "requires": ["wake.claim", "wake.durable-dedupe"]},
+  {"id": "wake.automation-only", "requires": []},
+  {"id": "wake.claim", "requires": ["wake.automation-only", "wake.exact-target", "wake.current-binding", "wake.trigger-active-readback"]},
+  {"id": "wake.current-binding", "requires": []},
+  {"id": "wake.durable-dedupe", "requires": []},
+  {"id": "wake.exact-target", "requires": []},
+  {"id": "wake.trigger-active-readback", "requires": []}
+]
+```

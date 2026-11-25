@@ -5,6 +5,10 @@ description: Set up or resume a project Harness. Discover its operating needs in
 
 # Harness Setup
 
+Start with the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md):
+an explicit request goes straight to Setup; otherwise offer only read-only
+research-backed choices before starting either phase.
+
 Deliver a minimum working Harness and a usable continuation, not a fixed set
 of files. Setup owns the decision map and assignment verification; decision
 contexts discover choices and implementation contexts deliver eligible tickets.
@@ -45,13 +49,12 @@ Apply does not itself authorize writes.
    questions only for requested Bot work. Review the remaining branches, then
    batch only actionable unanswered questions (authority first) and clear
    proposals for review. No questions means no empty turn.
-3. In pass two, visit domains of non-deferred branches in order of readiness,
+3. In pass two, visit applicable topics of non-deferred branches in order of readiness,
    using the earliest ready node in tree order. Carry only relevant parent
    direction, choices and artifact pointers. Use one working context per
    node, not one per method. Ask groups of ready questions and route answers
-   back to the nodes. At each node in both passes, call `harness-library`
-   internally for the scoped need; do not substitute raw catalog or CLI.
-   If a dependency blocks one node, continue independent authorized work.
+   back to the nodes. Let each topic use Library for the scoped need. If a
+   dependency blocks one node, continue independent authorized work.
 4. Follow the [decision map](DECISION-MAP.md) for ticket types, checkpoints
    and evidence of confirmation. Present a synthesis of choices, open and
    deferred items, proposed implementation tickets and draft Glossary/ADRs.
@@ -93,7 +96,7 @@ Apply only. Require separate authority for each effect.
    and readback, never on `repo-only`. The operator owns separate activation.
 
 Hand off references to settled choices, revisions, live authority, evidence and
-the next actionable item. For a session transfer, suggest the user run
-`/handoff` only if available; temporary handoff output does not replace an
-authorized durable record. Do not auto-start Evolve, open a PR or schedule work.
+the next actionable item. For a session transfer, follow the
+[continuation handoff](../../../kit/PERSISTENCE.md#continuation-handoff).
+Do not auto-start Evolve, open a PR or schedule work.
 Use the [qualification checklist](CHECKLIST.md) when authorized to test the route.
