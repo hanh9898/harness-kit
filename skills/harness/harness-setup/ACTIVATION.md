@@ -12,12 +12,11 @@
 2. For missing originals, choose one install path for the actual host from
    [upstream's installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
    Prefer the documented managed route where supported and in scope. For Devin
-   use the project root and an explicit `--skill` list of missing IDs,
-   including `setup-matt-pocock-skills` if absent, as upstream directs. For
-   example, when all three are missing:
+   use the project root and an explicit `--skill` list of missing, required
+   IDs. For example, when both discovery methods are missing:
 
    ```sh
-   npx skills@latest add mattpocock/skills -a devin --skill grilling domain-modeling setup-matt-pocock-skills
+   npx skills@latest add mattpocock/skills -a devin --skill grilling domain-modeling
    ```
 
    Do not use `--global` for the Devin pilot. Check all destinations and side
@@ -31,9 +30,10 @@
    including real-time confirmation for a permitted non-atomic send.
    Run only within the grant; otherwise leave configuration unchanged and
    record the blocked methods and next action. If the host requires the user
-   or an admin to install, hand them the exact approved route. Any needed
-   per-repo `setup-matt-pocock-skills` configuration is user-invoked, with
-   separate authorization for its writes.
+   or an admin to install, hand them the exact approved route. Include
+   `setup-matt-pocock-skills` as upstream directs when per-repo configuration
+   is needed and covered by the install grant; it does not gate discovery.
+   The user runs that helper, with separate authorization for its writes.
 4. After installation, read back the installed IDs and check their resolved
    source/path and revision or digest in the intended project. For
    agent-callable methods, verify loading through the permitted host route;
