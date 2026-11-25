@@ -22,9 +22,10 @@ Missing source facts may need original research. Required unavailable methods or
 access block dependent work, with the exact prerequisite and permitted next step.
 A settled comparison does not need an invented diagnosis or interview.
 
-Retrieve `H09` for attributable usage, `H15` for evidence meaning and `H02` for
-quality/regression checks. For deliberately measured optimization, read `I06`:
-its inferred noise/held-out guidance applies when comparing scored candidates.
+Use `harness-library` to verify selection and retrieve relevant guidance from
+`H09` for attributable usage, `H15` for evidence and `H02` for quality checks.
+For deliberately measured optimization, also check `I06` for noise and
+held-out-case guidance. Skip excluded or unverified resources.
 Use available observations to justify variability checks and case separation for
 the actual claim. These resources prescribe neither a new evaluation platform
 nor a launcher cap for every request.

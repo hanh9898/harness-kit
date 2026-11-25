@@ -4,7 +4,12 @@ Deliver context that the consuming task can actually use: selected attributable 
 
 ## Select for the task
 
-Identify the consuming task, target, audience and decision or fact that needs support. Read adequate existing source maps and project guidance before broad search. Use the entry's focused catalog retrieval to inspect B08 for authoritative source maps and B06 when a trigger/pointer is needed. These are reference patterns, not requirements to install a registry, create a skill or replace the project's conventions. Retrieve reusable material through library when useful, preserving its effective selection and origin.
+Identify the consuming task, target, audience and decision or fact that needs
+support. Read adequate source maps and project guidance before broad search.
+Through `harness-library`, verify selection and retrieve `B08` for source maps
+or `B06` for a trigger or pointer when needed. Preserve selection and origin;
+skip excluded or unverified material. These are reference patterns, not
+requirements to install a registry, create a skill or replace conventions.
 
 Select sources by authority and task applicability, not search rank or recency alone. Open the relevant material, including necessary definitions and conditions; a title or search snippet is only a discovery lead. For each determining source, retain its identity/location, owner or authority when known, revision or observation date where available, and why it applies to this target. Mark inferred and unknown facts. Distinguish a local snapshot's capture time from the currency of the originating source and from a successful read today.
 

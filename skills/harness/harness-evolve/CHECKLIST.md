@@ -20,6 +20,7 @@ this source tree.
 | Mixed product and Harness findings | Product source remains read-only. Harness work uses the pinned Harness namespace, or an authorized canonical local ticket for small work. |
 | Required provider absent or unreadable | Dependent authoring remains unchanged; exact missing prerequisite and continuation reported; independent inspection may finish; no manual replay or ungranted install |
 | Advice or assessment before onboarding | Useful scoped result; no adoption, new records or other writes without a save grant |
+| Status or assessment with an excluded catalog item | Scoped Library selection is checked. No raw catalog lookup or use of the excluded item; supported observations and criteria still finish. |
 | Adjacent ordinary report/product task | Requested deliverable only; no evolve selection, onboarding or harness redesign |
 | Required pre-action logging | Recoverable scope, choice, rationale and authority precede the effect in the trace; later results preserve review/application/outcome distinctions and prior choice history |
 | Record writer contention | Existing owner's claim is retained; blocked writer performs no dependent effect or lost update; a fresh read/worktree is not treated as exclusion |

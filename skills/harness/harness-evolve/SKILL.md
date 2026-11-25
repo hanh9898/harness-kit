@@ -31,6 +31,11 @@ Use the appropriate reference, not the bundle:
 | Authority, team, standards or an explicitly selected factory | [Authority](../../../kit/authority/DESIGN.md), [team](../../../kit/team-workflow/TEAM.md), [task workflow](../../../kit/team-workflow/TASKS.md), [standards](../../../kit/standards/SELECT.md), [factory](../../../kit/FACTORY.md) |
 | Record repair, supersession, archival or cleanup | [Record maintenance](../../../kit/MAINTENANCE.md) |
 
+For any catalog ID named by a runbook, call `harness-library` internally to
+check current selection and retrieve only relevant details. If an item is
+excluded or unverified, do not use it as guidance; continue independent work
+and state any dependent limitation. No raw catalog fallback.
+
 ## Phase A: decide in the affected scope
 
 1. Record desired outcome, acceptance, consuming targets, protected scope and
@@ -50,11 +55,9 @@ Use the appropriate reference, not the bundle:
    only relevant Harness Glossary/ADR pointers. Group unanswered choices;
    respect current choices and constraints. Apply [method selection](CHANGE-FLOW.md)
    before recommendations or effects. Call `harness-library` by exact host ID
-   for relevant lookup and selection, including advisory work that relies on
-   kit resources. Use only the necessary operation/data; no direct CLI or
-   whole-bundle load. If unavailable, report the gap and continue independent
-   work. For separately authorized library changes call the exact operation;
-   applying in the repo remains a separate decision and permission.
+   for the scoped discovery need. For separately authorized library changes
+   call the exact operation; applying in the repo remains a separate decision
+   and permission.
 4. Separate facts, proposals and choices; cite user confirmation or actual
    delegation for that exact choice. Check `DesignReady` against the map and
    target; hold unresolved, incompatible or unproven dependencies. Advice
