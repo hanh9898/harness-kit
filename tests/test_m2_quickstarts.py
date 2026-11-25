@@ -135,18 +135,27 @@ def test_devin_registration_rejects_redirected_skills_directory(devin_project, t
     assert not list(outside.iterdir())
 
 
-@pytest.mark.parametrize("missing", ["python3", "realpath"])
-def test_devin_registration_checks_runtime_before_writing(devin_project, tmp_path, missing):
+@pytest.mark.parametrize(
+    ("missing", "expected_error"),
+    [("python3", "python3"), ("realpath", "realpath"), (None, "cannot run the pinned Library helper")],
+    ids=["missing-python3", "missing-realpath", "failing-helper"],
+)
+def test_devin_registration_checks_runtime_before_writing(devin_project, tmp_path, missing, expected_error):
     checkout, project, revision = devin_project
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     for command in {"sh", "git", "realpath", "mkdir", "ln", "python3"} - {missing}:
-        (bin_dir / command).symlink_to(shutil.which(command))
+        executable = bin_dir / command
+        if missing is None and command == "python3":
+            executable.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+            executable.chmod(0o755)
+        else:
+            executable.symlink_to(shutil.which(command))
 
     result = bootstrap_devin(checkout, project, revision, PATH=str(bin_dir))
 
     assert result.returncode == 2
-    assert missing in result.stderr.lower()
+    assert expected_error in result.stderr
     assert not (project / ".devin").exists()
 
 
