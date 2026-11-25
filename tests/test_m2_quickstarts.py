@@ -766,6 +766,7 @@ class PinnedBotKit:
 
 @dataclass(frozen=True)
 class SelectionReadback:
+    bot_id: str
     handoff: dict
     linked_digest: str
 
@@ -779,7 +780,7 @@ def file_identity(path):
     return stat.st_dev, stat.st_ino
 
 
-def read_bot_selections(pin, binding, scope_ref, owner_ref):
+def read_bot_selections(pin, binding, bot_id, scope_ref, owner_ref):
     if binding is not None:
         try:
             target = binding.store.resolve(strict=True)
@@ -830,7 +831,7 @@ def read_bot_selections(pin, binding, scope_ref, owner_ref):
             raise AddBotStop("Preview: linked content pin mismatch")
 
         if binding is not None:
-            selections[piece] = SelectionReadback({
+            selections[piece] = SelectionReadback(bot_id, {
                 "version": 1, "operation": "selection", "source": "supplied", "id": piece,
                 "store_ref": binding.target.as_uri(), "scope_ref": scope_ref,
                 "selection_revision": selected["revision"], "distribution_revision": pin.revision,
@@ -918,10 +919,10 @@ def test_add_bot_selection_stops_without_writes(bot_setup_kit, fault, outcome):
 
     before = fixture_files(project)
     if outcome is None:
-        assert read_bot_selections(pin, binding, scope, owner) == {}
+        assert read_bot_selections(pin, binding, "bot-a", scope, owner) == {}
     else:
         with pytest.raises(AddBotStop, match=outcome):
-            read_bot_selections(pin, binding, scope, owner)
+            read_bot_selections(pin, binding, "bot-a", scope, owner)
     assert fixture_files(project) == before
 
 
@@ -954,7 +955,8 @@ def add_disabled_fixture_bot(config, proposed, routes, selections, grant, observ
             or observed.role_digest != selections["software-factory"].linked_digest
             or observed.tools != ("read",)):
         return None
-    if any(readback.handoff["scope_ref"] != target.scope_ref for readback in selections.values()):
+    if any((readback.bot_id, readback.handoff["scope_ref"]) != (target.bot_id, target.scope_ref)
+           for readback in selections.values()):
         return None
 
     current = json.loads(config.read_text())
@@ -1024,7 +1026,7 @@ def test_disabled_bot_quickstart(bot_setup_kit, two_bots, tmp_path, monkeypatch,
     catalog_before = fixture_files(pin.checkout / "kit")
     observations = {}
     for phase, proposal in zip(("Setup", "Evolve"), proposals, strict=True):
-        scope = proposal["binding"]["scope_ref"] = f"project:{project / proposal['bot_id']}"
+        scope = proposal["binding"]["scope_ref"] = f"project:{project}"
         for route in routes:
             if route["target_bot_id"] == proposal["bot_id"]:
                 route["scope_ref"] = scope
@@ -1033,12 +1035,13 @@ def test_disabled_bot_quickstart(bot_setup_kit, two_bots, tmp_path, monkeypatch,
         before = fixture_files(project)
         if host == "pi":
             home_before = fixture_files(home)
-        selections = read_bot_selections(pin, binding, scope, target.owner_ref)
+        selections = read_bot_selections(pin, binding, target.bot_id, scope, target.owner_ref)
         assert fixture_files(project) == before
         if host == "pi":
             assert fixture_files(home) == home_before
         assert set(selections) == {"software-factory", "bot-portable-template"}
         for piece, readback in selections.items():
+            assert readback.bot_id == target.bot_id
             assert readback.handoff["store_ref"] == store.as_uri()
             assert readback.handoff["scope_ref"] == scope
             assert readback.handoff["effective"] is True
@@ -1059,7 +1062,10 @@ def test_disabled_bot_quickstart(bot_setup_kit, two_bots, tmp_path, monkeypatch,
             "software-factory": selections["software-factory"],
         }, target, role) is None
         if prior["bots"]:
+            assert first_selections["software-factory"].handoff["scope_ref"] == scope
             assert add_disabled_fixture_bot(config, proposal, routes, first_selections, target, role) is None
+            mixed = {**selections, "bot-portable-template": first_selections["bot-portable-template"]}
+            assert add_disabled_fixture_bot(config, proposal, routes, mixed, target, role) is None
         else:
             first_selections = selections
         assert fixture_files(project) == before
@@ -1081,7 +1087,7 @@ def test_disabled_bot_quickstart(bot_setup_kit, two_bots, tmp_path, monkeypatch,
         already_applied = fixture_files(project)
 
         started = perf_counter()
-        smoke_selections = read_bot_selections(pin, binding, scope, target.owner_ref)
+        smoke_selections = read_bot_selections(pin, binding, target.bot_id, scope, target.owner_ref)
         smoke_config, smoke_triggers = read_disabled_fixture_config(project / f"{target.bot_id}-host.json")
         observations[phase] = (perf_counter() - started) * 1000
         assert smoke_selections == selections
