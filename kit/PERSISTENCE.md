@@ -137,8 +137,9 @@ source, revision, caller, and host invocation policy. Invoke it once only if
 the caller has permission and the route can use the approved destination.
 Never invoke a user-only route on the user's behalf. The [pinned upstream
 route](https://github.com/mattpocock/skills/blob/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/productivity/handoff/SKILL.md)
-is user-only and defaults to temporary storage. Neither reading its source
-nor finding a temp file qualifies as a durable handoff.
+is user-only and requires the OS temporary directory, not the workspace.
+Neither reading its source nor finding a temp file qualifies as a durable
+handoff.
 
 If the route is missing, restricted, or cannot use the approved destination,
 say why it was not used. Do not claim `handoff` was invoked. Return only an
