@@ -5,6 +5,9 @@ description: Diagnose, assess or improve an existing Harness. Use for drift, age
 
 # Harness Evolve
 
+An explicit request takes the direct path. Otherwise, start with silent,
+read-only research under the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md).
+
 Start from the requested result, the actual consuming host and its current
 authority. Keep existing records, including `needs-change` work, and reopen only
 what affects this request. A missing setup catalog or `harness/record/` does not
@@ -52,7 +55,8 @@ and state any dependent limitation. No raw catalog fallback.
    use the [tracker contract](../harness-implement/WORK.md#publish-or-update).
    Product references may inform the work when readable, but are not a write
    destination. No substitute using repo defaults, filtered views or labels.
-2. Select affected nodes and dependencies using [discovery](../harness-setup/DISCOVERY.md).
+2. Use the [discovery map](../harness-setup/DISCOVERY.md) to identify affected
+   nodes and dependencies. Do not invoke Setup's topic routes.
    Pass one checks current context and widens only for dependencies that could
    alter the result. Use relevant authorized runtime evidence; its absence is
    not a blocker for static cases or a basis for invented improvements. Revisit

@@ -8,6 +8,13 @@ and link per decision, waiting and under-specified work, approved deferrals
 with reasons, and approved out-of-scope items. Keep detailed rationale,
 evidence and results in their own sources.
 
+Entry selection (H1) opens a request, not a settled node or a write grant.
+At H2 confirm the actual node decision and, separately, the final design
+revision. The [discovery map](DISCOVERY.md) owns route order and parent
+eligibility. Topic results are inline input to the map writer, not tickets
+or checkpoints of their own. An approved deferral records why and when to
+reopen it; a blocker or silence is not a deferral.
+
 ## Record and close by result
 
 | Ticket | Close only when |

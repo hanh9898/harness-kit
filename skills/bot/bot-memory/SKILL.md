@@ -5,6 +5,10 @@ description: Read or update scoped, durable Bot rules in an opted-in instance wi
 
 # Bot memory
 
+Use the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md) before
+choosing an operation. A scoped start or resume that calls for a Memory
+read goes direct. A bare invocation is not opt-in to inspect a store.
+
 Read on start or resume. Refresh before relying on an old session's view.
 Resolve the exact skill and source. Confirm opt-in and use the
 [qualified host route](HOST.md) before accessing a store.
