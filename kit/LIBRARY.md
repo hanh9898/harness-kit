@@ -5,13 +5,35 @@ The public entry is `harness-library`. `scripts/kit` retrieves supplied pieces, 
 Choose an existing suitable store first. For the local operation, pass an explicitly authorized SQLite file path with `--store`. Its parent must already exist. Project-governed stores should live in project-versioned storage when appropriate; commit or otherwise sync the store under the project's policy for continuation beyond the current machine. A local file alone does not survive disposal. Personal stores need an authorized durable personal location. No default silently writes outside the invoking project. Local SQLite is supported on a filesystem with working SQLite locks; remote filesystems and synchronization of independently edited database copies are unqualified.
 
 ```
-<kit>/scripts/library --store <path> --require-existing-store search "focused term"
+<kit>/scripts/library --store <path> --require-existing-store search "focused term" --kit-dir <pinned-catalog>
 <kit>/scripts/library --store <path> save --input <resource.json> --expect-revision 0
 <kit>/scripts/library --store <path> show report-facts
 <kit>/scripts/library --store <path> history report-facts
 ```
 
-`search` reads effective supplied pieces/rules and that one store, returns at most 12 summaries by default (`--limit` 1–50), and reports truncation. Narrow a truncated query; it is not proof that no reusable material exists. Use `kit list P` and `kit list delegation` for those references. `search --include-disabled` also exposes excluded matches with `enabled: false`; it is inspection, not restoration. Filtering precedes the result limit. `show` retrieves a saved resource by exact ID with its current selection state; supplied IDs use `kit show`. Read-only operations never create a store. Corrupt or inaccessible stores fail visibly rather than masquerading as empty results.
+`search` reads effective supplied pieces/rules and that one store, returns at most 12 summaries by default (`--limit` 1–50), and reports truncation. Narrow a truncated query; it is not proof that no reusable material exists. `search --include-disabled` also exposes excluded matches with `enabled: false`; it is inspection, not restoration. Filtering precedes the result limit. `library show` retrieves a saved resource by exact ID with its current selection state. Read-only operations never create a store.
+
+## Pin the consumer catalog
+
+Resolve the CLI executables from the trusted harness-kit checkout. Resolve
+`<pinned-catalog>` separately: the absolute `kit/` directory at the consumer's
+verified distribution revision. Check the source revision and file contents
+against the consumer's binding. A path or matching row digest alone does not
+verify the revision. Reuse the verified path for `library search`, supplied
+`selection` and `selection-history`, and supplied grant issuance, mutation
+and readback. For supplied detail or lists use the same path with
+`<kit>/scripts/kit --dir <pinned-catalog> show <id>` or
+`<kit>/scripts/kit --dir <pinned-catalog> list <group>`. Check that a supplied
+search hit's `retrieve` path matches the pin and use the trusted executable.
+Quote paths with spaces.
+
+Omitting the directory flag selects the executable's bundled catalog. Use
+that directory explicitly if it is the verified pin; never retry with it
+after a pin or configured-store error. A history command can still return
+stored records for a retired resource; a successful history read alone does
+not prove that the pinned catalog is present or valid. Verify the pin before
+reading history. Raw `kit` output is provenance only and does not verify a
+store or a selection.
 
 ## Configured store reads
 
@@ -101,8 +123,8 @@ For later consumer adoption or legacy upgrade, evolve's [adoption procedure](../
 Use a guarded store for automated writes whose authority can be withdrawn. A trusted caller with authority to manage grants issues one against the **target store**, after inspecting the target revision and approving the exact input file. The first successful `grant-write` creates or enables guarding on that store. Existing stores that never enabled guarding keep their prior CLI behavior. A guarded store always requires a grant for `save`, `update`, `disable` and `restore`, even when no active grants remain. Reads are unchanged.
 
 ```
-<kit>/scripts/library --store <path> grant-write disable reread-source-before-write --source supplied --input <decision.json> --expect-revision 0 --ttl-seconds 60
-<kit>/scripts/library --store <path> disable reread-source-before-write --source supplied --input <decision.json> --expect-selection-revision 0 --write-grant <write_grant>
+<kit>/scripts/library --store <path> grant-write disable reread-source-before-write --source supplied --kit-dir <pinned-catalog> --input <decision.json> --expect-revision 0 --ttl-seconds 60
+<kit>/scripts/library --store <path> disable reread-source-before-write --source supplied --kit-dir <pinned-catalog> --input <decision.json> --expect-selection-revision 0 --write-grant <write_grant>
 <kit>/scripts/library --store <path> revoke-write <write_grant>
 ```
 
@@ -112,20 +134,28 @@ Success returns JSON with `write_grant` (the ID to pass to the mutation) and `ex
 
 To cancel before the worker writes, use `revoke-write` against the same store with the original grant ID. An old ID cannot revoke its replacement. The mutation checks and consumes the grant in the same SQLite write transaction that compares the revision and appends history. If revocation commits first, the mutation fails with no history change even if its revision is still current. If the mutation commits first, revocation does not undo it. A rolled-back transaction does not consume the grant; when the outcome is uncertain, inspect history before retrying.
 
-This is a local guard for calls through the current Library CLI, not an authentication or permissions boundary. The host must establish who may issue or revoke grants, confirm the route and supplied catalog, and prevent workers from bypassing the CLI or issuing their own grants. An upstream claim or decision changing does not revoke a grant here: revoke it at the target. Do not rely on this guard for older CLIs, raw SQLite writes, independent database copies or non-Library targets.
+This is a local guard for calls through the current Library CLI, not an authentication or permissions boundary. The grant does not bind the caller or the catalog revision. The host must verify the caller, scope, route and catalog at both issuance and mutation, keep the token private to the intended writer, and prevent workers from bypassing the CLI or issuing their own grants. If the pin or authority changes, revoke the outstanding grant at the target and reconcile before reissuing. Do not rely on this guard for older CLIs, raw SQLite writes, independent database copies or non-Library targets.
 
 ## Exclusion and explicit restoration
 
 Selection is an overlay in the authorized store, separate from supplied files and saved content revisions. Its identity is `(source, exact resource ID)` in that store: `supplied` denotes this harness-kit catalog, `saved` denotes this store's draft. Matching ID strings in the two sources remain independent. Replacing or moving the supplied distribution, saving or updating content (including parent replacement and carry-forward), or temporarily removing and reintroducing a supplied ID does not clear its exclusion. Keep the authoritative store when updating the distribution. Copying/resetting a store is not a distribution update.
 
+Consumers bind selection evidence to `(store_ref, scope_ref, source, canonical_id)`
+and the intended Bot and pin. Sharing a store does not share selection refs,
+adoption evidence or grants. The CLI has one selection stream per source and ID
+in a store, not per Bot. A row owned by another scope may constrain use but is
+not that Bot's selection evidence or authority. If two scopes need independent
+writes to the same stream, stop and resolve distinct authorized targets; do not
+reuse the other Bot's revision or grant.
+
 ```
-<kit>/scripts/library --store <path> --require-existing-store selection reread-source-before-write --source supplied
-<kit>/scripts/library --store <path> disable reread-source-before-write --source supplied --input <decision.json> --expect-selection-revision 0
-<kit>/scripts/library --store <path> --require-existing-store selection-history reread-source-before-write --source supplied
-<kit>/scripts/library --store <path> restore reread-source-before-write --source supplied --input <decision.json> --expect-selection-revision 1
+<kit>/scripts/library --store <path> --require-existing-store selection reread-source-before-write --source supplied --kit-dir <pinned-catalog>
+<kit>/scripts/library --store <path> disable reread-source-before-write --source supplied --kit-dir <pinned-catalog> --input <decision.json> --expect-selection-revision 0
+<kit>/scripts/library --store <path> --require-existing-store selection-history reread-source-before-write --source supplied --kit-dir <pinned-catalog>
+<kit>/scripts/library --store <path> restore reread-source-before-write --source supplied --kit-dir <pinned-catalog> --input <decision.json> --expect-selection-revision 1
 ```
 
-Use exact IDs for supplied pieces, rules, patterns (`P6`) and delegation references (`axis1`, `step2`, `combine`), or saved pieces/rules/workflows. Selection commands accept `--kit-dir` to inspect a supplied distribution elsewhere. `kit list/show` remains a raw catalog/provenance interface and has no store context; before selecting a directly retrieved resource, check `library selection` in the intended store. Excluded material remains inspectable for history, comparison and explicit restoration. `enabled` reflects the stored choice, or the default if no choice exists (false during a rename hold); `available` describes whether the current resource exists; `effective` requires both. Neither effective selection nor restoration establishes qualified use or consumer adoption.
+Use exact IDs for supplied pieces, rules, patterns (`P6`) and delegation references (`axis1`, `step2`, `combine`), or saved pieces/rules/workflows. Before selecting directly retrieved content, check `library selection` in the intended store with the same pin. Excluded material remains inspectable for history, comparison and explicit restoration. `enabled` reflects the stored choice, or the default if no choice exists (false during a rename hold); `available` describes whether the current resource exists; `effective` requires both. Neither effective selection nor restoration establishes qualified use or consumer adoption.
 
 Selection JSON contains `owner`, `scope`, `decision`, `evidence` and `continuation`, with the same types and authority rules as saves. Include additional context, alternatives, known-use coverage and pre-action record references as applicable. For example:
 
@@ -163,7 +193,7 @@ If a new ID has no selection record, the CLI holds it out of selection when all 
 Verify the rename in the catalog source and record that evidence in the decision. To confirm `previous-hook` as the predecessor, add the top-level field `"confirm_rename_from": "previous-hook"` to the disable input and use the predecessor's owner and scope:
 
 ```
-<kit>/scripts/library --store <path> disable replacement-hook --source supplied --kit-dir <renamed-kit> --input <decision.json> --expect-selection-revision 0
+<kit>/scripts/library --store <path> disable replacement-hook --source supplied --kit-dir <pinned-catalog> --input <decision.json> --expect-selection-revision 0
 ```
 
 The new ID starts its own exclusion history with an `inherit-disable` record pointing to the predecessor revision; the old history is unchanged. After confirmation, later content edits do not clear the exclusion, and only an explicit restore on the new ID re-enables it. A predecessor revision can be confirmed once. A plain `disable` records an independent decision, not lineage. The CLI cannot recognize a rename if any non-ID fields differ from the disable snapshot: reconcile ID-only changes first, or explicitly disable the replacement before using it. No lineage is inferred across sources, stores, or distributors, or for Markdown resources.
