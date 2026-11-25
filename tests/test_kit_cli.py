@@ -3,7 +3,7 @@ import os
 import re
 import subprocess
 
-from conftest import CHECK_KIT, KIT, KIT_CLI, run, row, write_kit
+from conftest import CHECK_KIT, COLUMNS, KIT, KIT_CLI, run, row, write_kit
 
 
 def kit(tmp_path, *args):
@@ -31,6 +31,12 @@ def test_piece_lookup_rejects_id_and_exact_name_ambiguity(tmp_path):
     result = run(KIT_CLI, "--dir", root, "show", "alpha-hook")
     assert result.returncode == 2 and "matches more than one piece" in result.stderr
 
+
+def test_piece_lookup_supports_custom_group_alias(tmp_path):
+    root = write_kit(tmp_path, [row("custom-hook", "Z", legacy_id="Z01")],
+                     header=COLUMNS + ["legacy_id"])
+    result = run(KIT_CLI, "--dir", root, "show", "Z01")
+    assert result.returncode == 0 and result.stdout.startswith("id: custom-hook\n")
 
 def test_list_without_group_shows_group_names_with_counts_not_pieces(tmp_path):
     r = kit(tmp_path, "list")

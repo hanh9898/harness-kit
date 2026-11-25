@@ -4,7 +4,7 @@ import re
 
 
 SLUG = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*")
-LEGACY_ID = re.compile(r"[A-N][0-9]{2}")
+LEGACY_ID = re.compile(r"[A-Z][0-9]{2}")
 MARKDOWN_SELECTOR = re.compile(r"combine|(?:p|axis|step)[0-9]+")
 
 
