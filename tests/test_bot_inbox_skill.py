@@ -44,36 +44,64 @@ def test_skill_links_to_packaged_host_routes_and_qualification():
 
 
 @pytest.mark.parametrize(
+    ("key", "fields"),
+    [
+        ("Card key", "bot_id, respondent, subject-id, subject-revision, kind, exact-action"),
+        ("Delivery key", "card-key, logical-delivery-id, approved-route-id"),
+    ],
+)
+def test_inbox_identity_contract(key, fields):
+    body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    assert f"**{key}:** `({fields})`" in body
+
+
+@pytest.mark.parametrize(
     ("filename", "section", "guardrails"),
     [
         ("SKILL.md", "Keep one active card per action", (
-            "authorized respondent, canonical subject and requested action",
             "store-enforced uniqueness or a verified single writer",
             "cannot set priority or defer cards",
+            "supersede the old card before opening its replacement",
+            "suppress its pending delivery",
+            "a repeated or late event does not reopen a settled ask",
         )),
         ("SKILL.md", "Deliver and handle replies separately", (
             "separate send authority",
-            "stable delivery key",
             "on unknown outcome, reconcile before retrying",
-            "wrong person or thread",
-            "independent grant gate",
+            "receipt with the ask ids and delivery keys it covers",
+            "does not change tasks status, assignee or session claim, or github pr status",
+        )),
+        ("SKILL.md", "Validate and record replies", (
+            "active card in the bound bot's inbox",
+            "authenticated respondent, canonical subject, current subject revision, kind, exact action and approved reply thread",
+            "do not settle on a mismatch",
+            "record a matching answer once",
+            "decline settles only the card",
+            "only an authenticated yes can send the existing request to the independent grant gate",
+            "a reply cannot wake a bot or mint a grant",
         )),
         ("HOST.md", "Resolve the route", (
             "explicit opt-in",
             "stop the dependent operation on unresolved id/source conflicts",
+            "if native cannot prove the reply's subject revision, require manual review with no effect",
         )),
         ("HOST.md", "Qualify in an isolated Bot", (
             "one active card for the action and one initial delivery",
             "zero additional deliveries on replay",
             "zero effect grants",
             "zero results delivered across routes",
+            "wrong bot, actor, thread, subject, revision or action",
+            "tasks and github state stay unchanged",
+            "upsert, lookup, delivery and reconciliation",
             "manual reconciliation is evidence only for the manual route",
         )),
     ],
 )
 def test_documented_guardrails_stay_in_their_operation_section(filename, section, guardrails):
     body = (SKILL / filename).read_text(encoding="utf-8")
-    guidance = body.split(f"\n## {section}\n", 1)[1].split("\n## ", 1)[0]
+    _, heading, remainder = body.partition(f"\n## {section}\n")
+    assert heading, f"Missing section: {section}"
+    guidance = remainder.split("\n## ", 1)[0]
     normalized = " ".join(guidance.lower().split())
     for guardrail in guardrails:
         assert guardrail in normalized
