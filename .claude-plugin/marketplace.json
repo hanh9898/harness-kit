@@ -8,7 +8,7 @@
     {
       "name": "harness-kit",
       "source": "./",
-      "description": "Progressive harness-setup, scoped harness-evolve and reusable-resource harness-library with the shared kit."
+      "description": "Harness setup, scoped evolution, verified implementation and reusable resources."
     }
   ]
 }

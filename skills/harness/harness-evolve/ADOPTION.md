@@ -15,8 +15,8 @@ their discovery routes; fill only gaps that affect this request. A legacy layout
 is not a reason to restart onboarding or the old six-module checklist.
 
 Read the selected source and complete assembly contents, including applicable
-child material. Use the library's [operation contract](../../../kit/LIBRARY.md)
-for source identity, content/origin history and independent selection history.
+child material. Call `harness-library` for source identity, content/origin
+history, lineage and independent selection history in the exact store.
 Base provenance and transformation claims on decoded source values and actual
 target bytes. JSON display escaping is not evidence of literal content escapes.
 Claim a normalization only when a before/after comparison demonstrates it;
@@ -89,9 +89,10 @@ selected source/selection, target, contract and authority can change after a pla
 Compare with the captured basis. Reconcile material differences and refresh the
 affected decision before writing; preserve valid late changes. A newly available
 library revision is not permission to substitute it for a pinned selection.
-Use a suitable conditional native operation where available. Cooperating local
-record locks do not protect against arbitrary external writers; serialize or
-block where the required target protection is unavailable.
+Use the [Implement write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation).
+Use a target-enforced atomic condition or, when allowed, a live authorized
+supervisor for each non-atomic send. Cooperating local record locks alone do
+not protect against late writes.
 
 Inspect exact applied artifacts and protected scope, including the library and
 unselected consumers. Record each target's selected revision, actual effect,

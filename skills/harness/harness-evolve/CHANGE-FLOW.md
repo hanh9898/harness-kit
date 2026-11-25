@@ -15,8 +15,9 @@ Use this composition reference from the owning workflow; it does not change that
 
 Select by the work you will actually perform, including supporting edits and
 operations. Calling a task "already set up", "maintenance" or "babysitting" does
-not remove prerequisites for its new effects. Use the owning entry's kit CLI:
-inspect relevant summaries, then `kit show <id>` for the determining sources.
+not remove prerequisites for its new effects. Invoke `harness-library` for a
+scoped lookup and inspect only the determining sources. Do not call the
+catalog or library CLI directly from the owning workflow.
 Reuse complete source reads already available in this context when their identity
 and applicability are unchanged; a summary or remembered ID is not that read.
 
@@ -61,8 +62,8 @@ Browse available original descriptions and kit summaries, then load the selected
 | Broken or recurring behavior | Original diagnosing-bugs with representative evidence |
 | Missing source facts | Original research with attributable evidence |
 | Actual domain terms or architectural choices | Original domain-modeling and its artifact/writeback criteria |
-| Larger specified work | Appropriate specification, ticket and implementation methods with the actual tracker |
-| Unsettled design, including a short interview | Applicable original interview/design method; longer work may need a multi-session design method; use kit knowledge before questioning |
+| Approved work that needs preparation, publication or execution | `harness-implement` and the verified route for the missing spec, ticket or execution result |
+| Unsettled Harness design | [Node discovery](../harness-setup/DISCOVERY.md) with original grilling and domain-modeling; do not invoke user-only wrappers |
 | Requested retrospective | Original retrospective method; recommendations stay distinct from adoption |
 | Reusable resource authoring | Library composition with origin, ownership, source and consumption limits |
 

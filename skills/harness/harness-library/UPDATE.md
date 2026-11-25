@@ -1,6 +1,6 @@
 # Compare and update library material
 
-Use the entry's grants, original methods and standards. Library updates change saved content; consumer adoption remains separate. Read the [operation contract](../../../kit/LIBRARY.md#origin-comparison-and-updates) for the local commands and input fields.
+Use the entry's grants, original methods and standards. Library updates change saved content; consumer adoption remains separate. Read the [operation contract](../../../kit/LIBRARY.md#origin-comparison-and-updates) for the local commands and input fields. Apply the [write guard](WRITE.md#write-guard) before an effect.
 
 1. Inspect live `show`, `history`, `selection` and `selection-history`, the actual candidate source, and known uses within scope. Establish the complete selected contents, including nested children, from attributable snapshots. The local operation stores assembly contents in `content`; referenced files remain independent. If required contents or history are unavailable, name that gap. Reconcile an uncertain prior effect before retrying; a completed update needs no duplicate revision.
 2. Run `compare` with the candidate's reference, revision and exact snapshot. Examine old origin versus customization, old origin versus candidate, and current selection versus candidate. Preserve unknown history as unknown. A textually clean merge is only a textual observation. Read the applicable target contract and check meaning, dependencies, applicability, authority and evidence requirements, including interactions between changes on different lines.

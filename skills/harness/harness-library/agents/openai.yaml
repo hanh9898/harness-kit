@@ -1,0 +1,5 @@
+interface:
+  display_name: "Harness Library"
+  short_description: "Find, verify and maintain reusable Harness resources"
+policy:
+  allow_implicit_invocation: true

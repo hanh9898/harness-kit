@@ -1,6 +1,5 @@
 """harness-evolve structural and boundary checks; runtime behavior is covered by CHECKLIST.md."""
 import re
-import shutil
 
 from conftest import CHECK_BOUNDARY, ROOT, TOKENS, run
 
@@ -43,21 +42,3 @@ def test_skill_has_no_machine_absolute_paths():
 def test_skills_have_no_forbidden_tokens():
     r = run(CHECK_BOUNDARY, "--root", ROOT / "skills", "--tokens", TOKENS, "--strict")
     assert r.returncode == 0, r.stdout
-
-
-def test_kit_commands_resolve_from_a_foreign_copy(tmp_path):
-    cmds = []
-    for f in SKILL.glob("*.md"):
-        for line in f.read_text(encoding="utf-8").splitlines():
-            if "kit/scripts/kit" in line and re.match(r"\S+/kit/scripts/kit ", line):
-                assert line.startswith("<skill-dir>/../../../kit/scripts/kit "), (f.name, line)
-                cmds.append(line)
-    assert cmds
-    plugin = tmp_path / "somewhere else" / "plug"
-    shutil.copytree(ROOT, plugin, ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache"))
-    skill_dir = plugin / "skills" / "harness" / "harness-evolve"
-    kit = skill_dir / ".." / ".." / ".." / "kit" / "scripts" / "kit"
-    out = run(kit, "list")
-    assert out.returncode == 0 and out.stdout.strip()
-    assert run(kit, "show", run(kit, "list", out.stdout.split()[0]).stdout.split()[0]).returncode == 0
-    assert (skill_dir / "UPDATE.md").is_file()

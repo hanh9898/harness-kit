@@ -1,84 +1,94 @@
 ---
 name: harness-evolve
-description: Improve an existing agent harness or way of working. Use for recurring context or output problems, authority gaps, tool/integration operations, interrupted-work recovery, workflow changes, selected-update adoption, legacy upgrades, record correction or archival/cleanup, explicitly selected factory arrangements, cost or latency concerns, operating status or spend questions, and task-specific context, capability advice, assessment, retrospectives or experiments. Ordinary application fixes and today's deliverables keep their existing route.
+description: Diagnose, assess or improve an existing Harness. Use for drift, agent guidance, tools, workflows, authority, costs, experiments and resource adoption. Change only the affected scope; ordinary product work belongs elsewhere.
 ---
 
 # Harness Evolve
 
-Deliver the requested improvement, or the narrower context, observation, advice, assessment or learning result. Use a proportional Plan-Do-Study-Act loop for improvement: reconcile, choose, act, assess and continue. A routine correction needs focused execution and checks, not an experiment.
+Start from the requested result, the actual consuming host and its current
+authority. Keep existing records, including `needs-change` work, and reopen only
+what affects this request. A missing setup catalog or `harness/record/` does not
+require onboarding. New foundations belong to Setup; library-only work belongs
+to `harness-library`. Classify a change by what it changes, not where it was
+reported or where its files live.
 
-Complete step 2 before recommending a change or taking an application effect, including a supporting record edit or schedule creation. Read-only reconciliation can proceed first; step 3 owns the required pre-action capture.
+| Intent | Path |
+| --- | --- |
+| Observe, advise, assess or retrospect | Read current evidence and open only relevant questions. Return findings, limits and the next step. Do not create a record, schedule, activation or implementation ticket for advice. |
+| Repair a small, understood problem | Confirm the failure, current basis, exact target and check. Use a minimal implementation ticket without another grill. |
+| Design a change with unresolved choices or multiple consumers | Track affected nodes and real dependencies. Settle the decision before preparing implementation. |
+| Diagnose or run a bounded experiment | Define question, baseline, quality floor, allowed effects and stop rule. Report negative or inconclusive results; no automatic adoption. |
 
-## 1. Reconcile the request and relevant state
+Use the appropriate reference, not the bundle:
 
-Identify the requested result, affected guidance or capability, consuming targets and scope. Reuse facts, reasoning, criteria and grants already supplied. Default effects to the current repository; this boundary is not blanket write permission. Another repository, host installation or user-level configuration needs an actual applicable grant. A one-call grant can cover lasting effects without granting future calls.
+| Need | Reference |
+| --- | --- |
+| Drift or recovery | [Drift](DRIFT.md), [coordinated recovery](../../../kit/RECOVERY.md) |
+| Existing selection, upgrade, replacement or carry-forward | [Adoption](ADOPTION.md) |
+| Access to task-specific knowledge or instruction design | [Context](CONTEXT.md), [instruction and response](../../../kit/instruction-response/DESIGN.md) |
+| Tools, failures or uncertain tool effects | [Tool operations](../../../kit/TOOL-OPERATIONS.md) |
+| Status, spend, assessment, learning or comparison | [Observation](OBSERVE.md), [assessment](ASSESS.md), [retrospective](RETROSPECTIVE.md), [experiment](EXPERIMENT.md) |
+| Authority, team, standards or an explicitly selected factory | [Authority](../../../kit/authority/DESIGN.md), [team](../../../kit/team-workflow/TEAM.md), [task workflow](../../../kit/team-workflow/TASKS.md), [standards](../../../kit/standards/SELECT.md), [factory](../../../kit/FACTORY.md) |
+| Record repair, supersession, archival or cleanup | [Record maintenance](../../../kit/MAINTENANCE.md) |
 
-Read the project's guidance, selected standards, relevant live targets and discoverable current record/history. Reuse adequate arrangements, including legacy records and `needs-change` work. A missing `harness/record/` directory does not require onboarding. For drift or unfinished work, read [DRIFT.md](DRIFT.md) and reconcile only what can affect this request.
+## Phase A: decide in the affected scope
 
-Route by the final result: project onboarding belongs to setup; reusable material management belongs to library; applying material to this project belongs here. Compose relevant library work internally. Ordinary product fixes and current reports retain their ordinary route. Advice, discovery before onboarding, assessment and retrospective requests authorize their stated result, not adoption or new project records. Save only when authorized.
+1. Record desired outcome, acceptance, consuming targets, protected scope and
+   current grants. For multi-step work, use the shared [decision map](../harness-setup/DECISION-MAP.md).
+   A simple case can use an existing record or an in-session summary.
+   Check the Harness and product destinations when trackers are relevant;
+   use the [tracker contract](../harness-implement/WORK.md#publish-or-update).
+   Product references may inform the work when readable, but are not a write
+   destination. No substitute using repo defaults, filtered views or labels.
+2. Select affected nodes and dependencies using [discovery](../harness-setup/DISCOVERY.md).
+   Pass one checks current context and widens only for dependencies that could
+   alter the result. Use relevant authorized runtime evidence; its absence is
+   not a blocker for static cases or a basis for invented improvements. Revisit
+   a deferred choice only if the new objective or its trigger makes it relevant.
+3. Pass two resolves actionable questions in dependency order. Use one context
+   per affected node that needs grilling, with both foundation skills and
+   only relevant Harness Glossary/ADR pointers. Group unanswered choices;
+   respect current choices and constraints. Apply [method selection](CHANGE-FLOW.md)
+   before recommendations or effects. Call `harness-library` by exact host ID
+   for relevant lookup and selection, including advisory work that relies on
+   kit resources. Use only the necessary operation/data; no direct CLI or
+   whole-bundle load. If unavailable, report the gap and continue independent
+   work. For separately authorized library changes call the exact operation;
+   applying in the repo remains a separate decision and permission.
+4. Separate facts, proposals and choices; cite user confirmation or actual
+   delegation for that exact choice. Check `DesignReady` against the map and
+   target; hold unresolved, incompatible or unproven dependencies. Advice
+   alone stops here. For a repair with settled scope, the evidence and
+   prior decision can satisfy this phase without open discovery.
 
-For record corrections, supersession, competing updates, archival or cleanup, read [record maintenance](../../../kit/MAINTENANCE.md). Deliver the scoped maintenance result using existing stores; preview disposal against live ownership, references and retention before effects.
+## Phase B: prepare, apply and verify
 
-For selected-update adoption, parent replacement, historical customization carry-forward or legacy upgrade, read [ADOPTION.md](ADOPTION.md). Reconcile each consuming target independently; preserve valid applied work and effective criteria.
+Read [UPDATE.md](UPDATE.md) before effects. Reuse the existing durable record,
+integration owner and current adoption procedure. A proposed rule does not
+authorize itself. Document timing, active grants and pre-action state.
 
-For an authority model, delegated-choice review/calibration, whether an action is permitted, legacy delegation migration, or a core/standard/provider replacement, read [authority design](../../../kit/authority/DESIGN.md) before resolving the result. This includes assessment-only grant questions; a concrete disposition needs no model redesign or adoption. Preserve actual grants, selected controls and the prior adoption procedure.
+Independently verify only needed skill routes on Devin using the
+[route contract](../harness-implement/ROUTES.md). Reuse current evidence or
+inspect effective host configuration and run a permitted no-write probe. Use
+the resulting ID/revision, scope, invocation context, status and evidence; do
+not rerun Setup, install a route, or invoke a user-only upstream method.
+Valid artifacts eliminate their preparation routes. An unavailable or
+ambiguous execution route blocks execution, not drafting or independent work.
 
-For an explicitly selected factory design, application or unattended-readiness assessment, read [optional factory arrangement](../../../kit/FACTORY.md). Compose its task/service relationships and readiness limits; ordinary manual work does not select this capability.
+Call `harness-implement` through the host for the requested operation only.
+Pass the decision/revision and route evidence for preparation; pass the
+canonical ticket and assignment for execution. Apply its [separate gates](../harness-implement/WORK.md):
+draft without posting/target authority, publish only with a verified Harness
+destination and exact write grant (or authorized local small-work ticket),
+and execute only at `DispatchReady`. Use the target-enforced atomic write
+gate or direct authorized supervision for each eligible non-atomic send;
+otherwise stop. An uncertain write remains `Unknown` until reconciled.
 
-For task-specific knowledge, source selection or context access, read [CONTEXT.md](CONTEXT.md). Deliver usable material and a checked access route independently; application steps apply only to authorized saves or changes.
-
-For direct tool/integration requests, protocol failures or uncertain operation effects, read [tool operations](../../../kit/TOOL-OPERATIONS.md). Deliver the operation independently using adequate existing facilities; preserve this workflow's methods, grants, records and assessment.
-
-For a recovery request spanning affected tasks, artifacts or dependencies, read [coordinated recovery](../../../kit/RECOVERY.md). Deliver an ordered valid continuation independently, using current state and existing local repair; distinguish restored work from remaining blockers.
-
-For operating questions about running, stalled, completed or costly agent work, read [OBSERVE.md](OBSERVE.md). Deliver that observation independently; use the applicable source/method checks below and skip application steps when no effect is requested.
-
-For assessment-only or criterion-level outcome judgments, read [ASSESS.md](ASSESS.md). Use existing evidence to deliver justified recommendations and trade-offs; application steps apply only to separately authorized effects.
-
-For cost/latency diagnosis or a deliberate bounded experiment, read [EXPERIMENT.md](EXPERIMENT.md). Establish comparable evidence, test one scoped change and preserve selected quality; a rejected or inconclusive candidate can complete learning without adoption.
-
-**Done:** the objective, relevant live state, target boundary and authority are understood. A clear authorized correction proceeds to source selection in step 2 without another interview or confirmation; reconciliation alone does not complete the prerequisites for effects.
-
-## 2. Select evidence and applicable methods
-
-Start source selection with relevant kit summaries, then load determining detail before recommendations or dependent effects. Read-only inspection needed to identify the request and targets may precede this selection:
-
-```
-<skill-dir>/../../../kit/scripts/kit list
-<skill-dir>/../../../kit/scripts/kit list <group>
-<skill-dir>/../../../kit/scripts/kit show <id>
-```
-
-Resolve the loaded `SKILL.md` to its physical filesystem location before substituting its parent folder for `<skill-dir>` (for example, Python `Path(skill_path).resolve().parent`). A project skill symlink is a registration route; its apparent parent is not the kit root. If the computed kit path is missing, inspect the link target before declaring the source unavailable. Never load the whole catalog.
-
-For a clear correction, use the settled choice and a check that distinguishes the requested result from plausible wrong results. For an unclear recurring problem, inspect representative failures and diagnose before proposing a remedy. For an improvement claim, capture a suitable baseline and regression criteria. For a bounded experiment, retain its learning objective, limits and adoption boundary; rejection may be success.
-
-Reuse adequate native facilities and existing project material. Justify an addition by fit, adoption effort, context, integration, verification and maintenance cost, rather than a fixed delivery ladder. Selected standards and satisfied standards are different claims.
-
-Read [CHANGE-FLOW.md](CHANGE-FLOW.md), complete its action-based kit selection, and load applicable original methods, including current writing-for-agents for agent-read authoring. Preserve each selected method's prerequisites and completion contract. Check required providers before dependent effects; an unreadable source or unavailable invocation blocks only that work. Do not recreate a required unavailable method manually.
-
-For team responsibilities or reviewer identity/context/authority/independence, read [team arrangements](../../../kit/team-workflow/TEAM.md). For task contracts, review timing, transitions, handoffs, flow controls or tracker choices, read [task workflows](../../../kit/team-workflow/TASKS.md) and its applicable branches. Deliver team-only and workflow-only results independently; factory setup is optional.
-
-For direct standards selection, conflicting requirements or document-quality checks, read [standards selection](../../../kit/standards/SELECT.md). Deliver applicable requirements and machine/human check routes independently; selected, performed and satisfied remain distinct.
-
-For instruction conflicts, agent handoffs or model-output contracts, read [instruction and response design](../../../kit/instruction-response/DESIGN.md). Deliver usable guidance, examples and content/form checks independently; keep exchanged tool protocol validity separate.
-
-**Done:** the selection trace identifies the kit IDs actually read, their effect on each distinct harness change and its check, plus any material uncovered need or unavailable prerequisite. Required original methods are loaded. Use this trace to select the change or learning path and its limits before step 3; adequate existing evidence and grants need no new approval chain.
-
-## 3. Capture and execute within scope
-
-For application work, read [UPDATE.md](UPDATE.md) before effects. Establish a durable discoverable record and serialize its updates. Record actual selection and required rationale/authority before the affected action; preserve separate review, application and outcome meaning. Reuse adequate authoritative references. If required capture fails, block that action unless an authorized durable alternative satisfies the same contract; continue independent work.
-
-Apply the selected original methods and standards to the authorized targets. Keep project knowledge, scope, authority, selected references and evidence available throughout composition. Recheck authority before a consequential effect. Use the adoption procedure already in force; a new rule cannot authorize itself. Apply at the granted time, normally for future runs unless an explicit reconciliation boundary or qualified live migration is selected. Stop and revocation controls remain effective.
-
-**Done:** the selected work is applied, or the dependent blocker and completed independent work are explicit. A library change does not itself adopt it into other consumers.
-
-## 4. Assess and preserve continuation
-
-Read [CHECK-STEP.md](CHECK-STEP.md). Run the agreed checks against the actual result and unchanged scope. Inspect effects, not just command success. Review with the applicable method and selected standards; preserve failures and uncertainty. Adapt within the request's limits, or stop with the smallest useful next evidence step. Do not turn a failed check into passing by waiver.
-
-Update the current foundation, evidence and linked choice history using [UPDATE.md](UPDATE.md). For a resume, inspect uncertain effects before retry, retain valid completed work and avoid duplicate application or repeated settled questions.
-
-Report the requested outcome first, then the consulted kit IDs and their material contributions, performed checks and limits. Include populated exceptions: an outside-kit dependency, an unfollowed recommendation with reason, or unverified work with its missing condition. Give the discoverable record and precise next action. Provide a Resource / What it changed / Evidence table when requested. Advice-only work may finish in the conversation without writes.
-
-**Done:** the result is assessed within its actual evidence, records distinguish selected/applied/observed state, and remaining work is discoverable. Actual host qualification procedures and their limits are in [CHECKLIST.md](CHECKLIST.md).
+Use [CHECK-STEP.md](CHECK-STEP.md) and verify the actual assignment, behavior,
+affected target and protected scope. Check Harness behavior and relevant
+product regressions separately. Only mark `Verified` and close passed work
+with evidence readable to the receiving context; only Evolve updates its map.
+Distinguish selected, applied, observed working and measured improvement.
+Report what remains open, untested or blocked and the next action. Do not
+reapply finished effects on resume or create a new loop or schedule. See the
+[qualification checklist](CHECKLIST.md) for authorized behavior checks.

@@ -44,6 +44,19 @@ def test_json_output(tmp_path):
     assert {x["dir"]: x["name_mismatch"] for x in d["dirs"]} == {".claude/skills": 0, ".agents/skills": 1}
 
 
+def test_default_uses_bundled_skills_only_without_host_directories(tmp_path):
+    skill(tmp_path, "skills/group", "bundle", "---\nname: bundle\ndescription: Bundled\n---\n")
+    args = ("--root", tmp_path, "--json", "--strict")
+    bundled = run(*args)
+    assert bundled.returncode == 0, bundled.stdout
+    assert [d["dir"] for d in json.loads(bundled.stdout)["dirs"]] == ["skills"]
+
+    make(tmp_path)
+    host = json.loads(run(*args).stdout)
+    assert [d["dir"] for d in host["dirs"]] == [".claude/skills", ".agents/skills"]
+    assert host["total_chars"] == 25
+
+
 def test_json_top_limits_rows_per_directory_without_changing_totals_or_warnings(tmp_path):
     make(tmp_path)
     skill(tmp_path, ".claude/skills", "z", "---\nname: z\ndescription: biggest\n---\n")

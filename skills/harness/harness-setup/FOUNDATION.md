@@ -11,7 +11,7 @@ can satisfy several outcomes together. Fill only actual gaps under the grant.
 | Effective resource/provider selection | Selected material has source/identity, applicability, prerequisites and limits; adequate personal material is retained even with unknown provenance. Required original methods actually load under the selected host policy. |
 | Initial-use and evolve routes | The selected consumer can reach effective guidance and perform one useful initial task; later authorized improvement has a reachable public route. Explicit or source-read use may be qualified more narrowly than automatic selection. |
 | Durable state, evidence and continuation | One discoverable authoritative current view references sources and live effects, preserves logically separate choice/review history and captures actual per-target results, conditions, remaining work and next trigger. |
-| Revisitable discovery | A reachable capability guide exposes the twelve outcomes, concrete examples and relevant readiness limits without forcing their activation. |
+| Revisitable discovery | The [Harness tree](DISCOVERY.md) and authorized decision map are reachable without replaying setup or activating unused capabilities. |
 
 For applicable requirements, conflicts and document-quality checks, use [standards selection](../../../kit/standards/SELECT.md). Reuse consumer criteria and distinguish selected requirements, performed checks and satisfaction.
 

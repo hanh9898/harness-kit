@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from test_library_cli import draft, save
-from test_library_selection import CLI, decision, invoke
+from test_library_selection import CLI, decision, invoke, rename_supplied, selection, supplied
 from test_library_updates import OLD, plan
 
 
@@ -42,6 +42,36 @@ def request(operation, source, identity, payload, expected):
 def assert_denied(result):
     assert (result.returncode, result.stdout) == (2, "")
     assert "No current write grant matches this mutation" in result.stderr
+
+
+def test_guarded_rename_preserves_exclusion_without_replaying_a_revoked_write(tmp_path):
+    supplied(tmp_path)
+    payload = decision(tmp_path)
+    disable = request("disable", "supplied", "H14", payload, 0)
+    grant = issue(tmp_path, "disable", "supplied", "H14", payload, 0)
+    first = invoke(tmp_path, *disable, "--write-grant", grant)
+    assert first.returncode == 0, first.stderr
+    old_history = selection(tmp_path, id="H14", history=True)
+    rename_supplied(tmp_path, "H14", "H98")
+    assert selection(tmp_path, id="H98")["possible_previous_ids"] == ["H14"]
+
+    payload = decision(tmp_path, confirm_rename_from="H14")
+    inherit = (*request("disable", "supplied", "H98", payload, 0), "--kit-dir", tmp_path / "kit")
+    grant = issue(tmp_path, "disable", "supplied", "H98", payload, 0)
+    assert revoke(tmp_path, grant).returncode == 0
+    assert_denied(invoke(tmp_path, *inherit, "--write-grant", grant))
+    assert selection(tmp_path, id="H98", history=True) == []
+    assert not selection(tmp_path, id="H98")["effective"]
+
+    fresh = issue(tmp_path, "disable", "supplied", "H98", payload, 0)
+    applied = invoke(tmp_path, *inherit, "--write-grant", fresh)
+    assert applied.returncode == 0, applied.stderr
+    state = selection(tmp_path, id="H98")
+    assert not state["effective"]
+    assert state["record"]["renamed_from"] == {"id": "H14", "revision": 1}
+    assert len(selection(tmp_path, id="H98", history=True)) == 1
+    assert selection(tmp_path, id="H14", history=True) == old_history
+    assert selection(tmp_path, id="H15")["effective"]
 
 
 def test_guarded_store_never_falls_back_to_legacy_writes(tmp_path):

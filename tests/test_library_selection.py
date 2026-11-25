@@ -190,7 +190,7 @@ def test_rename_hold_lists_ambiguous_candidates_without_choosing(tmp_path):
 
 
 def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
-    skill = ROOT / 'skills/harness/harness-library/SKILL.md'
+    skill = ROOT / 'skills/harness/harness-library/READ.md'
     template, = re.findall(r'`(library (?:[^`\n]+ )?selection [^`\n]+)`',
                            skill.read_text(encoding='utf-8'))
     store = tmp_path / 'selected library.sqlite3'
