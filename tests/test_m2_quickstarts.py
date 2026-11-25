@@ -1061,6 +1061,12 @@ def test_disabled_bot_quickstart(bot_setup_kit, two_bots, tmp_path, monkeypatch,
         assert add_disabled_fixture_bot(config, proposal, routes, {
             "software-factory": selections["software-factory"],
         }, target, role) is None
+        for piece, readback in selections.items():
+            wrong_scope = {
+                **selections,
+                piece: replace(readback, handoff=dict(readback.handoff, scope_ref="project:other")),
+            }
+            assert add_disabled_fixture_bot(config, proposal, routes, wrong_scope, target, role) is None
         if prior["bots"]:
             assert first_selections["software-factory"].handoff["scope_ref"] == scope
             assert add_disabled_fixture_bot(config, proposal, routes, first_selections, target, role) is None
