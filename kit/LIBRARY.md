@@ -122,6 +122,8 @@ Candidate JSON contains `reference`, `revision` and exact `snapshot`, like `orig
 
 `compare` is read-only. It returns the exact old origin (or null), current customization, candidate, three textual diffs, missing-basis unknowns and `semantic_compatibility: unchecked`. Its token binds the entire saved resource/revision and candidate. It never infers semantic compatibility from textual non-overlap. The host reads the source/contract and checks meaning. Origin snapshots and review claims are attributable caller assertions, not independently authenticated facts.
 
+`diffs.selection_to_candidate` compares the saved customization (labeled `selection`) against the candidate even when the old origin is unknown. The two diffs against the old origin are null when that origin is unknown.
+
 An update plan has these fields:
 
 ```json

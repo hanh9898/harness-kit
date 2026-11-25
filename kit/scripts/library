@@ -106,9 +106,9 @@ def compare(row, candidate):
         raise ValueError("Candidate needs reference, revision and the complete snapshot.")
     resource = json.loads(row[2])
     origin = resource["origin"]
-    def diff(before, after, label):
+    def diff(before, after, fromfile, tofile):
         lines = difflib.unified_diff(StringIO(before).readlines(), StringIO(after).readlines(),
-                                     fromfile="old-origin", tofile=label)
+                                     fromfile=fromfile, tofile=tofile)
         return "".join(line if line.endswith("\n") else f"{line}\n\\ No newline at end of file\n"
                        for line in lines)
     token = hashlib.sha256(json.dumps([row[0], row[1], resource, candidate],
@@ -117,9 +117,13 @@ def compare(row, candidate):
                 basis="available" if origin else "missing", old_origin=origin,
                 customization=resource["content"], candidate=candidate,
                 unknowns=[] if origin else ["Old origin snapshot is unknown; local differences cannot be attributed."],
-                diffs={"customization": diff(origin["snapshot"], resource["content"], "customization") if origin else None,
-                       "origin": diff(origin["snapshot"], candidate["snapshot"], "candidate") if origin else None,
-                       "selection_to_candidate": diff(resource["content"], candidate["snapshot"], "candidate")},
+                diffs={
+                    "customization": diff(origin["snapshot"], resource["content"], "old-origin", "customization")
+                    if origin else None,
+                    "origin": diff(origin["snapshot"], candidate["snapshot"], "old-origin", "candidate")
+                    if origin else None,
+                    "selection_to_candidate": diff(resource["content"], candidate["snapshot"], "selection", "candidate"),
+                },
                 semantic_compatibility="unchecked")
 
 
