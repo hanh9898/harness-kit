@@ -160,17 +160,28 @@ def test_fixture_project_override_readbacks(override_project, blocker):
     assert snapshot() == before
 
 
-@pytest.mark.parametrize(("case", "roles"), [
-    ("Spec and ticket", []), ("Spec only", ["to-tickets"]), ("Ticket only", ["to-spec"]),
-    ("Neither", ["to-spec", "to-tickets"]),
+@pytest.mark.parametrize(("case", "approval", "roles"), [
+    ("Spec and ticket", "r2", []),
+    ("Spec only", "r2", ["to-tickets"]),
+    ("Ticket only", None, ["to-spec"]),
+    ("Neither", "r2", ["to-spec", "to-tickets"]),
+    ("Neither", None, ["to-spec"]),
+    ("Neither", "r1", ["to-spec"]),
+    ("Spec only", "r1", []),
 ])
-def test_fixture_preparation_load_trace(override_project, case, roles):
+def test_fixture_preparation_load_trace(override_project, case, approval, roles):
     routes, register, _, _ = override_project
     bindings, expected = register(routes.values())
     guide = section(IMPLEMENT / "ROUTES.md", "Prepare only missing artifacts")
     row, = re.findall(rf"^\| {case} \| (.*?) \|$", guide, re.M)
     opened = []
+    spec_revision = "r2"
     for skill_id in re.findall(r"`([\w-]+)`", row):
+        if skill_id == routes["to-tickets"]:
+            if approval != spec_revision:
+                print(f"ticket draft held: spec={spec_revision} approval={approval or '(none)'}")
+                break
+            print(f"ticket draft allowed: approval matches spec={spec_revision}")
         assert fixture_readback(bindings[skill_id], opened) == expected[skill_id]
     loaded = [p.parent.name for p in opened]
     print(f"prepare {case}: {', '.join(loaded) or '(none)'}")
