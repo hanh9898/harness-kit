@@ -248,6 +248,7 @@ def test_publish_entries_use_the_same_gate():
     assert "Direct publish, v1 handoffs and legacy records use the same gate" in publish
     assert "WORK.md#publish-or-update" in handoff
     assert "The checker validates shape only" in handoff
+    assert "return the blocker without emitting a `publish` handoff" in handoff
 
 
 def test_publish_preflight_keeps_deduplication_at_the_selected_destination():

@@ -62,9 +62,11 @@ Required: `draft_ref` (ID and revision), `target` (object with `instance`,
 `namespace` and `role` references), stable deduplication `work_id`, and
 `grant_ref` for this exact publish or update.
 
-The checker validates shape only. Emit only for an exact draft revision with
-the owner's decision on any material split (H6) and a separate exact publish
-grant (H7). The receiver reopens the authoritative records under the
+The checker validates shape only. Before sending, Setup or Evolve must verify
+the exact draft revision, the owner's decision on any material split (H6),
+and the separate exact publish grant (H7). If any check fails, keep the draft
+and return the blocker without emitting a `publish` handoff. The receiver
+reopens the authoritative records under the
 [publish gate](../skills/harness/harness-implement/WORK.md#publish-or-update).
 Resolve split approval through the draft and decision; do not add approval
 fields to the envelope or infer approval from `grant_ref`.
