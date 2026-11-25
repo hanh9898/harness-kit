@@ -1,6 +1,19 @@
 # Execution methods
 
-Read after dispatch gates pass. Choose the method that produces the required result. Confirm host-allowed routes and their prerequisites; load supplemental methods only when needed.
+Read after dispatch preflight. For the new workflow, require
+[all three verified bindings](ROUTES.md#route-readiness) and resolve only the
+execution override for the assigned ticket. Reuse current preparation evidence
+without loading drafting routes again. A draft pair, coordinator or H4 grant
+cannot stand in for an execution binding or authority.
+
+Before sending, apply the [write boundary](WORK.md#write-boundary-and-reconciliation)
+to the one proposed effect. Stop if the current route, assignment, revision,
+applicable selection or grant cannot be verified. The override returns the
+effect outcome and evidence; Harness Implement handles the result, and the
+caller retains verification and closure.
+
+Choose supplemental methods only when needed and confirm their own routes
+and prerequisites.
 
 | Work | Method and evidence |
 | --- | --- |

@@ -1,6 +1,10 @@
 """Check packaged handoff guidance and real CLI readbacks, not host execution."""
 import json
 import re
+from dataclasses import dataclass, replace
+from hashlib import sha256
+from pathlib import Path
+from shutil import copyfile
 
 import pytest
 
@@ -41,10 +45,129 @@ def test_prepare_routes_cover_only_missing_artifacts():
     rows = dict(re.findall(r"^\| ((?:Spec|Ticket|Neither)[^|]*?) \| (.*?) \|$", prepare, re.M))
     assert rows == {
         "Spec and ticket": "None",
-        "Spec only": "`to-tickets`",
-        "Ticket only": "`to-spec`",
-        "Neither": "`to-spec`, then `to-tickets`",
+        "Spec only": "`harness-project-to-tickets`",
+        "Ticket only": "`harness-project-to-spec`",
+        "Neither": "`harness-project-to-spec`, await spec approval, then `harness-project-to-tickets`",
     }
+
+
+def test_route_readiness_is_not_granted_by_registration_or_preparation():
+    readiness = section(IMPLEMENT / "ROUTES.md", "Route readiness")
+    assert "all three distinct, unshadowed project bindings" in readiness
+    assert "The pair alone is not execution-ready" in readiness
+    assert "readback alone does not qualify native routes" in readiness
+    assert "[dispatch gates](WORK.md#dispatch-and-integrate)" in readiness
+    assert "](ROUTES.md#route-readiness)" in (IMPLEMENT / "EXECUTION.md").read_text(encoding="utf-8")
+
+
+@dataclass(frozen=True)
+class FixtureBinding:
+    source: Path
+    caller: str = "harness-implement"
+    policy: str = "agent-callable"
+
+
+def fixture_readback(candidates, opened):
+    if len(candidates) != 1:
+        return None
+    binding, = candidates
+    source = binding.source.resolve(strict=True)
+    body = source.read_bytes()
+    opened.append(source)
+    skill_id, = re.findall(r"^name: (\S+)$", body.decode().split("---")[1], re.M)
+    return skill_id, source, binding.caller, binding.policy, sha256(body).hexdigest()
+
+
+@pytest.fixture
+def override_project(tmp_path):
+    guide = section(IMPLEMENT / "ROUTES.md", "Project override routes")
+    pairs = re.findall(r"^\| `([\w-]+)` \| `([\w-]+)` \|", guide, re.M)
+    assert pairs == [
+        ("to-spec", "harness-project-to-spec"),
+        ("to-tickets", "harness-project-to-tickets"),
+        ("implement", "harness-project-implement"),
+    ]
+    routes = dict(pairs)
+    project, neighbor = tmp_path / "project", tmp_path / "neighbor"
+    neighbor.mkdir()
+    (neighbor / "protected").write_bytes(b"keep")
+    for original_id in routes:
+        original = project / ".devin/skills" / original_id / "SKILL.md"
+        original.parent.mkdir(parents=True)
+        original.write_text(f"---\nname: {original_id}\ndisable-model-invocation: true\n---\n",
+                            encoding="utf-8")
+
+    def snapshot():
+        return {p.relative_to(tmp_path): p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+
+    def register(granted):
+        before = snapshot()
+        bindings, pins, additions = {}, {}, {}
+        for skill_id in granted:
+            template = ROOT / "skills/overrides" / skill_id / "SKILL.md"
+            source = project / ".devin/skills" / skill_id / "SKILL.md"
+            source.parent.mkdir()
+            content = template.read_bytes()
+            additions[source.relative_to(tmp_path)] = content
+            copyfile(template, source)
+            bindings[skill_id] = [FixtureBinding(source)]
+            pins[skill_id] = (skill_id, source, "harness-implement", "agent-callable",
+                              sha256(content).hexdigest())
+        assert snapshot() == before | additions
+        return bindings, pins
+
+    return routes, register, snapshot, neighbor
+
+
+@pytest.mark.parametrize("blocker", [None, "missing", "wrong-source", "wrong-caller",
+                                    "user-only", "duplicate", "changed-digest"])
+def test_fixture_project_override_readbacks(override_project, blocker):
+    routes, register, snapshot, neighbor = override_project
+    execution_id = routes["implement"]
+    granted = [skill_id for role, skill_id in routes.items() if role != "implement" or blocker != "missing"]
+    bindings, expected = register(granted)
+    if blocker in {"wrong-source", "duplicate"}:
+        original, = bindings[execution_id]
+        shadow = neighbor / "SKILL.md"
+        shadow.write_bytes(original.source.read_bytes())
+        assert sha256(shadow.read_bytes()).hexdigest() == expected[execution_id][-1]
+        bindings[execution_id] = ([original] if blocker == "duplicate" else []) + [FixtureBinding(shadow)]
+    if blocker == "wrong-caller":
+        bindings[execution_id] = [replace(bindings[execution_id][0], caller="setup")]
+    if blocker == "user-only":
+        bindings[execution_id] = [replace(bindings[execution_id][0], policy="user-only")]
+    if blocker == "changed-digest":
+        with bindings[execution_id][0].source.open("ab") as skill:
+            skill.write(b"\nUnapproved change.\n")
+
+    before = snapshot()
+    verified = []
+    for skill_id in routes.values():
+        readback = fixture_readback(bindings.get(skill_id, []), [])
+        if readback is not None and readback == expected.get(skill_id):
+            verified.append(skill_id)
+            print(f"fixture {skill_id}: Source={readback[1]} caller={readback[2]} policy={readback[3]}")
+    outcome = "draft pair only" if blocker else "complete fixture registration"
+    print(f"fixture {blocker or 'all-three'}: {outcome}; no execution qualification")
+    assert verified == ([routes["to-spec"], routes["to-tickets"]] if blocker else list(routes.values()))
+    assert snapshot() == before
+
+
+@pytest.mark.parametrize(("case", "roles"), [
+    ("Spec and ticket", []), ("Spec only", ["to-tickets"]), ("Ticket only", ["to-spec"]),
+    ("Neither", ["to-spec", "to-tickets"]),
+])
+def test_fixture_preparation_load_trace(override_project, case, roles):
+    routes, register, _, _ = override_project
+    bindings, expected = register(routes.values())
+    guide = section(IMPLEMENT / "ROUTES.md", "Prepare only missing artifacts")
+    row, = re.findall(rf"^\| {case} \| (.*?) \|$", guide, re.M)
+    opened = []
+    for skill_id in re.findall(r"`([\w-]+)`", row):
+        assert fixture_readback(bindings[skill_id], opened) == expected[skill_id]
+    loaded = [p.parent.name for p in opened]
+    print(f"prepare {case}: {', '.join(loaded) or '(none)'}")
+    assert loaded == [routes[role] for role in roles]
 
 
 def test_implement_keeps_destination_authority_and_reconciliation_separate():

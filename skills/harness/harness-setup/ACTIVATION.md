@@ -54,36 +54,41 @@ confirmed missing originals. Inspect and Advice report blockers without installi
 
 ## Register the v1 implementation overrides on Devin
 
-During discovery, plan only the needed `to-spec`, `to-tickets` and execution
-routes. Follow the [route contracts](../harness-implement/ROUTES.md). At
-authorized bootstrap, use the narrowest host-supported project scope. On Devin,
-create project-local skill entries (the pilot used `.devin/skills/<id>/SKILL.md`)
-with distinct IDs, matching frontmatter names and narrow descriptions. Use the
-host's permitted project-skill mechanism; confirm loadability for this project
-before relying on it. Keep global installed skills unchanged.
+Plan only the needed [project override routes](../harness-implement/ROUTES.md#project-override-routes).
+The three source templates under `skills/overrides/` are not default entries. On
+Devin, register them at `.devin/skills/<id>/SKILL.md` in the intended project
+using the host's supported mechanism. Do not register them globally, reuse an
+original ID or change an upstream skill or its invocation policy.
 
 Before authoring or changing an override, use the
 [agent-read guidance contract](../harness-evolve/CHANGE-FLOW.md#authoring-an-override-in-a-new-project).
 If a required source or method cannot be used, leave the dependent override
 unchanged and report what would unblock it.
 
-For each selected override record the source revision/license and the limited
-contract changes. Preserve upstream notices when adapting material. Implement
-the required inputs, outputs, use and non-use conditions, dependencies and
-effect limits from the route contract; merely changing invocation metadata is
-not an override. Preparation routes return drafts; a ticket route checks the
-assignment and target gate. Remove implicit tracker and Git effects. Do not
-change an upstream skill or try to bypass invocation policy.
+Record the template revision, any adaptations and the upstream source revision
+and license. Preserve upstream notices if adapting material. Changing only
+invocation metadata is not an override.
 
-Treat registration as its own granted write, using the
-[late-write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation).
-Read back the configuration and probe by exact ID through the native tool in
-the intended Devin context. Verify the resolved path and revision/digest,
-real output and denial without permission. Confirm no route collision or
-change to upstream manual invocation outside scope. Verify a fresh or a child
-session only when needed for the route; do not claim either without evidence.
-Return the lightweight verified catalog; an unverified entry blocks only its
-dependent step. Evolve can verify its own route without this bootstrap.
+Only in Apply, require a separate project administrator grant (H4) for the
+exact template IDs, source revisions, project, destination writes, intended
+caller and invocation policy. H3 does not authorize registration. Use the
+[late-write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation)
+and verify that every destination resolves inside the project and the grant
+before writing. H4 does not authorize execution.
+
+Read back the effective configuration and resolve each registered ID with
+the native tool in the intended caller and project. Match exact ID, Source
+(resolved path), revision or digest, caller and effective invocation policy.
+Check that each ID has a single binding and that the originals retain their
+sources and manual invocation policy. Do not invoke a user-only original to
+check it. Use permitted no-write probes to verify output and denial; test a
+fresh or child context only when the route uses it.
+
+Record the verified binding and evidence for each route independently. A
+verified preparation pair without verified execution is draft-only. Apply the
+[route readiness checks](../harness-implement/ROUTES.md#route-readiness) before
+reporting execution readiness; registration and fixture readback alone do not
+qualify native routes. Evolve verifies its needed bindings without reinstalling.
 
 ## Other selected activation
 
