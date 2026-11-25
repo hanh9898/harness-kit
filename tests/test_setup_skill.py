@@ -66,14 +66,38 @@ def test_canonical_publish_contract_allows_the_selected_local_harness_target():
     assert "not a fallback" in publish
 
 
-def test_upstream_install_is_reached_before_discovery_and_override_authoring():
+def test_setup_selects_mode_before_any_prerequisite_route():
     body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
-    design, implementation = body.split("## Phase B:", 1)
-    install = "](ACTIVATION.md#install-required-upstream-skills)"
-    assert install in design[:design.index("](DISCOVERY.md)")]
-    assert install in implementation[:implementation.index("](ACTIVATION.md)")]
+    entry, design = body.split("## Phase A:", 1)
+    design, implementation = design.split("## Phase B:", 1)
+    assert "Inspect and Advice never install or activate anything" in entry
+    assert "even with a prior install grant" in entry
+    verify = "](ACTIVATION.md#verify-upstream-prerequisites)"
+    assert verify in design[:design.index("](DISCOVERY.md)")]
+    assert "Apply only" in implementation[:implementation.index(verify)]
+    assert verify in implementation[:implementation.index("](ACTIVATION.md)")]
+
+
+def test_missing_methods_block_dependent_discovery_and_only_apply_reaches_install():
     activation = (SKILL / "ACTIVATION.md").read_text(encoding="utf-8")
-    assert "## Install required upstream skills\n" in activation
+    verify, install = activation.split("\n## Install required upstream skills\n", 1)
+    install = install.split("\n## ", 1)[0]
+    assert "confirmed missing" in verify and "only in Apply" in verify
+    assert "hold dependent work" in verify
+    assert "H3" in install.split("```sh", 1)[0]
+    assert 'npx "skills@$INSTALLER_VERSION" add "$MATT_REPO_AT_PIN"' in install
+    discovery = (SKILL / "DISCOVERY.md").read_text(encoding="utf-8")
+    assert "](ACTIVATION.md#install-required-upstream-skills)" not in discovery
+    assert "hold dependent discovery" in discovery
+
+
+def test_wrong_caller_and_ambiguity_are_not_missing_and_probes_are_scoped():
+    activation = (SKILL / "ACTIVATION.md").read_text(encoding="utf-8")
+    verify = activation.split("\n## Install required upstream skills\n", 1)[0]
+    assert "wrong caller" in verify and "ambiguous" in verify
+    assert "blocked, not missing" in verify
+    assert "exact ID, source, revision, caller and invocation policy" in verify
+    assert "Probe each required route once per" in verify
 
 
 def test_checklist_file_exists():
