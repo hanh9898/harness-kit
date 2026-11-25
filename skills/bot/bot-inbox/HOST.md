@@ -38,9 +38,9 @@ the Inbox and destination audit rather than inferring results from instructions:
 | Case | Evidence to collect |
 | --- | --- |
 | Trigger the same ask twice, including a replay after resume. | One active card for the action and at most one delivery to its approved recipient and thread. |
-| Reply as the wrong person or in the wrong thread, then reply on the correct route as the authorized person. | Invalid replies leave the card open and produce zero effect grants; the valid reply settles it once. Zero results delivered across routes. |
+| Reply as the wrong person and, if a second thread is in scope, in the wrong thread. Then reply on the correct route as the authorized person. | Invalid replies leave the card open and produce zero effect grants; the valid reply settles it once. Zero results delivered across routes. |
 | Try queue ranking as a worker and as the Bot; check sending with read-only access and a send-scoped grant. | Only the Bot can set priority or defer; read-only access cannot send; send permission cannot issue effect grants. |
-| Close a test PR only if separately authorized at the target. Exercise a verified wake, then replay it. | Live terminal state closes the matching review card once; no extra delivery or PR write. |
+| Start with an open test PR and review card. Close the test PR only if separately authorized at the target. Exercise a verified wake, then replay it. | Live terminal state closes the matching review card once; no extra delivery or PR write. |
 
 For automatic reconciliation, verify the event or schedule actually wakes the
 appropriate Bot and that it re-reads live state. When consuming events, record
