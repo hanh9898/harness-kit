@@ -37,6 +37,8 @@ def test_implement_routes_v1_and_legacy_to_the_same_operation_gates():
     assert "](../../../kit/STAGE-CONTRACTS.md)" in intake
     assert "--expect-operation <operation> <file>" in intake
     assert "do not reinterpret a rejected handoff as legacy input" in intake
+    assert "`needed_route_refs` can identify `to-tickets` but do not authorize invocation" in intake
+    assert "Apply [H5](#spec-approval-h5) before calling that route" in intake
     assert "Both inputs use the same operation checks" in intake
 
 
@@ -200,6 +202,10 @@ def test_prepare_holds_unapproved_spec_before_to_tickets(entry, status):
     assert status in denied[1].lower().split(", ")
     assert "`AwaitSpecApproval`" in denied[2]
     assert "Do not invoke `to-tickets`" in denied[2]
+    assert "return the spec reference, revision, basis, scope, and blocker to the caller." in approval
+    assert "requests H5 from the authorized spec owner only if a new approval is needed" in approval
+    assert "Resume only on a new `prepare` request." in approval
+    assert "Recheck approval on resume." in approval
 
 
 def test_prepare_reuses_only_current_spec_approval():

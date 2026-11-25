@@ -6,6 +6,8 @@ Use existing authorized records. This contract does not install a tracker, workf
 
 Use [stage handoffs v1](../../../kit/STAGE-CONTRACTS.md) for `prepare`, `publish` and `execute`. For a versioned handoff, check shape and match the operation to the caller's request before resolving references or loading routes. For an existing JSON file, use the real skill directory to locate `../../../kit/scripts/check-stage-handoff --expect-operation <operation> <file>`. For an in-session handoff, compare against the same contract without requiring a file. Unknown version, wrong operation or invalid shape stops the dependent step; do not reinterpret a rejected handoff as legacy input.
 
+For v1 `prepare`, `needed_route_refs` can identify `to-tickets` but do not authorize invocation. Apply [H5](#spec-approval-h5) before calling that route.
+
 For an unversioned legacy caller or manual record, gather existing references for the requested operation and fill gaps only from authoritative sources you can read. Do not require a migration or invent authority. Both inputs use the same operation checks below: reopen the original records, hold the draft or stop dependent work on missing, conflicting or unreadable required evidence, and do not treat a reference as a grant.
 
 ## Prepare
@@ -29,7 +31,9 @@ A changed basis or a material change to ownership, acceptance, dependencies, sco
 | Approval | Next step when a ticket is missing |
 | --- | --- |
 | Current and matching | Invoke `to-tickets` without asking again. |
-| Missing, stale, revoked, or unverifiable | Hold the draft and return `AwaitSpecApproval` with the exact spec revision. Do not invoke `to-tickets`. |
+| Missing, stale, revoked, or unverifiable | Hold the draft and return `AwaitSpecApproval`. Do not invoke `to-tickets`. |
+
+For `AwaitSpecApproval`, return the spec reference, revision, basis, scope, and blocker to the caller. The caller resolves the blocker and requests H5 from the authorized spec owner only if a new approval is needed. Resume only on a new `prepare` request. Recheck approval on resume.
 
 ## Publish or update
 
