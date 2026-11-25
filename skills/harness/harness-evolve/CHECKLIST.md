@@ -15,18 +15,23 @@ this source tree.
 
 | Case | Discriminating observations |
 | --- | --- |
-| Clear correction, explicit and natural intent | Actual Evolve loading and required original methods; one minimal spec and ticket, reusing valid artifacts; no redundant interview or onboarding |
-| Existing Harness without a Setup catalog | Evolve resolves only the needed route on Devin, records ID and revision/digest, and skips preparation when artifacts are valid. Unverified execution leaves the ticket waiting. |
-| Mixed product and Harness findings | Product source remains read-only. Harness work uses the pinned Harness namespace, or an authorized canonical local ticket for small work. |
+| Clear correction, explicit and natural intent | Actual Evolve loading and required original methods; reuse compatible spec/ticket refs, including legacy. If just the ticket is missing, v1 `prepare` keeps the spec and only resolves the ticket route. Both compatible means no preparation or duplicate publication. |
+| Existing Harness without a Setup catalog | Resolve only needed routes in the actual caller; record exact ID, source and revision/digest. Unverified execution waits without Setup, reinstall or caller substitution. |
+| Mixed product and Harness findings | Product source stays read-only. A wrong, missing, shared or ambiguous Harness namespace blocks `publish`; only the explicitly selected canonical local record may serve small work. |
+| Missing or stale execution claim | Published ticket does not authorize dispatch. Missing, stale or conflicting claim blocks dependent effects before send. |
 | Required provider absent or unreadable | Dependent authoring remains unchanged; exact missing prerequisite and continuation reported; independent inspection may finish; no manual replay or ungranted install |
 | Advice or assessment before onboarding | Useful scoped result; no adoption, new records or other writes without a save grant |
 | Status or assessment with an excluded catalog item | Scoped Library selection is checked. No raw catalog lookup or use of the excluded item; supported observations and criteria still finish. |
+| Configured store missing, unreadable or wrong identity | No dependent selection or effects, fallback or new store; a verified existing store with no row remains distinct at revision 0. |
 | Adjacent ordinary report/product task | Requested deliverable only; no evolve selection, onboarding or harness redesign |
 | Required pre-action logging | Recoverable scope, choice, rationale and authority precede the effect in the trace; later results preserve review/application/outcome distinctions and prior choice history |
 | Record writer contention | Existing owner's claim is retained; blocked writer performs no dependent effect or lost update; a fresh read/worktree is not treated as exclusion |
 | Ordinary fresh-session resume | Reopens live guidance and authoritative records; retains completed effects and settled choices; no duplicate application or history |
 | Interrupted after effect, before final record | Inspects the live effect before retry, finishes missing evidence/current state and retains history; uncertainty remains visible if inspection is insufficient |
+| Publication timeout | Read back at the original Harness destination with the same `work_id`; no re-publish or claim transfer while `Unknown`. Definitive no-write needs a fresh gate and grant. |
 | Scoped adoption | Only assigned targets change; original methods and standards remain prerequisites; one-call durable effects do not create standing or wider-scope authority |
+| Repo-only or combined Repo and Bot change | Repo-only emits no `bot-setup` or Bot calls. For both targets, track independent grants, revisions and outcomes; hold only genuinely dependent work, without cross-target rollback. |
+| Changed Bot binding | Old host triggers are off and work is drained or fenced before a cross-host rebind. Emit v1 `bot-setup` only after readback, with observed disabled capability IDs; do not activate a trigger. |
 
 Inspect transcript order as well as final files. A pre-action record written after the effect fails even if its final contents look right. A claim of unchanged scope requires actual snapshots of that scope. Passing a local single-writer case establishes no remote concurrency or native enforcement guarantee.
 

@@ -8,6 +8,30 @@ For a routine correction, check the intended change and relevant regressions. Fo
 
 For tool/integration effects, use [tool operations](../../../kit/TOOL-OPERATIONS.md) to classify the exchange and reconcile the target before repair. Keep model-result judgments with their selected instruction/content checks.
 
+## Receive an implementation result
+
+Accept [`result`](../../../kit/STAGE-CONTRACTS.md#implement--setup-or-evolve-result)
+v1 for the requested effect only. Match its assignment, target and
+effect/request ID to the authorized inputs and check the live claim. Open the
+receipt or history and evidence at the authoritative destination; compare the
+reported revision with the readback for that effect. Stop dependent verification
+on mismatched or unreadable references or a stale claim. Report any effect
+actually observed; neither envelope validity nor an expected revision proves
+a write. Legacy result references must pass the same live checks; an invalid
+versioned result is not legacy.
+
+- `Applied`: inspect the target, then check the actual acceptance criteria and
+  protected scope before marking `Verified`. Keep activation and improvement
+  separate from verification.
+- `Denied`: retain the explicit refusal and its reason; do not mark verified.
+- `Unknown`: retain the checkpoint and follow
+  [destination reconciliation](UPDATE.md#reconcile-an-uncertain-effect), not a
+  repair or replay. Retain any independent results.
+
+Report each target's evidence, outcome and next step. Update the decision map
+only after checking the criteria and confirming writeback authority. Closure
+is a separate authorized operation.
+
 ## Review and failure
 
 Use the applicable original review method and the actual selected standards. Include relevant project and kit criteria, source references, target scope and a fixed comparison point when needed. Agent guidance review uses current writing-for-agents; code uses its applicable code review method. Resolve conflicting standards before dependent consumption rather than assuming all product standards are irrelevant to harness files.

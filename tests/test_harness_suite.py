@@ -55,3 +55,8 @@ def test_library_helpers_resolve_from_a_linked_skill_in_a_foreign_checkout(tmp_p
                  "selection", "reread-source-before-write", "--source", "supplied")
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["effective"] is True
+
+
+def test_evolve_reuses_the_shared_m2_configuration_contract():
+    adoption = SKILL_ROOT / "harness-evolve" / "ADOPTION.md"
+    assert "](../../../kit/M2-CONFIG.md)" in adoption.read_text()
