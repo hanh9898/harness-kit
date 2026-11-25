@@ -38,7 +38,9 @@ approved delivery and reply routes. Resolve aliases before building the key.
 - Use card-close authority to settle a card with its reason and evidence.
   Suppress pending delivery for asks that are no longer current. Check active
   cards and settled history: a repeated or late event does not reopen a settled
-  ask. Verify that a new decision is needed before creating a card.
+  ask. Verify that a new decision is needed before creating a card. If it would
+  reuse a settled key, require a new authoritative subject revision before
+  opening a card. Without one, keep the new ask in manual review.
 
 ## Deliver and handle replies separately
 

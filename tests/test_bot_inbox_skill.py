@@ -64,6 +64,7 @@ def test_inbox_identity_contract(key, fields):
             "supersede the old card before opening its replacement",
             "suppress its pending delivery",
             "a repeated or late event does not reopen a settled ask",
+            "reuse a settled key, require a new authoritative subject revision",
         )),
         ("SKILL.md", "Deliver and handle replies separately", (
             "separate send authority",
