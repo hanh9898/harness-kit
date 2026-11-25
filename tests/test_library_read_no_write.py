@@ -1,6 +1,5 @@
 """No-write regression cases run against the public Library CLI."""
 
-import ctypes
 import json
 import os
 import select
@@ -23,10 +22,23 @@ NO_WRITE_UNAVAILABLE = "cannot enforce a no-write SQLite open on this host"
 
 @pytest.fixture(scope="module")
 def no_write_host():
-    if (sys.platform != "linux" or os.uname().machine not in ("x86_64", "aarch64")
-            or ctypes.sizeof(ctypes.c_void_p) != 8):
+    if sys.platform != "linux" or os.uname().machine not in ("x86_64", "aarch64"):
         return False
-    return ctypes.CDLL(None).syscall(444, None, ctypes.c_size_t(0), 1) >= 3
+    probe = """
+import ctypes, sys
+if ctypes.sizeof(ctypes.c_void_p) != 8:
+    sys.exit(1)
+libc = ctypes.CDLL(None)
+if libc.syscall(444, None, ctypes.c_size_t(0), 1) < 3:
+    sys.exit(1)
+read_or_execute = (1 << 0) | (1 << 2) | (1 << 3)
+write_access = ctypes.c_uint64(((1 << 15) - 1) & ~read_or_execute)
+ruleset = libc.syscall(444, ctypes.byref(write_access), ctypes.sizeof(write_access), 0)
+if ruleset < 0 or libc.prctl(38, 1, 0, 0, 0) != 0:
+    sys.exit(1)
+sys.exit(libc.syscall(446, ruleset, 0) != 0)
+"""
+    return subprocess.run([sys.executable, "-I", "-c", probe], timeout=10).returncode == 0
 
 
 def read_args(store, candidate, command, strict):
