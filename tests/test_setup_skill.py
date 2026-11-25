@@ -24,6 +24,16 @@ def test_runtime_reference_branches_are_packaged():
         assert (SKILL / sib).is_file() and f"]({sib})" in body
 
 
+def test_upstream_install_is_reached_before_discovery_and_override_authoring():
+    body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    design, implementation = body.split("## Phase B:", 1)
+    install = "](ACTIVATION.md#install-required-upstream-skills)"
+    assert install in design[:design.index("](DISCOVERY.md)")]
+    assert install in implementation[:implementation.index("](ACTIVATION.md)")]
+    activation = (SKILL / "ACTIVATION.md").read_text(encoding="utf-8")
+    assert "## Install required upstream skills\n" in activation
+
+
 def test_checklist_file_exists():
     assert (SKILL / "CHECKLIST.md").is_file()
 
