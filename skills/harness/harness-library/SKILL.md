@@ -26,8 +26,9 @@ or history only as needed, never the whole catalog or library bundle. Reuse
 results only while question, store, scope, authority and relevant data/revision
 remain current; always recheck before application and read back after writes.
 
-Return store/scope, source/ID/revision, state and its evidence, with omissions
-or blockers. For writes also return readback evidence or `Unknown`. Reading,
-saving, applying and executing are different effects; a library result never
-grants authority or proves consumer adoption. An unverified store or identity
-blocks only dependent use.
+For a verified selection read, return the [v1 selection handoff](READ.md#selection-handoff),
+not an adoption decision or a grant. For other reads, return focused findings
+and blockers; for writes, also return readback evidence or `Unknown`.
+Reading, saving, applying and executing are different effects. The consumer
+owns adoption and its evidence; do not apply a selection or record adoption
+in Library. An unverified store or identity blocks only dependent use.
