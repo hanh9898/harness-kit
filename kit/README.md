@@ -21,7 +21,7 @@ Supplied store of lego pieces for building an agent harness, plus the rules, tea
 
 | File | What it holds | Rows |
 |---|---|---|
-| `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 169 |
+| `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 191 |
 | `piece-aliases.csv` | Former piece IDs and their canonical slugs | 169 |
 | `groups.csv` | Group letter and name of the pieces; `scripts/kit list` prints both | 14 |
 | `rules.csv` | Rules for skills, agent documents, prompts, configuration, workflow, tools, testing | 219 |
@@ -51,6 +51,27 @@ There is no command that prints the whole store, on purpose. Ask for a group, th
 ## Team and workflow guidance
 
 team-responsibilities-and-review provides [responsibilities and reviewers](team-workflow/TEAM.md). task-contracts-and-workflow provides [task contracts and workflows](team-workflow/TASKS.md), with selected flow and tracker references. Both are inferred supplied guidance, useful independently through setup/evolve. See [provenance](team-workflow/SOURCES.md) for source scope and limits.
+
+## Bot role templates
+
+Group C (Agent behavior) includes [Bot role templates](BOT-ROLES.md) such as
+Software Factory, Chief of Staff, Product Engineer and QA Engineer. Each role
+is a supplied instruction-file piece, with the shared [portable template
+contract](BOT-TEMPLATE.md) as a separate piece. Run from this directory; set
+`store` to the authorized library path for the `library` commands:
+
+```sh
+scripts/kit list C
+scripts/kit show software-factory
+scripts/library --store "$store" search "bot role template" --limit 30
+scripts/library --store "$store" selection software-factory --source supplied
+```
+
+Without an authorized store, use `kit show` for provenance only. A supplied
+selection snapshot identifies the CSV row, not the linked Markdown. Pin the
+kit distribution revision (for example, the Git commit) and read both the
+role and contract from it before using them. Lookup and selection do not
+create or install a Bot, activate a schedule, grant access or qualify a host.
 
 ## Optional factory
 

@@ -54,4 +54,10 @@ body/partial certainty beneath a migration notice; retrieval marks legacy rows
 as historical and points to D24. Fresh PSW/Shavit/Lee–See research and inferred
 operating guidance live in `kit/authority/`; original row counts remain valid.
 
-J13 (#30) adds explicitly selected factory composition after generation: 169 current pieces. It reuses the task/flow and authority sources; original seed/report counts remain unchanged.
+J13 (#30) added explicitly selected factory composition after generation,
+bringing the catalog to 169 pieces. It reuses the task/flow and authority
+sources; original seed/report counts remain unchanged.
+
+The [Bot role templates](../kit/README.md#bot-role-templates) add 21 roles
+and a shared portable contract to group C, bringing the catalog to 191
+pieces. They are not part of the historical seeds or reports.

@@ -16,8 +16,9 @@ GEN = ROOT / "skills" / "harness" / "harness-evolve" / "scripts" / "generate_kit
 SEED = GEN.parent / "seed"
 NOTES = ROOT / "docs" / "generation-notes.md"
 REPORTS = Path(os.environ.get("HARNESS_REPORTS", "/Users/hanhnt2/Desktop/hbu-1976-control/.scratch/harness-standards-suite"))
-# Legos added after initial generation: H18, G13/G14, N07/N08, D24 and J13.
-ADDED_AFTER_GENERATION = 7
+# Seven earlier additions (H18, G13/G14, N07/N08, D24 and J13), plus the
+# portable Bot contract and 21 role templates.
+ADDED_AFTER_GENERATION = 29
 NOMINAL = {"legos": 162, "rules": 211, "patterns": 13}
 needs_reports = pytest.mark.skipif(not (REPORTS / "synthesis.md").is_file(), reason="source reports are unavailable on this machine")
 CERTAINTY = {"stated", "inferred", "open", "partial"}
