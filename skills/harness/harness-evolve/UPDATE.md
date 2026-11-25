@@ -28,6 +28,24 @@ For local Markdown without such a facility, atomic directory creation in the aut
 
 After acquiring ownership, reread current state and history. Use unique same-directory temporary files and atomic replacement for each full-file update. Read back each write. Preserve existing logical history and append only new events; serialize history and current-view changes under the same ownership. Individual renames are not a multi-file transaction. If interrupted between files, reconcile both with live effects before completing the missing update. Release only this writer's lock after required results and continuation are persisted, or retain it with a precise recovery handoff on uncertainty.
 
+## Reconcile an uncertain effect
+
+Before each send, retain the exact target and expected revision, assignment
+and claim epoch where applicable, and stable request/effect ID (or `work_id`
+for publication) in the authorized record. After a timeout or ambiguous reply,
+keep `Unknown`, the same identifiers, any observed revision, and references
+for destination readback. A history pointer is not a receipt. On resume,
+reopen the original destination and check its receipt, history or live state
+for this exact effect; inconclusive absence is not evidence of no write.
+
+While `Unknown`, do not retry, re-publish, roll back, close, transfer the
+claim, advance the effect checkpoint, or start a wake that could repeat it.
+Keep the affected checkpoint and report what evidence is needed. Independent
+targets can proceed under their own authority. If readback confirms application,
+verify it and finish only missing evidence or writeback. If it definitively
+establishes no write, reevaluate prerequisites, claim and revision and obtain
+a fresh exact grant before a new attempt; keep the same logical work identity.
+
 ## After effects and checks
 
 Record what actually changed for each target, when, the action/result references, commands and observed output, failures, unknowns and the scope of checks. Keep selected, applied, reviewed and improved meanings distinct. A passing structure check does not establish runtime use or improvement. Update the current view; retain append-only logical choice/review history. Link material corrections and supersession to the prior event; a wording-only repair needs no new choice event.

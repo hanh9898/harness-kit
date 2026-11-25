@@ -12,6 +12,13 @@ require onboarding. New foundations belong to Setup; library-only work belongs
 to `harness-library`. Classify a change by what it changes, not where it was
 reported or where its files live.
 
+Use the existing decision and live configuration to identify the affected target
+and caller. A request about the repo alone stays `repo-only`, with `interactive`
+as the default when no persistent runtime is bound. Do not add Bot questions or
+opt-ins, Inbox/Memory access or store writes to the repo path.
+Use [Adoption](ADOPTION.md#1-reconcile-selections-and-live-targets) to reconcile
+an affected binding, not to bootstrap or reinstall it.
+
 | Intent | Path |
 | --- | --- |
 | Observe, advise, assess or retrospect | Read current evidence and open only relevant questions. Return findings, limits and the next step. Do not create a record, schedule, activation or implementation ticket for advice. |
@@ -61,8 +68,8 @@ and state any dependent limitation. No raw catalog fallback.
 4. Separate facts, proposals and choices; cite user confirmation or actual
    delegation for that exact choice. Check `DesignReady` against the map and
    target; hold unresolved, incompatible or unproven dependencies. Advice
-   alone stops here. For a repair with settled scope, the evidence and
-   prior decision can satisfy this phase without open discovery.
+   alone stops here, without a stage handoff. For a repair with settled scope,
+   the evidence and prior decision can satisfy this phase without open discovery.
 
 ## Phase B: prepare, apply and verify
 
@@ -70,27 +77,30 @@ Read [UPDATE.md](UPDATE.md) before effects. Reuse the existing durable record,
 integration owner and current adoption procedure. A proposed rule does not
 authorize itself. Document timing, active grants and pre-action state.
 
-Independently verify only needed skill routes on Devin using the
-[route contract](../harness-implement/ROUTES.md). Reuse current evidence or
-inspect effective host configuration and run a permitted no-write probe. Use
+Independently verify only needed skill routes in the actual host and caller
+using the [route contract](../harness-implement/ROUTES.md). Reuse current evidence
+or inspect effective host configuration and run a permitted no-write probe. Use
 the resulting ID/revision, scope, invocation context, status and evidence; do
 not rerun Setup, install a route, or invoke a user-only upstream method.
 Valid artifacts eliminate their preparation routes. An unavailable or
 ambiguous execution route blocks execution, not drafting or independent work.
 
-Call `harness-implement` through the host for the requested operation only.
-Pass the decision/revision and route evidence for preparation; pass the
-canonical ticket and assignment for execution. Apply its [separate gates](../harness-implement/WORK.md):
-draft without posting/target authority, publish only with a verified Harness
-destination and exact write grant (or authorized local small-work ticket),
-and execute only at `DispatchReady`. Use the target-enforced atomic write
-gate or direct authorized supervision for each eligible non-atomic send;
-otherwise stop. An uncertain write remains `Unknown` until reconciled.
+For the current change only, send one [v1 stage handoff](../../../kit/STAGE-CONTRACTS.md)
+per requested operation. [Reuse compatible artifacts and prepare or publish](DESIGN-WRITEBACK.md#hand-off-the-current-change)
+through `harness-implement`. The authorized coordinator builds `execute` only
+at live `DispatchReady`: reopen the canonical ticket, decision, dependencies,
+selection if used, exclusive claim and epoch, exact route, target revision and
+authority for the effect.
+A missing, stale or conflicting claim blocks dispatch. Use the
+[destination write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation):
+target-enforced atomic conditions, or direct authorized supervision of each
+non-atomic send only where policy allows. Otherwise stop.
 
-Use [CHECK-STEP.md](CHECK-STEP.md) and verify the actual assignment, behavior,
-affected target and protected scope. Check Harness behavior and relevant
-product regressions separately. Only mark `Verified` and close passed work
-with evidence readable to the receiving context; only Evolve updates its map.
+Use [CHECK-STEP.md](CHECK-STEP.md) to receive `result` and verify the actual
+assignment, behavior, affected target and protected scope. Check Harness
+behavior and relevant product regressions separately. Update Evolve's map
+only after checking the criteria and with writeback authority; closing passed
+work needs separate authority.
 Distinguish selected, applied, observed working and measured improvement.
 Report what remains open, untested or blocked and the next action. Do not
 reapply finished effects on resume or create a new loop or schedule. See the

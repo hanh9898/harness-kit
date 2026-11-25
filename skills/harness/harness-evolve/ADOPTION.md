@@ -14,17 +14,42 @@ host independently of the invoking host. Reuse adequate legacy foundations and
 their discovery routes; fill only gaps that affect this request. A legacy layout
 is not a reason to restart onboarding or the old six-module checklist.
 
+Use the [M2 target and runtime contract](../../../kit/M2-CONFIG.md) when
+reconciling an affected binding. A target profile describes what changes;
+runtime mode describes who is running the work. A persistent caller doing
+repo-only work does not authorize Bot changes. Bot-only work uses its owning
+workspace and scope without a synthetic repo or Product tracker. If both targets
+are affected, reconcile their binding, revision, grant and outcome separately.
+Hold only the branch that needs a missing prerequisite; never roll back an
+independent Repo effect because a Bot effect failed.
+
+Compare the live target and binding to the original approved scope and basis.
+Verify needed unproven routes and reverify any affected route whose host, caller,
+source, revision/digest, destination or authority changed, in the actual caller
+context for the intended operation.
+Keep compatible references and unaffected evidence. An unavailable or ambiguous
+route blocks its dependent step; do not reinstall, bootstrap, or substitute
+another host, tool or caller to make reconciliation pass.
+
 Read the selected source and complete assembly contents, including applicable
-child material. Call `harness-library` for source identity, content/origin
-history, lineage and independent selection history in the exact store.
+child material. For Library-backed material, call `harness-library` for source
+identity, content/origin history, lineage and selection history in the exact store.
+For a configured Library, first verify the pinned store, owner, scope and
+identity against the original binding, then use `--require-existing-store`
+before `selection` or `selection-history`. Missing, unreadable or wrong-identity
+stores block dependent work; none is equivalent to an unconfigured store or
+revision 0 from a verified store with no selection row. No fallback store or raw
+catalog selection. Reread the scoped
+[v1 selection](../harness-library/READ.md#selection-handoff), including source,
+canonical ID, effective status and the applicable revisions, digest and lineage.
 Base provenance and transformation claims on decoded source values and actual
 target bytes. JSON display escaping is not evidence of literal content escapes.
 Claim a normalization only when a before/after comparison demonstrates it;
 otherwise leave the transformation unestablished. Preserve a mistaken historical
 claim with a linked correction when reconciling evidence.
-Check the intended store's effective selection even for directly retrieved
-supplied material. Preserve disabled selections until explicit authorized
-restoration. Exclusion alone neither removes an already-applied consumer nor
+Check the intended store's effective selection for Library-backed material,
+even if its supplied text was retrieved directly. Preserve disabled selections
+until explicit authorized restoration. Exclusion alone neither removes an already-applied consumer nor
 revokes its authority; inspect whether that prior use is still valid.
 
 Distinguish historical origin, current library selection and actual target
@@ -105,6 +130,52 @@ For a resumed or uncertain action, use [DRIFT.md](DRIFT.md): inspect the actual
 effect before retry, retain valid completed work and finish only missing records
 or evidence. A completed unchanged resume adds neither an effect nor a duplicate
 history event. Reopen a blocker only when new evidence or authority can resolve it.
+
+### Bot binding changes
+
+Only enter this branch for an affected Bot target. Reopen the role template
+and its linked contract at the same pinned distribution revision, as in
+[Setup](../harness-setup/FOUNDATION.md). If the approved role has no Library
+selection dependency, reuse approved direct pins without provisioning a store.
+For a Library-backed role, resolve both the role and `bot-portable-template`
+separately in the bound store; either disabled, unavailable or unverified
+selection blocks adoption. Do not fall back to direct pins from a failed
+configured store.
+
+When changing hosts, confirm old triggers are off, drain or fence old work,
+and reconcile all `Unknown`
+effects before the owner rebinds and reads back the disabled configuration.
+While draining, the new host may only inspect or run isolated fixtures.
+Keep the instance only if the new host can reopen the approved authoritative
+records; otherwise an independently authorized new instance needs scope
+separation or a stopped old instance. Never copy secrets, grants, transcripts,
+or schedules. Do not allow two hosts to send effects for the same scope.
+
+After applying and reading back the changed Bot configuration, hand the operator
+one [`bot-setup`](../../../kit/STAGE-CONTRACTS.md#setup-or-evolve--bot-operator-bot-setup)
+v1. Reference the observed instance, scope, adapter and configuration, the
+pinned template and contract, accessible evidence and the capability IDs read back as
+disabled. If readback is incomplete, report the blocker; repo-only and
+unchanged runs do not emit `bot-setup`. For example:
+
+```json
+{
+  "version": 1,
+  "operation": "bot-setup",
+  "instance_id": "bot:workspace",
+  "template_ref": "catalog:software-factory@kit-1",
+  "contract_ref": "catalog:bot-portable-template@kit-1",
+  "scope_ref": "scope:harness",
+  "adapter_ref": "adapter:workspace@1",
+  "configuration_ref": "configuration:workspace@2",
+  "evidence_refs": ["evidence:configuration-readback@2"],
+  "disabled_capabilities": ["wake"]
+}
+```
+
+Configuration is not activation. Keep affected triggers disabled until manual
+qualification, fresh-worker checkpoint readback and deduplication checks have
+passed, and the operator has separately granted and verified each trigger.
 
 **Done:** each assigned target has honest applied or blocked state with inspectable
 evidence and continuation; known-use coverage and unverified hosts/uses remain

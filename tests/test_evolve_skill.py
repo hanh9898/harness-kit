@@ -1,7 +1,10 @@
 """harness-evolve structural and boundary checks; runtime behavior is covered by CHECKLIST.md."""
+import json
 import re
 
-from conftest import CHECK_BOUNDARY, ROOT, TOKENS, run
+import pytest
+
+from conftest import CHECK_BOUNDARY, KIT, ROOT, TOKENS, run
 
 SKILL = ROOT / "skills" / "harness" / "harness-evolve"
 
@@ -23,6 +26,50 @@ def test_entry_references_its_runtime_guidance():
 
 def test_checklist_file_exists():
     assert (SKILL / "CHECKLIST.md").is_file()
+
+
+@pytest.mark.parametrize(("runbook", "operation"), [
+    ("DESIGN-WRITEBACK.md", "prepare"),
+    ("DESIGN-WRITEBACK.md", "publish"),
+    ("ADOPTION.md", "bot-setup"),
+])
+def test_v1_handoff_examples_pass_the_shipped_checker(tmp_path, runbook, operation):
+    examples = re.findall(r"```json\n(.*?)\n```", (SKILL / runbook).read_text(encoding="utf-8"), re.S)
+    example, = [value for value in examples if json.loads(value)["operation"] == operation]
+    path = tmp_path / f"{operation}.json"
+    path.write_text(example, encoding="utf-8")
+    result = run(KIT / "scripts" / "check-stage-handoff", "--expect-operation", operation, path)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == f"OK: v1 {operation} handoff shape is valid\n"
+    if operation == "prepare":
+        prepare = json.loads(example)
+        assert prepare["spec_ref"]
+        assert prepare["needed_route_refs"] == ["route:ticket-draft@1"]
+        assert "ticket_ref" not in prepare
+
+
+def test_preparation_reuses_compatible_artifacts():
+    guidance = " ".join((SKILL / "DESIGN-WRITEBACK.md").read_text().split())
+    assert "If both are compatible, skip preparation" in guidance
+    assert "reuse the canonical ticket rather than publishing again" in guidance
+
+
+def test_bot_rebind_preserves_the_role_source():
+    guidance = " ".join((SKILL / "ADOPTION.md").read_text().split())
+    assert "reuse approved direct pins without provisioning a store" in guidance
+    assert "Do not fall back to direct pins from a failed configured store" in guidance
+
+
+@pytest.mark.parametrize(("runbook", "guard"), [
+    ("ADOPTION.md", "Missing, unreadable or wrong-identity stores block dependent work"),
+    ("ADOPTION.md", "do not reinstall"),
+    ("DESIGN-WRITEBACK.md", "namespace blocks publication"),
+    ("SKILL.md", "missing, stale or conflicting claim blocks dispatch"),
+    ("UPDATE.md", "While `Unknown`, do not retry, re-publish"),
+])
+def test_runbooks_keep_fail_closed_guards(runbook, guard):
+    guidance = " ".join((SKILL / runbook).read_text().split())
+    assert guard in guidance
 
 
 def test_relative_guidance_links_resolve():
