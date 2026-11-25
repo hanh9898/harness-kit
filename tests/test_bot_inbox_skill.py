@@ -91,6 +91,7 @@ def test_inbox_identity_contract(key, fields):
         ("HOST.md", "Qualify in an isolated Bot", (
             "one active card per action and one initial delivery",
             "zero additional deliveries on replay",
+            "only the undelivered ask is sent",
             "zero effect grants",
             "zero results delivered across routes",
             "wrong bot, actor, thread, subject, revision or action",

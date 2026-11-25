@@ -43,6 +43,7 @@ and destination audit:
 | Case | Evidence to collect |
 | --- | --- |
 | With send authority and cadence permitting delivery, send two current asks as a group. Confirm delivery, then replay the trigger after resume with a nonmaterial edit and regrouping. | One active card per action and one initial delivery to the approved recipient and thread. Zero additional deliveries on replay. The receipt covers both asks. A held or failed first send does not qualify dedupe. |
+| Regroup a delivered ask with an authorized, undelivered ask on the same route, with cadence permitting delivery. | Only the undelivered ask is sent. Its receipt covers only that ask; the earlier receipt stays unchanged. |
 | Create a similar ask in each Bot. Try wrong Bot, actor, thread, subject, revision or action separately. Supersede a card and replay its old reply. | Neither Bot settles the other's ask. Invalid or stale replies leave the current card open and produce zero effect grants. The superseded card stays closed and its pending delivery is suppressed. |
 | Reply to the current card on the approved route, then replay the reply. Exercise both a decline and an authenticated yes on separate asks. | Each valid reply settles once. Decline submits no request; yes submits one request to the independent gate. No reply, card or receipt mints a grant or wakes a Bot. Zero results delivered across routes. Tasks and GitHub state stay unchanged. |
 | Try the native route without trustworthy subject revision evidence. | Manual review only: no settlement, grant request or effect. |
