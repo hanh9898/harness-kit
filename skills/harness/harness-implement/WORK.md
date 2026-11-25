@@ -60,9 +60,12 @@ Publish prerequisites first under their own approvals and grants; link dependenc
 
 ## Tasks board and Inbox
 
-Use the bound Tasks board for canonical work. Distinguish a human assignee
-from a session claim. Before claiming or dispatching, read back the canonical
-ticket, current claim and dependencies and verify authority on that board.
+When the bound Harness work source is a Tasks board, distinguish a human
+assignee from a session claim. Before claiming or dispatching, read back the
+canonical ticket, current claim and dependencies and verify authority on that
+board. For an authorized local Harness record, check the same facts at its
+canonical locator; do not require or invent a board.
+
 Inbox cards and replies do not authorize a Tasks claim or replace canonical
 work, PR status, or an effect grant.
 
