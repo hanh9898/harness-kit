@@ -58,6 +58,137 @@ def update_supplied(root):
         writer.writeheader(); writer.writerows(rows)
 
 
+def rename_supplied(root, old, new, filename='legos.csv', keep_old=False, **changes):
+    path = root / 'kit' / filename
+    with path.open(encoding='utf-8', newline='') as stream:
+        reader = csv.DictReader(stream)
+        rows, fields = list(reader), reader.fieldnames
+    index, = (i for i, row in enumerate(rows) if row['id'] == old)
+    replacement = dict(rows[index], id=new, **changes)
+    if keep_old:
+        rows.append(replacement)
+    else:
+        rows[index] = replacement
+    with path.open('w', encoding='utf-8', newline='') as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def confirm_rename(root, old, new, expected=0, source='supplied', **facts):
+    return change(root, 'disable', expected, source=source, id=new, confirm_rename_from=old, **facts)
+
+
+@pytest.mark.parametrize('old,new,filename', [('H14', 'H98', 'legos.csv'),
+                                             ('6.09', '99.09', 'rules.csv')])
+def test_supplied_rename_holds_exact_match_without_migrating_history(tmp_path, old, new, filename):
+    supplied(tmp_path)
+    disabled = change(tmp_path, 'disable', 0, id=old)
+    assert disabled.returncode == 0, disabled.stderr
+    first = json.loads(disabled.stdout)['record']
+    rename_supplied(tmp_path, old, new, filename)
+
+    state = selection(tmp_path, id=new)
+    assert state['available'] and not state['enabled'] and not state['effective']
+    assert state['revision'] == 0 and state['record'] is None
+    assert state['possible_previous_ids'] == [old]
+    assert not selection(tmp_path, id=old)['available']
+    assert selection(tmp_path, id=old, history=True) == [first]
+    assert selection(tmp_path, id=new, history=True) == []
+    assert selection(tmp_path, id='H15')['effective']
+
+    row = first['snapshot']['resource']
+    args = ('search', row.get('name') or row['rule'], '--kit-dir', tmp_path / 'kit')
+    result = json.loads(invoke(tmp_path, *args).stdout)
+    assert result['matches'] == [] and result['excluded'] == 1
+    visible = json.loads(invoke(tmp_path, *args, '--include-disabled').stdout)['matches']
+    assert [(hit['id'], hit['enabled'], hit['possible_previous_ids']) for hit in visible] == [
+        (new, False, [old])]
+    restore = change(tmp_path, 'restore', 0, id=new)
+    assert restore.returncode == 2 and 'confirm_rename_from' in restore.stderr
+    assert selection(tmp_path, id=new, history=True) == []
+
+
+def test_confirmed_rename_preserves_scope_and_exclusion_through_content_edit(tmp_path):
+    supplied(tmp_path)
+    missing = confirm_rename(tmp_path, 'H14', 'H15')
+    assert missing.returncode == 2 and not (tmp_path / 'library.sqlite3').exists()
+    assert change(tmp_path, 'disable', 0).returncode == 0
+    rename_supplied(tmp_path, 'H14', 'H98')
+
+    for old, expected, facts, error in [
+        (None, 0, {}, 'must name a predecessor ID'),
+        ('H15', 0, {}, 'possible predecessor'),
+        ('H14', 0, {'owner': 'Another owner'}, 'Changing selection owner'),
+        ('H14', 0, {'scope': f'project:{tmp_path}'}, 'Changing selection scope'),
+        ('H14', 1, {}, 'Selection revision conflict'),
+    ]:
+        failed = confirm_rename(tmp_path, old, 'H98', expected, **facts)
+        assert failed.returncode == 2 and error in failed.stderr
+    assert selection(tmp_path, id='H98', history=True) == []
+
+    linked = confirm_rename(tmp_path, 'H14', 'H98')
+    assert linked.returncode == 0, linked.stderr
+    state = json.loads(linked.stdout)
+    assert not state['effective'] and state['revision'] == 1
+    assert state['record']['action'] == 'inherit-disable'
+    assert state['record']['renamed_from'] == {'id': 'H14', 'revision': 1}
+    assert confirm_rename(tmp_path, 'H14', 'H98').returncode == 2
+
+    rename_supplied(tmp_path, 'H98', 'H98', name='Edited hook')
+    after_edit = selection(tmp_path, id='H98')
+    assert not after_edit['effective'] and after_edit['record'] == state['record']
+    assert after_edit['current_snapshot']['resource']['name'] == 'Edited hook'
+    assert change(tmp_path, 'restore', 1, id='H98').returncode == 0
+    assert selection(tmp_path, id='H98')['effective']
+    assert [record['enabled'] for record in selection(tmp_path, id='H98', history=True)] == [False, True]
+    assert [record['enabled'] for record in selection(tmp_path, history=True)] == [False]
+
+
+def test_confirmed_rename_predecessor_is_not_reused_after_restore(tmp_path):
+    supplied(tmp_path)
+    assert change(tmp_path, 'disable', 0).returncode == 0
+    rename_supplied(tmp_path, 'H14', 'H98')
+    linked = confirm_rename(tmp_path, 'H14', 'H98')
+    assert json.loads(linked.stdout)['record']['renamed_from']['id'] == 'H14'
+    assert change(tmp_path, 'restore', 1, id='H98').returncode == 0
+    rename_supplied(tmp_path, 'H98', 'H99')
+    assert selection(tmp_path, id='H99')['effective']
+    assert not selection(tmp_path)['enabled']
+
+
+def test_rename_hold_respects_live_ids_and_source_boundary(tmp_path):
+    from test_library_cli import draft, save
+    supplied(tmp_path)
+    assert change(tmp_path, 'disable', 0).returncode == 0
+    rename_supplied(tmp_path, 'H14', 'H98', keep_old=True)
+    assert selection(tmp_path, id='H98')['effective']
+    assert confirm_rename(tmp_path, 'H14', 'H98').returncode == 2
+    rename_supplied(tmp_path, 'H14', 'H99', name='Different hook')
+    assert selection(tmp_path, id='H99')['effective']
+    assert not selection(tmp_path, id='H98')['effective']
+
+    assert save(tmp_path, draft(id='H98')).returncode == 0
+    assert selection(tmp_path, source='saved', id='H98')['effective']
+    assert confirm_rename(tmp_path, 'H14', 'H98', source='saved').returncode == 2
+
+
+def test_rename_hold_lists_ambiguous_candidates_without_choosing(tmp_path):
+    supplied(tmp_path)
+    rename_supplied(tmp_path, 'H14', 'H97', keep_old=True)
+    assert change(tmp_path, 'disable', 0).returncode == 0
+    assert change(tmp_path, 'disable', 0, id='H97').returncode == 0
+    rename_supplied(tmp_path, 'H14', 'H98')
+    rename_supplied(tmp_path, 'H97', 'H99', name='Different hook')
+
+    assert selection(tmp_path, id='H98')['possible_previous_ids'] == ['H14', 'H97']
+    assert selection(tmp_path, id='H98', history=True) == []
+    assert confirm_rename(tmp_path, 'H97', 'H98').returncode == 0
+    lineage = selection(tmp_path, id='H98')['record']['renamed_from']
+    assert lineage == {'id': 'H97', 'revision': 1}
+    assert selection(tmp_path, id='H98')['enabled'] is False
+
+
 def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
     skill = ROOT / 'skills/harness/harness-library/SKILL.md'
     template, = re.findall(r'`(library (?:[^`\n]+ )?selection [^`\n]+)`',
