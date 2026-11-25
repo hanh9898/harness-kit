@@ -32,10 +32,31 @@ use `--source saved` for saved resources. Pin the actual catalog and store.
 Check effective state, source, exact ID and revision (content or catalog
 revision and selection revision as applicable); open scoped history only
 as needed. The same ID in `supplied` and `saved` means distinct resources.
-Return scope, identity/revision, effective selection and evidence, attributable
-sources/certainty and applicable limits. Do not infer approval, execution or a
-current external consumer inventory. Recheck live state before adoption,
-particularly if a selection is disabled, changed or no longer readable.
+
+## Selection handoff
+
+Use the live read in the consumer's authorized store and scope. Return a v1
+[`selection`](../../../kit/STAGE-CONTRACTS.md#library--consumer-selection)
+with `store_ref`, `scope_ref`, the CLI's `source` and canonical `id`,
+`revision` as `selection_revision`, and the observed `enabled`, `available`
+and `effective` (`enabled` and `available`) state. Include `evidence_refs`
+for the readback and provenance plus `lineage_ref` or `hold_ref` when relevant.
+
+| Source | Revision and snapshot evidence |
+| --- | --- |
+| `supplied` | Use the consumer's pinned catalog as `distribution_revision`. For an available snapshot, use `current_snapshot.sha256` as `digest`. |
+| `saved` | Use `current_snapshot.revision` as `content_revision`; omit it if unavailable. A saved snapshot does not require a digest. |
+
+Keep selection revision separate from content/distribution revision. A supplied
+CSV snapshot covers the row, not linked content; pin the template and linked
+content to the same distribution revision. If store, scope, revision or
+identity is unverified, return the blocker rather than guessing a handoff.
+A possible rename is a hold, not proof of lineage.
+
+The consumer must reread the live selection before application. Disabled,
+unavailable or unreconciled choices do not confer permission to use raw catalog
+content. Return source evidence and its limits, not approval, applied state
+or a claim about the current external consumer inventory.
 
 ## Lineage
 
