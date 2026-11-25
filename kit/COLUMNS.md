@@ -3,7 +3,6 @@
 | Column | Meaning |
 |---|---|
 | id | Unique, stable lowercase slug, for example `project-instructions`. |
-| legacy_id | Former piece ID, if it had one, for example `B01`. Keep existing aliases unchanged; leave this blank for new pieces. |
 | group | Group letter. |
 | name | Short name. `show` also accepts it, case-insensitive. |
 | summary | One sentence: what the piece is. |
@@ -13,7 +12,15 @@
 | sources | Where the claim comes from. |
 | detail | How to use it. Only `show` prints this. |
 
-Every cell except `legacy_id` is required. `tools/check_kit.py` also checks unique slugs and aliases and rejects collisions with other selectors. Historical catalogs without the `legacy_id` column remain readable.
+Every cell is required.
+
+## Piece ID aliases
+
+`piece-aliases.csv` maps each former `legacy_id` (for example `B01`) to its
+canonical `slug`. Keep both fields unchanged, including for retired pieces,
+so old library history stays reachable. New pieces need no alias. The checker
+rejects duplicate aliases, duplicate targets and collisions with other selectors.
+Historical catalogs without this file remain readable.
 
 The kit names no project. `boundary-tokens.txt` at the repo root lists the forbidden strings; keep it outside `kit/` so the kit stays clean. `tools/check_boundary.py` reads it.
 

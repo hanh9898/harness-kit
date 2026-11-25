@@ -22,6 +22,7 @@ Supplied store of lego pieces for building an agent harness, plus the rules, tea
 | File | What it holds | Rows |
 |---|---|---|
 | `legos.csv` | Pieces (columns in [COLUMNS.md](COLUMNS.md)) | 169 |
+| `piece-aliases.csv` | Former piece IDs and their canonical slugs | 169 |
 | `groups.csv` | Group letter and name of the pieces; `scripts/kit list` prints both | 14 |
 | `rules.csv` | Rules for skills, agent documents, prompts, configuration, workflow, tools, testing | 219 |
 | `patterns.md` | Team architecture patterns | 14 |

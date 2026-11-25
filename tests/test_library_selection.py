@@ -9,7 +9,7 @@ import subprocess
 
 import pytest
 
-from conftest import COLUMNS, ROOT, row, run, write_kit
+from conftest import ROOT, row, run, write_kit, write_piece_aliases
 
 CLI = ROOT / 'kit/scripts/library'
 REREAD = 'reread-source-before-write'
@@ -50,11 +50,13 @@ def upgrade_catalog(root, keep_legacy_id=False):
     catalog = root / 'kit'
     piece = row(REREAD if not keep_legacy_id else 'H14', group='H', name='Read live source',
                 detail='Refresh the source before recording a decision.')
+    if not keep_legacy_id:
+        piece.update(detail='Updated guidance: distinguish unreadable sources from empty results.')
+    write_kit(catalog, [piece])
     if keep_legacy_id:
-        write_kit(catalog, [piece])
+        (catalog / 'piece-aliases.csv').unlink(missing_ok=True)
     else:
-        piece.update(detail='Updated guidance: distinguish unreadable sources from empty results.', legacy_id='H14')
-        write_kit(catalog, [piece], header=COLUMNS + ['legacy_id'])
+        write_piece_aliases(catalog, ('H14', REREAD))
     (catalog / 'rules.csv').write_text('id,rule,source,certainty\n')
 
 
@@ -110,6 +112,28 @@ def test_slug_upgrade_keeps_previously_restored_state(tmp_path):
     assert (state['effective'], state['revision'], state['record']['action']) == (True, 2, 'restore')
 
 
+def test_slug_upgrade_keeps_first_slug_disable_visible_to_old_catalog(tmp_path):
+    upgrade_catalog(tmp_path)
+    assert change(tmp_path, 'disable', 0, id=REREAD).returncode == 0
+    upgrade_catalog(tmp_path, keep_legacy_id=True)
+    state = selection(tmp_path, id='H14')
+    assert (state['effective'], state['revision']) == (False, 1)
+    assert state['record']['id'] == REREAD
+
+
+def test_slug_upgrade_lists_retired_piece_history(tmp_path):
+    upgrade_catalog(tmp_path, keep_legacy_id=True)
+    assert change(tmp_path, 'disable', 0, id='H14').returncode == 0
+    previous = selection(tmp_path, id='H14', history=True)
+    upgrade_catalog(tmp_path)
+    write_kit(tmp_path / 'kit', [])
+    assert selection(tmp_path, id=REREAD, history=True) == previous
+    state = selection(tmp_path, id=REREAD)
+    assert (state['available'], state['enabled'], state['revision']) == (False, False, 1)
+    (tmp_path / 'kit/legos.csv').unlink()
+    assert selection(tmp_path, id=REREAD, history=True) == previous
+
+
 def test_slug_upgrade_resolves_history_at_selected_catalog_path(tmp_path):
     upgrade_catalog(tmp_path, keep_legacy_id=True)
     assert change(tmp_path, 'disable', 0, id='H14').returncode == 0
@@ -160,8 +184,6 @@ def rename_supplied(root, old, new, filename='legos.csv', keep_old=False, **chan
     index, = (i for i, row in enumerate(rows) if row['id'] == old)
     replacement = dict(rows[index], id=new, **changes)
     if keep_old:
-        if 'legacy_id' in fields:
-            replacement['legacy_id'] = ''
         rows.append(replacement)
     else:
         rows[index] = replacement

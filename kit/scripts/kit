@@ -26,7 +26,7 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from piece_ids import PieceAliases, public_piece
+from piece_ids import PieceAliases
 sys.path.pop(0)
 
 
@@ -253,10 +253,10 @@ def main(argv=None):
         return fail(e)
     try:
         rules = load_rules(Path(a.dir))
-        aliases = PieceAliases(entries, (row["id"] for row in rules[0]))
+        aliases = PieceAliases.load(Path(a.dir), entries, (row["id"] for row in rules[0]))
     except (OSError, ValueError) as e:
         return fail(e)
-    rows = [public_piece(row) for _, row in entries]
+    rows = [row for _, row in entries]
     if a.cmd == "list":
         return cmd_list(rows, a.group, patterns, deleg, rules, a.topic, names, dir_override=dir_override)
     return cmd_show(rows, a.query, patterns, head, deleg, rules, aliases)

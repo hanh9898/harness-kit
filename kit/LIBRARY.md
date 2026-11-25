@@ -110,7 +110,9 @@ A stale revision or request for the already-recorded state fails without a dupli
 
 ### Upgrading from letter-number piece IDs
 
-The shipped catalog declares the old IDs as `legacy_id` aliases. For supplied pieces, reads such as `selection H14` resolve to the slug `reread-source-before-write` and retain its existing selection revision and decision, even if the supplied content has changed. No migration command or database rewrite is needed. Historical records and snapshots retain the IDs they were written with; new records use the slug and continue the same history.
+The shipped catalog declares the old IDs in `piece-aliases.csv`. For supplied pieces, reads such as `selection H14` resolve to the slug `reread-source-before-write` and retain its existing selection revision and decision, even if the supplied content has changed. No migration command or database rewrite is needed. Historical records and snapshots retain the IDs they were written with; new records use the slug and continue the same history.
+
+Keep alias rows when retiring pieces: the slug still reads the old history while the piece is unavailable. New records for mapped pieces use the old SQLite key so a catalog from before the slug upgrade sees the same exclusion.
 
 Use the slug for writes and issue a fresh grant for that exact slug and current revision. For a custom catalog, pass the same `--kit-dir` when issuing the grant and writing. Old-ID grants do not authorize slug writes. Saved resource IDs and their origins are unchanged. If a custom catalog already recorded separate choices under both IDs, the library refuses to choose between them; inspect both streams with `selection-history` before reconciling the conflict.
 

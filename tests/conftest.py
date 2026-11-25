@@ -31,6 +31,13 @@ def write_kit(root, rows, header=COLUMNS, groups=None):
     return root
 
 
+def write_piece_aliases(root, *pairs):
+    with (root / "piece-aliases.csv").open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow(["legacy_id", "slug"])
+        writer.writerows(pairs)
+
+
 def row(id, group="A", name=None, rung="instruction-file", **kw):
     base = dict(id=id, group=group, name=name or f"Piece {id}", summary=f"Summary {id}",
                 needed_when=f"When {id}", rung=rung, certainty="high", sources="https://example.com", detail=f"Detail {id}")

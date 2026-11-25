@@ -21,7 +21,7 @@ from pathlib import Path
 from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from piece_ids import PieceAliases, public_piece
+from piece_ids import PieceAliases
 sys.path.pop(0)
 
 CONSUMPTION = "Requires checking conditions and gaps; saving is not adoption."
@@ -273,9 +273,8 @@ def supplied_catalog(kit_dir):
             for row in reader:
                 if kind == "piece":
                     pieces.append((reader.line_num, row))
-                    row = public_piece(row)
                 catalog.append((filename, kind, row))
-    return catalog, PieceAliases(pieces, (row["id"] for _, kind, row in catalog if kind == "rule"))
+    return catalog, PieceAliases.load(kit_dir, pieces, (row["id"] for _, kind, row in catalog if kind == "rule"))
 
 
 def latest_selections(db):
@@ -305,9 +304,11 @@ def row_signature(kind, row):
 
 
 def pending_renames(catalog, records, reconciled, aliases):
-    live_ids = {row["id"] for _, _, row in catalog} | aliases.by_legacy.keys()
+    live_ids = {row["id"] for _, _, row in catalog}
+    reconciled = {(aliases.canonical(identity), revision) for identity, revision in reconciled}
     retired = {}
     for (source, identity), record in records.items():
+        identity = aliases.canonical(identity)
         if (source != "supplied" or identity in live_ids or record["enabled"]
                 or (identity, record["revision"]) in reconciled):
             continue
@@ -315,18 +316,20 @@ def pending_renames(catalog, records, reconciled, aliases):
         if snapshot["kind"] in ("piece", "rule"):
             signature = row_signature(snapshot["kind"], snapshot["resource"])
             if signature is not None:
-                retired.setdefault(signature, []).append(identity)
+                retired.setdefault(signature, set()).add(identity)
     return retired
 
 
 def selection_key(records, source, identity, aliases):
     legacy = aliases.by_slug.get(identity) if source == "supplied" else None
-    if legacy is None or (source, legacy) not in records:
+    if legacy is None:
         return identity
     if (source, identity) in records:
-        raise ValueError(f"Conflicting selection histories for `{identity}` and `{legacy}`; "
-                         "inspect selection-history to reconcile both streams before selection.")
-    # Keep old rows immutable and append to their existing revision stream.
+        if (source, legacy) in records:
+            raise ValueError(f"Conflicting selection histories for `{identity}` and `{legacy}`; "
+                             "inspect selection-history to reconcile both streams before selection.")
+        return identity
+    # Use the former storage key even for new records so older catalogs see the same stream.
     return legacy
 
 
@@ -367,11 +370,12 @@ def selection_view(db, kit_dir, source, identity, catalog=(), aliases=None):
     snapshot = resource_snapshot(db, kit_dir, source, identity, catalog)
     pending = []
     key = identity
-    if source == "supplied" and snapshot and snapshot["kind"] in ("piece", "rule"):
+    if source == "supplied" and (identity in aliases.by_slug or
+                                (snapshot and snapshot["kind"] in ("piece", "rule"))):
         records, reconciled = latest_selections(db)
         key = selection_key(records, source, identity, aliases)
         record = records.get((source, key))
-        if record is None:
+        if record is None and snapshot:
             pending = pending_renames(catalog, records, reconciled, aliases).get(
                 row_signature(snapshot["kind"], snapshot["resource"]), [])
     else:
@@ -403,6 +407,7 @@ def selection_result(db, kit_dir, source, identity, history):
         except FileNotFoundError:
             if not history:
                 raise
+            aliases = PieceAliases.load(kit_dir, (), ())
     identity = aliases.canonical(identity)
     if history:
         legacy = aliases.by_slug.get(identity)
@@ -457,7 +462,8 @@ def change_selection(args):
         if renamed_from is not None:
             if renamed_from not in pending:
                 raise ValueError("confirm_rename_from needs a possible predecessor listed by selection.")
-            prior = selection_records(db, args.source, renamed_from)[-1]
+            records, _ = latest_selections(db)
+            prior = records[args.source, selection_key(records, args.source, renamed_from, aliases)]
             lineage = dict(id=renamed_from, revision=prior["revision"])
         if pending and enabled:
             raise ValueError("Possible rename is unresolved; disable with confirm_rename_from before restoring.")
