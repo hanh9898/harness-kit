@@ -6,7 +6,7 @@ import pytest
 
 from conftest import KIT, ROOT, run
 from test_library_cli import draft, save
-from test_library_selection import REREAD, decision, invoke
+from test_library_selection import REREAD, decision, invoke, upgrade_catalog
 from test_library_write_grants import assert_denied, issue, read, request, revoke
 
 SKILLS = ROOT / "skills/harness"
@@ -67,11 +67,17 @@ def test_implement_keeps_destination_authority_and_reconciliation_separate():
 @pytest.mark.parametrize("source", ["supplied", "saved"])
 def test_live_selection_readback_has_source_specific_v1_evidence(tmp_path, source):
     identity = REREAD if source == "supplied" else draft()["id"]
-    if source == "saved":
+    args = ("selection", identity, "--source", source)
+    if source == "supplied":
+        upgrade_catalog(tmp_path)
+        bundled = read(tmp_path, *args)
+        state = read(tmp_path, *args, "--kit-dir", tmp_path / "kit")
+        assert state["current_snapshot"]["sha256"] != bundled["current_snapshot"]["sha256"]
+    else:
         saved = save(tmp_path, draft())
         assert saved.returncode == 0, saved.stderr
+        state = read(tmp_path, *args)
 
-    state = read(tmp_path, "selection", identity, "--source", source)
     read_guide = (LIBRARY / "READ.md").read_text(encoding="utf-8")
     assert "`revision` as `selection_revision`" in read_guide
     handoff = {
@@ -85,6 +91,7 @@ def test_live_selection_readback_has_source_specific_v1_evidence(tmp_path, sourc
     }
     assert state["available"] and state["effective"]
     if source == "supplied":
+        assert "`--kit-dir <pinned-catalog>`" in read_guide
         assert "`current_snapshot.sha256` as `digest`" in read_guide
         handoff.update(distribution_revision="test-distribution", digest=state["current_snapshot"]["sha256"])
     else:
