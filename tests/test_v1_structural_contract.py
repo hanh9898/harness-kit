@@ -8,6 +8,7 @@ import subprocess
 from contextlib import closing
 from graphlib import CycleError, TopologicalSorter
 from pathlib import Path
+from runpy import run_path
 from urllib.parse import unquote, urlsplit
 
 import pytest
@@ -15,6 +16,9 @@ import pytest
 from conftest import ROOT, run
 from test_harness_suite import DISCOVERY_ROUTES
 from test_library_read_no_write import CLI, READS, library, no_write_host, read_args
+
+
+frontmatter = run_path(str(ROOT / "tools/skill_budget.py"))["frontmatter"]
 
 
 SKILLS = Path("skills")
@@ -235,9 +239,10 @@ def test_callers_link_canonical_gate(source, destination, anchor):
 
 
 def assert_skill_name(path):
-    frontmatter = re.match(r"\A---\n(.*?)\n---(?:\n|$)", read(path), re.S)
-    assert frontmatter, f"{path}: missing skill frontmatter"
-    assert re.findall(r"^name:\s*(.+)$", frontmatter[1], re.M) == [path.parent.name], path
+    header = re.match(r"\A---\n(.*?)\n---(?:\n|$)", read(path), re.S)
+    assert header and len(re.findall(r"^name:", header[1], re.M)) == 1, f"{path}: expected one skill name"
+    name = frontmatter(ROOT / path).get("name")
+    assert name == path.parent.name, f"{path}: expected {path.parent.name!r}, got {name!r}"
 
 
 def test_discovery_inventory_and_parent_order():
@@ -289,8 +294,7 @@ def test_default_opt_in_and_override_inventory():
     for path in ROOT.glob("**/SKILL.md"):
         if any(part.startswith(".") for part in path.relative_to(ROOT).parts):
             continue
-        name = re.match(r"\A---\n(?:.*\n)*?name:\s*([\w-]+)\s*\n", read(path.relative_to(ROOT)))
-        assert path.parent.name not in originals and (name is None or name[1] not in originals), f"Vendored original: {path}"
+        assert path.parent.name not in originals and frontmatter(path).get("name") not in originals, f"Vendored original: {path}"
 
 
 def test_checked_in_devin_registrations_only_expose_default_entries():
