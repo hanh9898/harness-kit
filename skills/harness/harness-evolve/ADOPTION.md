@@ -133,14 +133,21 @@ history event. Reopen a blocker only when new evidence or authority can resolve 
 
 ### Bot binding changes
 
-Only enter this branch for an affected Bot target. Reopen the role template
-and its linked contract at the same pinned distribution revision, as in
-[Setup](../harness-setup/FOUNDATION.md). If the approved role has no Library
-selection dependency, reuse approved direct pins without provisioning a store.
-For a Library-backed role, resolve both the role and `bot-portable-template`
-separately in the bound store; either disabled, unavailable or unverified
-selection blocks adoption. Do not fall back to direct pins from a failed
-configured store.
+Only enter this branch for an affected Bot target. For an Add, follow
+[Add a disabled Bot](../harness-setup/ACTIVATION.md#add-a-disabled-bot). Resolve
+both selections in the new Bot's scope, even when an existing Bot uses the same
+role and Library. Require separate H19 for the new Bot and read it back disabled.
+Never merge its configuration into an existing Bot or reuse that Bot's
+authority or evidence. A preview, denial or successful Add leaves the existing
+Bot's binding, grant, revision, receipt and triggers unchanged.
+
+For rebind, reopen the role template and its linked contract at the same
+pinned distribution revision, as in [Setup](../harness-setup/FOUNDATION.md).
+If the approved role has no Library selection dependency, reuse approved
+direct pins without provisioning a store. For a Library-backed role, resolve
+both the role and `bot-portable-template` separately in the bound store;
+either disabled, unavailable or unverified selection blocks adoption. Do not
+fall back to direct pins from a failed configured store.
 
 Use the shared [Bot lifecycle gates](../harness-setup/ACTIVATION.md#configure-and-qualify-a-bot)
 for the exact Bot being added or rebound. Inspect the proposed caller and

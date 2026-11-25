@@ -1,3 +1,4 @@
+import csv
 import hashlib
 import json
 import os
@@ -5,13 +6,16 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from pathlib import Path
+from time import perf_counter
 
 import pytest
 
-from conftest import KIT, ROOT
+from conftest import KIT, ROOT, run
+from test_library_selection import decision, initialize_empty_store
 
 
 HARNESS_IDS = ("harness-setup", "harness-evolve", "harness-implement", "harness-library")
@@ -722,3 +726,377 @@ def test_legacy_instance_key_does_not_accept_redelivery_as_a_new_occurrence(wake
     assert receive(wake_fixture, "bot-a", bound, route, "event") == ()
     assert occurrence_rows(db) == [(old_key, "pending")]
     assert occurrence_rows(ledgers["bot-b"]) == []
+
+
+BOT_PIECES = {
+    "software-factory": "kit/BOT-ROLES.md#software-factory",
+    "bot-portable-template": "kit/BOT-TEMPLATE.md",
+}
+
+
+@dataclass(frozen=True)
+class LibraryBinding:
+    store: Path
+    target: Path
+    identity: tuple[int, int]
+    scope_ref: str
+
+
+@dataclass(frozen=True)
+class PinnedBotKit:
+    checkout: Path
+    revision: str
+    scripts: Path
+
+    def pinned_bytes(self, relative):
+        try:
+            return subprocess.check_output(
+                ["git", "-C", self.checkout, "show", f"{self.revision}:{relative}"],
+                stderr=subprocess.PIPE,
+            )
+        except subprocess.CalledProcessError as exc:
+            raise AddBotStop("Preview: unverified distribution pin") from exc
+
+    def run(self, helper, *args):
+        return subprocess.run(
+            [sys.executable, "-IB", str(self.scripts / helper), *map(str, args)],
+            capture_output=True, text=True,
+        )
+
+
+@dataclass(frozen=True)
+class SelectionReadback:
+    handoff: dict
+    linked_digest: str
+
+
+class AddBotStop(Exception):
+    pass
+
+
+def file_identity(path):
+    stat = path.stat()
+    return stat.st_dev, stat.st_ino
+
+
+def read_bot_selections(pin, binding, scope_ref, owner_ref):
+    if binding is not None:
+        try:
+            target = binding.store.resolve(strict=True)
+            identity = file_identity(target)
+        except FileNotFoundError as exc:
+            raise AddBotStop("Blocked: missing store") from exc
+        except OSError as exc:
+            raise AddBotStop("Blocked: unreadable store") from exc
+        if (target, identity, binding.scope_ref) != (binding.target, binding.identity, scope_ref):
+            raise AddBotStop("Blocked: wrong-identity store or scope")
+
+    catalog = {row["id"]: row for row in csv.DictReader(
+        pin.pinned_bytes("kit/legos.csv").decode().splitlines(keepends=True)
+    )}
+    selections = {}
+    for piece, link in BOT_PIECES.items():
+        if binding is not None:
+            readback = pin.run(
+                "library", "--store", binding.store, "--require-existing-store",
+                "selection", piece, "--source", "supplied", "--kit-dir", pin.checkout / "kit",
+            )
+            if "cannot enforce a no-write SQLite open on this host" in readback.stderr:
+                pytest.skip("Host cannot enforce strict Library reads")
+            if readback.returncode:
+                assert readback.returncode == 2 and not readback.stdout, readback.stderr
+                raise AddBotStop("Blocked: unreadable store")
+            selected = json.loads(readback.stdout)
+            record = selected["record"]
+            if record and (record["scope"], record["owner"]) != (scope_ref, owner_ref):
+                raise AddBotStop("Preview: foreign selection")
+            if (selected["source"], selected["id"]) != ("supplied", piece) or not all(
+                selected[key] is True for key in ("enabled", "available", "effective")
+            ):
+                raise AddBotStop("Preview: ineffective selection")
+            snapshot = dict(kind="piece", reference=f"legos.csv#{piece}", resource=catalog[piece])
+            digest = hashlib.sha256(json.dumps(snapshot, sort_keys=True, ensure_ascii=False).encode())
+            if selected["current_snapshot"] != dict(snapshot, sha256=digest.hexdigest()):
+                raise AddBotStop("Preview: catalog pin mismatch")
+
+        shown = pin.run("kit", "--dir", pin.checkout / "kit", "show", piece)
+        path = link.split("#", 1)[0]
+        pinned_digest = hashlib.sha256(pin.pinned_bytes(path)).hexdigest()
+        try:
+            observed_digest = hashlib.sha256((pin.checkout / path).read_bytes()).hexdigest()
+        except OSError as exc:
+            raise AddBotStop("Preview: missing linked digest") from exc
+        if shown.returncode or link not in shown.stdout or observed_digest != pinned_digest:
+            raise AddBotStop("Preview: linked content pin mismatch")
+
+        if binding is not None:
+            selections[piece] = SelectionReadback({
+                "version": 1, "operation": "selection", "source": "supplied", "id": piece,
+                "store_ref": binding.target.as_uri(), "scope_ref": scope_ref,
+                "selection_revision": selected["revision"], "distribution_revision": pin.revision,
+                "enabled": selected["enabled"], "available": selected["available"],
+                "effective": selected["effective"], "digest": digest.hexdigest(),
+                "evidence_refs": [f"git:{pin.revision}:{link}"],
+            }, pinned_digest)
+    return selections
+
+
+def fixture_binding(store, scope):
+    return LibraryBinding(store, store.resolve(strict=True), file_identity(store), scope)
+
+
+def fixture_files(root):
+    return {
+        path.relative_to(root): (
+            path.readlink() if path.is_symlink()
+            else None if path.is_dir()
+            else (file_identity(path), path.read_bytes(), path.stat().st_mtime_ns, path.stat().st_ctime_ns)
+        )
+        for path in root.rglob("*")
+    }
+
+
+@pytest.fixture
+def bot_setup_kit(devin_project):
+    checkout, project, revision = devin_project
+    store = project / "library.sqlite3"
+    initialize_empty_store(store)
+    return PinnedBotKit(checkout, revision, checkout / "kit" / "scripts"), project, store
+
+
+@pytest.mark.parametrize(("fault", "outcome"), [
+    ("unconfigured", None),
+    ("missing", "Blocked: missing store"),
+    ("wrong-identity", "Blocked: wrong-identity"),
+    ("unreadable", "Blocked: unreadable store"),
+    ("wrong-scope", "Blocked: wrong-identity"),
+    ("foreign-role", "Preview: foreign selection"),
+    ("disabled-role", "Preview: ineffective selection"),
+    ("disabled-contract", "Preview: ineffective selection"),
+    ("missing-linked-digest", "Preview: missing linked digest"),
+    ("changed-contract", "Preview: linked content pin mismatch"),
+    ("changed-catalog", "Preview: catalog pin mismatch"),
+    ("unknown-pin", "Preview: unverified distribution pin"),
+])
+def test_add_bot_selection_stops_without_writes(bot_setup_kit, fault, outcome):
+    pin, project, store = bot_setup_kit
+    scope = f"project:{project}"
+    binding = fixture_binding(store, scope)
+    owner = "owner:shared"
+    if fault == "unconfigured":
+        binding = None
+        store.unlink()
+    elif fault == "missing":
+        store.unlink()
+    elif fault == "wrong-identity":
+        store.rename(store.with_suffix(".old"))
+        initialize_empty_store(store)
+    elif fault == "unreadable":
+        store.write_bytes(b"not a database")
+    elif fault == "wrong-scope":
+        binding = replace(binding, scope_ref=f"project:{project / 'other'}")
+    elif fault in ("foreign-role", "disabled-role", "disabled-contract"):
+        piece = "bot-portable-template" if fault == "disabled-contract" else "software-factory"
+        facts = decision(project, owner=owner, scope=(
+            f"project:{project / 'other'}" if fault == "foreign-role" else scope
+        ))
+        for command, revision in [("disable", 0)] + ([("restore", 1)] if fault == "foreign-role" else []):
+            result = run(pin.scripts / "library", "--store", store, command, piece, "--source",
+                         "supplied", "--kit-dir", pin.checkout / "kit", "--input", facts,
+                         "--expect-selection-revision", revision)
+            assert result.returncode == 0, result.stderr
+    elif fault == "missing-linked-digest":
+        (pin.checkout / "kit" / "BOT-ROLES.md").unlink()
+    elif fault == "changed-contract":
+        (pin.checkout / "kit" / "BOT-TEMPLATE.md").write_text("Unapproved contract\n")
+    elif fault == "changed-catalog":
+        catalog = pin.checkout / "kit" / "legos.csv"
+        catalog.write_text(catalog.read_text().replace("software-factory,C,Software Factory,",
+                                                        "software-factory,C,Unapproved role title,"))
+    elif fault == "unknown-pin":
+        pin = replace(pin, revision="missing-distribution")
+
+    before = fixture_files(project)
+    if outcome is None:
+        assert read_bot_selections(pin, binding, scope, owner) == {}
+    else:
+        with pytest.raises(AddBotStop, match=outcome):
+            read_bot_selections(pin, binding, scope, owner)
+    assert fixture_files(project) == before
+
+
+@dataclass(frozen=True)
+class DisabledConfigGrant:
+    bot_id: str
+    instance_id: str
+    scope_ref: str
+    binding_revision: int
+    adapter_ref: str
+    configuration_ref: str
+    owner_ref: str
+
+    @classmethod
+    def target(cls, proposal):
+        return cls(proposal["bot_id"], **{
+            key: proposal["binding"][key] for key in cls.__dataclass_fields__ if key != "bot_id"
+        })
+
+
+@dataclass(frozen=True)
+class RoleToolReadback:
+    role_digest: str | None
+    tools: tuple[str, ...]
+
+
+def add_disabled_fixture_bot(config, proposed, routes, selections, grant, observed):
+    target = DisabledConfigGrant.target(proposed)
+    if (grant != target or set(selections) != BOT_PIECES.keys()
+            or observed.role_digest != selections["software-factory"].linked_digest
+            or observed.tools != ("read",)):
+        return None
+    if any(readback.handoff["scope_ref"] != target.scope_ref for readback in selections.values()):
+        return None
+
+    current = json.loads(config.read_text())
+    if any(bot["bot_id"] == target.bot_id or bot["binding"]["instance_id"] == target.instance_id
+           for bot in current["bots"]):
+        return None
+    proposed_triggers = [route for route in routes if route["target_bot_id"] == target.bot_id]
+    existing = {route["trigger_ref"] for route in current["automations"]}
+    assert existing.isdisjoint(route["trigger_ref"] for route in proposed_triggers)
+    selection_refs = {
+        piece: f"selection:{target.bot_id}:{readback.handoff['scope_ref']}:{piece}"
+        for piece, readback in selections.items()
+    }
+    grant_ref, receipt_ref = (f"h19:{target.instance_id}", f"readback:{target.instance_id}")
+    host_config = config.with_name(f"{target.bot_id}-host.json")
+    host_config.write_text(json.dumps({
+        "bot": dict(proposed, role=selection_refs["software-factory"],
+                    contract=selection_refs["bot-portable-template"],
+                    grant=[grant_ref], receipt=[receipt_ref]),
+        "triggers": [dict(route, enabled=False) for route in proposed_triggers],
+    }), encoding="utf-8")
+    bot, triggers = read_disabled_fixture_config(host_config)
+    if (DisabledConfigGrant.target(bot) != target
+            or bot["revision"] != proposed["revision"]
+            or [{key: value for key, value in route.items() if key != "enabled"} for route in triggers]
+            != proposed_triggers):
+        raise AddBotStop("Blocked: disabled configuration readback not verified")
+    current["bots"].append(bot)
+    current["automations"].extend(triggers)
+    config.write_text(json.dumps(current), encoding="utf-8")
+    return {
+        "version": 1, "operation": "bot-setup",
+        "instance_id": bot["binding"]["instance_id"], "scope_ref": bot["binding"]["scope_ref"],
+        "template_ref": bot["role"], "contract_ref": bot["contract"],
+        "adapter_ref": bot["binding"]["adapter_ref"], "configuration_ref": bot["binding"]["configuration_ref"],
+        "evidence_refs": bot["receipt"], "disabled_capabilities": ["wake"],
+    }
+
+
+def read_disabled_fixture_config(path):
+    observed = json.loads(path.read_text())
+    if any(route["enabled"] is not False for route in observed["triggers"]):
+        raise AddBotStop("Blocked: expected disabled triggers")
+    return observed["bot"], observed["triggers"]
+
+
+@pytest.mark.parametrize("host", ["devin", "pi"])
+def test_disabled_bot_quickstart(bot_setup_kit, two_bots, tmp_path, monkeypatch, host):
+    pin, project, store = bot_setup_kit
+    if host == "devin":
+        applied = bootstrap_devin(pin.checkout, project, pin.revision)
+        assert applied.returncode == 0, applied.stderr
+        library = project / ".devin" / "skills" / LIBRARY_ID
+    else:
+        home = tmp_path / "pi-home"
+        home.mkdir()
+        monkeypatch.setenv("HOME", str(home))
+        entries = json.loads((pin.checkout / "package.json").read_text())["pi"]["skills"]
+        (library,) = [pin.checkout / entry for entry in entries if Path(entry).name == LIBRARY_ID]
+    monkeypatch.chdir(project)
+    assert library.resolve() == pin.checkout / "skills" / "harness" / LIBRARY_ID
+    pin = replace(pin, scripts=(library.resolve() / "../../../kit/scripts").resolve())
+
+    config = project / "host-config.json"
+    proposals, routes = two_bots["bots"], two_bots["automations"]
+    config.write_text(json.dumps(dict(two_bots, library_ref=store.as_uri(), bots=[], automations=[])))
+    catalog_before = fixture_files(pin.checkout / "kit")
+    observations = {}
+    for phase, proposal in zip(("Setup", "Evolve"), proposals, strict=True):
+        scope = proposal["binding"]["scope_ref"] = f"project:{project / proposal['bot_id']}"
+        for route in routes:
+            if route["target_bot_id"] == proposal["bot_id"]:
+                route["scope_ref"] = scope
+        binding = fixture_binding(store, scope)
+        target = DisabledConfigGrant.target(proposal)
+        before = fixture_files(project)
+        if host == "pi":
+            home_before = fixture_files(home)
+        selections = read_bot_selections(pin, binding, scope, target.owner_ref)
+        assert fixture_files(project) == before
+        if host == "pi":
+            assert fixture_files(home) == home_before
+        assert set(selections) == {"software-factory", "bot-portable-template"}
+        for piece, readback in selections.items():
+            assert readback.handoff["store_ref"] == store.as_uri()
+            assert readback.handoff["scope_ref"] == scope
+            assert readback.handoff["effective"] is True
+            assert readback.handoff["distribution_revision"] == pin.revision
+            assert readback.handoff["selection_revision"] == 0
+            payload = tmp_path / f"{target.bot_id}-{piece}-selection.json"
+            payload.write_text(json.dumps(readback.handoff))
+            checked = run(pin.scripts / "check-stage-handoff", payload, "--expect-operation", "selection")
+            assert checked.returncode == 0, checked.stderr
+
+        role = RoleToolReadback(selections["software-factory"].linked_digest, ("read",))
+        prior = json.loads(config.read_text())
+        other_grant = DisabledConfigGrant.target(proposals[0]) if prior["bots"] else None
+        for grant, tools in [(other_grant, role), (target, replace(role, role_digest=None)),
+                             (target, replace(role, tools=())), (target, replace(role, tools=("read", "write")))]:
+            assert add_disabled_fixture_bot(config, proposal, routes, selections, grant, tools) is None
+        assert add_disabled_fixture_bot(config, proposal, routes, {
+            "software-factory": selections["software-factory"],
+        }, target, role) is None
+        if prior["bots"]:
+            assert add_disabled_fixture_bot(config, proposal, routes, first_selections, target, role) is None
+        else:
+            first_selections = selections
+        assert fixture_files(project) == before
+
+        receipt = add_disabled_fixture_bot(config, proposal, routes, selections, target, role)
+        assert receipt["instance_id"] == target.instance_id
+        assert receipt["scope_ref"] == scope
+        assert receipt["disabled_capabilities"] == ["wake"]
+        payload = tmp_path / f"{target.bot_id}-setup.json"
+        payload.write_text(json.dumps(receipt))
+        checked = run(pin.scripts / "check-stage-handoff", payload, "--expect-operation", "bot-setup")
+        assert checked.returncode == 0, checked.stderr
+
+        after = json.loads(config.read_text())
+        assert after["bots"][:-1] == prior["bots"]
+        assert after["automations"][:len(prior["automations"])] == prior["automations"]
+        assert all(trigger["enabled"] is False for trigger in after["automations"])
+        assert after["bots"][-1]["receipt"] == receipt["evidence_refs"]
+        already_applied = fixture_files(project)
+
+        started = perf_counter()
+        smoke_selections = read_bot_selections(pin, binding, scope, target.owner_ref)
+        smoke_config, smoke_triggers = read_disabled_fixture_config(project / f"{target.bot_id}-host.json")
+        observations[phase] = (perf_counter() - started) * 1000
+        assert smoke_selections == selections
+        assert smoke_config == after["bots"][-1]
+        assert smoke_triggers == [route for route in after["automations"] if route["target_bot_id"] == target.bot_id]
+        assert fixture_files(project) == already_applied
+
+        assert add_disabled_fixture_bot(config, proposal, routes, selections, target, role) is None
+        assert fixture_files(project) == already_applied
+
+    assert [bot["bot_id"] for bot in after["bots"]] == ["bot-a", "bot-b"]
+    assert len(after["automations"]) == 3
+    assert len({bot[key] for bot in after["bots"] for key in ("role", "contract")}) == 4
+    assert fixture_files(pin.checkout / "kit") == catalog_before
+    if host == "pi":
+        assert fixture_files(home) == home_before
+    print(f"{host} fixture: strict role + contract and disabled config readback "
+          f"Setup A={observations['Setup']:.1f} ms Evolve B={observations['Evolve']:.1f} ms; 0 preview/smoke writes")
