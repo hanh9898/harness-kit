@@ -36,11 +36,19 @@ A list of skills does not prove which copy Devin loaded.
 
 ### Codex: plugin
 
-Register the full checkout as a local marketplace, or use project-local links
-under `.agents/skills/`. Use one route, not both. Verify the source in a new
-project session. See the [adapter guide](kit/HOST-ADAPTERS.md#select-one-entry-route)
-and the Codex guides for [local plugins](https://developers.openai.com/plugins/build/plugins)
-and [skill locations](https://developers.openai.com/codex/skills).
+With Codex CLI installed and these configuration changes approved, run from
+the root of the pinned Harness Kit checkout:
+
+```sh
+codex plugin marketplace add "$PWD"
+codex plugin add harness-kit@harness-kit
+```
+
+Start a new Codex session in the consuming project and verify the skill
+source. If registration must stay in the project, use
+[project-local skill links](https://developers.openai.com/codex/skills) under
+`.agents/skills/` instead. See the
+[Codex marketplace guide](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli).
 
 <a id="claude-code--plugin"></a>
 
