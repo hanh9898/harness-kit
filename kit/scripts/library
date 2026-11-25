@@ -258,19 +258,63 @@ def selection_records(db, source, identity):
         (source, identity))]
 
 
-def resource_snapshot(db, kit_dir, source, identity):
+def supplied_rows(kit_dir):
+    for filename, kind in (("legos.csv", "piece"), ("rules.csv", "rule")):
+        with (kit_dir / filename).open(encoding="utf-8", newline="") as stream:
+            for row in csv.DictReader(stream):
+                yield filename, kind, row
+
+
+def latest_selections(db):
+    records, reconciled = {}, set()
+    if db is not None and has_table(db, "selection_revisions"):
+        for source, identity, payload, first in db.execute("""
+            SELECT s.source, s.id, s.record, initial.record
+            FROM selection_revisions s
+            LEFT JOIN selection_revisions initial
+                ON initial.source=s.source AND initial.id=s.id AND initial.revision=1
+            WHERE s.revision=(SELECT MAX(revision) FROM selection_revisions
+                              WHERE source=s.source AND id=s.id)
+        """):
+            record = records[source, identity] = json.loads(payload)
+            if source == "supplied" and first is not None:
+                initial = record if record["revision"] == 1 else json.loads(first)
+                if initial["action"] == "inherit-disable":
+                    predecessor = initial["renamed_from"]
+                    reconciled.add((predecessor["id"], predecessor["revision"]))
+    return records, reconciled
+
+
+def row_signature(kind, row):
+    if None in row:  # A surplus CSV cell is not a lineage match.
+        return None
+    return kind, tuple(sorted((k, v) for k, v in row.items() if k != "id"))
+
+
+def pending_renames(catalog, records, reconciled):
+    live_ids = {row["id"] for _, _, row in catalog}
+    retired = {}
+    for (source, identity), record in records.items():
+        if (source != "supplied" or identity in live_ids or record["enabled"]
+                or (identity, record["revision"]) in reconciled):
+            continue
+        snapshot = record["snapshot"]
+        if snapshot["kind"] in ("piece", "rule"):
+            signature = row_signature(snapshot["kind"], snapshot["resource"])
+            if signature is not None:
+                retired.setdefault(signature, []).append(identity)
+    return retired
+
+
+def resource_snapshot(db, kit_dir, source, identity, catalog):
     if source == "saved":
         if db is None or not has_table(db, "revisions"):
             return None
         row = db.execute("SELECT revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1",
                          (identity,)).fetchone()
         return dict(revision=row[0], resource=json.loads(row[1])) if row else None
-    hits = []
-    for filename, kind in (("legos.csv", "piece"), ("rules.csv", "rule")):
-        with (kit_dir / filename).open(encoding="utf-8", newline="") as stream:
-            for row in csv.DictReader(stream):
-                if row["id"] == identity:
-                    hits.append(dict(kind=kind, resource=row, reference=f"{filename}#{identity}"))
+    hits = [dict(kind=kind, resource=row, reference=f"{filename}#{identity}")
+            for filename, kind, row in catalog if row["id"] == identity]
     if len(hits) > 1:
         raise ValueError("Ambiguous supplied identity; reconcile the distribution before changing selection.")
     if not hits and re.fullmatch(r"P[1-9][0-9]*|axis[1-4]|step[1-7]|combine", identity):
@@ -291,13 +335,23 @@ def resource_snapshot(db, kit_dir, source, identity):
 
 
 def selection_view(db, kit_dir, source, identity):
-    records = selection_records(db, source, identity)
-    record = records[-1] if records else None
-    snapshot = resource_snapshot(db, kit_dir, source, identity)
-    enabled = record["enabled"] if record else True
+    catalog = list(supplied_rows(kit_dir)) if source == "supplied" else []
+    snapshot = resource_snapshot(db, kit_dir, source, identity, catalog)
+    pending = []
+    if source == "supplied" and snapshot and snapshot["kind"] in ("piece", "rule"):
+        records, reconciled = latest_selections(db)
+        record = records.get((source, identity))
+        if record is None:
+            pending = pending_renames(catalog, records, reconciled).get(
+                row_signature(snapshot["kind"], snapshot["resource"]), [])
+    else:
+        history = selection_records(db, source, identity)
+        record = history[-1] if history else None
+    enabled = record["enabled"] if record else not pending
     return dict(source=source, id=identity, revision=record["revision"] if record else 0,
                 enabled=enabled, available=snapshot is not None, effective=enabled and snapshot is not None,
                 record=record, current_snapshot=snapshot,
+                **({"possible_previous_ids": sorted(pending)} if pending else {}),
                 consumption="Selection only; applied consumers remain unchanged. Check conditions before use.")
 
 
@@ -327,6 +381,14 @@ def change_selection(args):
                   origin=None, sources=[], conditions=[], gaps=[]))
     if args.expect_selection_revision < 0:
         raise ValueError("Expected selection revision must be zero or the inspected revision.")
+    renamed_from = facts.get("confirm_rename_from")
+    if "confirm_rename_from" in facts and (not isinstance(renamed_from, str) or not renamed_from.strip()):
+        raise ValueError("confirm_rename_from must name a predecessor ID.")
+    if renamed_from is not None:
+        if args.command != "disable" or args.source != "supplied":
+            raise ValueError("confirm_rename_from applies only to disabling supplied catalog pieces and rules.")
+        if not store_exists(args.store):
+            raise ValueError("confirm_rename_from requires a predecessor in the selection store.")
     before = read_selection(args.store, args.kit_dir, args.source, args.id)
     if not before["available"]:
         raise ValueError("Resource unavailable; inspect its source and identity before changing selection.")
@@ -339,9 +401,18 @@ def change_selection(args):
         if not current["available"]:
             raise ValueError("Resource unavailable; selection remains unchanged.")
         enabled = args.command == "restore"
-        if current["enabled"] == enabled:
-            raise ValueError("Selection already has the requested state; retain it rather than append a duplicate effect.")
         prior = current["record"]
+        pending = current.get("possible_previous_ids", [])
+        lineage = None
+        if renamed_from is not None:
+            if renamed_from not in pending:
+                raise ValueError("confirm_rename_from needs a possible predecessor listed by selection.")
+            prior = selection_records(db, args.source, renamed_from)[-1]
+            lineage = dict(id=renamed_from, revision=prior["revision"])
+        if pending and enabled:
+            raise ValueError("Possible rename is unresolved; disable with confirm_rename_from before restoring.")
+        if not pending and current["enabled"] == enabled:
+            raise ValueError("Selection already has the requested state; retain it rather than append a duplicate effect.")
         if prior:
             for key in ("owner", "scope"):
                 if prior[key] != facts[key]:
@@ -349,6 +420,8 @@ def change_selection(args):
         record = dict(facts, source=args.source, id=args.id, revision=current["revision"] + 1,
                       enabled=enabled, action=args.command, snapshot=current["current_snapshot"],
                       saved_at=datetime.now(timezone.utc).isoformat())
+        if lineage:
+            record.update(action="inherit-disable", renamed_from=lineage)
         payload = json.dumps(record, ensure_ascii=False, allow_nan=False)
         db.execute("CREATE TABLE IF NOT EXISTS selection_revisions (source TEXT, id TEXT, revision INTEGER, record TEXT NOT NULL, PRIMARY KEY (source, id, revision))")
         consume_write_grant(db, args, args.source, args.id, current["revision"], request_bytes)
@@ -362,30 +435,34 @@ def search(store, kit_dir, query, limit, include_disabled=False):
         raise ValueError("Supply a focused nonempty query and a limit from 1 to 50.")
     needle = query.casefold()
     matches = []
-    for filename, kind in (("legos.csv", "piece"), ("rules.csv", "rule")):
-        with (kit_dir / filename).open(encoding="utf-8", newline="") as source:
-            for row in csv.DictReader(source):
-                if needle in " ".join(row.values()).casefold():
-                    retrieve = shlex.join(("kit", "--dir", str(kit_dir.absolute()), "show", row["id"]))
-                    matches.append(dict(id=row["id"], name=row.get("name", row.get("rule")),
-                                        kind=kind, origin="supplied", certainty=row["certainty"],
-                                        sources=row.get("sources", row.get("source")), retrieve=retrieve))
-    states = {}
+    catalog = list(supplied_rows(kit_dir))
+    records, reconciled = {}, set()
+    saved_matches = []
     if store_exists(store):
         with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
-            if has_table(db, "selection_revisions"):
-                for source, identity, payload in db.execute("SELECT source, id, record FROM selection_revisions s WHERE revision=(SELECT MAX(revision) FROM selection_revisions WHERE source=s.source AND id=s.id)"):
-                    states[(source, identity)] = json.loads(payload)["enabled"]
+            records, reconciled = latest_selections(db)
             rows = db.execute("SELECT id, revision, resource FROM revisions r WHERE revision=(SELECT MAX(revision) FROM revisions WHERE id=r.id) ORDER BY id") if has_table(db, "revisions") else []
             for row in rows:
                 resource = json.loads(row[2])
                 if needle in " ".join(str(resource.get(k, "")) for k in ("id", "name", "content", "sources", "gaps")).casefold():
                     retrieve = shlex.join(("library", "--store", str(store.absolute()), "show", row[0]))
-                    matches.append(dict(id=row[0], revision=row[1], name=resource["name"],
-                                        kind=resource["kind"], owner=resource["owner"], scope=resource["scope"],
-                                        origin="saved", retrieve=retrieve))
-    for match in matches:
-        match["enabled"] = states.get((match["origin"], match["id"]), True)
+                    saved_matches.append(dict(id=row[0], revision=row[1], name=resource["name"],
+                                              kind=resource["kind"], owner=resource["owner"], scope=resource["scope"],
+                                              origin="saved", retrieve=retrieve,
+                                              enabled=records.get(("saved", row[0]), {}).get("enabled", True)))
+    retired = pending_renames(catalog, records, reconciled)
+    for _, kind, row in catalog:
+        if needle in " ".join(row.values()).casefold():
+            identity = row["id"]
+            retrieve = shlex.join(("kit", "--dir", str(kit_dir.absolute()), "show", identity))
+            record = records.get(("supplied", identity))
+            pending = retired.get(row_signature(kind, row), []) if record is None and retired else []
+            matches.append(dict(id=identity, name=row.get("name", row.get("rule")), kind=kind,
+                                origin="supplied", certainty=row["certainty"],
+                                sources=row.get("sources", row.get("source")), retrieve=retrieve,
+                                enabled=record["enabled"] if record else not pending,
+                                **({"possible_previous_ids": sorted(pending)} if pending else {})))
+    matches.extend(saved_matches)
     excluded = sum(not match["enabled"] for match in matches)
     matches = [match for match in matches if include_disabled or match["enabled"]]
     return dict(excluded=excluded, matches=matches[:limit], total=len(matches), truncated=len(matches) > limit,

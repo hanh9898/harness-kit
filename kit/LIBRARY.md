@@ -76,7 +76,7 @@ This is a local guard for calls through the current Library CLI, not an authenti
 
 ## Exclusion and explicit restoration
 
-Selection is an overlay in the authorized store, separate from supplied files and saved content revisions. Its identity is `(source, exact resource ID)` in that store: `supplied` denotes this harness-kit catalog, `saved` denotes this store's draft. Matching ID strings in the two sources remain independent. Replacing or moving the supplied distribution, saving or updating content (including parent replacement and carry-forward), or temporarily removing and reintroducing a supplied ID does not clear its exclusion. Keep the authoritative store when updating the distribution. Copying/resetting a store is not a distribution update. Renamed IDs and other distributors require explicit identity reconciliation; no alias or provenance relationship is inferred.
+Selection is an overlay in the authorized store, separate from supplied files and saved content revisions. Its identity is `(source, exact resource ID)` in that store: `supplied` denotes this harness-kit catalog, `saved` denotes this store's draft. Matching ID strings in the two sources remain independent. Replacing or moving the supplied distribution, saving or updating content (including parent replacement and carry-forward), or temporarily removing and reintroducing a supplied ID does not clear its exclusion. Keep the authoritative store when updating the distribution. Copying/resetting a store is not a distribution update.
 
 ```
 <kit>/scripts/library --store <path> selection H14 --source supplied
@@ -85,7 +85,7 @@ Selection is an overlay in the authorized store, separate from supplied files an
 <kit>/scripts/library --store <path> restore H14 --source supplied --input <decision.json> --expect-selection-revision 1
 ```
 
-Use exact IDs for supplied pieces, rules, patterns (`P6`) and delegation references (`axis1`, `step2`, `combine`), or saved pieces/rules/workflows. Selection commands accept `--kit-dir` to inspect a supplied distribution elsewhere. `kit list/show` remains a raw catalog/provenance interface and has no store context; before selecting a directly retrieved resource, check `library selection` in the intended store. Excluded material remains inspectable for history, comparison and explicit restoration. `enabled` is the stored choice; `available` describes whether the current resource exists; `effective` requires both. Neither effective selection nor restoration establishes qualified use or consumer adoption.
+Use exact IDs for supplied pieces, rules, patterns (`P6`) and delegation references (`axis1`, `step2`, `combine`), or saved pieces/rules/workflows. Selection commands accept `--kit-dir` to inspect a supplied distribution elsewhere. `kit list/show` remains a raw catalog/provenance interface and has no store context; before selecting a directly retrieved resource, check `library selection` in the intended store. Excluded material remains inspectable for history, comparison and explicit restoration. `enabled` reflects the stored choice, or the default if no choice exists (false during a rename hold); `available` describes whether the current resource exists; `effective` requires both. Neither effective selection nor restoration establishes qualified use or consumer adoption.
 
 Selection JSON contains `owner`, `scope`, `decision`, `evidence` and `continuation`, with the same types and authority rules as saves. Include additional context, alternatives, known-use coverage and pre-action record references as applicable. For example:
 
@@ -106,7 +106,19 @@ Selection JSON contains `owner`, `scope`, `decision`, `evidence` and `continuati
 
 Inspect `selection` and `selection-history` first. Changes compare `--expect-selection-revision` inside an immediate transaction; this revision is independent of content revision. A first disable expects 0. Each change appends its decision, scope, owner, observed source snapshot and timestamp atomically with the effective choice. Supplied snapshots retain their source fields and a content digest; saved snapshots retain the inspected content revision and origin. Restoration appends the current snapshot, preserving every prior disable/restore record and all content history. Owner/scope cannot silently change within that selection identity. Authority strings document grants; the host must establish actual authority before calling the operation.
 
-A stale revision or request for the already-current state fails without a duplicate history entry. On uncertain output, inspect the live choice/history and requested effect before retrying. Missing resources cannot be disabled/restored; an existing exclusion remains effective if a resource disappears and returns. Inaccessible/corrupt stores fail visibly. Compatible content updates and selection writes serialize in the same SQLite store but touch separate histories, preserving independent work. This proves local operation behavior, not synchronization between independent database copies.
+A stale revision or request for the already-recorded state fails without a duplicate history entry. On uncertain output, inspect the live choice/history and requested effect before retrying. Missing resources cannot be disabled/restored; an existing exclusion remains effective if a resource disappears and returns. Inaccessible/corrupt stores fail visibly. Compatible content updates and selection writes serialize in the same SQLite store but touch separate histories, preserving independent work. This proves local operation behavior, not synchronization between independent database copies.
+
+### Renaming an excluded supplied piece or rule
+
+If a new ID has no selection record, the CLI holds it out of selection when all other CSV fields exactly match the latest disable snapshot of a now-absent ID of the same kind. `selection` and `search --include-disabled` show `enabled: false` and `possible_previous_ids`; the hold writes no history. It identifies candidates, not proven lineage. A same-content copy does not trigger the hold while the earlier ID is still present.
+
+Verify the rename in the catalog source and record that evidence in the decision. To confirm H14 as the predecessor, add the top-level field `"confirm_rename_from": "H14"` to the disable input and use the predecessor's owner and scope:
+
+```
+<kit>/scripts/library --store <path> disable H98 --source supplied --kit-dir <renamed-kit> --input <decision.json> --expect-selection-revision 0
+```
+
+The new ID starts its own exclusion history with an `inherit-disable` record pointing to the predecessor revision; the old history is unchanged. After confirmation, later content edits do not clear the exclusion, and only an explicit restore on the new ID re-enables it. A predecessor revision can be confirmed once. A plain `disable` records an independent decision, not lineage. The CLI cannot recognize a rename if any non-ID fields differ from the disable snapshot: reconcile ID-only changes first, or explicitly disable the replacement before using it. No lineage is inferred across sources, stores, or distributors, or for Markdown resources.
 
 After changing selection, read it back and inspect actual changed/unchanged scope. Applied consumers remain unchanged; report only inspected known uses and coverage. Record continuation in the same authorized durable store and retain it under the project's storage policy. Restoration selects the currently available resource for future use; it does not roll content back or apply it anywhere.
 
