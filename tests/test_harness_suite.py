@@ -170,6 +170,14 @@ def test_bot_discovery_returns_intent_without_enabling_a_wake():
     assert "Do not configure, enable, claim, ACK or dispatch" in automation
 
 
+def test_repo_only_schedule_stays_in_workflow_discovery():
+    coordination = (DISCOVERY / "coordination-discovery/SKILL.md").read_text()
+    workflow = (DISCOVERY / "workflow-discovery/SKILL.md").read_text()
+    assert "native repo schedules that do not wake a Bot in workflow discovery" in coordination
+    assert "only for in-scope Bot wake design" in coordination
+    assert "Do not select a Bot or enable the schedule" in workflow
+
+
 def test_first_time_setup_uses_the_structured_continuation_handoff():
     text = (SKILL_ROOT / "harness-setup/SKILL.md").read_text()
     assert "](../../../kit/PERSISTENCE.md#continuation-handoff)" in text
