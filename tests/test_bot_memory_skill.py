@@ -82,6 +82,7 @@ def test_host_qualification_names_negative_cases_and_evidence():
     qualification = " ".join(section("HOST.md", "Qualify on an isolated Bot").split())
     for case in (
         "pinned source", "absent store", "audit zero store creation",
+        "Resume the old worker", "drop the response after a test write commits",
         "at most one sync batch", "not auto-applied", "stale conflicting write",
         "out-of-scope read", "denied before disclosure", "synthetic private data",
     ):

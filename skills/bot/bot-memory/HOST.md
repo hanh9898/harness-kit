@@ -42,15 +42,23 @@ not silently switch routes.
 1. From the actual Bot and worker, invoke exact `bot-memory` and record its
    pinned source. Exercise an absent store and a no-op read of an existing
    store; audit zero store creation, writes and write-side syncs.
-2. Record one owner-authorized standing rule at `high`; sync and verify its
-   exact revision and effect in a fresh worker. Forward the same instruction
-   to a worker and verify no duplicate rule or batch. The accepted change
-   must account for at most one sync batch in the store log.
-3. Put a `low` candidate in the scoped test data and verify it is not
+2. Open a worker on the old published revision. Record one owner-authorized
+   standing rule at `high`, sync it, and verify its exact revision and effect
+   in a fresh worker. Resume the old worker and verify a read-only refresh
+   picks up the new revision before rules are applied, with no writes or
+   write-side syncs. Forward the same instruction to a worker and verify no
+   duplicate rule or batch. The accepted change must account for at most one
+   sync batch in the store log.
+3. In a separate case, drop the response after a test write commits. From a
+   fresh authorized session, reconcile `Unknown` from the authoritative
+   receipt or history and verify the published revision with no replay and
+   exactly one committed batch. If the host cannot inject that failure, mark
+   the case unverified.
+4. Put a `low` candidate in the scoped test data and verify it is not
    auto-applied. Attempt a stale conflicting write and check that the
    published revision and draft are preserved, the disputed rule is blocked,
    and unrelated rules are unaffected until reconciliation.
-4. Try an out-of-scope read and verify access is denied before disclosure.
+5. Try an out-of-scope read and verify access is denied before disclosure.
    Seed only synthetic private data; verify none of it appears in the
    worker's context, shared rules or receipts.
 
