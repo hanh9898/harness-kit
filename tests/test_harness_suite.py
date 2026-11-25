@@ -128,6 +128,13 @@ def test_proposal_entry_covers_both_routes_and_does_not_grant_effects():
     assert_package_local_links(path)
 
 
+def test_implement_routes_explicit_requests_to_intake_even_when_effect_is_blocked():
+    text = (SKILL_ROOT / "harness-implement" / "SKILL.md").read_text()
+    assert "clear user request" in text and "authorized internal call" in text
+    assert "straight to intake, even if an effect grant is missing" in text
+    assert "a verified route and target authority before effects" in text
+
+
 def test_discovery_routes_match_pass_order_and_parents():
     path = SKILL_ROOT / "harness-setup" / "DISCOVERY.md"
     text = path.read_text(encoding="utf-8")
