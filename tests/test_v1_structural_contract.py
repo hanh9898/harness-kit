@@ -8,7 +8,6 @@ import subprocess
 from contextlib import closing
 from graphlib import CycleError, TopologicalSorter
 from pathlib import Path
-from runpy import run_path
 from urllib.parse import unquote, urlsplit
 
 import pytest
@@ -16,9 +15,6 @@ import pytest
 from conftest import ROOT, run
 from test_harness_suite import DISCOVERY_ROUTES
 from test_library_read_no_write import CLI, READS, library, no_write_host, read_args
-
-
-frontmatter = run_path(str(ROOT / "tools/skill_budget.py"))["frontmatter"]
 
 
 SKILLS = Path("skills")
@@ -238,10 +234,17 @@ def test_callers_link_canonical_gate(source, destination, anchor):
     require_link(source, destination, anchor)
 
 
+def skill_name(path):
+    header = re.match(r"\A---[ \t]*\n(.*?)\n---[ \t]*(?:\n|\Z)", read(path), re.S)
+    names = re.findall(r"^name:[ \t]*([^\n]*)$", header[1], re.M) if header else []
+    assert len(names) == 1, f"{path}: expected one skill name"
+    match = re.fullmatch(r"""(["']?)([a-z0-9-]+)\1(?:[ \t]+#[^\n]*)?[ \t]*""", names[0])
+    assert match, f"{path}: malformed skill name: {names[0]!r}"
+    return match[2]
+
+
 def assert_skill_name(path):
-    header = re.match(r"\A---\n(.*?)\n---(?:\n|$)", read(path), re.S)
-    assert header and len(re.findall(r"^name:", header[1], re.M)) == 1, f"{path}: expected one skill name"
-    name = frontmatter(ROOT / path).get("name")
+    name = skill_name(path)
     assert name == path.parent.name, f"{path}: expected {path.parent.name!r}, got {name!r}"
 
 
@@ -294,7 +297,7 @@ def test_default_opt_in_and_override_inventory():
     for path in ROOT.glob("**/SKILL.md"):
         if any(part.startswith(".") for part in path.relative_to(ROOT).parts):
             continue
-        assert path.parent.name not in originals and frontmatter(path).get("name") not in originals, f"Vendored original: {path}"
+        assert path.parent.name not in originals and skill_name(path.relative_to(ROOT)) not in originals, f"Vendored original: {path}"
 
 
 def test_checked_in_devin_registrations_only_expose_default_entries():
