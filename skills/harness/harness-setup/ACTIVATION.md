@@ -96,10 +96,12 @@ qualify native routes. Evolve verifies its needed bindings without reinstalling.
 
 ## Configure and qualify a Bot
 
-For a selected Bot only, verify its exact `bot_id`, scope and binding. H19
-authorizes configuring that Bot with all triggers disabled. Read back its
-binding and disabled triggers before returning one `bot-setup` handoff.
-Do not change a neighboring Bot.
+For a new Bot, verify the selected logical `bot_id` and intended host,
+workspace, owner and scope against its recorded intent. That intent is not a
+wake target or proof of an existing host binding. H19 authorizes configuring
+only that Bot with all triggers disabled. Read back the host identity, exact
+binding and disabled triggers before making the binding effective or returning
+one `bot-setup` handoff. Do not change a neighboring Bot.
 
 Before H14 rebind, disable and read back every trigger on the old binding,
 drain or fence its work, and reconcile all `Unknown` effects at their original
