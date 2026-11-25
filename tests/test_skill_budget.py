@@ -21,7 +21,7 @@ def skill(root, rel, folder, body):
 
 def make(root):
     skill(root, ".agents/skills", "a", '---\nname: a\ndescription: "An \\"egg\\" ok"\n---\nbody\n')
-    skill(root, ".agents/skills", "src-b", "---\nname: b\ndescription: >\n  one two\n  go\n---\n")
+    skill(root, ".agents/skills", "src-b", "---\nname: b\ndescription: >-\n  one two\n  go\n---\n")
     skill(root, ".claude/skills", "c", "---\nname: c\ndescription: 'it''s'\n---\n")
     return root
 
@@ -148,6 +148,35 @@ def test_description_can_start_below_key(tmp_path, description, expected):
     r = run("--root", tmp_path, "--dir", "skills", "--strict")
     assert r.returncode == 0, r.stdout
     assert f"TOTAL: {len(expected)} characters" in r.stdout
+
+
+@pytest.mark.parametrize(
+    ("description", "expected"),
+    [
+        ("|-\n  Intro.\n    detail\n  end\n", "Intro.\n  detail\nend"),
+        ("|-2 # indent is relative to the key\n    detail\n  end\n", "  detail\nend"),
+        ("|\n  one\n  two\n\n", "one\ntwo\n"),
+        ("|2+\n  one  \n \n    \n\n", "one  \n\n  \n\n"),
+        (
+            ">-\n  First\n  sentence.\n\n    detail\n\n  Next\n\n  paragraph.\n",
+            "First sentence.\n\n  detail\n\nNext\nparagraph.",
+        ),
+    ],
+    ids=["literal-indent", "explicit-indent", "clip", "keep-whitespace", "folded-indent"],
+)
+def test_block_description_budget(tmp_path, description, expected):
+    skill(tmp_path, "skills", "demo", f"---\nname: demo\ndescription: {description}---\n")
+    args = ("--root", tmp_path, "--dir", "skills", "--json", "--strict", "--max-total")
+    chars = len(expected)
+    at_limit = run(*args, chars)
+    report = json.loads(at_limit.stdout)
+    assert at_limit.returncode == 0, report
+    assert report["total_chars"] == report["dirs"][0]["rows"][0]["chars"] == chars
+    assert report["warnings"] == []
+
+    over_limit = run(*args, chars - 1)
+    assert over_limit.returncode == 1, over_limit.stdout
+    assert f"Total {chars} characters exceeds limit {chars - 1}." in json.loads(over_limit.stdout)["warnings"][0]
 
 
 def test_strict_discovers_flat_and_grouped_skills(tmp_path):
