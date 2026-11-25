@@ -18,8 +18,9 @@ executables in `<skill-dir>/../../../kit/scripts/`, not assumed PATH entries.
 Resolve `<pinned-catalog>` to the absolute `kit/` directory at the consumer's
 verified distribution revision. Pass `--kit-dir <pinned-catalog>` to Library
 commands that read supplied resources, even when the bundle is the verified
-pin. If you cannot verify the [pin](../../../kit/LIBRARY.md#pin-the-consumer-catalog)
-or configured store, stop. Do not retry with the bundled catalog.
+pin. If you cannot verify the [pin](../../../kit/LIBRARY.md#pin-the-consumer-catalog),
+stop mixed search and supplied reads. Do not retry with the bundled catalog.
+Exact saved-resource reads need only the verified store.
 
 For a verified binding, use `library --store <selected-path> --require-existing-store search <term> --kit-dir <pinned-catalog>`:
 text matching is literal, not semantic. Narrow queries on truncation; an
@@ -30,9 +31,10 @@ supplied hit's retrieval path against the pin first. Pass the same `--dir`
 to targeted lists where useful. The group index classifies resources, not
 discovery nodes. Raw kit output is provenance, not current selection evidence.
 
-For [Bot role templates](../../../kit/README.md#bot-role-templates), look up
-the exact role by slug or use the literal query `bot role template` with
-`--limit 30`. Open only the selected role section and its portable contract
+For Bot role templates, use the pinned commands above. Look up the exact
+role by slug or use the literal query `bot role template` with `--limit 30`.
+The kit README's role examples use the bundled default. Do not copy them
+for a pinned lookup. Open only the selected role section and its portable contract
 as needed, from the pinned distribution revision. The selection snapshot
 covers the catalog row, not the linked instructions. Treat both pieces as
 guidance, not installed Bots, grants, schedules or proof of host readiness.
