@@ -4,6 +4,34 @@ Read when selecting or checking onboarding completion. These are semantic outcom
 not required files or a new schema. Existing guidance, a native store and references
 can satisfy several outcomes together. Fill only actual gaps under the grant.
 
+## Target profile and caller mode
+
+Use the [M2 profile and mode contract](../../../kit/M2-CONFIG.md). Keep these
+values in existing authorized records, not mandatory new files. Reuse known
+owner, scope and bindings; ask only when a material input is missing.
+
+| Profile | Foundation in scope |
+| --- | --- |
+| `repo-only` | Default for a repo request. Keep the existing two-pass questions and checks. Do not open Bot discovery, load Inbox/Memory, add a store write, or emit `bot-setup`. |
+| `bot-only` | Use the real workspace, owner and scope. Skip repo and Product tracker inputs and Product verification. Keep a Harness work destination only where the work needs one; do not fabricate a repo or tracker. |
+| `repo-and-bot` | Select both targets only when both are to change. Keep separate bindings, revisions, grants, effects and results. If Bot work depends on unfinished Repo work, hold only that Bot branch; Bot denial does not roll back independent Repo work. |
+
+Use `interactive` for ordinary sessions and interactive Bot design or trials.
+`persistent-bot` describes the caller, not permission to change a Bot target.
+Record it as effective only after verifying the durable instance and adapter
+and that a worker with the correct ACL can open its checkpoint.
+
+For an in-scope Bot change, pin and read both the selected role template and
+its linked contract at the same distribution revision; if using Library
+selections, verify both are effective before applying. Selection is not
+configuration authority. If applying configuration, read back the actual
+instance ID, configuration and disabled capabilities. To qualify persistence,
+run the authorized manual route and prove a fresh worker can resume and
+deduplicate. Leave each trigger disabled until the operator obtains a
+separate grant and reads back activation.
+
+## Foundation outcomes
+
 | Required outcome | Evidence of adequacy |
 | --- | --- |
 | Recoverable project/environment/scope context | Work and source locations, harness/control-plane roles, consuming targets and effect boundary can be found by the next consumer; unknowns are explicit. |
@@ -15,7 +43,7 @@ can satisfy several outcomes together. Fill only actual gaps under the grant.
 
 For applicable requirements, conflicts and document-quality checks, use [standards selection](../../../kit/standards/SELECT.md). Reuse consumer criteria and distinguish selected requirements, performed checks and satisfaction.
 
-Choose a small actual use from the project's work: create one attributable report,
+Choose a small actual use from the selected repo or workspace: create one attributable report,
 answer one context question from selected sources, or perform one authorized
 operation with observable output. Reuse supplied selection and check criteria.
 If the use is unresolved, recommend one with a concrete benefit and explain only

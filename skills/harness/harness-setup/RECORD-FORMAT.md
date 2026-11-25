@@ -1,12 +1,85 @@
-> Historical reference for interpreting existing setup artifacts. Current onboarding
-> follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md); the sequence and
-> prerequisites below are not requirements for new or resumed onboarding.
-
 # Record format
 
-Files `harness-setup` writes under `harness/`.
+## Current stage handoffs
 
-## `record/<entry>.md`
+Use [the v1 contract](../../../kit/STAGE-CONTRACTS.md) for a single operation
+at a time. Pass minimal stable references the recipient can reopen. Use a host
+structure in-session or an authorized existing record for continuation; do
+not invent a durable reference or write path. With no approved write
+destination, return an inline draft and its blocker, not a promised resume.
+Use the [M2 contract](../../../kit/M2-CONFIG.md) in the owning decision and
+configuration records, not as extra v1 fields.
+
+| Operation | Setup boundary |
+| --- | --- |
+| `prepare` | After `DesignReady`, send the original request or immutable request ref, scoped decision/revision and basis, acceptance, dependencies and only still-needed drafting routes. Carry compatible spec/ticket refs; leave unavailable artifacts out. Reuse drafts without publishing them. |
+| `publish` | With a live grant for the exact draft revision and verified Harness destination, send that draft, exact tracker instance/namespace/role, stable work ID and grant reference. Keep the same work ID on timeout and reconcile at the destination before continuing; no Product fallback. |
+| `execute` | The coordinator constructs it, not discovery. Require a canonical ticket, live `DispatchReady` evidence and current exclusive claim/epoch; use the verified route, expected target revision, exact effect and applicable selection. Publish does not authorize execution. |
+| `result` | Validate shape and reopen the assignment, effect, target state and recipient-readable evidence. For `Unknown`, keep the checkpoint and reconcile without retry, rollback or reassigning the dependent work. Check an `Applied` result against acceptance before `Verified`; closure requires separate permission. |
+| `bot-setup` | Emit to the operator only after reading back an authorized Bot-target configuration, the actual instance and capabilities still disabled. Include the pinned role template and contract, adapter and observed configuration refs, scope and evidence. Neither the handoff nor readback activates a trigger. |
+
+When exchanging a JSON file, run the bundled read-only shape check on the
+authorized file, passing the exact intended operation. Nonzero means stop the
+dependent handoff and retain the draft/evidence; success does not establish
+reference validity or authority.
+
+```sh
+<skill-dir>/../../../kit/scripts/check-stage-handoff --expect-operation <operation> <file>
+```
+
+These illustrative payloads show shape, not live records, grants or receipts.
+A repo-only Setup can emit this `prepare` without Bot data:
+
+```json
+{
+  "version": 1,
+  "operation": "prepare",
+  "request": "Set up guidance for the docs repository.",
+  "scope_ref": "scope:docs",
+  "decision_ref": "decision:docs-guidance@2",
+  "acceptance": ["The selected reader can locate the documentation guidance."],
+  "dependency_refs": [],
+  "needed_route_refs": ["route:to-spec@1", "route:to-tickets@1"]
+}
+```
+
+An independently granted publication of the resulting draft:
+
+```json
+{
+  "version": 1,
+  "operation": "publish",
+  "draft_ref": "draft:docs-guidance@3",
+  "target": {"instance": "tracker:team", "namespace": "harness", "role": "harness"},
+  "work_id": "work:docs-guidance",
+  "grant_ref": "grant-ref:docs-guidance-publish"
+}
+```
+
+A separate Bot-only workspace after configuration readback:
+
+```json
+{
+  "version": 1,
+  "operation": "bot-setup",
+  "instance_id": "instance:editorial-assistant",
+  "template_ref": "kit:role/editorial@4",
+  "contract_ref": "kit:bot-contract@4",
+  "scope_ref": "scope:editorial",
+  "adapter_ref": "binding:editorial-worker@1",
+  "configuration_ref": "host:editorial-config@2",
+  "evidence_refs": ["evidence:editorial-config-readback"],
+  "disabled_capabilities": ["wake"]
+}
+```
+
+## Historical formats
+
+Use the following only to interpret existing setup artifacts under `harness/`.
+Current onboarding follows [SKILL.md](SKILL.md) and [RESUME.md](RESUME.md);
+the historical sequence and prerequisites are not requirements.
+
+### `record/<entry>.md`
 
 `<entry>` is a short kebab-case slug of the need.
 
@@ -41,7 +114,7 @@ Entries of `kind: standard` and `kind: isolation` point at a section of `harness
 
 `adopted` and `needs-change` are for a `kind: folder` entry of a part that already existed (card: `prior_harness`): `adopted` meets the standard and stays; `needs-change` does not, gap in `reason`. Setup moves nothing; `harness-evolve` reconciles relevant `needs-change` entries within the requested scope.
 
-## `situation.md`
+### `situation.md`
 
 Step 1 writes nine lines, `field: value`, facts only, no prose; `python3 tools/check_kit.py --situation harness/situation.md` checks them.
 
@@ -57,11 +130,11 @@ Step 1 writes nine lines, `field: value`, facts only, no prose; `python3 tools/c
 | `platform` | the agent app, or `<app>@<host>` when it runs through a host (schedules depend on it); `unknown` until S01 is answered |
 | `confirmed` | `no` while drafting, `yes` once the user says the card is right |
 
-## `gate.md`
+### `gate.md`
 
 Hand-off from step 3 to step 5, so an interrupted run keeps the approved evidence. One `## <item>` section per approved item with the five evidence fields (`lighter_rung`, `why_not_enough`, `source`, `read_on`, `answer`). The entry holds the lasting copy; later runs read the entry.
 
-## `record/index.md`
+### `record/index.md`
 
 Read first. One line per entry, no detail:
 
@@ -71,7 +144,7 @@ Read first. One line per entry, no detail:
 - [<entry>](<entry>.md): <kind>, <status>
 ```
 
-## `progress.log`
+### `progress.log`
 
 Append only; one line per finished step, never edited:
 
@@ -83,6 +156,6 @@ Append only; one line per finished step, never edited:
 
 **Revising a decision.** The log is never edited. When the user changes a decision already logged, append a new line with the same `step=` (and the same `part=` or `entry=`) and `revised=<timestamp of the old line>`; leave the old line alone. For each (step, part) the line in force is the last one. `python3 tools/check_kit.py --log harness/progress.log` checks that every `revised=` points to the timestamp of an earlier line with the same step, and lists the line in force for each (step, part) by the same rule.
 
-## Writing safely
+### Writing safely
 
 Write each file to `<name>.tmp` in the same folder, then rename over the target; remove no other file. An entry or index line already present is updated in place, never appended twice.

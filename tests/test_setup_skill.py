@@ -1,5 +1,8 @@
 """harness-setup structural and boundary checks; runtime behavior is covered by CHECKLIST.md."""
-from conftest import CHECK_BOUNDARY, ROOT, TOKENS, run
+import json
+import re
+
+from conftest import CHECK_BOUNDARY, KIT, ROOT, TOKENS, run
 
 SKILL = ROOT / "skills" / "harness" / "harness-setup"
 
@@ -22,6 +25,36 @@ def test_runtime_reference_branches_are_packaged():
     body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
     for sib in ("ENVIRONMENT.md", "FOUNDATION.md", "DISCOVERY.md", "ACTIVATION.md", "RESUME.md"):
         assert (SKILL / sib).is_file() and f"]({sib})" in body
+    assert "](FOUNDATION.md#target-profile-and-caller-mode)" in body
+    assert "](RECORD-FORMAT.md#current-stage-handoffs)" in body
+
+
+def test_setup_guidance_keeps_bot_work_opt_in_and_repo_inputs_optional_for_bot_only():
+    foundation = (SKILL / "FOUNDATION.md").read_text(encoding="utf-8")
+    repo_only, = re.findall(r"^\| `repo-only` \| (.*?) \|$", foundation, re.M)
+    bot_only, = re.findall(r"^\| `bot-only` \| (.*?) \|$", foundation, re.M)
+    assert "existing two-pass questions" in repo_only
+    assert "Do not open Bot discovery" in repo_only
+    assert "load Inbox/Memory" in repo_only
+    assert "emit `bot-setup`" in repo_only
+    assert "Skip repo and Product tracker inputs" in bot_only
+
+
+def test_documented_setup_payloads_pass_the_stage_checker(tmp_path):
+    records = (SKILL / "RECORD-FORMAT.md").read_text(encoding="utf-8")
+    examples = {}
+    for source in re.findall(r"^```json\n(.*?)^```$", records, re.M | re.S):
+        payload = json.loads(source)
+        operation = payload["operation"]
+        assert operation not in examples
+        examples[operation] = payload
+        handoff = tmp_path / f"{operation}.json"
+        handoff.write_text(source, encoding="utf-8")
+        result = run(KIT / "scripts/check-stage-handoff", "--expect-operation", operation, handoff)
+        assert result.returncode == 0, result.stderr
+    assert set(examples) == {"prepare", "publish", "bot-setup"}
+    assert examples["publish"]["target"]["role"] == "harness"
+    assert examples["bot-setup"]["disabled_capabilities"] == ["wake"]
 
 
 def test_upstream_install_is_reached_before_discovery_and_override_authoring():
@@ -50,7 +83,6 @@ def test_skill_has_no_machine_absolute_paths():
 
 
 def test_kit_commands_resolve_from_skill_dir_and_run_from_a_foreign_copy(tmp_path):
-    import re
     import shutil
     # Every kit command in the skill resolves through <skill-dir>.
     cmds = []
