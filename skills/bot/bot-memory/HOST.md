@@ -51,9 +51,10 @@ not silently switch routes.
    sync batch in the store log.
 3. In a separate case, drop the response after a test write commits. From a
    fresh authorized session, reconcile `Unknown` from the authoritative
-   receipt or history and verify the published revision with no replay and
-   exactly one committed batch. If the host cannot inject that failure, mark
-   the case unverified.
+   receipt or history and verify the published revision. Audit the caller's
+   outbound attempts for zero resubmissions and the store history separately
+   for exactly one committed batch. If the host cannot inject the failure or
+   expose both counts, mark the case unverified.
 4. Put a `low` candidate in the scoped test data and verify it is not
    auto-applied. Attempt a stale conflicting write and check that the
    published revision and draft are preserved, the disputed rule is blocked,
