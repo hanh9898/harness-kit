@@ -24,8 +24,9 @@ confirmed missing originals. Inspect and Advice report blockers without installi
 
 ## Install required upstream skills
 
-1. Confirm Setup is in Apply before entering this route. Present one scoped
-   install plan from the [upstream installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
+1. Confirm Setup is in Apply before entering this route. The
+   [entry gate](../../../kit/PROPOSAL-ENTRY.md#selection-h1) does not grant installation.
+   Present a scoped plan from the [upstream installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
    Require a fresh, explicit project administrator grant (H3) for this Apply.
    Bind the grant to the caller, host, project, exact missing IDs, installer
    version and upstream revision, command, destinations and lockfile effects.
@@ -93,6 +94,29 @@ verified preparation pair without verified execution is draft-only. Apply the
 reporting execution readiness; registration and fixture readback alone do not
 qualify native routes. Evolve verifies its needed bindings without reinstalling.
 
+## Configure and qualify a Bot
+
+For a new Bot, verify the selected logical `bot_id` and intended host,
+workspace, owner and scope against its recorded intent. That intent is not a
+wake target or proof of an existing host binding. H19 authorizes configuring
+only that Bot with all triggers disabled. Read back the host identity, exact
+binding and disabled triggers before making the binding effective or returning
+one `bot-setup` handoff. Do not change a neighboring Bot.
+
+Before H14 rebind, disable and read back every trigger on the old binding,
+drain or fence its work, and reconcile all `Unknown` effects at their original
+targets. If reconciliation stalls, H13 is for an operator decision, not a
+retry or reassignment. Require the owner's approval of the exact new binding,
+read it back disabled and verify continuity of authorized records and occurrence
+dedupe. Never keep two active bindings for the same Bot.
+
+On either the initial or rebound binding, require its disabled readback and H15
+for the manual and fresh-worker pilot. Check authority, scope, checkpoints,
+fencing and the [automation wake contract](../../../kit/PERSISTENCE.md#automation-wake).
+Only after both pilot checks pass on that binding may H16 authorize enabling
+the exact trigger for that Bot. Read back that trigger before reporting it active.
+H19, H14 and H15 do not authorize activation.
+
 ## Other selected activation
 
 Read only when the selected initial use needs a provider installation,
@@ -132,3 +156,41 @@ effects; preserve the failure and recovery scope. Retain per-target host/version
 model, provider/resource revision, configuration/grant conditions, observed use,
 missing conditions and next action. Material changes invalidate affected evidence,
 not unrelated qualified uses.
+
+```v1-gates
+[
+  {"id": "authority.bot-config", "requires": []},
+  {"id": "authority.install", "requires": []},
+  {"id": "authority.pilot", "requires": []},
+  {"id": "authority.rebind", "requires": []},
+  {"id": "authority.trigger", "requires": []},
+  {"id": "bot.configure-disabled", "requires": ["bot.exact-target", "bot.disabled-config", "authority.bot-config"]},
+  {"id": "bot.disabled-config", "requires": []},
+  {"id": "bot.disabled-readback", "requires": []},
+  {"id": "bot.drain-fence", "requires": []},
+  {"id": "bot.exact-target", "requires": []},
+  {"id": "bot.old-disabled-readback", "requires": []},
+  {"id": "bot.pilot.initial", "requires": ["bot.configure-disabled", "bot.disabled-readback", "authority.pilot"]},
+  {"id": "bot.pilot.rebound", "requires": ["bot.rebind", "bot.disabled-readback", "authority.pilot"]},
+  {"id": "bot.rebind", "requires": ["bot.exact-target", "bot.old-disabled-readback", "bot.drain-fence", "bot.reconciled", "authority.rebind"]},
+  {"id": "bot.reconciled", "requires": []},
+  {"id": "method.domain-modeling", "requires": []},
+  {"id": "method.grilling", "requires": []},
+  {"id": "method.handoff", "requires": []},
+  {"id": "method.writing-for-agents", "requires": []},
+  {"id": "original.implement", "requires": []},
+  {"id": "original.to-spec", "requires": []},
+  {"id": "original.to-tickets", "requires": []},
+  {"id": "override.implement", "requires": []},
+  {"id": "override.to-spec", "requires": []},
+  {"id": "override.to-tickets", "requires": []},
+  {"id": "pilot.manual-fresh-worker", "requires": []},
+  {"id": "setup.author-overrides", "requires": ["method.writing-for-agents", "original.to-spec", "original.to-tickets", "original.implement"]},
+  {"id": "setup.discovery", "requires": ["method.grilling", "method.domain-modeling"]},
+  {"id": "setup.execution-ready", "requires": ["override.to-spec", "override.to-tickets", "override.implement"]},
+  {"id": "setup.install", "requires": ["entry.explicit-apply", "authority.install"]},
+  {"id": "trigger.enable.initial", "requires": ["bot.pilot.initial", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
+  {"id": "trigger.enable.rebound", "requires": ["bot.pilot.rebound", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
+  {"id": "trigger.exact-id", "requires": []}
+]
+```

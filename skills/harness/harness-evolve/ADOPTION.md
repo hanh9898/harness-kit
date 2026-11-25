@@ -142,9 +142,8 @@ separately in the bound store; either disabled, unavailable or unverified
 selection blocks adoption. Do not fall back to direct pins from a failed
 configured store.
 
-When changing hosts, confirm old triggers are off, drain or fence old work,
-and reconcile all `Unknown`
-effects before the owner rebinds and reads back the disabled configuration.
+Use the shared [Bot lifecycle gates](../harness-setup/ACTIVATION.md#configure-and-qualify-a-bot)
+when adding a Bot or changing its binding.
 While draining, the new host may only inspect or run isolated fixtures.
 Keep the instance only if the new host can reopen the approved authoritative
 records; otherwise an independently authorized new instance needs scope
