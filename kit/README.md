@@ -1,8 +1,10 @@
-# Kit
+# Kit catalog
 
-Supplied store of lego pieces for building an agent harness, plus the rules, team patterns and delegation framework that go with them. Terms (harness, record, rung) are defined once, in the project's harness glossary; this kit only adds the ones below.
+The catalog contains pieces, rules, and team patterns for agent workflows.
+You can read supplied pieces without a host or a Library store.
 
-**The CSV files are the source of truth.** Edit `legos.csv`, `groups.csv` and `rules.csv` directly. They were generated once from research reports; nothing regenerates them, and the generator refuses to overwrite them (see "Where the data came from").
+The supplied CSV files are the source of truth. To change them, edit the CSVs
+directly. The historical generator does not overwrite the maintained catalog.
 
 ## Vocabulary
 
@@ -28,25 +30,26 @@ Supplied store of lego pieces for building an agent harness, plus the rules, tea
 | `patterns.md` | Team architecture patterns | 14 |
 | `delegation.md` | Historical four-axis/seven-step material with migration notice; current route: authority-design-and-calibration | 4 axes, 7 steps |
 
-Row counts differ from the first plan in one place (14 patterns, not 13); see `docs/generation-notes.md` at the repository root.
+See the [generation notes](../docs/generation-notes.md) for the source counts
+and later catalog additions.
 
 In `sources`, `note:R24` means "research note 24", an internal note, not a link. `practice:` means the piece is supported only by observed use. In `rules.csv`, a bare source id such as `K08` is the id used in the research; most carry a link next to them.
 
 ## Look something up
 
-```
-scripts/kit list            # groups: letter, name, piece count
-scripts/kit list A          # one line per piece in group A
-scripts/kit show project-instructions        # one piece in full, by id or exact name
-scripts/kit list P          # team patterns, one line each; scripts/kit show P6 for one
-scripts/kit show authority-design-and-calibration        # current authority design, review/calibration and effect grants
-scripts/kit list delegation # historical partial four axes/seven steps, with migration notice
-scripts/kit show axis1      # one axis; step3 for one step; combine for how the axes combine
+From the repository root, list the groups, list the pieces in group A, and
+open one piece by slug:
+
+```sh
+python3 -IB kit/scripts/kit list
+python3 -IB kit/scripts/kit list A
+python3 -IB kit/scripts/kit show project-instructions
 ```
 
 Use the slug for new references. Former letter-number IDs are [read aliases](LIBRARY.md#upgrading-from-letter-number-piece-ids).
 
-There is no command that prints the whole store, on purpose. Ask for a group, then a piece. Rules have their own commands: `kit list rules` (gate rules only), `kit list rules <topic>`, `kit show <rule id>` (for example `4.06`). Do not load `rules.csv` whole.
+See [catalog and Library retrieval](LIBRARY.md) for rule, pattern, and saved
+resource lookups.
 
 ## Team and workflow guidance
 
@@ -57,21 +60,19 @@ team-responsibilities-and-review provides [responsibilities and reviewers](team-
 Group C (Agent behavior) includes [Bot role templates](BOT-ROLES.md) such as
 Software Factory, Chief of Staff, Product Engineer and QA Engineer. Each role
 is a supplied instruction-file piece, with the shared [portable template
-contract](BOT-TEMPLATE.md) as a separate piece. Run from this directory; set
-`store` to the authorized library path for the `library` commands:
+contract](BOT-TEMPLATE.md) as a separate piece. Read both from the same pinned
+checkout:
 
 ```sh
-scripts/kit list C
-scripts/kit show software-factory
-scripts/library --store "$store" search "bot role template" --limit 30
-scripts/library --store "$store" selection software-factory --source supplied
+python3 -IB kit/scripts/kit show software-factory
+python3 -IB kit/scripts/kit show bot-portable-template
 ```
 
-Without an authorized store, use `kit show` for provenance only. A supplied
-selection snapshot identifies the CSV row, not the linked Markdown. Pin the
-kit distribution revision (for example, the Git commit) and read both the
-role and contract from it before using them. Lookup and selection do not
-create or install a Bot, activate a schedule, grant access or qualify a host.
+Without an authorized Library store, use `kit show` for provenance only. A
+supplied selection snapshot identifies the CSV row, not the linked Markdown.
+Lookup and selection do not configure a Bot, grant access, or activate a
+trigger. See the [disabled Bot fixture](../examples/bot-first-run/README.md)
+for selection and readback evidence.
 
 ## Optional factory
 
@@ -116,15 +117,12 @@ Use the public `harness-library` skill to retrieve, research, save or edit reusa
 
 ## Where the data came from
 
-A one-time script, `skills/harness/harness-evolve/scripts/generate_kit.py`, read the research reports and wrote the five data files. Numbers, ids, certainty and source links are parsed from the reports. The free text was Vietnamese, so it was translated by hand block by block into `skills/harness/harness-evolve/scripts/seed/`; the script stops if a seed block does not match a report id or count. Run it again only into an empty directory:
-
-```
-python3 skills/harness/harness-evolve/scripts/generate_kit.py --reports <reports dir> --dest <new dir>
-```
-
-It refuses to write if any output file already exists, so a hand-edited kit is never replaced.
+A [one-time generator](../skills/harness/harness-evolve/scripts/generate_kit.py)
+parsed the research reports and used [hand-translated seed text](../skills/harness/harness-evolve/scripts/seed/)
+for the Vietnamese prose. Reproduction requires the original reports and a
+new destination. It does not replace the maintained catalog.
 
 ## More
 
 - Columns and rules for editing the CSV: [COLUMNS.md](COLUMNS.md)
-- Checks (run from the repo root): `python3 -I tools/check_kit.py`, `python3 -I tools/check_boundary.py --strict`, `python3 -m pytest`
+- Validation commands: [source checks](../README.md#check-the-source)

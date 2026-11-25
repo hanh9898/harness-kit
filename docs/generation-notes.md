@@ -61,3 +61,12 @@ sources; original seed/report counts remain unchanged.
 The [Bot role templates](../kit/README.md#bot-role-templates) add 21 roles
 and a shared portable contract to group C, bringing the catalog to 191
 pieces. They are not part of the historical seeds or reports.
+
+## B8 documentation
+
+The four README guides describe the shipped catalog and existing fixtures.
+They do not come from `generate_kit.py`. Use the
+[B8 evidence record](harness-v1.md#b8-qualification-evidence) to distinguish
+local checks from host qualification. The locked design and its rendered
+diagrams are indexed in the
+[architecture package](architecture/harness-v1-stage-2a-index.md).

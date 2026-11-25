@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harness v1 · Biên quyền và chủ dữ liệu</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f2f5f8; color: #162d42; font: 15px/1.45 system-ui, sans-serif; }
+  main { max-width: 2800px; margin: auto; padding: 12px clamp(8px, 2vw, 32px) 24px; }
+  summary { padding: 6px 0 10px; cursor: pointer; font-weight: 650; }
+  details p { margin: 0 0 12px; }
+  figure { margin: 0; overflow: auto; background: white; border: 1px solid #a7bacb; border-radius: 8px; }
+  figure:focus-visible { outline: 2px solid #365f83; outline-offset: 3px; }
+  .canvas { min-width: 1120px; padding: 8px; }
+  details[open] + figure .canvas { width: max(100%, 100em); }
+  @media print {
+    body, main { padding: 0; background: white; }
+    details { display: none; }
+    figure { overflow: visible; border: 0; }
+    .canvas, details[open] + figure .canvas { min-width: 0; width: 100%; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <details>
+    <summary>Xem chữ lớn hơn</summary>
+    <p>Cuộn vùng sơ đồ để xem phần còn lại. Bạn cũng có thể thu phóng trong trình duyệt.</p>
+  </details>
+  <figure tabindex="0" aria-label="Harness v1 · Biên quyền và chủ dữ liệu">
+    <div class="canvas"><svg role="img" aria-label="Harness v1 · Biên quyền và chủ dữ liệu" style="display:block;width:100%;height:auto;background:white"
+ viewBox="0.00 0.00 1450.62 1181.12" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(16.56 1164.56)">
+<title>PermissionBoundary</title>
+<polygon fill="#ffffff" stroke="transparent" points="-16.56,16.56 -16.56,-1164.56 1434.06,-1164.56 1434.06,16.56 -16.56,16.56"/>
+<text text-anchor="start" x="8" y="-1126.6" font-family="DejaVu Sans" font-weight="bold" font-size="23.00">Harness v1 · Biên quyền và chủ dữ liệu</text>
+<text text-anchor="start" x="8" y="-1112.4" font-family="DejaVu Sans" font-size="12.00">Cam: quyết định Human. Xanh: effect tới đích. Tím: wake duy nhất từ automation. Nét đứt: chỉ đọc, resolve hoặc ref.</text>
+<text text-anchor="start" x="54.5" y="-1101.2" font-family="DejaVu Sans" font-size="11.00">Hai Bot minh họa dùng chung kho Library, không dùng chung Inbox, Memory, claim, checkpoint hoặc receipt.</text>
+
+<g id="node1" class="node">
+<title>col_h</title>
+<text text-anchor="start" x="99.5" y="-1084.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="64" y="-1073.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Vai trò có thẩm quyền</text>
+</g>
+
+<g id="node2" class="node">
+<title>col_a</title>
+<text text-anchor="start" x="636.5" y="-1084.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Agent / host</text>
+<text text-anchor="start" x="590" y="-1073.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Kiểm route, caller, scope và ACL</text>
+</g>
+
+
+<g id="node4" class="node">
+<title>h_design</title>
+<path fill="#fff0da" stroke="transparent" d="M27.5,-995C27.5,-995 223.5,-995 223.5,-995 229.5,-995 235.5,-1001 235.5,-1007 235.5,-1007 235.5,-1034 235.5,-1034 235.5,-1040 229.5,-1046 223.5,-1046 223.5,-1046 27.5,-1046 27.5,-1046 21.5,-1046 15.5,-1040 15.5,-1034 15.5,-1034 15.5,-1007 15.5,-1007 15.5,-1001 21.5,-995 27.5,-995"/>
+<text text-anchor="start" x="23.5" y="-1028.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="23.5" y="-1016.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Người yêu cầu / chủ Harness</text>
+<text text-anchor="start" x="23.5" y="-1005.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Quản trị project, chủ đích</text>
+<path fill="none" stroke="#cb985f" d="M27.5,-995C27.5,-995 223.5,-995 223.5,-995 229.5,-995 235.5,-1001 235.5,-1007 235.5,-1007 235.5,-1034 235.5,-1034 235.5,-1040 229.5,-1046 223.5,-1046 223.5,-1046 27.5,-1046 27.5,-1046 21.5,-1046 15.5,-1040 15.5,-1034 15.5,-1034 15.5,-1007 15.5,-1007 15.5,-1001 21.5,-995 27.5,-995"/>
+</g>
+
+
+<g id="node3" class="node">
+<title>col_t</title>
+<text text-anchor="start" x="1143" y="-1084.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Authority tại đích</text>
+<text text-anchor="start" x="1084.5" y="-1073.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Kiểm payload, grant, revision và claim sống</text>
+</g>
+
+
+<g id="node5" class="node">
+<title>a_design</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-989.5C541.5,-989.5 819.5,-989.5 819.5,-989.5 825.5,-989.5 831.5,-995.5 831.5,-1001.5 831.5,-1001.5 831.5,-1039.5 831.5,-1039.5 831.5,-1045.5 825.5,-1051.5 819.5,-1051.5 819.5,-1051.5 541.5,-1051.5 541.5,-1051.5 535.5,-1051.5 529.5,-1045.5 529.5,-1039.5 529.5,-1039.5 529.5,-1001.5 529.5,-1001.5 529.5,-995.5 535.5,-989.5 541.5,-989.5"/>
+<text text-anchor="start" x="537.5" y="-1034.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Entry / Setup / Evolve</text>
+<text text-anchor="start" x="537.5" y="-1022.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chọn đề xuất chỉ mở request.</text>
+<text text-anchor="start" x="537.5" y="-1011.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chốt thiết kế không cấp quyền ghi.</text>
+<text text-anchor="start" x="537.5" y="-1000.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Xác minh source và caller.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-989.5C541.5,-989.5 819.5,-989.5 819.5,-989.5 825.5,-989.5 831.5,-995.5 831.5,-1001.5 831.5,-1001.5 831.5,-1039.5 831.5,-1039.5 831.5,-1045.5 825.5,-1051.5 819.5,-1051.5 819.5,-1051.5 541.5,-1051.5 541.5,-1051.5 535.5,-1051.5 529.5,-1045.5 529.5,-1039.5 529.5,-1039.5 529.5,-1001.5 529.5,-1001.5 529.5,-995.5 535.5,-989.5 541.5,-989.5"/>
+</g>
+
+
+<g id="node6" class="node">
+<title>t_design</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-989.5C1007.5,-989.5 1405.5,-989.5 1405.5,-989.5 1411.5,-989.5 1417.5,-995.5 1417.5,-1001.5 1417.5,-1001.5 1417.5,-1039.5 1417.5,-1039.5 1417.5,-1045.5 1411.5,-1051.5 1405.5,-1051.5 1405.5,-1051.5 1007.5,-1051.5 1007.5,-1051.5 1001.5,-1051.5 995.5,-1045.5 995.5,-1039.5 995.5,-1039.5 995.5,-1001.5 995.5,-1001.5 995.5,-995.5 1001.5,-989.5 1007.5,-989.5"/>
+<text text-anchor="start" x="1003.5" y="-1034.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Record quyết định, Glossary và ADR</text>
+<text text-anchor="start" x="1003.5" y="-1022.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Phiên giữ proposal và nháp. Record đã chọn giữ</text>
+<text text-anchor="start" x="1003.5" y="-1011.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">scope, checkpoint discovery, DesignReady và Verified.</text>
+<text text-anchor="start" x="1003.5" y="-1000.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Mỗi Glossary/ADR giữ thuật ngữ hoặc lý do của mình.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-989.5C1007.5,-989.5 1405.5,-989.5 1405.5,-989.5 1411.5,-989.5 1417.5,-995.5 1417.5,-1001.5 1417.5,-1001.5 1417.5,-1039.5 1417.5,-1039.5 1417.5,-1045.5 1411.5,-1051.5 1405.5,-1051.5 1405.5,-1051.5 1007.5,-1051.5 1007.5,-1051.5 1001.5,-1051.5 995.5,-1045.5 995.5,-1039.5 995.5,-1039.5 995.5,-1001.5 995.5,-1001.5 995.5,-995.5 1001.5,-989.5 1007.5,-989.5"/>
+</g>
+
+
+<g id="node7" class="node">
+<title>h_work</title>
+<path fill="#fff0da" stroke="transparent" d="M12,-900C12,-900 239,-900 239,-900 245,-900 251,-906 251,-912 251,-912 251,-939 251,-939 251,-945 245,-951 239,-951 239,-951 12,-951 12,-951 6,-951 0,-945 0,-939 0,-939 0,-912 0,-912 0,-906 6,-900 12,-900"/>
+<text text-anchor="start" x="8.5" y="-933.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="8.5" y="-921.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chủ spec/split, người có quyền tracker</text>
+<text text-anchor="start" x="8.5" y="-910.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Người ủy quyền, operator, chủ nghiệm thu</text>
+<path fill="none" stroke="#cb985f" d="M12,-900C12,-900 239,-900 239,-900 245,-900 251,-906 251,-912 251,-912 251,-939 251,-939 251,-945 245,-951 239,-951 239,-951 12,-951 12,-951 6,-951 0,-945 0,-939 0,-939 0,-912 0,-912 0,-906 6,-900 12,-900"/>
+</g>
+
+
+<g id="node43" class="node">
+<title>g_design</title>
+<text text-anchor="start" x="274.5" y="-1044.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H1</text>
+<text text-anchor="start" x="298.5" y="-1043.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Chọn đề xuất hoặc nêu yêu cầu khác</text>
+<text text-anchor="start" x="274.5" y="-1031.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H2</text>
+<text text-anchor="start" x="298.5" y="-1030.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Chốt scope, bản Setup hoặc delta Evolve</text>
+<text text-anchor="start" x="274.5" y="-1018.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H3</text>
+<text text-anchor="start" x="298.5" y="-1017.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt cài prerequisite thiếu</text>
+<text text-anchor="start" x="274.5" y="-1005.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H4</text>
+<text text-anchor="start" x="298.5" y="-1004.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt đăng ký override</text>
+<text text-anchor="start" x="274.5" y="-992.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H19</text>
+<text text-anchor="start" x="298.5" y="-991.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cấp apply bootstrap/ghi thiết kế</text>
+</g>
+
+<g id="edge6" class="edge">
+<title>h_design&#45;&gt;g_design</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M235.7,-1020.5C248.08,-1020.5 260.47,-1020.5 272.85,-1020.5"/>
+</g>
+
+<g id="node19" class="node">
+<title>a_work</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-894.5C541.5,-894.5 819.5,-894.5 819.5,-894.5 825.5,-894.5 831.5,-900.5 831.5,-906.5 831.5,-906.5 831.5,-944.5 831.5,-944.5 831.5,-950.5 825.5,-956.5 819.5,-956.5 819.5,-956.5 541.5,-956.5 541.5,-956.5 535.5,-956.5 529.5,-950.5 529.5,-944.5 529.5,-944.5 529.5,-906.5 529.5,-906.5 529.5,-900.5 535.5,-894.5 541.5,-894.5"/>
+<text text-anchor="start" x="537.5" y="-939.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Implement / caller</text>
+<text text-anchor="start" x="537.5" y="-927.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Suy DispatchReady từ trạng thái live.</text>
+<text text-anchor="start" x="537.5" y="-916.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Đối soát Unknown chỉ tại đích gốc theo stable ID.</text>
+<text text-anchor="start" x="537.5" y="-905.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Readback khác nghiệm thu.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-894.5C541.5,-894.5 819.5,-894.5 819.5,-894.5 825.5,-894.5 831.5,-900.5 831.5,-906.5 831.5,-906.5 831.5,-944.5 831.5,-944.5 831.5,-950.5 825.5,-956.5 819.5,-956.5 819.5,-956.5 541.5,-956.5 541.5,-956.5 535.5,-956.5 529.5,-950.5 529.5,-944.5 529.5,-944.5 529.5,-906.5 529.5,-906.5 529.5,-900.5 535.5,-894.5 541.5,-894.5"/>
+</g>
+
+
+<g id="node56" class="node">
+<title>r_design</title>
+<text text-anchor="middle" x="913.5" y="-1023.5" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Ref và basis/revision;</text>
+<text text-anchor="middle" x="913.5" y="-1012.5" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">apply theo grant tại đích</text>
+</g>
+
+<g id="edge32" class="edge">
+<title>a_design&#45;&gt;r_design</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-1020.5C838.84,-1020.5 846.09,-1020.5 853.34,-1020.5"/>
+</g>
+
+<g id="node31" class="node">
+<title>t_work</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-889C1007.5,-889 1405.5,-889 1405.5,-889 1411.5,-889 1417.5,-895 1417.5,-901 1417.5,-901 1417.5,-950 1417.5,-950 1417.5,-956 1411.5,-962 1405.5,-962 1405.5,-962 1007.5,-962 1007.5,-962 1001.5,-962 995.5,-956 995.5,-950 995.5,-950 995.5,-901 995.5,-901 995.5,-895 1001.5,-889 1007.5,-889"/>
+<text text-anchor="start" x="1003.5" y="-944.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Nơi soạn, Tracker Harness và coordinator</text>
+<text text-anchor="start" x="1003.5" y="-932.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Nơi soạn giữ spec/draft, approval và split theo revision.</text>
+<text text-anchor="start" x="1003.5" y="-921.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Tracker Harness đã chọn giữ work/ticket/status canonical.</text>
+<text text-anchor="start" x="1003.5" y="-910.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Nơi cấp claim giữ assignment/epoch cho đúng ticket.</text>
+<text text-anchor="start" x="1003.5" y="-899.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Coordinator đã bind giữ Pending/Unknown, attempt, next step.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-889C1007.5,-889 1405.5,-889 1405.5,-889 1411.5,-889 1417.5,-895 1417.5,-901 1417.5,-901 1417.5,-950 1417.5,-950 1417.5,-956 1411.5,-962 1405.5,-962 1405.5,-962 1007.5,-962 1007.5,-962 1001.5,-962 995.5,-956 995.5,-950 995.5,-950 995.5,-901 995.5,-901 995.5,-895 1001.5,-889 1007.5,-889"/>
+</g>
+
+
+<g id="node8" class="node">
+<title>h_tasks</title>
+</g>
+
+
+<g id="node44" class="node">
+<title>g_work</title>
+<text text-anchor="start" x="267.5" y="-962.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H5</text>
+<text text-anchor="start" x="291.5" y="-961.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt spec đúng revision</text>
+<text text-anchor="start" x="267.5" y="-949.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H6</text>
+<text text-anchor="start" x="291.5" y="-948.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Chốt lại split thay đổi thực chất</text>
+<text text-anchor="start" x="267.5" y="-936.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H7</text>
+<text text-anchor="start" x="291.5" y="-935.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cấp publish vào đúng Harness tracker</text>
+<text text-anchor="start" x="267.5" y="-923.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H8</text>
+<text text-anchor="start" x="291.5" y="-922.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cấp execute đúng một effect</text>
+<text text-anchor="start" x="267.5" y="-910.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H9</text>
+<text text-anchor="start" x="291.5" y="-909.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Xác nhận từng lần gửi non&#45;atomic cho phép</text>
+<text text-anchor="start" x="267.5" y="-897.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H13</text>
+<text text-anchor="start" x="291.5" y="-896.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Can thiệp khi Unknown thiếu bằng chứng</text>
+<text text-anchor="start" x="267.5" y="-884.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H17</text>
+<text text-anchor="start" x="291.5" y="-883.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Quyết định closure/writeback sau verify</text>
+</g>
+
+<g id="edge8" class="edge">
+<title>h_work&#45;&gt;g_work</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M251.18,-925.5C256.26,-925.5 261.33,-925.5 266.4,-925.5"/>
+</g>
+
+<g id="node9" class="node">
+<title>h_library</title>
+<path fill="#fff0da" stroke="transparent" d="M27.5,-705.5C27.5,-705.5 223.5,-705.5 223.5,-705.5 229.5,-705.5 235.5,-711.5 235.5,-717.5 235.5,-717.5 235.5,-744.5 235.5,-744.5 235.5,-750.5 229.5,-756.5 223.5,-756.5 223.5,-756.5 27.5,-756.5 27.5,-756.5 21.5,-756.5 15.5,-750.5 15.5,-744.5 15.5,-744.5 15.5,-717.5 15.5,-717.5 15.5,-711.5 21.5,-705.5 27.5,-705.5"/>
+<text text-anchor="start" x="23.5" y="-738.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="23.5" y="-727.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Issuer Library</text>
+<text text-anchor="start" x="23.5" y="-716.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Đúng store và scope</text>
+<path fill="none" stroke="#cb985f" d="M27.5,-705.5C27.5,-705.5 223.5,-705.5 223.5,-705.5 229.5,-705.5 235.5,-711.5 235.5,-717.5 235.5,-717.5 235.5,-744.5 235.5,-744.5 235.5,-750.5 229.5,-756.5 223.5,-756.5 223.5,-756.5 27.5,-756.5 27.5,-756.5 21.5,-756.5 15.5,-750.5 15.5,-744.5 15.5,-744.5 15.5,-717.5 15.5,-717.5 15.5,-711.5 21.5,-705.5 27.5,-705.5"/>
+</g>
+
+
+<g id="node45" class="node">
+<title>g_tasks</title>
+<text text-anchor="middle" x="385.5" y="-818.5" font-family="DejaVu Sans" font-size="10.00" fill="#142d43"> </text>
+</g>
+
+
+<g id="node10" class="node">
+<title>h_inbox</title>
+<path fill="#fff0da" stroke="transparent" d="M27.5,-610C27.5,-610 223.5,-610 223.5,-610 229.5,-610 235.5,-616 235.5,-622 235.5,-622 235.5,-649 235.5,-649 235.5,-655 229.5,-661 223.5,-661 223.5,-661 27.5,-661 27.5,-661 21.5,-661 15.5,-655 15.5,-649 15.5,-649 15.5,-622 15.5,-622 15.5,-616 21.5,-610 27.5,-610"/>
+<text text-anchor="start" x="23.5" y="-643.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="23.5" y="-631.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Respondent được chỉ định</text>
+<text text-anchor="start" x="23.5" y="-620.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chủ đích gửi Inbox</text>
+<path fill="none" stroke="#cb985f" d="M27.5,-610C27.5,-610 223.5,-610 223.5,-610 229.5,-610 235.5,-616 235.5,-622 235.5,-622 235.5,-649 235.5,-649 235.5,-655 229.5,-661 223.5,-661 223.5,-661 27.5,-661 27.5,-661 21.5,-661 15.5,-655 15.5,-649 15.5,-649 15.5,-622 15.5,-622 15.5,-616 21.5,-610 27.5,-610"/>
+</g>
+
+
+<g id="node46" class="node">
+<title>g_library</title>
+<text text-anchor="start" x="299.5" y="-729" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H10</text>
+<text text-anchor="start" x="323.5" y="-728" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cấp hoặc thu hồi Library grant</text>
+</g>
+
+<g id="edge12" class="edge">
+<title>h_library&#45;&gt;g_library</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M235.7,-731C256.57,-731 277.44,-731 298.31,-731"/>
+</g>
+
+<g id="node11" class="node">
+<title>h_memory</title>
+<path fill="#fff0da" stroke="transparent" d="M27.5,-514.5C27.5,-514.5 223.5,-514.5 223.5,-514.5 229.5,-514.5 235.5,-520.5 235.5,-526.5 235.5,-526.5 235.5,-553.5 235.5,-553.5 235.5,-559.5 229.5,-565.5 223.5,-565.5 223.5,-565.5 27.5,-565.5 27.5,-565.5 21.5,-565.5 15.5,-559.5 15.5,-553.5 15.5,-553.5 15.5,-526.5 15.5,-526.5 15.5,-520.5 21.5,-514.5 27.5,-514.5"/>
+<text text-anchor="start" x="23.5" y="-547.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="23.5" y="-536.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chủ Memory / quản trị ACL</text>
+<text text-anchor="start" x="23.5" y="-525.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Đúng Bot, store và chủ thể</text>
+<path fill="none" stroke="#cb985f" d="M27.5,-514.5C27.5,-514.5 223.5,-514.5 223.5,-514.5 229.5,-514.5 235.5,-520.5 235.5,-526.5 235.5,-526.5 235.5,-553.5 235.5,-553.5 235.5,-559.5 229.5,-565.5 223.5,-565.5 223.5,-565.5 27.5,-565.5 27.5,-565.5 21.5,-565.5 15.5,-559.5 15.5,-553.5 15.5,-553.5 15.5,-526.5 15.5,-526.5 15.5,-520.5 21.5,-514.5 27.5,-514.5"/>
+</g>
+
+
+<g id="node47" class="node">
+<title>g_inbox</title>
+<text text-anchor="start" x="294.5" y="-640.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H11</text>
+<text text-anchor="start" x="318.5" y="-639.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Trả lời ask đúng revision</text>
+<text text-anchor="start" x="294.5" y="-627.5" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H19</text>
+<text text-anchor="start" x="318.5" y="-626.5" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cấp quyền gửi đúng effect Inbox</text>
+</g>
+
+<g id="edge14" class="edge">
+<title>h_inbox&#45;&gt;g_inbox</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M235.7,-635.5C254.91,-635.5 274.12,-635.5 293.34,-635.5"/>
+</g>
+
+<g id="node12" class="node">
+<title>h_bot_a</title>
+<path fill="#fff0da" stroke="transparent" d="M27.5,-435.5C27.5,-435.5 223.5,-435.5 223.5,-435.5 229.5,-435.5 235.5,-441.5 235.5,-447.5 235.5,-447.5 235.5,-474.5 235.5,-474.5 235.5,-480.5 229.5,-486.5 223.5,-486.5 223.5,-486.5 27.5,-486.5 27.5,-486.5 21.5,-486.5 15.5,-480.5 15.5,-474.5 15.5,-474.5 15.5,-447.5 15.5,-447.5 15.5,-441.5 21.5,-435.5 27.5,-435.5"/>
+<text text-anchor="start" x="23.5" y="-468.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="23.5" y="-457.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chủ Bot A / Bot A operator</text>
+<text text-anchor="start" x="23.5" y="-446.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chủ đích cấu hình bot&#45;a</text>
+<path fill="none" stroke="#cb985f" d="M27.5,-435.5C27.5,-435.5 223.5,-435.5 223.5,-435.5 229.5,-435.5 235.5,-441.5 235.5,-447.5 235.5,-447.5 235.5,-474.5 235.5,-474.5 235.5,-480.5 229.5,-486.5 223.5,-486.5 223.5,-486.5 27.5,-486.5 27.5,-486.5 21.5,-486.5 15.5,-480.5 15.5,-474.5 15.5,-474.5 15.5,-447.5 15.5,-447.5 15.5,-441.5 21.5,-435.5 27.5,-435.5"/>
+</g>
+
+
+<g id="node48" class="node">
+<title>g_memory</title>
+<text text-anchor="start" x="304.5" y="-538" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H12</text>
+<text text-anchor="start" x="328.5" y="-537" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt thay đổi ACL Memory</text>
+</g>
+
+<g id="edge16" class="edge">
+<title>h_memory&#45;&gt;g_memory</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M235.7,-540C258.22,-540 280.75,-540 303.28,-540"/>
+</g>
+
+<g id="node13" class="node">
+<title>h_wake_a</title>
+</g>
+
+
+<g id="node49" class="node">
+<title>g_bot_a</title>
+<text text-anchor="start" x="272.5" y="-472" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H14</text>
+<text text-anchor="start" x="296.5" y="-471" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt rebind bot&#45;a sau drain/fence</text>
+<text text-anchor="start" x="272.5" y="-459" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H16</text>
+<text text-anchor="start" x="296.5" y="-458" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt đúng trigger của bot&#45;a</text>
+<text text-anchor="start" x="272.5" y="-446" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H19</text>
+<text text-anchor="start" x="296.5" y="-445" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cấp cấu hình disabled đúng binding bot&#45;a</text>
+</g>
+
+<g id="edge18" class="edge">
+<title>h_bot_a&#45;&gt;g_bot_a</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M235.7,-461C247.59,-461 259.49,-461 271.39,-461"/>
+</g>
+
+<g id="node14" class="node">
+<title>h_bot_b</title>
+<path fill="#fff0da" stroke="transparent" d="M27.5,-277.5C27.5,-277.5 223.5,-277.5 223.5,-277.5 229.5,-277.5 235.5,-283.5 235.5,-289.5 235.5,-289.5 235.5,-316.5 235.5,-316.5 235.5,-322.5 229.5,-328.5 223.5,-328.5 223.5,-328.5 27.5,-328.5 27.5,-328.5 21.5,-328.5 15.5,-322.5 15.5,-316.5 15.5,-316.5 15.5,-289.5 15.5,-289.5 15.5,-283.5 21.5,-277.5 27.5,-277.5"/>
+<text text-anchor="start" x="23.5" y="-310.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="23.5" y="-299.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chủ Bot B / Bot B operator</text>
+<text text-anchor="start" x="23.5" y="-288.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chủ đích cấu hình bot&#45;b</text>
+<path fill="none" stroke="#cb985f" d="M27.5,-277.5C27.5,-277.5 223.5,-277.5 223.5,-277.5 229.5,-277.5 235.5,-283.5 235.5,-289.5 235.5,-289.5 235.5,-316.5 235.5,-316.5 235.5,-322.5 229.5,-328.5 223.5,-328.5 223.5,-328.5 27.5,-328.5 27.5,-328.5 21.5,-328.5 15.5,-322.5 15.5,-316.5 15.5,-316.5 15.5,-289.5 15.5,-289.5 15.5,-283.5 21.5,-277.5 27.5,-277.5"/>
+</g>
+
+
+<g id="node50" class="node">
+<title>g_wake_a</title>
+<text text-anchor="middle" x="385.5" y="-379.5" font-family="DejaVu Sans" font-size="10.00" fill="#142d43"> </text>
+</g>
+
+
+<g id="node15" class="node">
+<title>h_wake_b</title>
+</g>
+
+
+<g id="node51" class="node">
+<title>g_bot_b</title>
+<text text-anchor="start" x="272.5" y="-314" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H14</text>
+<text text-anchor="start" x="296.5" y="-313" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt rebind bot&#45;b sau drain/fence</text>
+<text text-anchor="start" x="272.5" y="-301" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H16</text>
+<text text-anchor="start" x="296.5" y="-300" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt đúng trigger của bot&#45;b</text>
+<text text-anchor="start" x="272.5" y="-288" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H19</text>
+<text text-anchor="start" x="296.5" y="-287" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cấp cấu hình disabled đúng binding bot&#45;b</text>
+</g>
+
+<g id="edge22" class="edge">
+<title>h_bot_b&#45;&gt;g_bot_b</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M235.7,-303C247.59,-303 259.49,-303 271.39,-303"/>
+</g>
+
+<g id="node16" class="node">
+<title>h_release</title>
+<path fill="#fff0da" stroke="transparent" d="M27,-119.5C27,-119.5 224,-119.5 224,-119.5 230,-119.5 236,-125.5 236,-131.5 236,-131.5 236,-158.5 236,-158.5 236,-164.5 230,-170.5 224,-170.5 224,-170.5 27,-170.5 27,-170.5 21,-170.5 15,-164.5 15,-158.5 15,-158.5 15,-131.5 15,-131.5 15,-125.5 21,-119.5 27,-119.5"/>
+<text text-anchor="start" x="23.5" y="-152.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Human</text>
+<text text-anchor="start" x="23.5" y="-141.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Owner pilot / chủ repo</text>
+<text text-anchor="start" x="23.5" y="-130.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Quyền pilot không phải quyền merge</text>
+<path fill="none" stroke="#cb985f" d="M27,-119.5C27,-119.5 224,-119.5 224,-119.5 230,-119.5 236,-125.5 236,-131.5 236,-131.5 236,-158.5 236,-158.5 236,-164.5 230,-170.5 224,-170.5 224,-170.5 27,-170.5 27,-170.5 21,-170.5 15,-164.5 15,-158.5 15,-158.5 15,-131.5 15,-131.5 15,-125.5 21,-119.5 27,-119.5"/>
+</g>
+
+
+<g id="node52" class="node">
+<title>g_wake_b</title>
+<text text-anchor="middle" x="385.5" y="-221.5" font-family="DejaVu Sans" font-size="10.00" fill="#142d43"> </text>
+</g>
+
+
+<g id="node17" class="node">
+<title>h_product</title>
+</g>
+
+
+<g id="node53" class="node">
+<title>g_release</title>
+<text text-anchor="start" x="257.5" y="-156" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H15</text>
+<text text-anchor="start" x="281.5" y="-155" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cho phép effect pilot đúng Bot/binding</text>
+<text text-anchor="start" x="257.5" y="-143" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H18</text>
+<text text-anchor="start" x="281.5" y="-142" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Duyệt PR cuối B8 theo SHA và evidence</text>
+<text text-anchor="start" x="257.5" y="-130" font-family="DejaVu Sans" font-weight="bold" font-size="10.00" fill="#80440d">H20</text>
+<text text-anchor="start" x="281.5" y="-129" font-family="DejaVu Sans" font-size="10.00" fill="#80440d">Cho go dây PR / duyệt từng PR/head cần review</text>
+</g>
+
+<g id="edge26" class="edge">
+<title>h_release&#45;&gt;g_release</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M236.2,-145C242.91,-145 249.62,-145 256.32,-145"/>
+</g>
+
+<g id="node18" class="node">
+<title>h_secret</title>
+</g>
+
+
+<g id="node54" class="node">
+<title>g_product</title>
+<text text-anchor="middle" x="385.5" y="-74.5" font-family="DejaVu Sans" font-size="10.00" fill="#142d43"> </text>
+</g>
+
+
+<g id="node55" class="node">
+<title>g_secret</title>
+<text text-anchor="middle" x="385.5" y="-17.5" font-family="DejaVu Sans" font-size="10.00" fill="#142d43"> </text>
+</g>
+
+
+<g id="node20" class="node">
+<title>a_tasks</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-790C541.5,-790 819.5,-790 819.5,-790 825.5,-790 831.5,-796 831.5,-802 831.5,-802 831.5,-840 831.5,-840 831.5,-846 825.5,-852 819.5,-852 819.5,-852 541.5,-852 541.5,-852 535.5,-852 529.5,-846 529.5,-840 529.5,-840 529.5,-802 529.5,-802 529.5,-796 535.5,-790 541.5,-790"/>
+<text text-anchor="start" x="537.5" y="-834.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Devin Tasks adapter</text>
+<text text-anchor="start" x="537.5" y="-823.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Kiểm board, namespace, role và ACL trước khi bind</text>
+<text text-anchor="start" x="537.5" y="-812.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">làm Harness tracker. Đọc lại ticket/claim canonical.</text>
+<text text-anchor="start" x="537.5" y="-801.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Board điều phối không phải fallback.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-790C541.5,-790 819.5,-790 819.5,-790 825.5,-790 831.5,-796 831.5,-802 831.5,-802 831.5,-840 831.5,-840 831.5,-846 825.5,-852 819.5,-852 819.5,-852 541.5,-852 541.5,-852 535.5,-852 529.5,-846 529.5,-840 529.5,-840 529.5,-802 529.5,-802 529.5,-796 535.5,-790 541.5,-790"/>
+</g>
+
+
+<g id="node57" class="node">
+<title>r_work</title>
+<text text-anchor="middle" x="913.5" y="-928.5" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Work ID, claim/epoch,</text>
+<text text-anchor="middle" x="913.5" y="-917.5" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">payload, revision, grant ref</text>
+</g>
+
+<g id="edge34" class="edge">
+<title>a_work&#45;&gt;r_work</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-925.5C836.71,-925.5 841.83,-925.5 846.94,-925.5"/>
+</g>
+
+<g id="node21" class="node">
+<title>a_library</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-700C541.5,-700 819.5,-700 819.5,-700 825.5,-700 831.5,-706 831.5,-712 831.5,-712 831.5,-750 831.5,-750 831.5,-756 825.5,-762 819.5,-762 819.5,-762 541.5,-762 541.5,-762 535.5,-762 529.5,-756 529.5,-750 529.5,-750 529.5,-712 529.5,-712 529.5,-706 535.5,-700 541.5,-700"/>
+<text text-anchor="start" x="537.5" y="-744.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">harness&#45;library / CLI</text>
+<text text-anchor="start" x="537.5" y="-733.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Bot A và Bot B resolve selection theo scope riêng.</text>
+<text text-anchor="start" x="537.5" y="-722.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chuyển đúng operation, ID, bytes và revision.</text>
+<text text-anchor="start" x="537.5" y="-711.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Selection không tự adopt.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-700C541.5,-700 819.5,-700 819.5,-700 825.5,-700 831.5,-706 831.5,-712 831.5,-712 831.5,-750 831.5,-750 831.5,-756 825.5,-762 819.5,-762 819.5,-762 541.5,-762 541.5,-762 535.5,-762 529.5,-756 529.5,-750 529.5,-750 529.5,-712 529.5,-712 529.5,-706 535.5,-700 541.5,-700"/>
+</g>
+
+
+<g id="node58" class="node">
+<title>r_tasks</title>
+<text text-anchor="middle" x="913.5" y="-818.5" font-family="DejaVu Sans" font-size="10.00" fill="#495c6d">Chỉ tới board đã xác minh</text>
+</g>
+
+<g id="edge36" class="edge">
+<title>a_tasks&#45;&gt;r_tasks</title>
+<path fill="none" stroke="#64798a" stroke-width="1.5" stroke-dasharray="5,2" d="M831.59,-821C837.88,-821 844.17,-821 850.46,-821"/>
+</g>
+
+<g id="node22" class="node">
+<title>a_inbox</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-604.5C541.5,-604.5 819.5,-604.5 819.5,-604.5 825.5,-604.5 831.5,-610.5 831.5,-616.5 831.5,-616.5 831.5,-654.5 831.5,-654.5 831.5,-660.5 825.5,-666.5 819.5,-666.5 819.5,-666.5 541.5,-666.5 541.5,-666.5 535.5,-666.5 529.5,-660.5 529.5,-654.5 529.5,-654.5 529.5,-616.5 529.5,-616.5 529.5,-610.5 535.5,-604.5 541.5,-604.5"/>
+<text text-anchor="start" x="537.5" y="-649.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Bot Inbox / delivery adapter</text>
+<text text-anchor="start" x="537.5" y="-637.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Khớp Bot, actor, card active, subject/revision,</text>
+<text text-anchor="start" x="537.5" y="-626.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">exact action và thread. Reply không cấp grant,</text>
+<text text-anchor="start" x="537.5" y="-615.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">claim hay wake. Child dùng Inbox của Bot sinh nó.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-604.5C541.5,-604.5 819.5,-604.5 819.5,-604.5 825.5,-604.5 831.5,-610.5 831.5,-616.5 831.5,-616.5 831.5,-654.5 831.5,-654.5 831.5,-660.5 825.5,-666.5 819.5,-666.5 819.5,-666.5 541.5,-666.5 541.5,-666.5 535.5,-666.5 529.5,-660.5 529.5,-654.5 529.5,-654.5 529.5,-616.5 529.5,-616.5 529.5,-610.5 535.5,-604.5 541.5,-604.5"/>
+</g>
+
+
+<g id="node59" class="node">
+<title>r_library</title>
+<text text-anchor="middle" x="913.5" y="-734" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Đọc theo pin;</text>
+<text text-anchor="middle" x="913.5" y="-723" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">CAS + consume tại SQLite</text>
+</g>
+
+<g id="edge38" class="edge">
+<title>a_library&#45;&gt;r_library</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-731C837.35,-731 843.11,-731 848.86,-731"/>
+</g>
+
+<g id="node23" class="node">
+<title>a_memory</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-514.5C541.5,-514.5 819.5,-514.5 819.5,-514.5 825.5,-514.5 831.5,-520.5 831.5,-526.5 831.5,-526.5 831.5,-553.5 831.5,-553.5 831.5,-559.5 825.5,-565.5 819.5,-565.5 819.5,-565.5 541.5,-565.5 541.5,-565.5 535.5,-565.5 529.5,-559.5 529.5,-553.5 529.5,-553.5 529.5,-526.5 529.5,-526.5 529.5,-520.5 535.5,-514.5 541.5,-514.5"/>
+<text text-anchor="start" x="537.5" y="-547.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Bot Memory adapter</text>
+<text text-anchor="start" x="537.5" y="-536.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Kiểm Bot, store, chủ thể và ACL revision.</text>
+<text text-anchor="start" x="537.5" y="-525.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Fresh worker mở lại đúng quyền đọc/ghi.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-514.5C541.5,-514.5 819.5,-514.5 819.5,-514.5 825.5,-514.5 831.5,-520.5 831.5,-526.5 831.5,-526.5 831.5,-553.5 831.5,-553.5 831.5,-559.5 825.5,-565.5 819.5,-565.5 819.5,-565.5 541.5,-565.5 541.5,-565.5 535.5,-565.5 529.5,-559.5 529.5,-553.5 529.5,-553.5 529.5,-526.5 529.5,-526.5 529.5,-520.5 535.5,-514.5 541.5,-514.5"/>
+</g>
+
+
+<g id="node60" class="node">
+<title>r_inbox</title>
+<text text-anchor="middle" x="913.5" y="-638.5" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Ask/reply ref theo ACL;</text>
+<text text-anchor="middle" x="913.5" y="-627.5" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">chỉ gửi qua route đã duyệt</text>
+</g>
+
+<g id="edge40" class="edge">
+<title>a_inbox&#45;&gt;r_inbox</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-635.5C837.45,-635.5 843.32,-635.5 849.18,-635.5"/>
+</g>
+
+<g id="node24" class="node">
+<title>a_bot_a</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-435.5C541.5,-435.5 819.5,-435.5 819.5,-435.5 825.5,-435.5 831.5,-441.5 831.5,-447.5 831.5,-447.5 831.5,-474.5 831.5,-474.5 831.5,-480.5 825.5,-486.5 819.5,-486.5 819.5,-486.5 541.5,-486.5 541.5,-486.5 535.5,-486.5 529.5,-480.5 529.5,-474.5 529.5,-474.5 529.5,-447.5 529.5,-447.5 529.5,-441.5 535.5,-435.5 541.5,-435.5"/>
+<text text-anchor="start" x="537.5" y="-468.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Đích bot&#45;a</text>
+<text text-anchor="start" x="537.5" y="-457.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Adapter resolve exact bot&#45;a và binding A.</text>
+<text text-anchor="start" x="537.5" y="-446.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Rebind sau drain/fence, không chuyển quyền.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-435.5C541.5,-435.5 819.5,-435.5 819.5,-435.5 825.5,-435.5 831.5,-441.5 831.5,-447.5 831.5,-447.5 831.5,-474.5 831.5,-474.5 831.5,-480.5 825.5,-486.5 819.5,-486.5 819.5,-486.5 541.5,-486.5 541.5,-486.5 535.5,-486.5 529.5,-480.5 529.5,-474.5 529.5,-474.5 529.5,-447.5 529.5,-447.5 529.5,-441.5 535.5,-435.5 541.5,-435.5"/>
+</g>
+
+
+<g id="node61" class="node">
+<title>r_memory</title>
+<text text-anchor="middle" x="913.5" y="-543" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Rule refs, ACL revision;</text>
+<text text-anchor="middle" x="913.5" y="-532" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">sync một batch theo CAS</text>
+</g>
+
+<g id="edge42" class="edge">
+<title>a_memory&#45;&gt;r_memory</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-540C838.31,-540 845.02,-540 851.74,-540"/>
+</g>
+
+<g id="node25" class="node">
+<title>a_wake_a</title>
+<path fill="#e8f2fc" stroke="transparent" d="M540,-356.5C540,-356.5 821,-356.5 821,-356.5 827,-356.5 833,-362.5 833,-368.5 833,-368.5 833,-395.5 833,-395.5 833,-401.5 827,-407.5 821,-407.5 821,-407.5 540,-407.5 540,-407.5 534,-407.5 528,-401.5 528,-395.5 528,-395.5 528,-368.5 528,-368.5 528,-362.5 534,-356.5 540,-356.5"/>
+<text text-anchor="start" x="536.5" y="-389.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Automation daily&#45;a</text>
+<text text-anchor="start" x="536.5" y="-378.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Lịch đã duyệt · trigger&#45;a</text>
+<text text-anchor="start" x="536.5" y="-367.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Kiểm exact source, trigger, scope và binding active.</text>
+<path fill="none" stroke="#90aec8" d="M540,-356.5C540,-356.5 821,-356.5 821,-356.5 827,-356.5 833,-362.5 833,-368.5 833,-368.5 833,-395.5 833,-395.5 833,-401.5 827,-407.5 821,-407.5 821,-407.5 540,-407.5 540,-407.5 534,-407.5 528,-401.5 528,-395.5 528,-395.5 528,-368.5 528,-368.5 528,-362.5 534,-356.5 540,-356.5"/>
+</g>
+
+
+<g id="node62" class="node">
+<title>r_bot_a</title>
+<text text-anchor="middle" x="913.5" y="-464" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Grant, revision và receipt</text>
+<text text-anchor="middle" x="913.5" y="-453" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">tại đúng đích</text>
+</g>
+
+<g id="edge44" class="edge">
+<title>a_bot_a&#45;&gt;r_bot_a</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-461C838.2,-461 844.81,-461 851.42,-461"/>
+</g>
+
+<g id="node26" class="node">
+<title>a_bot_b</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-277.5C541.5,-277.5 819.5,-277.5 819.5,-277.5 825.5,-277.5 831.5,-283.5 831.5,-289.5 831.5,-289.5 831.5,-316.5 831.5,-316.5 831.5,-322.5 825.5,-328.5 819.5,-328.5 819.5,-328.5 541.5,-328.5 541.5,-328.5 535.5,-328.5 529.5,-322.5 529.5,-316.5 529.5,-316.5 529.5,-289.5 529.5,-289.5 529.5,-283.5 535.5,-277.5 541.5,-277.5"/>
+<text text-anchor="start" x="537.5" y="-310.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Đích bot&#45;b</text>
+<text text-anchor="start" x="537.5" y="-299.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Adapter resolve exact bot&#45;b và binding B.</text>
+<text text-anchor="start" x="537.5" y="-288.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Rebind sau drain/fence, không chuyển quyền.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-277.5C541.5,-277.5 819.5,-277.5 819.5,-277.5 825.5,-277.5 831.5,-283.5 831.5,-289.5 831.5,-289.5 831.5,-316.5 831.5,-316.5 831.5,-322.5 825.5,-328.5 819.5,-328.5 819.5,-328.5 541.5,-328.5 541.5,-328.5 535.5,-328.5 529.5,-322.5 529.5,-316.5 529.5,-316.5 529.5,-289.5 529.5,-289.5 529.5,-283.5 535.5,-277.5 541.5,-277.5"/>
+</g>
+
+
+<g id="node63" class="node">
+<title>r_wake_a</title>
+<text text-anchor="middle" x="913.5" y="-385" font-family="DejaVu Sans" font-size="10.00" fill="#553482">target_bot_id = bot&#45;a</text>
+<text text-anchor="middle" x="913.5" y="-374" font-family="DejaVu Sans" font-size="10.00" fill="#553482">scope / binding hiện hành</text>
+</g>
+
+<g id="edge46" class="edge">
+<title>a_wake_a&#45;&gt;r_wake_a</title>
+<path fill="none" stroke="#744aa4" stroke-width="1.5" d="M833.41,-382C839.25,-382 845.09,-382 850.93,-382"/>
+</g>
+
+<g id="node27" class="node">
+<title>a_wake_b</title>
+<path fill="#e8f2fc" stroke="transparent" d="M540,-198.5C540,-198.5 821,-198.5 821,-198.5 827,-198.5 833,-204.5 833,-210.5 833,-210.5 833,-237.5 833,-237.5 833,-243.5 827,-249.5 821,-249.5 821,-249.5 540,-249.5 540,-249.5 534,-249.5 528,-243.5 528,-237.5 528,-237.5 528,-210.5 528,-210.5 528,-204.5 534,-198.5 540,-198.5"/>
+<text text-anchor="start" x="536.5" y="-231.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Automation issue&#45;b</text>
+<text text-anchor="start" x="536.5" y="-220.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Sự kiện tích hợp đã duyệt · trigger&#45;b</text>
+<text text-anchor="start" x="536.5" y="-209.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Kiểm exact source, trigger, scope và binding active.</text>
+<path fill="none" stroke="#90aec8" d="M540,-198.5C540,-198.5 821,-198.5 821,-198.5 827,-198.5 833,-204.5 833,-210.5 833,-210.5 833,-237.5 833,-237.5 833,-243.5 827,-249.5 821,-249.5 821,-249.5 540,-249.5 540,-249.5 534,-249.5 528,-243.5 528,-237.5 528,-237.5 528,-210.5 528,-210.5 528,-204.5 534,-198.5 540,-198.5"/>
+</g>
+
+
+<g id="node64" class="node">
+<title>r_bot_b</title>
+<text text-anchor="middle" x="913.5" y="-306" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Grant, revision và receipt</text>
+<text text-anchor="middle" x="913.5" y="-295" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">tại đúng đích</text>
+</g>
+
+<g id="edge48" class="edge">
+<title>a_bot_b&#45;&gt;r_bot_b</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-303C838.2,-303 844.81,-303 851.42,-303"/>
+</g>
+
+<g id="node28" class="node">
+<title>a_release</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-114C541.5,-114 819.5,-114 819.5,-114 825.5,-114 831.5,-120 831.5,-126 831.5,-126 831.5,-164 831.5,-164 831.5,-170 825.5,-176 819.5,-176 819.5,-176 541.5,-176 541.5,-176 535.5,-176 529.5,-170 529.5,-164 529.5,-164 529.5,-126 529.5,-126 529.5,-120 535.5,-114 541.5,-114"/>
+<text text-anchor="start" x="537.5" y="-158.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Qualification / release adapter</text>
+<text text-anchor="start" x="537.5" y="-147.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Pilot cần grant effect riêng ở đích đúng scope.</text>
+<text text-anchor="start" x="537.5" y="-136.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Người nghiệm thu tự mở artifact theo ACL.</text>
+<text text-anchor="start" x="537.5" y="-125.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Không suy quyền bật trigger từ pilot hoặc PR.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-114C541.5,-114 819.5,-114 819.5,-114 825.5,-114 831.5,-120 831.5,-126 831.5,-126 831.5,-164 831.5,-164 831.5,-170 825.5,-176 819.5,-176 819.5,-176 541.5,-176 541.5,-176 535.5,-176 529.5,-170 529.5,-164 529.5,-164 529.5,-126 529.5,-126 529.5,-120 535.5,-114 541.5,-114"/>
+</g>
+
+
+<g id="node65" class="node">
+<title>r_wake_b</title>
+<text text-anchor="middle" x="913.5" y="-227" font-family="DejaVu Sans" font-size="10.00" fill="#553482">target_bot_id = bot&#45;b</text>
+<text text-anchor="middle" x="913.5" y="-216" font-family="DejaVu Sans" font-size="10.00" fill="#553482">scope / binding hiện hành</text>
+</g>
+
+<g id="edge50" class="edge">
+<title>a_wake_b&#45;&gt;r_wake_b</title>
+<path fill="none" stroke="#744aa4" stroke-width="1.5" d="M833.41,-224C839.25,-224 845.09,-224 850.93,-224"/>
+</g>
+
+<g id="node29" class="node">
+<title>a_product</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,-57C541.5,-57 819.5,-57 819.5,-57 825.5,-57 831.5,-63 831.5,-69 831.5,-69 831.5,-85 831.5,-85 831.5,-91 825.5,-97 819.5,-97 819.5,-97 541.5,-97 541.5,-97 535.5,-97 529.5,-91 529.5,-85 529.5,-85 529.5,-69 529.5,-69 529.5,-63 535.5,-57 541.5,-57"/>
+<text text-anchor="start" x="537.5" y="-79.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Product resolver</text>
+<text text-anchor="start" x="537.5" y="-68.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Không mở route publish Product.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,-57C541.5,-57 819.5,-57 819.5,-57 825.5,-57 831.5,-63 831.5,-69 831.5,-69 831.5,-85 831.5,-85 831.5,-91 825.5,-97 819.5,-97 819.5,-97 541.5,-97 541.5,-97 535.5,-97 529.5,-91 529.5,-85 529.5,-85 529.5,-69 529.5,-69 529.5,-63 535.5,-57 541.5,-57"/>
+</g>
+
+
+<g id="node66" class="node">
+<title>r_release</title>
+<text text-anchor="middle" x="913.5" y="-148" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">Effect đúng đích;</text>
+<text text-anchor="middle" x="913.5" y="-137" font-family="DejaVu Sans" font-size="10.00" fill="#254c6b">đọc evidence và PR state</text>
+</g>
+
+<g id="edge52" class="edge">
+<title>a_release&#45;&gt;r_release</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M831.59,-145C838.2,-145 844.81,-145 851.42,-145"/>
+</g>
+
+<g id="node30" class="node">
+<title>a_secret</title>
+<path fill="#e8f2fc" stroke="transparent" d="M541.5,0C541.5,0 819.5,0 819.5,0 825.5,0 831.5,-6 831.5,-12 831.5,-12 831.5,-28 831.5,-28 831.5,-34 825.5,-40 819.5,-40 819.5,-40 541.5,-40 541.5,-40 535.5,-40 529.5,-34 529.5,-28 529.5,-28 529.5,-12 529.5,-12 529.5,-6 535.5,0 541.5,0"/>
+<text text-anchor="start" x="537.5" y="-22.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Secret resolver</text>
+<text text-anchor="start" x="537.5" y="-11.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Chỉ dùng ref qua route đã duyệt.</text>
+<path fill="none" stroke="#90aec8" d="M541.5,0C541.5,0 819.5,0 819.5,0 825.5,0 831.5,-6 831.5,-12 831.5,-12 831.5,-28 831.5,-28 831.5,-34 825.5,-40 819.5,-40 819.5,-40 541.5,-40 541.5,-40 535.5,-40 529.5,-34 529.5,-28 529.5,-28 529.5,-12 529.5,-12 529.5,-6 535.5,0 541.5,0"/>
+</g>
+
+
+<g id="node67" class="node">
+<title>r_product</title>
+<text text-anchor="middle" x="913.5" y="-74.5" font-family="DejaVu Sans" font-size="10.00" fill="#495c6d">Chỉ đọc Product ref</text>
+</g>
+
+<g id="edge54" class="edge">
+<title>a_product&#45;&gt;r_product</title>
+<path fill="none" stroke="#64798a" stroke-width="1.5" stroke-dasharray="5,2" d="M831.59,-77C843.32,-77 855.05,-77 866.78,-77"/>
+</g>
+
+<g id="node68" class="node">
+<title>r_secret</title>
+<text text-anchor="middle" x="913.5" y="-17.5" font-family="DejaVu Sans" font-size="10.00" fill="#495c6d">Resolve Secret ref</text>
+</g>
+
+<g id="edge56" class="edge">
+<title>a_secret&#45;&gt;r_secret</title>
+<path fill="none" stroke="#64798a" stroke-width="1.5" stroke-dasharray="5,2" d="M831.59,-20C843.85,-20 856.12,-20 868.38,-20"/>
+</g>
+
+<g id="node32" class="node">
+<title>t_tasks</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-779C1007.5,-779 1405.5,-779 1405.5,-779 1411.5,-779 1417.5,-785 1417.5,-791 1417.5,-791 1417.5,-851 1417.5,-851 1417.5,-857 1411.5,-863 1405.5,-863 1405.5,-863 1007.5,-863 1007.5,-863 1001.5,-863 995.5,-857 995.5,-851 995.5,-851 995.5,-791 995.5,-791 995.5,-785 1001.5,-779 1007.5,-779"/>
+<text text-anchor="start" x="1003.5" y="-845.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Devin Tasks board</text>
+<text text-anchor="start" x="1003.5" y="-834.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Human assignee và session claim là hai trường riêng.</text>
+<text text-anchor="start" x="1003.5" y="-823.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">claim/dispatch chặn khi còn dependency chưa hoàn tất.</text>
+<text text-anchor="start" x="1003.5" y="-812.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">dispatch chặn nếu đã claim. Create có thể claim cho</text>
+<text text-anchor="start" x="1003.5" y="-801.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">phiên đã tồn tại; dispatch tạo phiên cho ticket đã có.</text>
+<text text-anchor="start" x="1003.5" y="-790.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Bot vận hành board không đồng nghĩa ACL private.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-779C1007.5,-779 1405.5,-779 1405.5,-779 1411.5,-779 1417.5,-785 1417.5,-791 1417.5,-791 1417.5,-851 1417.5,-851 1417.5,-857 1411.5,-863 1405.5,-863 1405.5,-863 1007.5,-863 1007.5,-863 1001.5,-863 995.5,-857 995.5,-851 995.5,-851 995.5,-791 995.5,-791 995.5,-785 1001.5,-779 1007.5,-779"/>
+</g>
+
+
+<g id="node33" class="node">
+<title>t_library</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-700C1007.5,-700 1405.5,-700 1405.5,-700 1411.5,-700 1417.5,-706 1417.5,-712 1417.5,-712 1417.5,-750 1417.5,-750 1417.5,-756 1411.5,-762 1405.5,-762 1405.5,-762 1007.5,-762 1007.5,-762 1001.5,-762 995.5,-756 995.5,-750 995.5,-750 995.5,-712 995.5,-712 995.5,-706 1001.5,-700 1007.5,-700"/>
+<text text-anchor="start" x="1003.5" y="-744.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">harness&#45;library · Kho duy nhất dùng chung</text>
+<text text-anchor="start" x="1003.5" y="-733.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Kit pin giữ supplied catalog và linked content.</text>
+<text text-anchor="start" x="1003.5" y="-722.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">SQLite đích giữ saved, selection/history và grant.</text>
+<text text-anchor="start" x="1003.5" y="-711.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Cấu hình consumer giữ adoption.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-700C1007.5,-700 1405.5,-700 1405.5,-700 1411.5,-700 1417.5,-706 1417.5,-712 1417.5,-712 1417.5,-750 1417.5,-750 1417.5,-756 1411.5,-762 1405.5,-762 1405.5,-762 1007.5,-762 1007.5,-762 1001.5,-762 995.5,-756 995.5,-750 995.5,-750 995.5,-712 995.5,-712 995.5,-706 1001.5,-700 1007.5,-700"/>
+</g>
+
+
+<g id="node34" class="node">
+<title>t_inbox</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-588C1007.5,-588 1405.5,-588 1405.5,-588 1411.5,-588 1417.5,-594 1417.5,-600 1417.5,-600 1417.5,-671 1417.5,-671 1417.5,-677 1411.5,-683 1405.5,-683 1405.5,-683 1007.5,-683 1007.5,-683 1001.5,-683 995.5,-677 995.5,-671 995.5,-671 995.5,-600 995.5,-600 995.5,-594 1001.5,-588 1007.5,-588"/>
+<text text-anchor="start" x="1003.5" y="-665.1" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Inbox / Needs you đã bind theo từng bot_id</text>
+<text text-anchor="start" x="1003.5" y="-653.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Giữ ask, revision và disposition: Active / On hold /</text>
+<text text-anchor="start" x="1003.5" y="-642.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Done / Canceled. Không thay status Tasks hoặc PR.</text>
+<text text-anchor="start" x="1003.5" y="-631.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Không có dedupe ask xuyên Bot. Thẻ PR theo dõi</text>
+<text text-anchor="start" x="1003.5" y="-620.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">close/merge từ GitHub, không quyết định PR terminal.</text>
+<text text-anchor="start" x="1003.5" y="-609.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Route gửi giữ delivery identity/receipt; Inbox giữ ref.</text>
+<text text-anchor="start" x="1003.5" y="-598.7" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Effect receipt chỉ do đích effect giữ.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-588C1007.5,-588 1405.5,-588 1405.5,-588 1411.5,-588 1417.5,-594 1417.5,-600 1417.5,-600 1417.5,-671 1417.5,-671 1417.5,-677 1411.5,-683 1405.5,-683 1405.5,-683 1007.5,-683 1007.5,-683 1001.5,-683 995.5,-677 995.5,-671 995.5,-671 995.5,-600 995.5,-600 995.5,-594 1001.5,-588 1007.5,-588"/>
+</g>
+
+
+<g id="node35" class="node">
+<title>t_memory</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-509C1007.5,-509 1405.5,-509 1405.5,-509 1411.5,-509 1417.5,-515 1417.5,-521 1417.5,-521 1417.5,-559 1417.5,-559 1417.5,-565 1411.5,-571 1405.5,-571 1405.5,-571 1007.5,-571 1007.5,-571 1001.5,-571 995.5,-565 995.5,-559 995.5,-559 995.5,-521 995.5,-521 995.5,-515 1001.5,-509 1007.5,-509"/>
+<text text-anchor="start" x="1003.5" y="-553.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Memory đã bind theo từng bot_id</text>
+<text text-anchor="start" x="1003.5" y="-542.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Giữ rules, confidence, sync revision và ACL riêng.</text>
+<text text-anchor="start" x="1003.5" y="-531.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Không giữ checkpoint tác động. Missing/sai identity</text>
+<text text-anchor="start" x="1003.5" y="-520.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">là Blocked, không coi là rỗng.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-509C1007.5,-509 1405.5,-509 1405.5,-509 1411.5,-509 1417.5,-515 1417.5,-521 1417.5,-521 1417.5,-559 1417.5,-559 1417.5,-565 1411.5,-571 1405.5,-571 1405.5,-571 1007.5,-571 1007.5,-571 1001.5,-571 995.5,-565 995.5,-559 995.5,-559 995.5,-521 995.5,-521 995.5,-515 1001.5,-509 1007.5,-509"/>
+</g>
+
+
+<g id="node36" class="node">
+<title>t_bot_a</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-430C1007.5,-430 1405.5,-430 1405.5,-430 1411.5,-430 1417.5,-436 1417.5,-442 1417.5,-442 1417.5,-480 1417.5,-480 1417.5,-486 1411.5,-492 1405.5,-492 1405.5,-492 1007.5,-492 1007.5,-492 1001.5,-492 995.5,-486 995.5,-480 995.5,-480 995.5,-442 995.5,-442 995.5,-436 1001.5,-430 1007.5,-430"/>
+<text text-anchor="start" x="1003.5" y="-474.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">bots[] · Biên Bot A · bot_id = bot&#45;a</text>
+<text text-anchor="start" x="1003.5" y="-463.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Host A giữ role, contract, binding, config revision,</text>
+<text text-anchor="start" x="1003.5" y="-452.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">grant và effect history/receipt riêng. Coordinator A</text>
+<text text-anchor="start" x="1007" y="-441.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">giữ checkpoint. Bot A dùng Inbox A và Memory A.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-430C1007.5,-430 1405.5,-430 1405.5,-430 1411.5,-430 1417.5,-436 1417.5,-442 1417.5,-442 1417.5,-480 1417.5,-480 1417.5,-486 1411.5,-492 1405.5,-492 1405.5,-492 1007.5,-492 1007.5,-492 1001.5,-492 995.5,-486 995.5,-480 995.5,-480 995.5,-442 995.5,-442 995.5,-436 1001.5,-430 1007.5,-430"/>
+</g>
+
+
+<g id="node37" class="node">
+<title>t_wake_a</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-351C1007.5,-351 1405.5,-351 1405.5,-351 1411.5,-351 1417.5,-357 1417.5,-363 1417.5,-363 1417.5,-401 1417.5,-401 1417.5,-407 1411.5,-413 1405.5,-413 1405.5,-413 1007.5,-413 1007.5,-413 1001.5,-413 995.5,-407 995.5,-401 995.5,-401 995.5,-363 995.5,-363 995.5,-357 1001.5,-351 1007.5,-351"/>
+<text text-anchor="start" x="1003.5" y="-395.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Runner / occurrence ledger · bot&#45;a</text>
+<text text-anchor="start" x="1003.5" y="-384.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Giữ trigger, claim, khóa dedupe bền và cursor.</text>
+<text text-anchor="start" x="1003.5" y="-373.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Ghi claim + khóa trước ACK. Sai đích/binding:</text>
+<text text-anchor="start" x="1003.5" y="-362.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">không claim, positive ACK hay dispatch.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-351C1007.5,-351 1405.5,-351 1405.5,-351 1411.5,-351 1417.5,-357 1417.5,-363 1417.5,-363 1417.5,-401 1417.5,-401 1417.5,-407 1411.5,-413 1405.5,-413 1405.5,-413 1007.5,-413 1007.5,-413 1001.5,-413 995.5,-407 995.5,-401 995.5,-401 995.5,-363 995.5,-363 995.5,-357 1001.5,-351 1007.5,-351"/>
+</g>
+
+
+<g id="node38" class="node">
+<title>t_bot_b</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-272C1007.5,-272 1405.5,-272 1405.5,-272 1411.5,-272 1417.5,-278 1417.5,-284 1417.5,-284 1417.5,-322 1417.5,-322 1417.5,-328 1411.5,-334 1405.5,-334 1405.5,-334 1007.5,-334 1007.5,-334 1001.5,-334 995.5,-328 995.5,-322 995.5,-322 995.5,-284 995.5,-284 995.5,-278 1001.5,-272 1007.5,-272"/>
+<text text-anchor="start" x="1003.5" y="-316.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">bots[] · Biên Bot B · bot_id = bot&#45;b</text>
+<text text-anchor="start" x="1003.5" y="-305.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Host B giữ role, contract, binding, config revision,</text>
+<text text-anchor="start" x="1003.5" y="-294.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">grant và effect history/receipt riêng. Coordinator B</text>
+<text text-anchor="start" x="1007" y="-283.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">giữ checkpoint. Bot B dùng Inbox B và Memory B.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-272C1007.5,-272 1405.5,-272 1405.5,-272 1411.5,-272 1417.5,-278 1417.5,-284 1417.5,-284 1417.5,-322 1417.5,-322 1417.5,-328 1411.5,-334 1405.5,-334 1405.5,-334 1007.5,-334 1007.5,-334 1001.5,-334 995.5,-328 995.5,-322 995.5,-322 995.5,-284 995.5,-284 995.5,-278 1001.5,-272 1007.5,-272"/>
+</g>
+
+
+<g id="node39" class="node">
+<title>t_wake_b</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-193C1007.5,-193 1405.5,-193 1405.5,-193 1411.5,-193 1417.5,-199 1417.5,-205 1417.5,-205 1417.5,-243 1417.5,-243 1417.5,-249 1411.5,-255 1405.5,-255 1405.5,-255 1007.5,-255 1007.5,-255 1001.5,-255 995.5,-249 995.5,-243 995.5,-243 995.5,-205 995.5,-205 995.5,-199 1001.5,-193 1007.5,-193"/>
+<text text-anchor="start" x="1003.5" y="-237.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Runner / occurrence ledger · bot&#45;b</text>
+<text text-anchor="start" x="1003.5" y="-226.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Giữ trigger, claim, khóa dedupe bền và cursor.</text>
+<text text-anchor="start" x="1003.5" y="-215.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Ghi claim + khóa trước ACK. Sai đích/binding:</text>
+<text text-anchor="start" x="1003.5" y="-204.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">không claim, positive ACK hay dispatch.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-193C1007.5,-193 1405.5,-193 1405.5,-193 1411.5,-193 1417.5,-199 1417.5,-205 1417.5,-205 1417.5,-243 1417.5,-243 1417.5,-249 1411.5,-255 1405.5,-255 1405.5,-255 1007.5,-255 1007.5,-255 1001.5,-255 995.5,-249 995.5,-243 995.5,-243 995.5,-205 995.5,-205 995.5,-199 1001.5,-193 1007.5,-193"/>
+</g>
+
+
+<g id="node40" class="node">
+<title>t_release</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-114C1007.5,-114 1405.5,-114 1405.5,-114 1411.5,-114 1417.5,-120 1417.5,-126 1417.5,-126 1417.5,-164 1417.5,-164 1417.5,-170 1411.5,-176 1405.5,-176 1405.5,-176 1007.5,-176 1007.5,-176 1001.5,-176 995.5,-170 995.5,-164 995.5,-164 995.5,-126 995.5,-126 995.5,-120 1001.5,-114 1007.5,-114"/>
+<text text-anchor="start" x="1003.5" y="-158.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Đích Repo / GitHub và nơi lưu evidence</text>
+<text text-anchor="start" x="1003.5" y="-147.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Đích Repo giữ assets, grant, revision và effect receipt.</text>
+<text text-anchor="start" x="1003.5" y="-136.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">GitHub giữ PR/repo/head và trạng thái đóng/merge.</text>
+<text text-anchor="start" x="1003.5" y="-125.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Nơi lưu evidence đã duyệt giữ artifact và evidence ACL.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-114C1007.5,-114 1405.5,-114 1405.5,-114 1411.5,-114 1417.5,-120 1417.5,-126 1417.5,-126 1417.5,-164 1417.5,-164 1417.5,-170 1411.5,-176 1405.5,-176 1405.5,-176 1007.5,-176 1007.5,-176 1001.5,-176 995.5,-170 995.5,-164 995.5,-164 995.5,-126 995.5,-126 995.5,-120 1001.5,-114 1007.5,-114"/>
+</g>
+
+
+<g id="node41" class="node">
+<title>t_product</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,-57C1007.5,-57 1405.5,-57 1405.5,-57 1411.5,-57 1417.5,-63 1417.5,-69 1417.5,-69 1417.5,-85 1417.5,-85 1417.5,-91 1411.5,-97 1405.5,-97 1405.5,-97 1007.5,-97 1007.5,-97 1001.5,-97 995.5,-91 995.5,-85 995.5,-85 995.5,-69 995.5,-69 995.5,-63 1001.5,-57 1007.5,-57"/>
+<text text-anchor="start" x="1003.5" y="-79.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Product tracker</text>
+<text text-anchor="start" x="1003.5" y="-68.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Giữ Product issues. Không phải fallback publish.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,-57C1007.5,-57 1405.5,-57 1405.5,-57 1411.5,-57 1417.5,-63 1417.5,-69 1417.5,-69 1417.5,-85 1417.5,-85 1417.5,-91 1411.5,-97 1405.5,-97 1405.5,-97 1007.5,-97 1007.5,-97 1001.5,-97 995.5,-91 995.5,-85 995.5,-85 995.5,-69 995.5,-69 995.5,-63 1001.5,-57 1007.5,-57"/>
+</g>
+
+
+<g id="node42" class="node">
+<title>t_secret</title>
+<path fill="#f1edf8" stroke="transparent" d="M1007.5,0C1007.5,0 1405.5,0 1405.5,0 1411.5,0 1417.5,-6 1417.5,-12 1417.5,-12 1417.5,-28 1417.5,-28 1417.5,-34 1411.5,-40 1405.5,-40 1405.5,-40 1007.5,-40 1007.5,-40 1001.5,-40 995.5,-34 995.5,-28 995.5,-28 995.5,-12 995.5,-12 995.5,-6 1001.5,0 1007.5,0"/>
+<text text-anchor="start" x="1003.5" y="-22.6" font-family="DejaVu Sans" font-weight="bold" font-size="13.00" fill="#142d43">Secret store</text>
+<text text-anchor="start" x="1003.5" y="-11.2" font-family="DejaVu Sans" font-size="11.00" fill="#142d43">Giữ bí mật. Handoff không mang token.</text>
+<path fill="none" stroke="#ac9bbe" d="M1007.5,0C1007.5,0 1405.5,0 1405.5,0 1411.5,0 1417.5,-6 1417.5,-12 1417.5,-12 1417.5,-28 1417.5,-28 1417.5,-34 1411.5,-40 1405.5,-40 1405.5,-40 1007.5,-40 1007.5,-40 1001.5,-40 995.5,-34 995.5,-28 995.5,-28 995.5,-12 995.5,-12 995.5,-6 1001.5,0 1007.5,0"/>
+</g>
+
+
+<g id="edge7" class="edge">
+<title>g_design&#45;&gt;a_design</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M498.14,-1020.5C506.3,-1020.5 514.47,-1020.5 522.63,-1020.5"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.98,-1022.78 529.48,-1020.5 522.98,-1018.23 522.98,-1022.78"/>
+</g>
+
+
+<g id="edge9" class="edge">
+<title>g_work&#45;&gt;a_work</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M504.77,-925.5C510.82,-925.5 516.87,-925.5 522.92,-925.5"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.98,-927.78 529.48,-925.5 522.98,-923.23 522.98,-927.78"/>
+</g>
+
+
+
+
+<g id="edge13" class="edge">
+<title>g_library&#45;&gt;a_library</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M472.5,-731C489.24,-731 505.97,-731 522.71,-731"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.88,-733.28 529.38,-731 522.88,-728.73 522.88,-733.28"/>
+</g>
+
+
+<g id="edge15" class="edge">
+<title>g_inbox&#45;&gt;a_inbox</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M477.69,-635.5C492.57,-635.5 507.46,-635.5 522.34,-635.5"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.68,-637.78 529.18,-635.5 522.68,-633.23 522.68,-637.78"/>
+</g>
+
+
+<g id="edge17" class="edge">
+<title>g_memory&#45;&gt;a_memory</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M467.6,-540C485.87,-540 504.14,-540 522.41,-540"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.64,-542.28 529.14,-540 522.64,-537.73 522.64,-542.28"/>
+</g>
+
+
+<g id="edge19" class="edge">
+<title>g_bot_a&#45;&gt;a_bot_a</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M499.58,-461C507.16,-461 514.73,-461 522.31,-461"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.76,-463.28 529.26,-461 522.76,-458.73 522.76,-463.28"/>
+</g>
+
+
+
+
+<g id="edge23" class="edge">
+<title>g_bot_b&#45;&gt;a_bot_b</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M499.58,-303C507.16,-303 514.73,-303 522.31,-303"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.76,-305.28 529.26,-303 522.76,-300.73 522.76,-305.28"/>
+</g>
+
+
+
+
+<g id="edge27" class="edge">
+<title>g_release&#45;&gt;a_release</title>
+<path fill="none" stroke="#a95c17" stroke-width="1.5" d="M514.56,-145C517.36,-145 520.15,-145 522.95,-145"/>
+<polygon fill="#a95c17" stroke="#a95c17" stroke-width="1.5" points="522.97,-147.28 529.47,-145 522.97,-142.73 522.97,-147.28"/>
+</g>
+
+
+
+
+
+<g id="edge33" class="edge">
+<title>r_design&#45;&gt;t_design</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M973.59,-1020.5C978.59,-1020.5 983.6,-1020.5 988.6,-1020.5"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.92,-1022.78 995.42,-1020.5 988.92,-1018.23 988.92,-1022.78"/>
+</g>
+
+
+<g id="edge35" class="edge">
+<title>r_work&#45;&gt;t_work</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M980.17,-925.5C982.99,-925.5 985.81,-925.5 988.62,-925.5"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.7,-927.78 995.2,-925.5 988.7,-923.23 988.7,-927.78"/>
+</g>
+
+
+<g id="edge37" class="edge">
+<title>r_tasks&#45;&gt;t_tasks</title>
+<path fill="none" stroke="#64798a" stroke-width="1.5" stroke-dasharray="5,2" d="M976.74,-821C980.66,-821 984.59,-821 988.52,-821"/>
+<polygon fill="#64798a" stroke="#64798a" stroke-width="1.5" points="988.63,-823.28 995.13,-821 988.63,-818.73 988.63,-823.28"/>
+</g>
+
+
+<g id="edge39" class="edge">
+<title>r_library&#45;&gt;t_library</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M978.17,-731C981.61,-731 985.05,-731 988.49,-731"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.61,-733.28 995.11,-731 988.61,-728.73 988.61,-733.28"/>
+</g>
+
+
+<g id="edge41" class="edge">
+<title>r_inbox&#45;&gt;t_inbox</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M977.59,-635.5C981.32,-635.5 985.05,-635.5 988.77,-635.5"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.98,-637.78 995.48,-635.5 988.98,-633.23 988.98,-637.78"/>
+</g>
+
+
+<g id="edge43" class="edge">
+<title>r_memory&#45;&gt;t_memory</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M975.02,-540C979.57,-540 984.13,-540 988.69,-540"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.86,-542.28 995.36,-540 988.86,-537.73 988.86,-542.28"/>
+</g>
+
+
+<g id="edge45" class="edge">
+<title>r_bot_a&#45;&gt;t_bot_a</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M975.59,-461C980.03,-461 984.48,-461 988.92,-461"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.93,-463.28 995.43,-461 988.93,-458.73 988.93,-463.28"/>
+</g>
+
+
+<g id="edge47" class="edge">
+<title>r_wake_a&#45;&gt;t_wake_a</title>
+<path fill="none" stroke="#744aa4" stroke-width="1.5" d="M976.16,-382C980.2,-382 984.23,-382 988.27,-382"/>
+<polygon fill="#744aa4" stroke="#744aa4" stroke-width="1.5" points="988.56,-384.28 995.06,-382 988.56,-379.73 988.56,-384.28"/>
+</g>
+
+
+<g id="edge49" class="edge">
+<title>r_bot_b&#45;&gt;t_bot_b</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M975.59,-303C980.03,-303 984.48,-303 988.92,-303"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.93,-305.28 995.43,-303 988.93,-300.73 988.93,-305.28"/>
+</g>
+
+
+<g id="edge51" class="edge">
+<title>r_wake_b&#45;&gt;t_wake_b</title>
+<path fill="none" stroke="#744aa4" stroke-width="1.5" d="M976.16,-224C980.2,-224 984.23,-224 988.27,-224"/>
+<polygon fill="#744aa4" stroke="#744aa4" stroke-width="1.5" points="988.56,-226.28 995.06,-224 988.56,-221.73 988.56,-226.28"/>
+</g>
+
+
+<g id="edge53" class="edge">
+<title>r_release&#45;&gt;t_release</title>
+<path fill="none" stroke="#416c8f" stroke-width="1.5" d="M975.59,-145C980.03,-145 984.48,-145 988.92,-145"/>
+<polygon fill="#416c8f" stroke="#416c8f" stroke-width="1.5" points="988.93,-147.28 995.43,-145 988.93,-142.73 988.93,-147.28"/>
+</g>
+
+
+<g id="edge55" class="edge">
+<title>r_product&#45;&gt;t_product</title>
+<path fill="none" stroke="#64798a" stroke-width="1.5" stroke-dasharray="5,2" d="M960.14,-77C969.65,-77 979.17,-77 988.68,-77"/>
+<polygon fill="#64798a" stroke="#64798a" stroke-width="1.5" points="988.77,-79.28 995.27,-77 988.77,-74.73 988.77,-79.28"/>
+</g>
+
+
+<g id="edge57" class="edge">
+<title>r_secret&#45;&gt;t_secret</title>
+<path fill="none" stroke="#64798a" stroke-width="1.5" stroke-dasharray="5,2" d="M958.71,-20C968.77,-20 978.82,-20 988.88,-20"/>
+<polygon fill="#64798a" stroke="#64798a" stroke-width="1.5" points="988.99,-22.28 995.49,-20 988.99,-17.73 988.99,-22.28"/>
+</g>
+</g>
+</svg></div>
+  </figure>
+</main>
+</body>
+</html>

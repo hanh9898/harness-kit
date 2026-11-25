@@ -1,0 +1,376 @@
+' PlantUML 1.2025.10: -tsvg or -tpng renders one file per named diagram.
+' The delivered SVG/PNG assemble those renders without text reflow.
+' Normative sources: arc42-harness-v1.md #skill-inventory #human-gates #diagram-contract.
+
+@startuml st-entry
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>Entry · Từ đề xuất đến request</b></size>
+state "Mở skill" as Start
+note right of Start
+  Đây là entry tương tác.
+  Không có đường từ chat tới wake Bot.
+end note
+state "Khảo sát thầm · chỉ đọc" as Survey
+state "Chờ lựa chọn" as Choose
+state "Không mở request" as None
+state "Request rõ · chưa cấp quyền" as Request
+state "Effect đúng grant" as Apply #DFF2E8
+[*] --> Start
+Start --> Survey : Agent [chưa có yêu cầu rõ]
+Start --> Request : Yêu cầu rõ / node cụ thể\n[bypass H1]
+Survey --> None : Agent [không đủ căn cứ]
+Survey --> Choose : Agent trình 1–2 đề xuất có evidence\nTitle nguyên văn + “Something else”
+Choose -[#9A550A]-> Request : <b>Human H1</b> chọn đúng title\nhoặc nêu intent khác
+Choose -[#9A550A]-> None : <b>Human H1</b> từ chối
+Choose --> None : Im lặng / câu trả lời mơ hồ
+Request --> Apply : Agent và đích kiểm\ncổng tương ứng + exact grant
+@enduml
+
+@startuml st-library-store
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>Library · Năm outcome của store</b></size>
+state "Resolve binding, path, owner và continuity\nKhông tạo file hoặc sidecar" as Resolve
+state Class <<choice>>
+state "unconfigured" as U #FFF5D8
+state "missing" as M #FBE8E8
+state "unreadable" as X #FBE8E8
+state "wrong-identity" as W #FBE8E8
+state "ready" as R #DFF2E8
+state "Catalog-only\nRaw catalog đã pin; không dùng như SQLite" as Catalog #FFF5D8
+state "Blocked · fail closed\nKhông fallback catalog; không coi là rỗng" as Blocked #FBE8E8
+state Preflight <<choice>>
+state "Dừng trước open\nKhông WAL/SHM; không sửa DB" as Stop #FBE8E8
+state "Strict read · mode=ro\nNo-write route đã qualify" as Read
+state "Không có row\nrevision 0" as Empty #DFF2E8
+state "Có row\nrevision ≥ 1 từ dữ liệu canonical" as Row #DFF2E8
+[*] --> Resolve
+Resolve --> Class : Agent phân loại binding
+Class --> U
+Class --> M
+Class --> X
+Class --> W
+Class --> R
+U --> Catalog : [xác nhận chưa cấu hình]
+M --> Blocked
+X --> Blocked
+W --> Blocked
+R --> Preflight : Agent kiểm no-write trước open
+Preflight --> Stop : [WAL chưa qualify\nhoặc không chặn được race]
+Preflight --> Read : [đúng store, no-write đã chứng minh]
+Read --> Empty : [không có row]
+Read --> Row : [có row]
+@enduml
+
+@startuml st-library-grant
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>Library · Quyết định cấp hoặc thu hồi grant</b></size>
+state "Grant tại SQLite đích" as Grant
+state "Yêu cầu cấp grant" as Issue
+state "Yêu cầu thu hồi grant" as Revoke
+state "Grant hiện hành" as Active #DFF2E8
+state "Grant cũ không đổi" as Old
+state "Commit bị chặn" as Denied #FBE8E8
+state "Đã commit\nConsume + history cùng transaction" as Commit #DFF2E8
+state "Kết quả vẫn Applied\nRevoke không undo" as Applied #DFF2E8
+[*] --> Grant
+Grant -[#9A550A]-> Issue : <b>Human H10</b> · issuer cấp\nexact store, ID/op, bytes, revision, expiry
+Grant -[#9A550A]-> Revoke : <b>Human H10</b> · issuer thu hồi\nđúng grant tại đúng store
+Issue --> Active : SQLite kiểm CAS, input và expiry [đạt]
+Issue --> Old : [stale hoặc invalid]
+Active --> Commit : Đích kiểm grant/revision/bytes tại commit
+Revoke --> Denied : [revoke thắng trước commit]
+Revoke --> Applied : [commit đã thắng]
+@enduml
+
+@startuml st-bot-start
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>Bot · Cấu hình và bật theo từng bot_id</b></size>
+state "Chuẩn bị Bot đã chọn\nSetup hoặc Evolve" as Prepare
+state "Đã duyệt cấu hình tắt" as Grant
+state "Configured disabled" as Disabled
+state "Pilot được duyệt · trigger vẫn tắt" as Pilot
+state "Manual-qualified" as Manual
+state "Resume-qualified" as Resume
+state "Đã duyệt một trigger" as TriggerGrant
+state "Đã gửi lệnh · chờ đọc lại" as TriggerSent
+state "Trigger active · đã đọc lại" as Active #DFF2E8
+[*] --> Prepare
+note right of Prepare
+  bots[] giữ ref theo bot_id ổn định.
+  Mỗi Bot có role, contract, binding,
+  bot-inbox, bot-memory, grant, revision,
+  receipt và checkpoint riêng.
+  Chỉ dùng chung harness-library.
+end note
+Prepare -[#9A550A]-> Grant : <b>Human H19</b> · chủ đích cấp exact grant\ncấu hình tắt đúng Bot/binding
+Grant --> Disabled : Agent kiểm source/caller, role/contract đã pin\nvà grant; đích áp dụng, Agent đọc lại\nBot/binding + mọi trigger tắt, phát bot-setup
+Disabled -[#9A550A]-> Pilot : <b>Human H15</b> · owner duyệt pilot đúng Bot/binding,\nroute, scope, dữ liệu, giới hạn và cách dừng
+Pilot --> Manual : Agent chạy tay với exact effect grant\nKhông wake, không mở trigger
+Manual --> Resume : Agent chạy worker mới với exact grant;\nkiểm ACL, checkpoint, fence và claim/dedupe
+Resume -[#9A550A]-> TriggerGrant : <b>Human H16</b> · operator duyệt đúng\ntrigger/Bot/binding/scope
+TriggerGrant --> TriggerSent : Agent và đích kiểm grant rồi gửi
+TriggerSent --> Active : Agent đọc lại đúng trigger đã bật
+note right of Active
+  Kích hoạt theo trigger, không theo cả Bot.
+  Trigger khác và Bot khác giữ nguyên.
+  Thiếu grant hoặc readback: chưa active.
+end note
+@enduml
+
+@startuml st-bot-recovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>Bot · Đối soát và rebind độc lập</b></size>
+state "Binding hiện hành của bot_id" as Current
+state "Unknown · giữ effect checkpoint\ntại đúng Bot và đích gốc" as Unknown #FFF5D8
+state "Giữ Unknown / thu thập evidence\nXử lý ngoài luồng cần quyền riêng" as Hold #FFF5D8
+state "Đã đối soát\nApplied / Denied / proven no-write" as Evidence
+state "Draining · fence binding cũ\nKhông tạo việc mới" as Drain
+state "Binding cũ đã dừng\nĐã đối soát mọi effect Unknown" as Drained
+state "Đã duyệt binding mới" as Approved
+state "Cùng bot_id · generation mới\nConfigured disabled" as New #DFF2E8
+[*] --> Current
+Current -down-> Unknown : Agent nhận timeout sau send
+Unknown -down-> Evidence : Agent đối soát đích gốc theo stable ID\n[receipt/history đủ chứng minh]
+Unknown -[#9A550A]right-> Hold : <b>Human H13</b> · operator\n[đối soát bế tắc]
+Hold -left-> Unknown : Agent nhận evidence mới
+note bottom of Hold
+  Không retry/reassign/rollback/close.
+  Vắng record không phải no-write.
+  Không advance effect checkpoint.
+end note
+Current -left-> Drain : Agent tắt và đọc lại trigger cũ\nđúng bot_id/binding
+Drain -right-> Unknown : Agent thấy effect Unknown\nGiữ fence binding cũ
+Evidence -left-> Drain : Agent tiếp tục drain\n[nếu đang rebind]
+note bottom of Evidence
+  Ngoài rebind, chỉ xét gửi mới nếu
+  proven no-write và có grant mới.
+end note
+Drain -down-> Drained : Agent xác minh drain/fence hoàn tất\nvà đối soát toàn bộ Unknown
+Drained -[#9A550A]down-> Approved : <b>Human H14</b> · Bot owner duyệt\nbinding mới đúng Bot/scope
+Approved -down-> New : Agent kiểm grant; rebind và đọc lại vẫn tắt
+note right of New
+  Không chuyển lịch, secret hay grant cũ.
+  Giữ khóa dedupe; kiểm ledger continuity.
+  Pilot và bật từng trigger ở luồng cấu hình.
+  Không đổi Bot khác.
+end note
+@enduml
+
+@startuml st-bot-wake
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>Wake · Automation tới đúng một Bot</b></size>
+state "Delivery từ automation lịch\nhoặc sự kiện tích hợp" as Delivery
+state Target <<choice>>
+state "Reject hoặc quarantine\nKhông claim, dispatch hay positive ACK" as Reject #FBE8E8
+state Claim <<choice>>
+state "Đích giữ claim occurrence,\nkhóa dedupe bền và pending\ntrong cùng primitive atomic" as Pending
+state "ACK delivery sau commit" as Ack #DFF2E8
+state "ACK duplicate sau đọc lại\nclaim/key bền đúng mapping" as Duplicate
+state "Chỉ tiếp tục pending record này\nqua work claim/epoch và fence riêng" as Work
+[*] --> Delivery
+Delivery --> Target : Runner xác thực source, automation_id và trigger active;\nkiểm đúng một target_bot_id, scope và binding revision
+Target --> Reject : [thiếu hoặc lệch]
+Target --> Claim : [exact target + binding hiện hành]
+Claim --> Pending : [occurrence mới, commit được]
+Claim --> Duplicate : [đã có record, mapping khớp]
+Claim --> Reject : [không commit atomic\nhoặc record lệch]
+Pending --> Ack : Runner ACK sau khi đọc được commit
+Pending --> Work : Agent tiếp tục đúng Bot từ record đã commit,\nkể cả recovery khi crash trước ACK
+note right of Duplicate
+  Không claim hoặc dispatch lại.
+end note
+note right of Delivery
+  Chỉ automation tạo wake.
+  Chat, Inbox, @mention và pilot tay
+  không thuộc đường wake.
+end note
+note right of Work
+  ACK delivery không phải effect receipt.
+  Unknown không advance effect checkpoint.
+end note
+@enduml
+
+@startuml st-tasks-inbox
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>Devin · Tasks tách khỏi Inbox / Needs you</b></size>
+state "Tasks board · ticket canonical" as Tasks
+Tasks : Human assignee khác session claim/epoch.
+Tasks : Bot vận hành board không suy ra ACL private.
+Tasks : Kiểm đúng board, namespace, role và ACL.
+state "Ticket chưa có claim\nvà không còn dependency block" as Available
+state "Work claim · phiên Devin đã claim" as Claimed #DFF2E8
+state "Từ chối thao tác\nKhông đổi ticket hoặc claim" as Rejected #FBE8E8
+Tasks --> Available : Đọc lại ticket canonical
+Tasks --> Rejected : claim/dispatch bị dependency block\nhoặc dispatch gặp claim đang có
+Available --> Claimed : claim hoặc dispatch có quyền\nĐọc lại canonical ticket và claim
+note bottom of Claimed
+  Có thể tạo ticket kèm claim cho
+  phiên con đã tồn tại nếu có quyền.
+  Dispatch ticket hiện có tạo phiên mới.
+end note
+
+state "Inbox / Needs you · ask theo bot_id" as Inbox
+Inbox : Quyết định, quyền, PR cần review/merge, thông tin.
+Inbox : Có thể lưu dạng board ticket có card kind.
+Inbox : Phiên con dùng Inbox của Bot đã tạo nó.
+Inbox : Không dedupe liên Bot.
+state "Ask chưa xử lý" as Open {
+  state "Active" as Active
+  state "On hold" as Hold
+  [*] --> Active
+  Active -left-> Hold : Tạm giữ
+  Hold -right-> Active : Mở lại
+}
+state "Done" as Done #DFF2E8
+state "Canceled" as Canceled
+Inbox --> Open : Card đã được tạo có quyền
+Open --> Done : Ask đã xử lý
+Open --> Canceled : Ask bị hủy
+note bottom of Inbox
+  Reply không cấp grant, claim hay wake.
+  Card không đổi trạng thái Tasks hoặc PR.
+  GitHub là nguồn PR đóng/merge;
+  Inbox chỉ theo dõi và đọc lại auto-settle.
+end note
+Tasks -[hidden]right-> Inbox
+@enduml
+
+@startuml st-b8-review
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam linetype polyline
+skinparam state {
+  BackgroundColor #EDF5FC
+  BorderColor #7898B7
+  FontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+hide empty description
+title <size:24><b>B8 · Quyền bắt đầu và review PR</b></size>
+state "Chờ go để bắt đầu dây PR" as Wait
+state "Dây PR có go\nF1 đến B8" as Go
+state "PR hành vi / tương tác / host\nChờ review đúng head" as Review
+state "Head đã được duyệt\nPR còn cần các cổng merge khác" as Head
+state "B8 · Gói cuối chờ review" as Pack
+state "B8 · SHA gói cuối đã duyệt" as Approved #DFF2E8
+state "B8 merge theo cổng repository\nCó thể giữ trigger disabled" as Done #DFF2E8
+[*] --> Wait
+Wait -[#9A550A]-> Go : <b>Human H20</b> · repo owner cho go\n[ghi riêng, không suy từ H18]
+Go --> Review : Agent đưa PR cần review đúng head
+Review -[#9A550A]-> Head : <b>Human H20</b> · repo owner review PR/head cụ thể
+Head --> Pack : Agent tập hợp khi deps B8 đạt\nUnit/live/perf, bốn host, blind Eval,\nREADME, diagrams, blockers
+Pack -[#9A550A]-> Approved : <b>Human H18</b> · repo owner\nduyệt đúng SHA gói cuối
+Approved --> Pack : [thay đổi material]\nKiểm lại và duyệt lại
+Approved --> Done : [các điều kiện merge đều đạt] Không cấp H15/H16
+@enduml

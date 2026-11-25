@@ -1,0 +1,128 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+HIDE_STEREOTYPE()
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam ArrowFontSize 12
+skinparam packageTitleAlignment left
+skinparam packageStyle rectangle
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #94A7B9
+  FontColor #25445D
+}
+skinparam wrapWidth 235
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam linetype polyline
+skinparam shadowing false
+
+AddElementTag("human", $bgColor="#FFF0DA", $fontColor="#542F0B", $borderColor="#B56B21")
+AddElementTag("entry", $bgColor="#E7F2FC", $fontColor="#153653", $borderColor="#608CB3")
+AddElementTag("optin", $bgColor="#E3F4EF", $fontColor="#133C36", $borderColor="#629A8D")
+AddElementTag("internal", $bgColor="#EFEAF8", $fontColor="#38265B", $borderColor="#9178B2")
+AddElementTag("authority", $bgColor="#F2F5F8", $fontColor="#172F45", $borderColor="#899FB3")
+AddElementTag("wake", $bgColor="#F2EBFC", $fontColor="#3D255C", $borderColor="#8E6BAF")
+AddRelTag("decision", $textColor="#84450A", $lineColor="#AD641C", $lineThickness=2)
+AddRelTag("effect", $textColor="#204A6F", $lineColor="#32638D", $lineThickness=2)
+AddRelTag("ref", $textColor="#495C6D", $lineColor="#688095", $lineStyle=DashedLine())
+AddRelTag("wake", $textColor="#553482", $lineColor="#744AA4", $lineThickness=2)
+
+title <size:25><b>Harness v1 · Kiến trúc đích</b></size>\n<size:13>C4 kết hợp ngữ cảnh, khối kỹ thuật và host. Không phải kết quả pilot.</size>
+
+Person(owner, "Human · Người yêu cầu / chủ Harness", "Người yêu cầu, owner, quản trị project hoặc issuer Library đúng scope.", $tags="human")
+Person(accept, "Human · Người quyết định công việc", "Chủ spec/split, người có quyền tracker hoặc effect, operator đối soát và chủ nghiệm thu.", $tags="human")
+Person(operator, "Human · Chủ Bot / người vận hành / chủ repo", "Vai trò tách theo cổng. Respondent Inbox và quản trị ACL không kế thừa quyền của nhau.", $tags="human")
+
+package " " as host {
+  rectangle "<b>Agent / host</b>\nDevin · Pi · Claude Code · Codex" as hostLabel #EAF2F9
+  package " " as kit {
+    rectangle "<b>Harness Kit</b>\nSkills, CLI và hợp đồng cục bộ" as kitLabel #EAF2F9
+    Component(setup, "Setup / Evolve", "2 skill lõi mặc định", "harness-setup · Khám phá hai lượt và chốt bản Setup.\nharness-evolve · Đọc nền hiện có, chỉ xét delta.", $tags="entry")
+    Component(impl, "Implement", "Skill lõi mặc định", "harness-implement\nPrepare → publish → một effect.\nUnknown: đối soát đích gốc.", $tags="entry")
+    Component(lib, "Library", "Skill lõi mặc định", "harness-library\nĐọc theo store/scope/pin. Lưu không đồng nghĩa adoption.", $tags="entry")
+    Component(bot, "Inbox / Memory", "2 skill lõi opt-in", "bot-inbox · Ask và reply đúng revision.\nbot-memory · Rules theo từng bot_id và ACL.\nKhông shadow route native cùng ID.", $tags="optin")
+
+    Component(p1, "Discovery · Lượt 1", "7 sub-skill", "1  environment-discovery\n2  guidance-discovery\n3  capabilities-discovery\n4  agent-role-discovery\n5  coordination-discovery\n6  verification-discovery\n7  state-continuation-discovery", $tags="internal")
+    Component(p2, "Discovery · Lượt 2", "4 sub-skill", "Capabilities → skill-discovery\nCoordination → workflow-discovery\nCoordination → hooks-discovery\nCoordination → automation-discovery\nChỉ mở topic đã đủ điều kiện.", $tags="internal")
+    Component(over, "Override project-local", "3 binding riêng", "harness-project-to-spec → to-spec\nharness-project-to-tickets → to-tickets\nharness-project-implement → implement\nKhông shadow upstream hoặc tự publish/execute.", $tags="internal")
+    Component(checks, "Hợp đồng và công cụ", "Local CLI và kiểm nguồn", "prepare, publish, execute,\nselection, result, bot-setup\ncheck-stage-handoff chỉ kiểm shape.\nKit/Library CLI; check_kit, check_boundary,\nskill_budget và pytest.", $tags="entry")
+  }
+  Component(adapter, "Host adapter và qualification", "Resolve / inspect / apply / reconcile", "Kiểm exact ID, source, caller và ACL. Fallback phải chọn và kiểm riêng.\nB7a đăng ký; B7b prepare nháp; B7c cấu hình Bot disabled.\nB8 qualify worker, fence, dedupe và route. Devin là pilot đầu.", $tags="entry")
+  Component(release, "Dây PR / pilot / vận hành", "Điều phối", "Bot mới thêm qua Setup/Evolve vẫn disabled.\nPilot trước khi xét bật từng trigger.\nRebind sau drain/fence và đối soát. Binding mới vẫn disabled.", $tags="optin")
+}
+
+System_Ext(upstream, "mattpocock/skills", "6 prerequisite đã pin:\ngrilling, domain-modeling, writing-for-agents,\nto-spec, to-tickets, implement\nhandoff chỉ khi cần continuation.", $tags="authority")
+System_Ext(tracker, "Tracker Harness đã chọn", "Ticket/status canonical. Nơi cấp claim giữ assignment/epoch.\nLocal record phải được chọn, không tự fallback.", $tags="authority")
+System_Ext(tasks, "Devin Tasks board", "Assignee Human khác session claim.\nclaim và dispatch chặn khi còn dependency.\ndispatch chặn nếu ticket đã claim.\nBot vận hành không đồng nghĩa ACL private.", $tags="authority")
+System_Ext(product, "Tracker Product", "Sở hữu Product issues.\nKhông là đích publish của Harness.", $tags="authority")
+ContainerDb_Ext(sqlite, "harness-library dùng chung", "Library SQLite và Kit pin", "SQLite đích giữ saved, selection/history và grant theo scope.\nKit pin giữ catalog supplied và linked content.", $tags="authority")
+System_Ext(repo, "Đích Repo / GitHub", "Repo giữ assets/config, grant, revision và receipt của effect Repo.\nGitHub giữ PR/head và trạng thái đóng/merge canonical.", $tags="authority")
+System_Ext(secret, "Secret store", "Giữ bí mật. Handoff chỉ mang ref an toàn.", $tags="authority")
+
+System_Ext(autoA, "Automation daily-a", "Lịch đã duyệt · trigger-a\nRunner đã bind với bot-a.", $tags="wake")
+System_Ext(autoB, "Automation issue-b", "Sự kiện tích hợp đã duyệt · trigger-b\nRunner đã bind với bot-b.", $tags="wake")
+
+package " " as botA {
+  Container(a, "bots[] · Biên Bot A\nbot_id = bot-a", "Host/config và coordinator", "Role, contract, binding, grant, revision, effect receipt và checkpoint riêng.\nClaim + khóa dedupe bền trước ACK.", $tags="optin")
+  Container(aInbox, "Inbox / Needs you · A", "Ask/reply và disposition", "Phiên con của A dùng Inbox A.\nRoute gửi giữ delivery receipt riêng.", $tags="optin")
+  Container(aMem, "Memory · A", "Rules / ACL", "Đọc và sync theo ACL riêng.\nKhông giữ checkpoint tác động.", $tags="optin")
+}
+package " " as botB {
+  Container(b, "bots[] · Biên Bot B\nbot_id = bot-b", "Host/config và coordinator", "Role, contract, binding, grant, revision, effect receipt và checkpoint riêng.\nClaim + khóa dedupe bền trước ACK.", $tags="optin")
+  Container(bInbox, "Inbox / Needs you · B", "Ask/reply và disposition", "Phiên con của B dùng Inbox B.\nRoute gửi giữ delivery receipt riêng.", $tags="optin")
+  Container(bMem, "Memory · B", "Rules / ACL", "Đọc và sync theo ACL riêng.\nKhông giữ checkpoint tác động.", $tags="optin")
+}
+
+Rel_D(owner, setup, "H1 chọn đề xuất hi-i-m-devin / nêu yêu cầu khác\nH2 chốt scope, bản Setup hoặc delta Evolve\nH3 duyệt cài prerequisite thiếu\nH4 duyệt đăng ký override\nH19 cấp quyền bootstrap/ghi record, Glossary hoặc ADR", $tags="decision")
+Rel_D(owner, lib, "H10 issuer cấp/thu hồi grant tại SQLite đích", $tags="decision")
+Rel_D(accept, impl, "H5 duyệt spec trước to-tickets\nH6 chốt split thay đổi\nH7 cấp quyền publish Harness\nH8 cấp quyền execute một effect\nH9 xác nhận lần gửi non-atomic\nH13 can thiệp khi Unknown thiếu evidence\nH17 quyết định closure/writeback sau verify", $tags="decision")
+Rel_D(operator, bot, "H11 respondent trả lời Inbox đúng revision\nH12 chủ Memory/quản trị ACL duyệt đổi quyền\nH19 chủ đích cấp quyền gửi Inbox", $tags="decision")
+Rel_D(operator, release, "H14 duyệt rebind đúng Bot/scope sau drain/fence\nH15 cho phép effect pilot B8 đúng Bot/binding\nH16 duyệt đúng Bot/scope/trigger ID\nH18 duyệt PR cuối B8\nH19 cấp quyền cấu hình disabled đúng Bot/binding\nH20 cho go dây PR / duyệt PR/head cần review", $tags="decision")
+
+Rel_D(setup, p1, "Nạp từng nhánh cha", $tags="ref")
+Rel_R(p1, p2, "Parent đã chốt hướng", $tags="ref")
+Rel_D(impl, over, "Gọi exact binding", $tags="ref")
+Rel_D(p2, adapter, "Route discovery", $tags="ref")
+Rel_D(over, adapter, "Route project-local", $tags="ref")
+Rel_D(checks, adapter, "Handoff chỉ mang ref", $tags="ref")
+Rel_D(lib, adapter, "Selection / thao tác scope đã chọn", $tags="ref")
+Rel_D(bot, checks, "Binding opt-in theo bot_id", $tags="ref")
+Rel_D(release, adapter, "Pilot / vận hành trong quyền", $tags="ref")
+Rel_D(adapter, upstream, "Resolve prerequisite đã pin", $tags="ref")
+Rel_D(adapter, tracker, "Publish / đọc work và claim", $tags="effect")
+Rel_D(tracker, tasks, "Chỉ bind đúng board/namespace/role và ACL", $tags="ref")
+Rel_D(adapter, product, "Chỉ đọc Product ref", $tags="ref")
+Rel_D(adapter, sqlite, "Ghi có guard", $tags="effect")
+Rel_D(adapter, repo, "Effect Repo có grant", $tags="effect")
+Rel_D(adapter, secret, "Resolve ref qua route đã duyệt", $tags="ref")
+Rel_D(adapter, a, "Effect đúng bot-a", $tags="effect")
+Rel_D(adapter, b, "Effect đúng bot-b", $tags="effect")
+Rel_D(autoA, a, "target_bot_id = bot-a\nBinding hiện hành", $tags="wake")
+Rel_D(autoB, b, "target_bot_id = bot-b\nBinding hiện hành", $tags="wake")
+Rel_D(a, aInbox, "", $tags="effect")
+Rel_D(a, aMem, "", $tags="effect")
+Rel_D(b, bInbox, "", $tags="effect")
+Rel_D(b, bMem, "", $tags="effect")
+Rel_U(a, sqlite, "Selection theo scope A", $tags="ref")
+Rel_U(b, sqlite, "Selection theo scope B", $tags="ref")
+
+Lay_R(owner, accept)
+Lay_R(accept, operator)
+Lay_R(kitLabel, p1)
+Lay_R(hostLabel, adapter)
+Lay_R(setup, lib)
+Lay_R(lib, impl)
+Lay_R(impl, bot)
+Lay_R(p2, over)
+Lay_R(over, checks)
+Lay_R(bot, release)
+Lay_R(aInbox, aMem)
+Lay_R(bInbox, bMem)
+Lay_R(b, a)
+
+caption <color:#84450A><b>Cam</b> · Quyết định Human</color>     <color:#204A6F><b>Xanh</b> · Effect tại đích</color>     <color:#553482><b>Tím</b> · Wake chỉ từ automation</color>     <color:#495C6D><b>Nét đứt</b> · Gọi hoặc đọc ref</color>\nInbox: Active / On hold / Done / Canceled. Không thay Tasks hoặc GitHub, không dedupe ask xuyên Bot, không đánh thức Bot.\nReceipt delivery, ask/disposition Inbox và receipt effect là ba record riêng. Chỉ harness-library dùng chung giữa các Bot.
+footer Nguồn: arc42 Harness v1 §§3–8, H1–H20 · ADR-015 · RFC B7a–B8
+@enduml
