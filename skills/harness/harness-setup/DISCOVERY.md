@@ -28,16 +28,16 @@ extensions, not prerequisites.
    Glossary/ADR pointers, scope, active repo and host defaults. Keep drafts
    distinct. Use existing facts first; no runtime or incident data is needed
    for initial setup.
-2. Use [grilling][grilling] and [domain-modeling][domain] directly via the
-   approved host mechanism before asking the first question. Default to
-   invoking both for every node. Reuse a load only in the same context and
+2. [Verify the originals](ACTIVATION.md#verify-upstream-prerequisites) before
+   running the node. Use [grilling][grilling] and [domain-modeling][domain]
+   directly via the approved host mechanism before asking the first question.
+   Default to invoking both for every node. Reuse a load only in the same context and
    scope/revision if qualification shows unchanged outputs, isolation and
    node-specific questions. Never call the user-only `grill-with-docs`,
    `wayfinder` or `/handoff` on the user's behalf. If a required route is
-   blocked, name it and hold dependent discovery. In Setup, return to the
-   [prerequisite check](ACTIVATION.md#install-required-upstream-skills) for a
-   missing original. In Evolve, report what is needed without running Setup
-   or installing. Do not copy or emulate a blocked method.
+   blocked, name it and hold dependent discovery. Evolve reports what is
+   needed without running Setup or installing. Do not copy or emulate a
+   blocked method.
 3. Call `harness-library` internally with the current question, destination,
    store and scope. Search a few terms based on need, not translated node
    names. Open details and verify state only for viable candidates; reuse

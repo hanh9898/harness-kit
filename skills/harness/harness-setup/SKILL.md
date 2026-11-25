@@ -15,6 +15,11 @@ Select [the target profile and caller mode](FOUNDATION.md#target-profile-and-cal
 from the request and existing context before asking questions. Ordinary repo
 onboarding adds no Bot questions or opt-ins. A Bot workspace can be the only target.
 
+Choose Inspect, Advice or Apply from the request before probing prerequisites.
+Default to Inspect if the requested mode is unclear. Apply must be explicit.
+Inspect and Advice never install or activate anything, even with a prior install grant.
+Apply does not itself authorize writes.
+
 ## Phase A: settle the design
 
 1. Reconcile the [environment](ENVIRONMENT.md), active authority and prior
@@ -25,9 +30,8 @@ onboarding adds no Bot questions or opt-ins. A Bot workspace can be the only tar
    resources that could change the goal or its acceptance. Do not create a
    store for a read. Record the goal, acceptance and scope before the first
    node; lack of operational history does not block discovery.
-2. Check the original foundation methods and [install missing prerequisites
-   when authorized](ACTIVATION.md#install-required-upstream-skills) before
-   opening dependent discovery nodes. Follow the [discovery tree and node
+2. [Verify upstream prerequisites](ACTIVATION.md#verify-upstream-prerequisites)
+   before opening dependent discovery nodes. Follow the [discovery tree and node
    contract](DISCOVERY.md). In pass one, visit all seven branches in order
    without opening child domains. Start with Environment & authority: settle
    context boundaries, autonomy, where authorized setup records and Harness
@@ -52,17 +56,18 @@ onboarding adds no Bot questions or opt-ins. A Bot workspace can be the only tar
    and evidence of confirmation. Present a synthesis of choices, open and
    deferred items, proposed implementation tickets and draft Glossary/ADRs.
    Approval does not authorize activation or target writes. Run the scoped
-   `DesignReady` check; when advising only or blocked, return the design and
-   checkpoint without calling execution.
+   `DesignReady` check. In Inspect or Advice, or when blocked, return the
+   design and checkpoint without entering Phase B.
 
 ## Phase B: implement and verify
 
-1. [Check and install missing prerequisites for the selected routes when
-   authorized](ACTIVATION.md#install-required-upstream-skills) before authoring
-   their overrides. If the selected routes need overrides in an approved Devin
-   project, prepare and when authorized register the needed `to-spec`,
-   `to-tickets` and execution
-   overrides via [activation](ACTIVATION.md). Registration can use a separate
+Apply only. Require separate authority for each effect.
+
+1. [Verify upstream prerequisites](ACTIVATION.md#verify-upstream-prerequisites)
+   before authoring overrides. If the selected routes need overrides in an
+   approved Devin project, prepare the needed `to-spec`, `to-tickets` and
+   execution overrides and register them only when authorized. See
+   [activation](ACTIVATION.md). Registration can use a separate
    authorized bootstrap; it does not depend on an override that is not yet installed.
    Keep a small catalog with actual resolution and invocation evidence.
 2. Follow [v1 stage handoffs](RECORD-FORMAT.md#current-stage-handoffs) and invoke
