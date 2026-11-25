@@ -9,34 +9,44 @@ Report missing, unreadable and wrong-identity separately; block the dependent
 read until the original binding is recovered or an authorized rebind is
 verified. Only confirmed unconfigured scopes may read raw catalog provenance;
 do not create a store or report effective selection for those scopes.
+All six Library read commands reject WAL stores and hosts that cannot
+enforce a no-write SQLite open. Report the blocker. Do not checkpoint the
+store, change its permissions or reopen it as immutable.
 
 Resolve the skill's real directory; `library` and `kit` below mean the
 executables in `<skill-dir>/../../../kit/scripts/`, not assumed PATH entries.
-For a verified binding, use `library --store <selected-path> --require-existing-store search <term>`:
+Resolve `<pinned-catalog>` to the absolute `kit/` directory at the consumer's
+verified distribution revision. Pass `--kit-dir <pinned-catalog>` to Library
+commands that read supplied resources, even when the bundle is the verified
+pin. If you cannot verify the [pin](../../../kit/LIBRARY.md#pin-the-consumer-catalog),
+stop mixed search and supplied reads. Do not retry with the bundled catalog.
+Exact saved-resource reads need only the verified store.
+
+For a verified binding, use `library --store <selected-path> --require-existing-store search <term> --kit-dir <pinned-catalog>`:
 text matching is literal, not semantic. Narrow queries on truncation; an
 empty result proves nothing beyond that scope. Open only useful candidates via
-`kit show` for supplied resources or `library show` for saved resources.
-Use targeted `kit list <group>`, `kit list rules <topic>`, `kit list P` or
-`kit list delegation` for summaries where relevant. The group index classifies
-resources, not discovery nodes. Raw kit output is provenance, not evidence
-of current selection.
+`kit --dir <pinned-catalog> show <id>` for supplied resources or
+`library --store <selected-path> show <id>` for saved resources. Check the
+supplied hit's retrieval path against the pin first. Pass the same `--dir`
+to targeted lists where useful. The group index classifies resources, not
+discovery nodes. Raw kit output is provenance, not current selection evidence.
 
-For [Bot role templates](../../../kit/README.md#bot-role-templates), look up
-the exact role by slug or use the literal query `bot role template` with
-`--limit 30`. Open only the selected role section and its portable contract
+For Bot role templates, use the pinned commands above. Look up the exact
+role by slug or use the literal query `bot role template` with `--limit 30`.
+The kit README's role examples use the bundled default. Do not copy them
+for a pinned lookup. Open only the selected role section and its portable contract
 as needed, from the pinned distribution revision. The selection snapshot
 covers the catalog row, not the linked instructions. Treat both pieces as
 guidance, not installed Bots, grants, schedules or proof of host readiness.
 
-For a supplied resource use `library --store <selected-path> --require-existing-store selection <id> --source supplied`.
-If the pinned distribution is not the bundled one, add
-`--kit-dir <pinned-catalog>` pointing to its verified kit directory. Do not
-use the bundled catalog as a fallback. Use `--source saved` for saved resources.
+For a supplied resource use `library --store <selected-path> --require-existing-store selection <id> --source supplied --kit-dir <pinned-catalog>`.
+Use `--source saved` for saved resources; they do not use a catalog.
 Check effective state, source, exact ID and revision (content or catalog
-revision and selection revision as applicable); use the same strict flag with
-`selection-history` as needed. Revision 0 and empty history are valid only
-after a ready-store read. The same ID in `supplied` and `saved` means distinct
-resources.
+revision and selection revision as applicable). For supplied history use
+`library --store <selected-path> --require-existing-store selection-history <id> --source supplied --kit-dir <pinned-catalog>`.
+History can outlive a catalog. Check the pin independently. Revision 0 and
+empty history are valid only after a ready-store read. The same ID in
+`supplied` and `saved` means distinct resources.
 
 ## Selection handoff
 
@@ -52,13 +62,17 @@ for the readback and provenance plus `lineage_ref` or `hold_ref` when relevant.
 | `supplied` | Use the revision of the catalog actually read as `distribution_revision`. For an available snapshot from that same read, use `current_snapshot.sha256` as `digest`. |
 | `saved` | Use `current_snapshot.revision` as `content_revision`; omit it if unavailable. A saved snapshot does not require a digest. |
 
-Keep selection revision separate from content/distribution revision. A supplied
-CSV snapshot covers the row, not linked content; pin the template and linked
-content to the same distribution revision. If store, scope, revision or
-identity is unverified, return the blocker rather than guessing a handoff.
-A possible rename is a hold, not proof of lineage.
+Keep selection revision separate from content/distribution revision. Check
+owner and scope against the actual consumer before using any stored record.
+Two Bots may share a Library, but each needs its own scoped selection and
+adoption evidence. A supplied CSV snapshot covers the row, not linked
+content. Pin the template and linked content to the same distribution
+revision. If store, scope, revision or identity is unverified, return the
+blocker rather than guessing a handoff. A possible rename is a hold, not
+proof of lineage.
 
-The consumer must reread the live selection before application. Disabled,
+The consumer must reread the live selection with the same store, scope and pin
+before an independently authorized application. Disabled,
 unavailable or unreconciled choices do not confer permission to use raw catalog
 content. Return source evidence and its limits, not approval, applied state
 or a claim about the current external consumer inventory.

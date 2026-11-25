@@ -315,11 +315,14 @@ def test_rename_hold_lists_ambiguous_candidates_without_choosing(tmp_path):
 
 
 def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
+    supplied(tmp_path)
+    update_supplied(tmp_path)
     skill = ROOT / 'skills/harness/harness-library/READ.md'
     template, = re.findall(r'`(library (?:[^`\n]+ )?selection [^`\n]+)`',
                            skill.read_text(encoding='utf-8'))
     store = tmp_path / 'selected library.sqlite3'
-    command = template.replace('<selected-path>', shlex.quote(str(store))).replace('<id>', REREAD)
+    command = (template.replace('<selected-path>', shlex.quote(str(store))).replace('<id>', REREAD)
+               .replace('<pinned-catalog>', shlex.quote(str(tmp_path / 'kit'))))
     monkeypatch.setenv('PATH', str(CLI.parent), prepend=os.pathsep)
 
     missing = subprocess.run(command, shell=True, capture_output=True, text=True)
@@ -331,7 +334,150 @@ def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
     assert result.returncode == 0, result.stderr
-    assert json.loads(result.stdout)['effective'] is True
+    selected = json.loads(result.stdout)
+    assert selected['effective'] is True
+    assert selected['current_snapshot']['resource']['name'] == 'Updated hook policy'
+
+
+def test_catalog_pin_controls_search_detail_lifecycle_and_grant(tmp_path):
+    upgrade_catalog(tmp_path, keep_legacy_id=True)
+    rename_supplied(tmp_path, 'H14', 'H99')
+    disabled = change(tmp_path, 'disable', 0, id='H99')
+    assert disabled.returncode == 0, disabled.stderr
+    upgrade_catalog(tmp_path)
+    write_piece_aliases(tmp_path / 'kit', ('H99', REREAD))
+    catalog = tmp_path / 'pinned catalog'
+    (tmp_path / 'kit').rename(catalog)
+    kit = CLI.with_name('kit')
+    strict = ('--require-existing-store',)
+    selector = (REREAD, '--source', 'supplied')
+    pin = ('--kit-dir', catalog)
+
+    def read(*args):
+        result = invoke(tmp_path, *strict, *args)
+        assert result.returncode == 0, result.stderr
+        return json.loads(result.stdout)
+
+    bundled = read('selection', *selector)
+    pinned = read('selection', *selector, *pin)
+    assert (bundled['effective'], bundled['revision']) == (True, 0)
+    assert (pinned['effective'], pinned['revision']) == (False, 1)
+    assert pinned['id'] == bundled['id'] == REREAD
+    assert pinned['current_snapshot']['sha256'] != bundled['current_snapshot']['sha256']
+    assert read('selection-history', *selector) == []
+    history = read('selection-history', *selector, *pin)
+    assert [record['id'] for record in history] == ['H99']
+
+    default_hit, = read('search', REREAD)['matches']
+    assert default_hit['name'] == bundled['current_snapshot']['resource']['name']
+    hidden = read('search', REREAD, *pin)
+    assert hidden['matches'] == [] and hidden['excluded'] == 1
+    hit, = read('search', REREAD, *pin, '--include-disabled')['matches']
+    assert not hit['enabled']
+    command, *args = shlex.split(hit['retrieve'])
+    assert command == 'kit'
+    assert args == ['--dir', str(catalog), 'show', REREAD]
+    detail = run(kit, *args)
+    assert detail.returncode == 0, detail.stderr
+    assert pinned['current_snapshot']['resource']['detail'] in detail.stdout
+    assert bundled['current_snapshot']['resource']['detail'] not in detail.stdout
+
+    typo = catalog.with_name('pinnned catalog')
+    for command in [('search', REREAD), ('selection', *selector)]:
+        failed = invoke(tmp_path, *strict, *command, '--kit-dir', typo)
+        assert (failed.returncode, failed.stdout) == (2, '')
+        assert str(typo) in failed.stderr
+    failed = run(kit, '--dir', typo, 'show', REREAD)
+    assert (failed.returncode, failed.stdout) == (2, '')
+    assert str(typo) in failed.stderr
+
+    request = ('--input', decision(tmp_path))
+    issue = ('grant-write', 'restore', *selector, *request,
+             '--expect-revision', 1, '--ttl-seconds', 60)
+    failed = invoke(tmp_path, *issue)
+    assert (failed.returncode, failed.stdout) == (2, '')
+    assert 'Selection revision conflict' in failed.stderr
+    granted = invoke(tmp_path, *issue, *pin)
+    assert granted.returncode == 0, granted.stderr
+    commit = ('restore', *selector, *request, '--expect-selection-revision', 1,
+              '--write-grant', json.loads(granted.stdout)['write_grant'])
+    failed = invoke(tmp_path, *commit)
+    assert (failed.returncode, failed.stdout) == (2, '')
+    assert 'Selection revision conflict' in failed.stderr
+    assert read('selection-history', *selector, *pin) == history
+
+    committed = invoke(tmp_path, *commit, *pin)
+    assert committed.returncode == 0, committed.stderr
+    restored = read('selection', *selector, *pin)
+    assert (restored['effective'], restored['revision']) == (True, 2)
+    assert restored['record']['snapshot'] == pinned['current_snapshot']
+    assert read('selection-history', *selector, *pin) == [*history, restored['record']]
+    assert read('selection', *selector) == bundled
+
+
+def test_two_bots_cannot_reuse_a_scoped_decision_for_the_same_supplied_resource(tmp_path):
+    supplied(tmp_path)
+    pin = ('--kit-dir', tmp_path / 'kit')
+    store = tmp_path / 'library.sqlite3'
+    initialize_empty_store(store)
+    bot_a, bot_b = tmp_path / 'bot-a', tmp_path / 'bot-b'
+    consumers = {}
+    for bot in (bot_a, bot_b):
+        bot.mkdir()
+        project = bot / 'active-config'
+        consumers[project] = f'Independently adopted content for {bot.name}\n'
+        project.write_text(consumers[project], encoding='utf-8')
+    request_a = decision(bot_a, scope=f'project:{bot_a}')
+    request_b = decision(bot_b, scope=f'project:{bot_b}')
+    selector = (REREAD, '--source', 'supplied', *pin)
+
+    def read_as(bot, command, target=selector):
+        result = subprocess.run([str(CLI), '--store', str(store), '--require-existing-store',
+                                 command, *map(str, target)],
+                                cwd=bot, capture_output=True, text=True)
+        assert result.returncode == 0, result.stderr
+        return json.loads(result.stdout)
+
+    def grant_disable(target, request):
+        issued = invoke(tmp_path, 'grant-write', 'disable', *target, '--input', request,
+                        '--expect-revision', 0, '--ttl-seconds', 60)
+        assert issued.returncode == 0, issued.stderr
+        return json.loads(issued.stdout)['write_grant']
+
+    assert read_as(bot_a, 'selection')['record'] is None
+    assert read_as(bot_b, 'selection')['record'] is None
+    grant_a = grant_disable(selector, request_a)
+    other = ('evidence-labels', '--source', 'supplied', *pin)
+    grant_b = grant_disable(other, request_b)
+    commit = ('disable', *selector, '--expect-selection-revision', 0,
+              '--write-grant', grant_a)
+    denied = invoke(tmp_path, *commit, '--input', request_b)
+    assert (denied.returncode, denied.stdout) == (2, '')
+    assert 'No current write grant' in denied.stderr
+    assert read_as(bot_b, 'selection-history') == []
+
+    committed = invoke(tmp_path, *commit, '--input', request_a)
+    assert committed.returncode == 0, committed.stderr
+    selected_a = read_as(bot_a, 'selection')
+    observed_b = read_as(bot_b, 'selection')
+    assert observed_b == selected_a
+    assert (selected_a['revision'], selected_a['effective']) == (1, False)
+    assert observed_b['record']['scope'] == f'project:{bot_a}'
+    assert observed_b['record']['scope'] != f'project:{bot_b}'
+    assert 'applied consumers remain unchanged' in observed_b['consumption']
+
+    denied = invoke(tmp_path, 'grant-write', 'restore', *selector, '--input', request_b,
+                    '--expect-revision', observed_b['revision'], '--ttl-seconds', 60)
+    assert (denied.returncode, denied.stdout) == (2, '')
+    assert 'Changing selection scope' in denied.stderr
+    committed = invoke(tmp_path, 'disable', *other, '--expect-selection-revision', 0,
+                       '--input', request_b, '--write-grant', grant_b)
+    assert committed.returncode == 0, committed.stderr
+    selected_b = read_as(bot_b, 'selection', other)
+    assert (selected_b['revision'], selected_b['effective']) == (1, False)
+    assert selected_b['record']['scope'] == f'project:{bot_b}'
+    assert read_as(bot_b, 'selection-history') == [selected_a['record']]
+    assert {project: project.read_text(encoding='utf-8') for project in consumers} == consumers
 
 
 def test_exclusion_survives_supplied_update_and_explicit_restore_preserves_provenance(tmp_path):

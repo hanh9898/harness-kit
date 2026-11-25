@@ -14,47 +14,56 @@ Do not reinstall to resolve an unverified source.
 Use the [adapter runbook](../../../kit/HOST-ADAPTERS.md) only for selected host
 capabilities. Do not install same-ID portable Inbox or Memory over native Devin.
 
+## Verify upstream prerequisites
+
+Verify the originals `grilling` and `domain-modeling` before dependent discovery.
+Before authoring a selected override, verify `writing-for-agents` and that
+override's original: `to-spec`, `to-tickets` or `implement`. Skip originals
+for unselected overrides. Check extra methods only where used.
+Use the upstream originals, not vendored copies.
+
+Check exact ID, source, revision, caller and invocation policy on the consuming
+host and project. Probe each required route once per unchanged scope and reuse
+the result until the host, project, caller, source, revision or policy changes.
+Do not confuse a route probe with a node's use of the method. For user-only
+originals, inspect source and policy if permitted. Never invoke them on the
+user's behalf or count source inspection as invocation.
+
+An ambiguous result, wrong source or wrong caller, denied invocation or pending
+load is blocked, not missing. Re-probe a pending load only after the host's
+skill discovery refreshes. If a required method cannot be verified, name it,
+hold dependent work and continue independent authorized work. For Setup, follow
+the [install route](#install-required-upstream-skills) only in Apply and only for
+confirmed missing originals. Inspect and Advice report blockers without installing.
+
 ## Install required upstream skills
 
-1. On the host that will use them, check the original `grilling` and
-   `domain-modeling` before discovery. Before authoring overrides, check
-   `writing-for-agents` (unless a qualified replacement is selected), the
-   originals for the needed `to-spec`, `to-tickets`, `implement` or
-   `implement-spec` routes, and any methods those routes actually require.
-   Check exact IDs, source and invocation policy; reuse verified originals.
-   An ambiguous or disallowed route is not a missing installation.
-2. For missing originals, choose one install path for the actual host from
-   [upstream's installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
-   Prefer the documented managed route where supported and in scope. For Devin
-   use the project root and an explicit `--skill` list of missing, required
-   IDs. For example, when both discovery methods are missing:
+1. Confirm Setup is in Apply before entering this route. Present one scoped
+   install plan from the [upstream installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
+   Require a fresh, explicit project administrator grant (H3) for this Apply.
+   Bind the grant to the caller, host, project, exact missing IDs, installer
+   version and upstream revision, command, destinations and lockfile effects.
+   Without a matching grant, leave configuration unchanged and report the
+   blocked methods and next action. Apply the [write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation),
+   including real-time confirmation for a permitted non-atomic send.
+2. Check bundled skills and all proposed writes before running the installer.
+   In Devin, use the target project root, `.devin/skills/` and `skills-lock.json`.
+   Never install globally, use two install routes, or replace an existing source
+   through this gate. With the approved installer version and upstream source
+   pinned to its approved revision, run this only if both IDs are missing:
 
    ```sh
-   npx skills@latest add mattpocock/skills -a devin --skill grilling domain-modeling
+   npx "skills@$INSTALLER_VERSION" add "$MATT_REPO_AT_PIN" -a devin --skill grilling domain-modeling
    ```
 
-   Do not use `--global` for the Devin pilot. Check all destinations and side
-   effects, including bundled skills and installer metadata (on Devin, check
-   `.devin/skills/` and `skills-lock.json`). Do not install the same skill via
-   two routes or replace an existing source without authorization.
-3. Before running the installer, require explicit, current authority for
-   that host, command, scope and effects. If missing, present the exact plan
-   and request approval; selecting or invoking Setup is not permission.
-   Apply the [write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation),
-   including real-time confirmation for a permitted non-atomic send.
-   Run only within the grant; otherwise leave configuration unchanged and
-   record the blocked methods and next action. If the host requires the user
-   or an admin to install, hand them the exact approved route. Include
-   `setup-matt-pocock-skills` as upstream directs when per-repo configuration
-   is needed and covered by the install grant; it does not gate discovery.
-   The user runs that helper, with separate authorization for its writes.
-4. After installation, read back the installed IDs and check their resolved
-   source/path and revision or digest in the intended project. For
-   agent-callable methods, verify loading through the permitted host route;
-   for user-only originals, inspect their source and policy without invoking
-   them. If native loading requires a reload or new session, or the install
-   fails or is uncertain, hold dependent work until verified and continue
-   independent authorized work. Reconcile uncertain effects before retrying.
+   Pass only the confirmed missing IDs in scope. If the host requires a user or
+   admin to install, give them the exact plan. The user runs
+   `setup-matt-pocock-skills` only if per-repo configuration is needed and
+   separately authorized. It is not a discovery prerequisite.
+3. Read back the lockfile, installed IDs, resolved source/path, revision or
+   digest, caller and invocation policy in the intended project. Verify host loading
+   for agent-callable methods. If loading is pending or the install fails or
+   is uncertain, hold dependent work until verified. Reconcile before retrying.
    Installation alone does not verify an override.
 
 ## Register the v1 implementation overrides on Devin
