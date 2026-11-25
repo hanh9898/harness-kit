@@ -145,8 +145,9 @@ records; otherwise an independently authorized new instance needs scope
 separation or a stopped old instance. Never copy secrets, grants, transcripts,
 or schedules. Do not allow two hosts to send effects for the same scope.
 
-After applying and reading back the changed Bot configuration, hand the
-operator one [`bot-setup`](../../../kit/STAGE-CONTRACTS.md) v1. Reference the
+After applying and reading back the changed Bot configuration, hand the operator
+one [`bot-setup`](../../../kit/STAGE-CONTRACTS.md#setup-or-evolve--bot-operator-bot-setup)
+v1. Reference the
 observed instance, scope, adapter and configuration, the pinned template and
 contract, accessible evidence and the capability IDs actually read back as
 disabled. If readback is incomplete, report the blocker; repo-only and
