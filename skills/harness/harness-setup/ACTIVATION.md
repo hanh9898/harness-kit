@@ -16,7 +16,8 @@ originals, inspect source and policy if permitted. Never invoke them on the
 user's behalf or count source inspection as invocation.
 
 An ambiguous result, wrong source or wrong caller, denied invocation or pending
-load is blocked, not missing. If a required method cannot be verified, name it,
+load is blocked, not missing. Re-probe a pending load only after the host's
+skill discovery refreshes. If a required method cannot be verified, name it,
 hold dependent work and continue independent authorized work. For Setup, follow
 the [install route](#install-required-upstream-skills) only in Apply and only for
 confirmed missing originals. Inspect and Advice report blockers without installing.
