@@ -40,10 +40,13 @@ transaction is not a sufficient automatic boundary.
    caller uses `grant-write <operation> <id> --source <source> --input <file> --expect-revision <rev> --ttl-seconds <ttl>`
    on the same `--store`. Use `saved` for content writes; use the actual
    source and selection revision for exclusion/restoration. Use a short TTL.
+   Issuance validates the request and compares the live revision before enabling
+   guarding or replacing a grant. On conflict, reread content or selection
+   history and reconcile before reissuing. Rejection leaves existing grants intact.
 2. Pass the returned `write_grant` ID with `--write-grant` to the exact
    mutation with unchanged input bytes, store, source, resource and revision.
-   For supplied resources use the verified catalog; the grant does not bind
-   `--kit-dir` or the CLI revision.
+   For supplied resources use the same verified `--kit-dir` at issuance and
+   mutation; the grant does not bind the catalog or CLI revision.
    The mutation uses `--expect-selection-revision` for selection and
    `--expect-revision` for content. A grant is single-use; a rejection does
    not authorize a retry, a different input, or a downgrade to an unguarded store.
