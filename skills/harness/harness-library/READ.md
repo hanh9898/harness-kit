@@ -9,6 +9,9 @@ Report missing, unreadable and wrong-identity separately; block the dependent
 read until the original binding is recovered or an authorized rebind is
 verified. Only confirmed unconfigured scopes may read raw catalog provenance;
 do not create a store or report effective selection for those scopes.
+All six Library read commands reject WAL stores and hosts that cannot
+enforce a no-write SQLite open. Report the blocker. Do not checkpoint the
+store, change its permissions or reopen it as immutable.
 
 Resolve the skill's real directory; `library` and `kit` below mean the
 executables in `<skill-dir>/../../../kit/scripts/`, not assumed PATH entries.

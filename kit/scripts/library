@@ -8,6 +8,7 @@ import csv
 import difflib
 import hashlib
 import json
+import os
 import re
 import shlex
 import sqlite3
@@ -21,6 +22,7 @@ from pathlib import Path
 from stat import S_ISREG
 from uuid import uuid4
 
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from piece_ids import PieceAliases
 sys.path.pop(0)
@@ -435,7 +437,7 @@ def resource_snapshot(db, kit_dir, source, identity, catalog):
         raise ValueError("Ambiguous supplied identity; reconcile the distribution before changing selection.")
     if not hits and re.fullmatch(r"P[1-9][0-9]*|axis[1-4]|step[1-7]|combine", identity):
         filename = "patterns.md" if identity.startswith("P") else "delegation.md"
-        result = subprocess.run([sys.executable, "-I", str(Path(__file__).with_name("kit")),
+        result = subprocess.run([sys.executable, "-IB", str(Path(__file__).with_name("kit")),
                                  "--dir", str(kit_dir), "show", identity], capture_output=True, text=True)
         if result.returncode == MARKDOWN_ENTRY_NOT_FOUND:
             return None
@@ -484,43 +486,75 @@ def store_exists(store):
 
 
 class StoreReadError(ValueError):
-    def __init__(self, state, store):
-        super().__init__(f"Store is {state}: {store}")
+    def __init__(self, state, store, reason=""):
+        super().__init__(f"Store is {state}: {store}" + (f" ({reason})" if reason else ""))
 
 
-def strict_read_target(store):
+def read_target(store):
     try:
         target = store.resolve(strict=True)
-        if not S_ISREG(target.stat().st_mode):
-            raise StoreReadError("unreadable", store)
-        with target.open("rb") as stream:
+        fd = os.open(target, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0))
+        with os.fdopen(fd, "rb") as stream:
+            stat = os.fstat(stream.fileno())
+            if not S_ISREG(stat.st_mode):
+                raise StoreReadError("unreadable", store)
             header = stream.read(100)
     except FileNotFoundError:
         raise StoreReadError("missing", store) from None
     except (OSError, RuntimeError):
         raise StoreReadError("unreadable", store) from None
-    # Even a read-only WAL connection can create or update SQLite sidecars.
     if len(header) != 100 or not header.startswith(b"SQLite format 3\0") or header[18:20] != b"\x01\x01":
         raise StoreReadError("unreadable", store)
-    return target
+    return target, stat
+
+
+def deny_filesystem_writes(store):
+    """Apply an empty Landlock allowlist to write operations in this CLI process."""
+    import ctypes
+
+    if (sys.platform == "linux" and os.uname().machine in ("x86_64", "aarch64")
+            and ctypes.sizeof(ctypes.c_void_p) == 8):
+        libc = ctypes.CDLL(None)
+        create_ruleset, restrict_self = 444, 446
+        abi = libc.syscall(create_ruleset, None, ctypes.c_size_t(0), 1)
+        if abi >= 3:
+            # Through LANDLOCK_ACCESS_FS_TRUNCATE, excluding execute and reads.
+            write_access = ctypes.c_uint64(((1 << 15) - 1) & ~((1 << 0) | (1 << 2) | (1 << 3)))
+            ruleset = libc.syscall(create_ruleset, ctypes.byref(write_access), ctypes.sizeof(write_access), 0)
+            if ruleset >= 0:
+                try:
+                    pr_set_no_new_privs = 38
+                    if (libc.prctl(pr_set_no_new_privs, 1, 0, 0, 0) == 0
+                            and libc.syscall(restrict_self, ruleset, 0) == 0):
+                        return
+                finally:
+                    os.close(ruleset)
+    raise StoreReadError("unreadable", store, "cannot enforce a no-write SQLite open on this host")
 
 
 @contextmanager
 def read_store(store, *, require_existing_store):
-    if require_existing_store:
-        target = strict_read_target(store)
-    elif store_exists(store):
-        target = store.resolve()
-    else:
+    if not require_existing_store and not store_exists(store):
         yield None
         return
+    target, stat = read_target(store)
+    deny_filesystem_writes(store)
     try:
         with closing(sqlite3.connect(target.as_uri() + "?mode=ro", uri=True)) as db:
+            try:
+                current = store.stat()
+            except OSError:
+                raise StoreReadError("unreadable", store) from None
+            if current.st_size < 100 or not os.path.samestat(stat, current):
+                raise StoreReadError("unreadable", store)
+            db.execute("PRAGMA temp_store=MEMORY")
+            db.execute("BEGIN")
+            db.execute("SELECT name FROM main.sqlite_master LIMIT 1").fetchone()
+            if db.execute("PRAGMA main.journal_mode").fetchone() != ("delete",):
+                raise StoreReadError("unreadable", store)
             yield db
     except sqlite3.Error:
-        if require_existing_store:
-            raise StoreReadError("unreadable", store) from None
-        raise
+        raise StoreReadError("unreadable", store) from None
 
 
 def selection_result(db, kit_dir, source, identity, history):
@@ -618,7 +652,7 @@ def change_selection(args):
         consume_write_grant(db, args, args.source, args.id, expected, request_bytes)
         db.execute("INSERT INTO selection_revisions VALUES (?, ?, ?, ?)",
                    (args.source, storage_id, record["revision"], payload))
-    return read_selection(args.store, args.kit_dir, args.source, args.id)
+        return selection_result(db, args.kit_dir, args.source, args.id, history=False)
 
 
 def search(store, kit_dir, query, limit, include_disabled=False, *, require_existing_store=False):
@@ -723,8 +757,13 @@ def main():
         elif args.command == "revoke-write":
             result = revoke_write(args)
         elif args.command in ("show", "history", "compare"):
-            with sqlite3.connect(args.store.resolve().as_uri() + "?mode=ro", uri=True) as db:
-                row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (args.id,)).fetchone()
+            with read_store(args.store, require_existing_store=True) as db:
+                row = None
+                if has_table(db, "revisions"):
+                    row = db.execute(
+                        "SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1",
+                        (args.id,),
+                    ).fetchone()
                 if row is None:
                     raise ValueError("Resource not found; inspect the intended store and identity.")
                 if args.command == "compare":
