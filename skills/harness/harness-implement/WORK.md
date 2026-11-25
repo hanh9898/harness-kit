@@ -18,7 +18,7 @@ Check both artifacts for compatibility before resolving any drafting route, incl
 
 - **Spec:** describe the problem, target behavior, protected scope, design choices and checks through agreed public seams. Confirm only missing details that do not reopen the decision. The spec does not replace an ADR or decision.
 - **Tickets:** each implementation ticket cites one decision/revision and its spec, has a target and acceptance check, and states real dependencies. One small spec and one ticket can be enough. Split into independently checkable slices; for a mechanical migration, stage compatibility, migrate, then remove the old path. State any checks that require the integrated result.
-- Return compatible artifact references or in-session drafts, plus unresolved points. Persist drafts only where a separate grant allows it. Do not pass posting credentials or effect authority to draft methods. Confirm any changed split before publishing.
+- Return compatible artifact references or in-session drafts, plus unresolved points. Persist drafts only where a separate grant allows it. Do not pass posting credentials or effect authority to draft methods. Resolve material split changes at [publication](#publish-or-update).
 
 ### Spec approval (H5)
 
@@ -37,13 +37,26 @@ For `AwaitSpecApproval`, return the spec reference, revision, basis, scope, and 
 
 ## Publish or update
 
+Direct publish, v1 handoffs and legacy records use the same gate. Preflight is read-only; no step below authorizes a write on its own.
+
 Keep three destinations distinct: **Harness work records**, **product references** and **effect targets**. Harness records own work on agent behavior, skills, rules, hooks and workflow, even in a product repository. Product feature or bug work stays in its own workflow; read a related product issue only with read authority and pass its full URL only when disclosure is allowed. Do not create, sync, update, change status or close a product issue in this flow; separate product authorization belongs to the product workflow.
 
-Reopen the exact draft revision. Resolve the tracker instance, namespace and Harness role, and validate the grant for this exact action before each write. Two issue spaces may share a provider, but labels, views and filtered boards of the same issue set are not separation. Do not inherit the target from the checkout, product link, upstream defaults or orchestration board. A wrong, missing, shared, ambiguous or unpinnable namespace blocks the write. Use a permitted local Harness record only if it is the selected target, not as a fallback for a failed tracker write. Apply the write gate below before publishing, status changes and closure as well as execution.
+1. Reopen the current draft at its authoritative source. Match the requested draft reference and revision. Compare its split with the current authoritative decision. Changes to ownership, acceptance, dependencies, scope or impact are material. An unchanged split may reuse the current decision if its basis and scope still match. If the basis has changed or evidence cannot be opened, hold the draft rather than infer a match.
+2. **H6: split approval.** For a material change, verify a current decision by the authorized decision owner at the authoritative source. It must cover the exact draft reference and revision, material diff, decision basis and scope, including acceptance and dependency or independence changes. General assent, ticket status, an Inbox card or a publish grant is not split approval. H6 does not replace H5 or H7.
+3. **H7: publish authority.** Resolve the selected target's exact instance, namespace and Harness role at the destination, not from the handoff alone. Two issue spaces may share a provider, but labels, views and filtered boards of the same issue set are not separation. Do not inherit the target from the checkout, product link, upstream defaults or orchestration board. A wrong, missing, shared, ambiguous or unpinnable namespace blocks the write. For a selected local Harness destination, use the local record's own instance, namespace and role; require durable, receiver-readable storage at that locator. Never switch to Product or fall back to local after a tracker error.
+4. Resolve the live grant for the exact draft revision, publish or update action, payload and selected destination. Check prerequisites and apply the [write boundary](#write-boundary-and-reconciliation) before each send, including revision and revocation checks. Recheck the draft, split approval and target binding before sending; a changed premise stops publication.
 
-Check prerequisites and deduplicate at the authoritative write boundary. In the exact Harness namespace, look up the stable `work_id` and also search by node, question and intended outcome, including legacy records without a `work_id`. An ID hit must match all three; a semantic hit with a different recorded `work_id` is also a conflict. Reuse only a single compatible ticket after readback, without changing its identity. If the keys disagree, multiple candidates match or the lookup is incomplete, stop; only create when both checks rule out an existing ticket. Update an existing record only if the requested action and grant cover that revision.
+| Condition | Outcome |
+| --- | --- |
+| Draft revision changed | Keep the draft; do not publish. |
+| Material split with missing, mismatched or revoked owner approval | Keep the draft; do not publish. |
+| Product role or mismatched Harness locator | Keep the draft; do not write to any destination. |
+| Missing, stale, revoked or mismatched publish grant | Keep the draft; do not publish. |
+| Timeout after send | Record `Unknown`; reconcile at the same destination without resending. |
 
-Publish prerequisites first; link dependencies by stable Harness IDs. Product predecessors are read-only references, not tracker links that update the other side. Return canonical `ticket_ref` only after reading back the exact destination, ID, revision, content, links and state. A local ticket is canonical only if it is durable in the selected, authorized location and readable by the receiving session.
+Deduplicate at the authoritative write boundary. In the exact Harness namespace, look up the stable `work_id` once and search by node, question and intended outcome, including legacy records without a `work_id`. An ID hit must match all three; a semantic hit with a different recorded `work_id` is also a conflict. Reuse only a single compatible ticket after readback, without changing its identity. If the keys disagree, multiple candidates match or the lookup is incomplete, stop; only create when both checks rule out an existing ticket. Update an existing record only if the requested action and grant cover that revision.
+
+Publish prerequisites first under their own approvals and grants; link dependencies by stable Harness IDs. Product predecessors are read-only references, not tracker links that update the other side. Return canonical `ticket_ref` only after reading back the exact destination, ID, revision, content, links and state. Resolve an `Unknown` attempt by its effect or request ID and stable `work_id` at the same destination. The write boundary also applies to status changes and closure.
 
 ## Dispatch and integrate
 
