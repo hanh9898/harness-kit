@@ -3,7 +3,8 @@
 
   skill_budget.py [--root DIR] [--dir REL ...] [--top N] [--json] [--strict] [--max-total N]
 
-Defaults to .claude/skills and .agents/skills under --root; root defaults to the current directory.
+Defaults to .claude/skills and .agents/skills under --root, or bundled skills/ when neither exists.
+Root defaults to the current directory.
 Print total characters, estimated tokens (characters / 4), per-skill rows in descending order, and folders
 whose name differs from the folder. Defaults to warnings with exit 0; --strict exits 1 for warnings (
 name/folder mismatches, missing descriptions, unreadable SKILL.md, or totals above --max-total).
@@ -164,10 +165,12 @@ def main(argv=None):
     a = ap.parse_args(argv)
 
     root = Path(a.root)
-    dirs = a.dir or DEFAULT_DIRS
     if not root.is_dir():
         print(f"ERROR: --root is not a directory: {a.root}. Next step: supply the harness repository root.", file=sys.stderr)
         return 2
+    dirs = a.dir or DEFAULT_DIRS
+    if not a.dir and (root / "skills").is_dir() and not any((root / d).is_dir() for d in DEFAULT_DIRS):
+        dirs = ["skills"]
     report, warnings = [], []
     for rel in dirs:
         rows = measure(root, rel)

@@ -252,9 +252,9 @@ def check_progress_log(text, groups=None):
 
 SITUATION_FIELDS = {
     "matt_config": r"present|partial|absent",
-    "work_source": r"git|none|tracker:\S+|doc:\S+",
+    "work_source": r"git|none|(?:tracker|doc):\S+",
     "code_home": r"\.|[^,\s][^,]*(,\s*[^,\s][^,]*)*",
-    "flow_source": r"sample|asked|doc:\S+",
+    "flow_source": r"sample|asked|doc:[^\s]+",
     "prior_harness": r"none|[^,\s][^,]*(,\s*[^,\s][^,]*)*",
     "history": r"yes|none",
     "tree_relation": r"shared|apart",

@@ -1,10 +1,11 @@
 {
   "name": "harness-kit",
   "version": "0.1.1",
-  "description": "A lightweight plugin for Matt Pocock skills: harness-setup builds a project harness, and harness-evolve maintains it. harness-library finds and authors reusable drafts. Includes a supplied kit of building blocks, rules, team patterns, and delegation guidance.",
+  "description": "Set up and evolve a project Harness, prepare and execute authorized Harness work, and manage reusable resources with the shared kit.",
   "skills": [
     "./skills/harness/harness-setup",
     "./skills/harness/harness-evolve",
+    "./skills/harness/harness-implement",
     "./skills/harness/harness-library"
   ]
 }

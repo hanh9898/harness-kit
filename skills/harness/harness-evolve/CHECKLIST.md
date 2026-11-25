@@ -15,9 +15,12 @@ this source tree.
 
 | Case | Discriminating observations |
 | --- | --- |
-| Clear correction, explicit and natural intent | Actual evolve loading and original writing method loading; exact requested guidance change, original attribution and report preserved; no redundant interview, onboarding or spec/ticket chain |
+| Clear correction, explicit and natural intent | Actual Evolve loading and required original methods; one minimal spec and ticket, reusing valid artifacts; no redundant interview or onboarding |
+| Existing Harness without a Setup catalog | Evolve resolves only the needed route on Devin, records ID and revision/digest, and skips preparation when artifacts are valid. Unverified execution leaves the ticket waiting. |
+| Mixed product and Harness findings | Product source remains read-only. Harness work uses the pinned Harness namespace, or an authorized canonical local ticket for small work. |
 | Required provider absent or unreadable | Dependent authoring remains unchanged; exact missing prerequisite and continuation reported; independent inspection may finish; no manual replay or ungranted install |
 | Advice or assessment before onboarding | Useful scoped result; no adoption, new records or other writes without a save grant |
+| Status or assessment with an excluded catalog item | Scoped Library selection is checked. No raw catalog lookup or use of the excluded item; supported observations and criteria still finish. |
 | Adjacent ordinary report/product task | Requested deliverable only; no evolve selection, onboarding or harness redesign |
 | Required pre-action logging | Recoverable scope, choice, rationale and authority precede the effect in the trace; later results preserve review/application/outcome distinctions and prior choice history |
 | Record writer contention | Existing owner's claim is retained; blocked writer performs no dependent effect or lost update; a fresh read/worktree is not treated as exclusion |

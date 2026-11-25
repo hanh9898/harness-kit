@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
@@ -6,40 +7,48 @@ title harness-kit — skill packages, local helpers and consumer state
 LAYOUT_TOP_DOWN()
 
 Person(developer, "Developer", "Selects work, scope and actual grants")
+System_Ext(devin, "Devin", "First v1 pilot host; approved project scope")
 System_Ext(codex, "Codex", "External agent host")
 System_Ext(claude, "Claude Code", "External agent host")
 System_Ext(pi, "Pi", "External agent host")
 System_Ext(methods, "Original-method providers", "Separately installed methods; not bundled")
 
 System_Boundary(repo, "harness-kit checkout — guidance and local tools, not an autonomous service") {
-  Container(registration, "Host registration", "JSON manifests / skill directories", ".claude-plugin/{plugin,marketplace}.json; package.json for Pi; direct skill links also supported")
+  Container(registration, "Host registration", "JSON manifests / skill directories", "Project-local Devin skills, compatible plugin manifests or Pi package")
   Container_Boundary(skills, "skills/harness/ — Markdown instructions executed by the selected host") {
     Component(setup, "harness-setup", "Skill + references", "Reuse foundations, fill onboarding gaps and demonstrate initial use")
     Component(evolve, "harness-evolve", "Skill + references", "Scoped improvement, assessment, adoption and durable continuation")
+    Component(implement, "harness-implement", "Skill + references", "Independent gates for draft, publish and execute; verifies at the target")
     Component(library, "harness-library", "Skill + references", "Find, author, save and maintain reusable resources; saving is not adoption")
   }
   Container(kitcli, "kit/scripts/kit", "Python CLI / standard library", "Focused list/show retrieval; raw catalog has no selection-store context")
-  Container(libcli, "kit/scripts/library", "Python CLI / sqlite3", "Search, save/history, compare/update and disable/restore; revision-checked writes")
+  Container(libcli, "kit/scripts/library", "Python CLI / sqlite3", "Scoped reads, guarded writes and supplied ID-rename exclusion")
   ContainerDb(catalog, "Supplied kit catalog", "CSV + Markdown", "legos.csv, groups.csv, rules.csv, gates.csv; patterns.md and historical delegation.md")
   Container(guidance, "Capability guidance", "kit/ Markdown references", "Authority, standards, team/workflow, instruction design, library, tools, recovery, persistence and optional factory")
   Container(checks, "Source validation", "tools/*.py + tests/ (pytest)", "check_kit.py: catalog/gates, legacy log/card; check_boundary.py: portability; skill_budget.py: discovery budget; source regressions")
 }
 
 System_Boundary(consumer, "Authorized consumer storage — outside the distributed kit") {
-  ContainerDb(records, "Target-project guidance and durable state", "Existing native store or versioned Markdown", "Discoverable current view, grants, evidence and continuation; legacy harness/record/, situation.md and append-only progress.log supported, not required")
+  ContainerDb(records, "Harness tracker or local record", "Existing authorized store", "Decisions, canonical tickets and observed evidence; separate from product issues and write targets")
   ContainerDb(store, "Reusable-resource store", "SQLite at explicit --store path", "Personal or project scope; drafts, origin/history and selection overlay; separate from supplied CSVs and consumer adoption")
 }
 
 Rel(developer, codex, "Requests and authorizes work")
+Rel(developer, devin, "Requests and authorizes scoped work")
 Rel(developer, claude, "Requests and authorizes work")
 Rel(developer, pi, "Requests and authorizes work")
 Rel(codex, registration, "Loads compatible plugin or linked skills")
+Rel(devin, registration, "Verifies project-local skill routes by ID and revision")
 Rel(claude, registration, "Loads plugin")
 Rel(pi, registration, "Loads package or skill directory")
-Rel(registration, skills, "Exposes all three skills to the selected host")
+Rel(registration, skills, "Exposes the four skills to the selected host")
 Lay_R(setup, evolve)
-Lay_R(evolve, library)
-Rel(skills, kitcli, "Setup/evolve retrieve selected building blocks and rules")
+Rel(setup, implement, "Hands off the settled design")
+Rel(evolve, implement, "Hands off scoped work")
+Rel(setup, library, "Looks up scoped resources")
+Rel(evolve, library, "Looks up scoped resources")
+Rel(implement, library, "Rechecks live selection before use")
+Rel(library, kitcli, "Retrieves focused catalog provenance")
 Rel(library, libcli, "Invokes focused resource operations")
 Rel(kitcli, catalog, "Reads pieces, rules, gates and references")
 Rel(libcli, catalog, "Searches supplied pieces/rules; checks selection identity")

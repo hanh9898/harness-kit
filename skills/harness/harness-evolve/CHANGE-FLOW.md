@@ -15,14 +15,15 @@ Use this composition reference from the owning workflow; it does not change that
 
 Select by the work you will actually perform, including supporting edits and
 operations. Calling a task "already set up", "maintenance" or "babysitting" does
-not remove prerequisites for its new effects. Use the owning entry's kit CLI:
-inspect relevant summaries, then `kit show <id>` for the determining sources.
+not remove prerequisites for its new effects. Invoke `harness-library` for a
+scoped lookup and inspect only the determining sources. Do not call the
+catalog or library CLI directly from the owning workflow.
 Reuse complete source reads already available in this context when their identity
 and applicability are unchanged; a summary or remembered ID is not that read.
 
 | Proposed work | Read before the dependent recommendation or action |
 | --- | --- |
-| Construct or review agent-read guidance, including a small pointer | `N06` and current original writing-for-agents; its skill-mechanics reference for a skill |
+| Construct or review agent-read guidance, including a small pointer | `N06` (subject to the [bootstrap rule](#authoring-an-override-in-a-new-project)) and [the writing method](#providers-and-authority), including skill mechanics for a skill |
 | Change current state or choice history | `E07`, `E08` and [UPDATE.md](UPDATE.md); record edits also follow the applicable writing discipline |
 | Create or change unattended work or a background schedule | `J05`, `D22` and the applicable [flow controls](../../../kit/team-workflow/FLOW.md) |
 | Read changing sources incrementally on a schedule | `J06`; decide how existing source state and read failures are handled |
@@ -48,6 +49,20 @@ work or evidence.
 traceable choice/check, or an explicit dependent blocker. State this selection
 before effects; local guidance and an adequate legacy foundation complement it.
 
+## Authoring an override in a new project
+
+Use the writing method below, including skill mechanics: load the original
+`writing-for-agents` or a declared replacement qualified for skill authoring,
+through its permitted route. Invoke `harness-library` for scoped `N06`
+selection and guidance. For first-time Devin override bootstrap only, if
+Library confirms no store is configured for this scope, keep selection
+unverified and use the packaged [writing scope](../../../kit/instruction-response/WRITING.md)
+and current host/project standards with the selected method. These are base
+references, not a selection or adoption of `N06`. Do not create a store to
+perform this check. If a store is configured but unreadable, if the scope
+or Library call cannot be verified, or if the required item is excluded,
+do not use the bootstrap exception.
+
 ## Original methods
 
 Browse available original descriptions and kit summaries, then load the selected sources through the host's supported mechanism. Use native invocation when available. In hosts that support skills by reading their source, read the original SKILL.md and applicable references. Native delivery of the complete skill source is also loading; a file listing or echoed method name is not. Loading is evidence of access, not proof that the method's interaction and completion requirements were performed.
@@ -61,8 +76,8 @@ Browse available original descriptions and kit summaries, then load the selected
 | Broken or recurring behavior | Original diagnosing-bugs with representative evidence |
 | Missing source facts | Original research with attributable evidence |
 | Actual domain terms or architectural choices | Original domain-modeling and its artifact/writeback criteria |
-| Larger specified work | Appropriate specification, ticket and implementation methods with the actual tracker |
-| Unsettled design, including a short interview | Applicable original interview/design method; longer work may need a multi-session design method; use kit knowledge before questioning |
+| Approved work that needs preparation, publication or execution | `harness-implement` and the verified route for the missing spec, ticket or execution result |
+| Unsettled Harness design | [Node discovery](../harness-setup/DISCOVERY.md) with original grilling and domain-modeling; do not invoke user-only wrappers |
 | Requested retrospective | Original retrospective method; recommendations stay distinct from adoption |
 | Reusable resource authoring | Library composition with origin, ownership, source and consumption limits |
 

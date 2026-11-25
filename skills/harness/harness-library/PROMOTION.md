@@ -1,6 +1,6 @@
 # Shared promotion
 
-Deliver justified maintained shared material or a candid proposal. Use the library entry's retrieval, original-method selection and save/reconciliation steps. Promotion changes reusable material; consumer adoption remains a separate setup/evolve request.
+Deliver justified maintained shared material or a candid proposal. Use [scoped retrieval](READ.md) and [write guidance](WRITE.md) for original-method selection and the write gate. Promotion changes reusable material; consumer adoption remains a separate setup/evolve request.
 
 ## 1. Choose the contribution
 

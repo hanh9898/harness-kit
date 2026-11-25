@@ -2,13 +2,19 @@
 
 Answer the operating question at its requested time and scope. Observation can finish with facts, conflicts and limits; an experiment, diagnosis or harness change is a separate result. Use accessible existing platform views, exports, records and supplied artifacts within the read grant. A missing live source limits the answer to the available snapshot.
 
-Retrieve kit `H15` for evidence meaning. For multi-run state, retrieve `M02`; for spend or usage, retrieve `H09`. Use the entry's kit CLI to read their full details before drawing conclusions. M02 favors the existing platform view. H09 informs attributable usage, not an automatic cap, launcher change or telemetry installation. Preserve each resource's source, applicability and certainty. Use [CHANGE-FLOW.md](CHANGE-FLOW.md) for any applicable original method; direct inspection of supplied facts needs no invented research or authoring prerequisite.
+Through `harness-library`, verify selection and retrieve relevant guidance:
+`H15` for evidence meaning, `M02` for multi-run state or `H09` for spend and
+usage. Preserve source, applicability and certainty. M02 favors the existing
+platform view; H09 informs attributable usage, not a cap or telemetry install.
+If a resource is excluded or unverified, skip it and name any dependent limit.
+Use [CHANGE-FLOW.md](CHANGE-FLOW.md) for applicable original methods. Direct
+inspection of supplied facts does not require a research or authoring method.
 
 ## Correlate before summarizing
 
 Identify the task, target, attempt, session and host when available. Join sources by established identities; retain unmapped rows separately. Keep retries distinct from duplicate exports of the same event. Explain incomplete or ambiguous joins rather than assign spend or status by a similar name.
 
-For each material fact, retain the source/reference, event or effective time, collection time and coverage. State the answer's cutoff and timezone. Distinguish a source's assertion, your inference and an open question using H15's evidence meanings. A fresh export can contain stale events. A later timestamp supersedes an earlier fact only when identity, authority and meaning match; a tracker marked done and a platform reporting running may describe different states. Preserve both and name the evidence needed to resolve the apparent conflict. Infer stalled work only against a supplied expectation or a justified interval, with the uncertainty visible.
+For each material fact, retain the source/reference, event or effective time, collection time and coverage. State the answer's cutoff and timezone. Distinguish a source's assertion, your inference and an open question. A fresh export can contain stale events. A later timestamp supersedes an earlier fact only when identity, authority and meaning match; a tracker marked done and a platform reporting running may describe different states. Preserve both and name the evidence needed to resolve the apparent conflict. Infer stalled work only against a supplied expectation or a justified interval, with the uncertainty visible.
 
 For usage, retain units, currency, measured interval, actual versus estimated values and missing fields. Aggregate only compatible, attributable, nonduplicated values; label partial sums with their coverage. Unknown usage is not zero. Estimates, token counts and actual billed costs are different facts. A cost conversion needs a stated applicable rate and remains an estimate. Keep unknown totals unknown; identify the smallest missing source or join needed to answer them.
 

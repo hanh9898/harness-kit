@@ -2,7 +2,14 @@
 
 Assess the selected outcome independently of observation, experimentation or adoption. Reuse supplied artifacts, human review, checks and existing operating evidence. Telemetry is optional; qualitative evidence can answer a qualitative criterion. When operating facts need correlation, use [OBSERVE.md](OBSERVE.md). An unavailable source limits its dependent conclusion, not every criterion.
 
-Read kit `H15` for stated/inferred/open evidence and `H02` for representative cases and a criterion-specific rubric through the entry's kit CLI. Their guidance informs the assessment; selecting H02 does not require installing an evaluation platform. Read `I06` only for a measured-improvement experiment: its noise and held-out-case guidance does not impose a composite score or an experiment on direct assessment. Select original methods through [CHANGE-FLOW.md](CHANGE-FLOW.md) for the actual work. Supplied-fact assessment alone is not guidance authoring; an authorized agent-read assessment record does require the selected writing discipline.
+Through `harness-library`, verify selection for `H15` (evidence meaning),
+`H02` (representative cases and rubric) and, for a measured-improvement
+experiment only, `I06` (noise and held-out cases). Retrieve only relevant,
+verified guidance. Excluded or unverified resources cannot supply a criterion;
+continue with independently supported criteria. No evaluation platform,
+composite score or experiment is implied. Select original methods through
+[CHANGE-FLOW.md](CHANGE-FLOW.md). Assessment of supplied facts is not
+guidance authoring; an agent-read assessment record requires the writing method.
 
 For whether an action is permitted, delegated-choice review or authority calibration,
 read [authority guidance](../../../kit/authority/DESIGN.md) before the judgment.

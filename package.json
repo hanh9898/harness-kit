@@ -2,11 +2,12 @@
   "name": "harness-kit",
   "version": "0.1.1",
   "private": true,
-  "description": "Composable harness setup, evolve and library skills for Pi.",
+  "description": "Composable Harness setup, evolve, implement and library skills for Pi.",
   "pi": {
     "skills": [
       "./skills/harness/harness-setup",
       "./skills/harness/harness-evolve",
+      "./skills/harness/harness-implement",
       "./skills/harness/harness-library"
     ]
   }

@@ -1,15 +1,30 @@
 # harness-kit
 
-Composable harness skills for Codex, Claude Code and Pi, using Matt Pocock methods.
-The supplied catalog, rules and references support project onboarding, harness
-improvement and reusable resources. Original methods need their own available
-provider; this kit does not bundle an autonomous execution service.
+Composable Harness skills using Matt Pocock methods. Devin is the first v1 pilot
+host; the suite also packages for Codex, Claude Code and Pi. Registration does
+not establish end-to-end support on any host. Original methods are separate
+dependencies. The kit does not bundle an execution service.
 
 ## Installation
 
 Keep a complete checkout in a stable location: skill references and helpers depend
 on the adjacent `kit/` tree. Register the original methods you intend to use through
 the same host; they are separate dependencies. Choose your host below.
+
+### Devin — project scope (v1 pilot)
+
+In an approved project, expose the four skill directories from the full checkout
+as project-local skills under `.devin/skills/` using Devin's supported mechanism.
+Keep each `SKILL.md` with its references and preserve the adjacent kit paths.
+Verify by invoking the exact skill ID in the project and checking the resolved
+source and revision or digest; listing/search alone is not proof. Do not register
+globally by default.
+
+Setup registers project-scoped, agent-callable preparation and execution
+overrides only when authorized. The original user-only methods keep their own
+routes. See [activation](skills/harness/harness-setup/ACTIVATION.md) for the
+override contracts and verification, and [qualification](docs/harness-v1.md) for
+what to test before relying on a route.
 
 ### Codex — plugin
 
@@ -24,7 +39,7 @@ codex plugin add harness-kit@harness-kit
 Start a new Codex session after installation. Use `/plugins` to inspect installed
 plugins and `/skills` or the `$` skill picker to select a bundled harness skill.
 In supported desktop clients, use the plugin browser after registering the local
-marketplace. The plugin keeps all three skills, references and kit helpers together.
+marketplace. The plugin keeps all four skills, references and kit helpers together.
 See [OpenAI's plugin packaging and compatibility documentation](https://developers.openai.com/plugins/build/plugins)
 and [plugin usage](https://learn.chatgpt.com/docs/plugins).
 
@@ -34,14 +49,14 @@ Use this route when you want direct skill discovery instead of a plugin install.
 Choose one registration route for a given project to avoid duplicate skill entries.
 
 Codex discovers `.agents/skills/` and follows symlinked skill directories. Link
-these three entries from the consuming project to the full kit checkout
+these four entries from the consuming project to the full kit checkout
 (macOS/Linux shell):
 
 ```sh
 harness_kit="/absolute/path/to/harness-kit"
 project="/absolute/path/to/your-project"
 mkdir -p "$project/.agents/skills"
-for skill in harness-setup harness-evolve harness-library; do
+for skill in harness-setup harness-evolve harness-implement harness-library; do
   link="$project/.agents/skills/$skill"
   if [ -e "$link" ] || [ -L "$link" ]; then
     printf 'Already exists; inspect its target: %s\n' "$link"
@@ -51,12 +66,12 @@ for skill in harness-setup harness-evolve harness-library; do
 done
 ```
 
-Start Codex in the consuming project. Use `/skills` or mention `$harness-setup`,
-`$harness-evolve` or `$harness-library` in your prompt. Restart Codex if the new
+Start Codex in the consuming project. Use `/skills` or mention the relevant
+skill, such as `$harness-setup`, in your prompt. Restart Codex if the new
 entries do not appear. Existing entries are left untouched by the commands above;
 inspect any reported conflict. Resolve supporting paths from the symlink's real
 target directory, as the skills specify. For personal scope, Codex also discovers
-`~/.agents/skills/`; choose that scope explicitly instead of changing it as part
+`$HOME/.agents/skills/`; choose that scope explicitly instead of changing it as part
 of project setup. See the [Codex skill documentation](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills).
 
 ### Claude Code — plugin
@@ -68,8 +83,8 @@ claude plugin marketplace add <absolute-path-to-harness-kit>
 claude plugin install harness-kit@harness-kit
 ```
 
-Restart Claude Code and invoke `/harness-kit:harness-setup`,
-`/harness-kit:harness-evolve` or `/harness-kit:harness-library`.
+Restart Claude Code and invoke the relevant skill by its plugin-qualified name,
+such as `/harness-kit:harness-setup`.
 For session-only use, pass `claude --plugin-dir <absolute-path-to-harness-kit>`.
 The `.claude-plugin/` manifest is also accepted by Codex through its compatibility
 route above. Pi loads the same skill source through its native skill interface.
@@ -77,7 +92,7 @@ route above. Pi loads the same skill source through its native skill interface.
 ### Pi — package
 
 Pi's package mechanism bundles skills and other resources. This repository's
-`package.json` declares the same three skill directories as the compatible
+`package.json` declares the same four skill directories as the compatible
 Codex/Claude plugin; the shared `kit/` remains alongside them.
 
 From the consuming project, register a local checkout in that project's settings:
@@ -113,8 +128,8 @@ For one session without registering a package, start Pi from the consuming proje
 pi --skill /absolute/path/to/harness-kit/skills/harness
 ```
 
-Invoke `/skill:harness-setup`, `/skill:harness-evolve` or
-`/skill:harness-library`. Add another `--skill` for each required original-method
+Invoke the relevant entry, such as `/skill:harness-setup`. Add another
+`--skill` for each required original-method
 file or directory. Pi also discovers project/user `.agents/skills/` directories;
 use `/reload` after changing skill content in an active session. See Pi's
 [skills](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md)
@@ -128,13 +143,18 @@ a skill does not establish all-host support or authorize its effects.
 
 | Skill | Purpose |
 | --- | --- |
-| [harness-setup](skills/harness/harness-setup/SKILL.md) | Reuse adequate foundations, fill onboarding gaps and demonstrate selected initial use. |
-| [harness-evolve](skills/harness/harness-evolve/SKILL.md) | Diagnose or improve the selected harness capability; ordinary application work keeps its own route. |
+| [harness-setup](skills/harness/harness-setup/SKILL.md) | Settle a minimum design in two discovery passes and verify initial use. |
+| [harness-evolve](skills/harness/harness-evolve/SKILL.md) | Diagnose or improve an existing Harness without replaying onboarding. |
+| [harness-implement](skills/harness/harness-implement/SKILL.md) | Prepare, publish or execute approved Harness work through separate gates. |
 | [harness-library](skills/harness/harness-library/SKILL.md) | Discover, author and maintain reusable resources with attributable sources and explicit storage scope. |
 
-Each entry supports explicit invocation and is eligible for model selection on
-its stated intent. Narrow advice can finish without onboarding or a saved record.
-Saved material is separate from adoption into a consumer.
+Setup and Evolve invoke Implement and Library internally where needed. A draft
+does not require tracker permission; publishing requires a verified Harness
+destination and its own grant; execution requires a canonical ticket, a
+verified route and authority at the effect target. Product issues are read-only
+references in this workflow, not a fallback tracker. A non-atomic write needs
+direct authorized supervision if policy allows it; otherwise it stops. Narrow
+advice can finish without a saved record, and saving is not consumer adoption.
 
 ## Building blocks
 

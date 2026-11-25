@@ -7,7 +7,7 @@ The `tools/skill_budget.py` tool measures the fixed context cost of frontmatter 
 Paths below are relative to the kit repo root; `--root` selects the repo to measure and defaults to the current directory.
 
 ```
-python3 tools/skill_budget.py --root <repo-root>                 # scan .claude/skills and .agents/skills under this root
+python3 tools/skill_budget.py --root <repo-root>                 # scan host paths, or bundled skills/ when neither exists
 python3 tools/skill_budget.py --root <repo-root> --top 10        # only the 10 largest skills per directory
 python3 tools/skill_budget.py --root <repo-root> --dir skills    # another skill directory; repeatable
 python3 tools/skill_budget.py --root <repo-root> --json          # machine-readable output

@@ -1,5 +1,40 @@
 # Selected provider activation
 
+## Register the v1 implementation overrides on Devin
+
+During discovery, plan only the needed `to-spec`, `to-tickets` and execution
+routes. Follow the [route contracts](../harness-implement/ROUTES.md). At
+authorized bootstrap, use the narrowest host-supported project scope. On Devin,
+create project-local skill entries (the pilot used `.devin/skills/<id>/SKILL.md`)
+with distinct IDs, matching frontmatter names and narrow descriptions. Use the
+host's permitted project-skill mechanism; confirm loadability for this project
+before relying on it. Keep global installed skills unchanged.
+
+Before authoring or changing an override, use the
+[agent-read guidance contract](../harness-evolve/CHANGE-FLOW.md#authoring-an-override-in-a-new-project).
+If a required source or method cannot be used, leave the dependent override
+unchanged and report what would unblock it.
+
+For each selected override record the source revision/license and the limited
+contract changes. Preserve upstream notices when adapting material. Implement
+the required inputs, outputs, use and non-use conditions, dependencies and
+effect limits from the route contract; merely changing invocation metadata is
+not an override. Preparation routes return drafts; a ticket route checks the
+assignment and target gate. Remove implicit tracker and Git effects. Do not
+change an upstream skill or try to bypass invocation policy.
+
+Treat registration as its own granted write, using the
+[late-write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation).
+Read back the configuration and probe by exact ID through the native tool in
+the intended Devin context. Verify the resolved path and revision/digest,
+real output and denial without permission. Confirm no route collision or
+change to upstream manual invocation outside scope. Verify a fresh or a child
+session only when needed for the route; do not claim either without evidence.
+Return the lightweight verified catalog; an unverified entry blocks only its
+dependent step. Evolve can verify its own route without this bootstrap.
+
+## Other selected activation
+
 Read only when the selected initial use needs a provider installation,
 registration, invocation-policy change or provider update. First inspect actual
 availability and current host-specific documentation/help. Reuse adequate native
