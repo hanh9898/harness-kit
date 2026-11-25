@@ -103,7 +103,10 @@ factory operation. A manual fallback does not qualify unattended writes.
 
 ## Provenance
 
-Adapted from the supplied *Bot Portable Template* and accompanying role
-catalog. The catalog entries are inferred adaptations: they retain role
-intent, with kit guidance for boundaries and evidence. They are not upstream
-prompts, a claim of feature parity or observations of any host.
+Adapted from two owner-supplied references received 2026-11-25: *Bot Portable
+Template (Host-Agnostic)* (SHA-256
+`159bfd6d1dfad1c14d26480d98119918a496c4e77a98f05faddc072a2f7f44c3`)
+and the accompanying 21-entry role catalog snapshot. Neither reference has
+a public URL. The kit entries adapt the role summaries, not upstream prompts;
+their boundaries and evidence requirements do not claim provider parity or
+observed host behavior.
