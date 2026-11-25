@@ -106,6 +106,13 @@ def fail(msg, code=2):
     return code
 
 
+def catalog_command(dir_override, *args):
+    command = ["kit"]
+    if dir_override is not None:
+        command.extend(("--dir", str(Path(dir_override).absolute())))
+    return shlex.join([*command, *args])
+
+
 def cmd_list_rules(rules, gates, topic, dir_override=None):
     if not rules:
         return fail("rules.csv is missing from the kit directory.")
@@ -121,11 +128,8 @@ def cmd_list_rules(rules, gates, topic, dir_override=None):
         return 0
     picked = [r for r in rules if r["topic"].lower() == topic.lower()]
     if not picked:
-        command = ["kit"]
-        if dir_override is not None:
-            command.extend(("--dir", str(Path(dir_override).absolute())))
-        command.extend(("list", "rules", "all"))
-        return fail(f"Topic `{topic}` does not exist.\nNext step: run `{shlex.join(command)}` to see topics.")
+        command = catalog_command(dir_override, "list", "rules", "all")
+        return fail(f"Topic `{topic}` does not exist.\nNext step: run `{command}` to see topics.")
     for r in picked:
         print(f"{r['id']}{'*' if r['id'] in gates else ''}\t{r['check']}\t{r['rule']}")
     return 0
@@ -166,7 +170,8 @@ def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, nam
         return 0
     picked = [r for r in rows if r["group"].lower() == group.lower()]
     if not picked:
-        return fail(f"Group `{group}` does not exist.\nNext step: run `kit list` to see groups.")
+        command = catalog_command(dir_override, "list")
+        return fail(f"Group `{group}` does not exist.\nNext step: run `{command}` to see groups.")
     for r in picked:
         print(f"{r['id']}\t{r['rung']}\t{r['name']}\t{r['summary']}")
     return 0

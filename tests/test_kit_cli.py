@@ -48,10 +48,27 @@ def test_list_group_shows_only_that_group_one_line_each(tmp_path):
     assert "Detail A01" not in r.stdout  # Listing omits details.
 
 
-def test_list_unknown_group_errors_with_next_step(tmp_path):
-    r = kit(tmp_path, "list", "Z")
-    assert r.returncode != 0
-    assert "kit list" in r.stderr
+def test_unknown_group_hint_lists_the_selected_catalog(tmp_path, monkeypatch):
+    root = write_kit(tmp_path / "alternate's catalog", [row("Z01", group="Z")])
+    monkeypatch.chdir(tmp_path)
+    r = run(KIT_CLI, "--dir", root.name, "list", "A")
+    assert r.returncode == 2 and "Group `A` does not exist." in r.stderr
+    hint = re.search(r"Next step: run `(.+)` to see groups\.", r.stderr)
+    assert hint, r.stderr
+
+    monkeypatch.setenv("PATH", str(KIT_CLI.parent), prepend=os.pathsep)
+    groups = subprocess.run(["bash", "-c", hint[1]], capture_output=True, text=True, cwd=KIT)
+    assert groups.returncode == 0, groups.stderr
+    assert [line for line in groups.stdout.splitlines() if "\t" in line] == ["Z\tGroup Z\t1 pieces"]
+
+
+def test_unknown_group_hint_without_override_is_unchanged():
+    r = run(KIT_CLI, "list", "missing-group")
+    assert r.returncode == 2
+    assert r.stderr == (
+        "ERROR: Group `missing-group` does not exist.\n"
+        "Next step: run `kit list` to see groups.\n"
+    )
 
 
 def test_show_by_id(tmp_path):
