@@ -79,6 +79,7 @@ REQUIRED = {
 }
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
+HTML_COMMENT = re.compile(r"<!--.*?(?:-->|\Z)", re.S)
 INLINE_LINK = re.compile(r"(?<!!)\[[^\]\n]+\]\(([^)\s]+)\)")
 
 
@@ -106,7 +107,7 @@ def split_markdown(text):
         elif block is not None:
             block.append(line)
     assert block is None, "Unclosed v1-gates fence"
-    return "\n".join(prose), declarations
+    return HTML_COMMENT.sub("", "\n".join(prose)), declarations
 
 
 def unique_object(pairs):
