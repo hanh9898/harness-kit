@@ -66,11 +66,14 @@ blocks drafting; do not open or infer a tracker destination.
 Use the missing-artifact table above, with
 [`harness-m2-to-spec`](../../../examples/devin-prepare/harness-m2-to-spec/SKILL.md)
 and [`harness-m2-to-tickets`](../../../examples/devin-prepare/harness-m2-to-tickets/SKILL.md)
-as the fixture's draft routes only. On subsequent requests, pass only the
-still-needed route refs. With a compatible ticket, do not draft another.
+as the fixture's draft routes only. The route records identify the missing
+`artifact` and name its prerequisites in `requires`. On subsequent requests,
+pass only the still-needed route refs. With a compatible ticket, do not draft
+another.
 Before resolving tickets, reopen the exact spec revision and apply
-[H5](WORK.md#spec-approval-h5). Return `AwaitSpecApproval` when the spec is
-missing, stale or unapproved. Resume on a new prepare request without
+[H5](WORK.md#spec-approval-h5) to establish `prepare.spec-approved`. Return
+`AwaitSpecApproval` when the spec is missing, stale or unapproved.
+Resume on a new prepare request without
 reauthoring a compatible spec or re-asking for a current approval.
 
 Before each needed native call, match the project, caller, exact ID, registered

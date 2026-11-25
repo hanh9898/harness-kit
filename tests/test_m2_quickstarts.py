@@ -326,16 +326,9 @@ def test_pinned_host_fixture_keeps_internal_routes_out_of_default_inventory(devi
         assert default_prompt() == before
 
 
-def test_devin_prepare_example_opens_pinned_fixture_records():
-    handoff = PREPARE_EXAMPLE / "prepare.json"
-    checked = subprocess.run(
-        [KIT / "scripts" / "check-stage-handoff", "--expect-operation", "prepare", handoff],
-        capture_output=True, text=True,
-    )
-    assert checked.returncode == 0, checked.stderr
-    prepare = json.loads(handoff.read_text(encoding="utf-8"))
-    assert {"spec_ref", "ticket_ref"}.isdisjoint(prepare)
-
+@pytest.fixture
+def devin_prepare_records():
+    prepare = json.loads((PREPARE_EXAMPLE / "prepare.json").read_text(encoding="utf-8"))
     records = json.loads((PREPARE_EXAMPLE / "decision.json").read_text(encoding="utf-8"))
 
     def open_ref(reference):
@@ -345,6 +338,22 @@ def test_devin_prepare_example_opens_pinned_fixture_records():
         for key in pointer.split("/"):
             record = record[key]
         return record
+
+    return prepare, records, open_ref
+
+
+def check_prepare_handoff(handoff):
+    checked = subprocess.run(
+        [KIT / "scripts" / "check-stage-handoff", "--expect-operation", "prepare", handoff],
+        capture_output=True, text=True,
+    )
+    assert checked.returncode == 0, checked.stderr
+
+
+def test_devin_prepare_example_opens_pinned_fixture_records(devin_prepare_records):
+    check_prepare_handoff(PREPARE_EXAMPLE / "prepare.json")
+    prepare, records, open_ref = devin_prepare_records
+    assert {"spec_ref", "ticket_ref"}.isdisjoint(prepare)
 
     decision = open_ref(prepare["decision_ref"])
     assert prepare["decision_ref"].endswith(f'/{decision["id"]}@{decision["revision"]}')
@@ -369,6 +378,53 @@ def test_devin_prepare_example_opens_pinned_fixture_records():
         assert f"\nname: {exact_id}\n" in frontmatter
         assert re.search(r"^description: .+", frontmatter, re.MULTILINE)
         assert "disable-model-invocation: true" not in frontmatter
+
+
+def test_devin_prepare_fixture_replays_missing_artifacts_and_h5(devin_prepare_records, tmp_path):
+    prepare, _, open_ref = devin_prepare_records
+    route_refs = prepare["needed_route_refs"]
+    spec, tickets = PREPARE_IDS
+    approved_spec_ref = "inline:verification-spec@1"
+    fixture_h5_receipt = (approved_spec_ref, prepare["decision_ref"], prepare["scope_ref"])
+    ticket_ref = {"instance": "fixture", "namespace": "harness", "id": "draft-check", "revision": 1}
+
+    def replay(handoff, h5_receipt=None):
+        facts = set()
+        spec_ref = handoff.get("spec_ref")
+        if spec_ref and h5_receipt == (spec_ref, handoff["decision_ref"], handoff["scope_ref"]):
+            facts.add("prepare.spec-approved")
+
+        calls = []
+        for reference in handoff["needed_route_refs"]:
+            route = open_ref(reference)
+            if f'{route["artifact"]}_ref' in handoff:
+                continue
+            if not facts.issuperset(route["requires"]):
+                return calls, "AwaitSpecApproval"
+            calls.append(route["skill_id"])
+        return calls, "DraftOnly"
+
+    assert replay(prepare) == ([spec], "AwaitSpecApproval")
+    with_spec = {**prepare, "spec_ref": approved_spec_ref}
+    assert replay(with_spec) == ([], "AwaitSpecApproval")
+    assert replay({**with_spec, "spec_ref": "inline:verification-spec@2"}, fixture_h5_receipt) == (
+        [], "AwaitSpecApproval",
+    )
+    assert replay({**prepare, "ticket_ref": ticket_ref}) == ([spec], "DraftOnly")
+    assert replay({**with_spec, "ticket_ref": ticket_ref}, fixture_h5_receipt) == ([], "DraftOnly")
+    assert replay(with_spec, fixture_h5_receipt) == ([tickets], "DraftOnly")
+
+    resumed = {
+        **with_spec,
+        "needed_route_refs": [
+            reference for reference in route_refs
+            if f'{open_ref(reference)["artifact"]}_ref' not in with_spec
+        ],
+    }
+    resumed_path = tmp_path / "resume.json"
+    resumed_path.write_text(json.dumps(resumed), encoding="utf-8")
+    check_prepare_handoff(resumed_path)
+    assert replay(resumed, fixture_h5_receipt) == ([tickets], "DraftOnly")
 
 
 def unique_object(pairs):

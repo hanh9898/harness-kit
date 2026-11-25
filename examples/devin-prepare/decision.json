@@ -38,12 +38,16 @@
     "harness-m2-to-spec": {
       "skill_id": "harness-m2-to-spec",
       "source": "harness-m2-to-spec/SKILL.md",
-      "invocation_policy": "agent-callable"
+      "invocation_policy": "agent-callable",
+      "artifact": "spec",
+      "requires": []
     },
     "harness-m2-to-tickets": {
       "skill_id": "harness-m2-to-tickets",
       "source": "harness-m2-to-tickets/SKILL.md",
-      "invocation_policy": "agent-callable"
+      "invocation_policy": "agent-callable",
+      "artifact": "ticket",
+      "requires": ["prepare.spec-approved"]
     }
   }
 }
