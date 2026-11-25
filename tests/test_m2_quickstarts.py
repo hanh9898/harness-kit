@@ -16,6 +16,8 @@ from conftest import KIT, ROOT
 
 HARNESS_IDS = ("harness-setup", "harness-evolve", "harness-implement", "harness-library")
 LIBRARY_ID = "harness-library"
+PREPARE_EXAMPLE = ROOT / "examples" / "devin-prepare"
+PREPARE_IDS = ("harness-m2-to-spec", "harness-m2-to-tickets")
 
 
 @pytest.fixture
@@ -26,6 +28,7 @@ def devin_project(tmp_path):
     shutil.copytree(ROOT / "skills" / "harness", checkout / "skills" / "harness")
     for group in ("discovery", "overrides"):
         shutil.copytree(ROOT / "skills" / group, checkout / "skills" / group)
+    shutil.copytree(PREPARE_EXAMPLE, checkout / "examples" / PREPARE_EXAMPLE.name)
     shutil.copytree(ROOT / ".claude-plugin", checkout / ".claude-plugin")
     shutil.copy2(ROOT / "package.json", checkout)
     shutil.copytree(KIT, checkout / "kit", ignore=shutil.ignore_patterns("__pycache__"))
@@ -299,10 +302,11 @@ def test_pinned_host_fixture_keeps_internal_routes_out_of_default_inventory(devi
     assert probe.returncode == 0 and probe.stdout.startswith("usage: library"), probe.stderr
 
     for group, exact_id in [
-        ("discovery", "workflow-discovery"),
-        ("overrides", "harness-project-implement"),
+        ("skills/discovery", "workflow-discovery"),
+        ("skills/overrides", "harness-project-implement"),
+        *((f"examples/{PREPARE_EXAMPLE.name}", exact_id) for exact_id in PREPARE_IDS),
     ]:
-        source = skills / group / exact_id / "SKILL.md"
+        source = checkout / group / exact_id / "SKILL.md"
         expected = pin(exact_id, source.relative_to(checkout), source)
         assert f"\nname: {exact_id}\n" in source.read_text()
         foreign = project.parent / "foreign project"
@@ -320,6 +324,118 @@ def test_pinned_host_fixture_keeps_internal_routes_out_of_default_inventory(devi
                 check_entry(replace(expected, **{field: value}), expected)
         check_entry(read(exact_id, source), expected)
         assert default_prompt() == before
+
+
+def read_prepare_records(handoff_path):
+    prepare = json.loads(handoff_path.read_text(encoding="utf-8"))
+    records = json.loads(handoff_path.with_name("decision.json").read_text(encoding="utf-8"))
+
+    def open_ref(reference):
+        filename, pointer = reference.split("#/", 1)
+        assert filename == "decision.json"
+        record = records
+        for key in pointer.split("/"):
+            record = record[key]
+        return record
+
+    return prepare, records, open_ref
+
+
+@pytest.fixture
+def devin_prepare_records():
+    return read_prepare_records(PREPARE_EXAMPLE / "prepare.json")
+
+
+def check_prepare_handoff(handoff):
+    checked = subprocess.run(
+        [KIT / "scripts" / "check-stage-handoff", "--expect-operation", "prepare", handoff],
+        capture_output=True, text=True,
+    )
+    assert checked.returncode == 0, checked.stderr
+
+
+def test_devin_prepare_example_opens_pinned_fixture_records(devin_prepare_records):
+    check_prepare_handoff(PREPARE_EXAMPLE / "prepare.json")
+    prepare, records, open_ref = devin_prepare_records
+    assert {"spec_ref", "ticket_ref"}.isdisjoint(prepare)
+
+    decision = open_ref(prepare["decision_ref"])
+    assert prepare["decision_ref"].endswith(f'/{decision["id"]}@{decision["revision"]}')
+    assert decision["scope_ref"] == prepare["scope_ref"]
+    assert decision["acceptance"] == prepare["acceptance"]
+    assert decision["dependency_refs"] == prepare["dependency_refs"]
+    assert open_ref(decision["basis_ref"])
+    assert open_ref(prepare["scope_ref"])["fixture_only"] is True
+    assert all(open_ref(reference) for reference in prepare["dependency_refs"])
+
+    routes = [open_ref(reference) for reference in prepare["needed_route_refs"]]
+    assert [route["skill_id"] for route in routes] == list(PREPARE_IDS)
+    assert records["upstream"] == {
+        "repository": "https://github.com/mattpocock/skills",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    }
+    for route in routes:
+        exact_id = route["skill_id"]
+        assert route["source"] == f"{exact_id}/SKILL.md"
+        assert route["invocation_policy"] == "agent-callable"
+        frontmatter = (PREPARE_EXAMPLE / route["source"]).read_text(encoding="utf-8").split("---")[1]
+        assert f"\nname: {exact_id}\n" in frontmatter
+        assert re.search(r"^description: .+", frontmatter, re.MULTILINE)
+        assert "disable-model-invocation: true" not in frontmatter
+
+
+def test_devin_prepare_fixture_replays_missing_artifacts_and_h5(devin_prepare_records, tmp_path):
+    prepare, _, open_ref = devin_prepare_records
+    route_refs = prepare["needed_route_refs"]
+    spec, tickets = PREPARE_IDS
+    approved_spec_ref = "inline:verification-spec@1"
+    fixture_h5_receipt = (approved_spec_ref, prepare["decision_ref"], prepare["scope_ref"])
+    ticket_ref = {"instance": "fixture", "namespace": "harness", "id": "draft-check", "revision": 1}
+
+    def replay(handoff, open_ref, h5_receipt=None):
+        decision = open_ref(handoff["decision_ref"])
+        assert decision["scope_ref"] == handoff["scope_ref"]
+        assert open_ref(decision["basis_ref"])
+        facts = set()
+        spec_ref = handoff.get("spec_ref")
+        if spec_ref and h5_receipt == (spec_ref, handoff["decision_ref"], handoff["scope_ref"]):
+            facts.add("prepare.spec-approved")
+
+        calls = []
+        for reference in handoff["needed_route_refs"]:
+            route = open_ref(reference)
+            if f'{route["artifact"]}_ref' in handoff:
+                continue
+            if not facts.issuperset(route["requires"]):
+                return calls, "AwaitSpecApproval"
+            calls.append(route["skill_id"])
+        return calls, "DraftOnly"
+
+    assert replay(prepare, open_ref) == ([spec], "AwaitSpecApproval")
+    with_spec = {**prepare, "spec_ref": approved_spec_ref}
+    assert replay(with_spec, open_ref) == ([], "AwaitSpecApproval")
+    assert replay({**with_spec, "spec_ref": "inline:verification-spec@2"}, open_ref, fixture_h5_receipt) == (
+        [], "AwaitSpecApproval",
+    )
+    assert replay({**prepare, "ticket_ref": ticket_ref}, open_ref) == ([spec], "DraftOnly")
+    assert replay({**with_spec, "ticket_ref": ticket_ref}, open_ref, fixture_h5_receipt) == ([], "DraftOnly")
+    assert replay(with_spec, open_ref, fixture_h5_receipt) == ([tickets], "DraftOnly")
+
+    resumed = {
+        **with_spec,
+        "needed_route_refs": [
+            reference for reference in route_refs
+            if f'{open_ref(reference)["artifact"]}_ref' not in with_spec
+        ],
+    }
+    resumed_path = tmp_path / "resume.json"
+    resumed_path.write_text(json.dumps(resumed), encoding="utf-8")
+    check_prepare_handoff(resumed_path)
+    with pytest.raises(FileNotFoundError, match="decision.json"):
+        read_prepare_records(resumed_path)
+    shutil.copy2(PREPARE_EXAMPLE / "decision.json", tmp_path)
+    reopened, _, open_resumed_ref = read_prepare_records(resumed_path)
+    assert replay(reopened, open_resumed_ref, fixture_h5_receipt) == ([tickets], "DraftOnly")
 
 
 def unique_object(pairs):

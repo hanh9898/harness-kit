@@ -104,6 +104,21 @@ verified preparation pair without verified execution is draft-only. Apply the
 reporting execution readiness; registration and fixture readback alone do not
 qualify native routes. Evolve verifies its needed bindings without reinstalling.
 
+### Opt in to the Devin prepare fixture
+
+Use the [prepare fixture](../../../examples/devin-prepare/prepare.json) only
+in a separate Devin project. Pin the full `hanh9898/harness-kit` checkout to an
+approved commit and use the [fixture's upstream pin](../../../examples/devin-prepare/decision.json)
+for provenance only. Do not load or change the original user-only skills.
+
+With a grant for exact project-local registration, expose only the needed
+example ID under `.devin/skills/<id>/SKILL.md` from the pinned example
+directory. Record the registration path, resolved source and digest, project,
+intended caller and effective agent-callable policy. Keep both IDs out of
+default registration and the workflow override inventory. Follow the
+[fixture route](../harness-implement/ROUTES.md#devin-prepare-fixture) for
+invocation and evidence. This does not establish execution readiness.
+
 ## Configure and qualify a Bot
 
 For a new Bot, verify the selected logical `bot_id` and intended host,
