@@ -18,6 +18,19 @@ Check both artifacts for compatibility before resolving any drafting route, incl
 - **Tickets:** each implementation ticket cites one decision/revision and its spec, has a target and acceptance check, and states real dependencies. One small spec and one ticket can be enough. Split into independently checkable slices; for a mechanical migration, stage compatibility, migrate, then remove the old path. State any checks that require the integrated result.
 - Return compatible artifact references or in-session drafts, plus unresolved points. Persist drafts only where a separate grant allows it. Do not pass posting credentials or effect authority to draft methods. Confirm any changed split before publishing.
 
+### Spec approval (H5)
+
+Apply H5 to direct or legacy preparation and v1 `prepare` handoffs. It covers both the legacy `to-tickets` route and `harness-project-to-tickets`. A compatible spec, `DesignReady`, or valid handoff shape does not prove approval.
+
+Before resolving or invoking the ticket drafting route, reopen the spec, decision, and approval evidence at the selected authoritative spec or decision source. Verify explicit approval by the authorized spec owner. Match the exact spec reference and revision, decision reference and basis, and scope. Confirm the acceptance criteria and dependencies still match. Do not infer approval from general assent, ticket status, an Inbox card, or a publish grant.
+
+A changed basis or a material change to ownership, acceptance, dependencies, scope, or impact invalidates approval. Check revocation and current approver authority at the source.
+
+| Approval | Next step when a ticket is missing |
+| --- | --- |
+| Current and matching | Invoke `to-tickets` without asking again. |
+| Missing, stale, revoked, or unverifiable | Hold the draft and return `AwaitSpecApproval` with the exact spec revision. Do not invoke `to-tickets`. |
+
 ## Publish or update
 
 Keep three destinations distinct: **Harness work records**, **product references** and **effect targets**. Harness records own work on agent behavior, skills, rules, hooks and workflow, even in a product repository. Product feature or bug work stays in its own workflow; read a related product issue only with read authority and pass its full URL only when disclosure is allowed. Do not create, sync, update, change status or close a product issue in this flow; separate product authorization belongs to the product workflow.
