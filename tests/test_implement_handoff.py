@@ -53,6 +53,8 @@ def test_implement_keeps_destination_authority_and_reconciliation_separate():
     execute = section(work, "Dispatch and integrate")
     write = section(work, "Write boundary and reconciliation")
     assert "namespace blocks the write" in publish
+    assert "node, question and intended outcome for older records without a `work_id`" in publish
+    assert "A missing ID match does not prove the work is new" in publish
     assert "only after reading back" in publish
     assert "A stale claim, wrong route or revoked grant blocks the write" in execute
     assert "stale, disabled, unavailable or unreconciled selection" in execute
