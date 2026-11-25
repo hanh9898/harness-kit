@@ -431,20 +431,26 @@ def test_two_bots_cannot_reuse_a_scoped_decision_for_the_same_supplied_resource(
     request_b = decision(bot_b, scope=f'project:{bot_b}')
     selector = (REREAD, '--source', 'supplied', *pin)
 
-    def read_as(bot, command):
+    def read_as(bot, command, target=selector):
         result = subprocess.run([str(CLI), '--store', str(store), '--require-existing-store',
-                                 command, *map(str, selector)],
+                                 command, *map(str, target)],
                                 cwd=bot, capture_output=True, text=True)
         assert result.returncode == 0, result.stderr
         return json.loads(result.stdout)
 
+    def grant_disable(target, request):
+        issued = invoke(tmp_path, 'grant-write', 'disable', *target, '--input', request,
+                        '--expect-revision', 0, '--ttl-seconds', 60)
+        assert issued.returncode == 0, issued.stderr
+        return json.loads(issued.stdout)['write_grant']
+
     assert read_as(bot_a, 'selection')['record'] is None
     assert read_as(bot_b, 'selection')['record'] is None
-    issued = invoke(tmp_path, 'grant-write', 'disable', *selector, '--input', request_a,
-                    '--expect-revision', 0, '--ttl-seconds', 60)
-    assert issued.returncode == 0, issued.stderr
+    grant_a = grant_disable(selector, request_a)
+    other = ('evidence-labels', '--source', 'supplied', *pin)
+    grant_b = grant_disable(other, request_b)
     commit = ('disable', *selector, '--expect-selection-revision', 0,
-              '--write-grant', json.loads(issued.stdout)['write_grant'])
+              '--write-grant', grant_a)
     denied = invoke(tmp_path, *commit, '--input', request_b)
     assert (denied.returncode, denied.stdout) == (2, '')
     assert 'No current write grant' in denied.stderr
@@ -464,6 +470,12 @@ def test_two_bots_cannot_reuse_a_scoped_decision_for_the_same_supplied_resource(
                     '--expect-revision', observed_b['revision'], '--ttl-seconds', 60)
     assert (denied.returncode, denied.stdout) == (2, '')
     assert 'Changing selection scope' in denied.stderr
+    committed = invoke(tmp_path, 'disable', *other, '--expect-selection-revision', 0,
+                       '--input', request_b, '--write-grant', grant_b)
+    assert committed.returncode == 0, committed.stderr
+    selected_b = read_as(bot_b, 'selection', other)
+    assert (selected_b['revision'], selected_b['effective']) == (1, False)
+    assert selected_b['record']['scope'] == f'project:{bot_b}'
     assert read_as(bot_b, 'selection-history') == [selected_a['record']]
     assert {project: project.read_text(encoding='utf-8') for project in consumers} == consumers
 
