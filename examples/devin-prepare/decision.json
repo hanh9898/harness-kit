@@ -1,0 +1,49 @@
+{
+  "scope": {
+    "id": "devin-prepare-fixture",
+    "host": "devin",
+    "fixture_only": true,
+    "target": "Inline Harness verification summary",
+    "protected": "Check execution, result storage, trackers, Git and labels"
+  },
+  "decisions": {
+    "verification-summary@1": {
+      "id": "verification-summary",
+      "revision": 1,
+      "scope_ref": "decision.json#/scope",
+      "basis_ref": "decision.json#/bases/verification-results@1",
+      "acceptance": [
+        "Show each check name and outcome in input order.",
+        "Show 'No checks run' for empty input."
+      ],
+      "dependency_refs": ["decision.json#/dependencies/verification-results"]
+    }
+  },
+  "bases": {
+    "verification-results@1": {
+      "rationale": "A caller should be able to review the checks without reopening each result.",
+      "choice": "Format the existing results inline without changing how they are collected or stored."
+    }
+  },
+  "dependencies": {
+    "verification-results": {
+      "input": "An ordered list of completed checks, each with a name and outcome."
+    }
+  },
+  "upstream": {
+    "repository": "https://github.com/mattpocock/skills",
+    "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823"
+  },
+  "routes": {
+    "harness-m2-to-spec": {
+      "skill_id": "harness-m2-to-spec",
+      "source": "harness-m2-to-spec/SKILL.md",
+      "invocation_policy": "agent-callable"
+    },
+    "harness-m2-to-tickets": {
+      "skill_id": "harness-m2-to-tickets",
+      "source": "harness-m2-to-tickets/SKILL.md",
+      "invocation_policy": "agent-callable"
+    }
+  }
+}

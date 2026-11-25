@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "operation": "prepare",
+  "request": "Draft a spec and a small implementation ticket for an inline summary of Harness verification results.",
+  "scope_ref": "decision.json#/scope",
+  "decision_ref": "decision.json#/decisions/verification-summary@1",
+  "acceptance": [
+    "Show each check name and outcome in input order.",
+    "Show 'No checks run' for empty input."
+  ],
+  "dependency_refs": ["decision.json#/dependencies/verification-results"],
+  "needed_route_refs": [
+    "decision.json#/routes/harness-m2-to-spec",
+    "decision.json#/routes/harness-m2-to-tickets"
+  ]
+}

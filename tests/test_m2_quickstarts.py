@@ -16,6 +16,8 @@ from conftest import KIT, ROOT
 
 HARNESS_IDS = ("harness-setup", "harness-evolve", "harness-implement", "harness-library")
 LIBRARY_ID = "harness-library"
+PREPARE_EXAMPLE = ROOT / "examples" / "devin-prepare"
+PREPARE_IDS = ("harness-m2-to-spec", "harness-m2-to-tickets")
 
 
 @pytest.fixture
@@ -26,6 +28,7 @@ def devin_project(tmp_path):
     shutil.copytree(ROOT / "skills" / "harness", checkout / "skills" / "harness")
     for group in ("discovery", "overrides"):
         shutil.copytree(ROOT / "skills" / group, checkout / "skills" / group)
+    shutil.copytree(PREPARE_EXAMPLE, checkout / "examples" / PREPARE_EXAMPLE.name)
     shutil.copytree(ROOT / ".claude-plugin", checkout / ".claude-plugin")
     shutil.copy2(ROOT / "package.json", checkout)
     shutil.copytree(KIT, checkout / "kit", ignore=shutil.ignore_patterns("__pycache__"))
@@ -299,10 +302,11 @@ def test_pinned_host_fixture_keeps_internal_routes_out_of_default_inventory(devi
     assert probe.returncode == 0 and probe.stdout.startswith("usage: library"), probe.stderr
 
     for group, exact_id in [
-        ("discovery", "workflow-discovery"),
-        ("overrides", "harness-project-implement"),
+        ("skills/discovery", "workflow-discovery"),
+        ("skills/overrides", "harness-project-implement"),
+        *((f"examples/{PREPARE_EXAMPLE.name}", exact_id) for exact_id in PREPARE_IDS),
     ]:
-        source = skills / group / exact_id / "SKILL.md"
+        source = checkout / group / exact_id / "SKILL.md"
         expected = pin(exact_id, source.relative_to(checkout), source)
         assert f"\nname: {exact_id}\n" in source.read_text()
         foreign = project.parent / "foreign project"
@@ -320,6 +324,51 @@ def test_pinned_host_fixture_keeps_internal_routes_out_of_default_inventory(devi
                 check_entry(replace(expected, **{field: value}), expected)
         check_entry(read(exact_id, source), expected)
         assert default_prompt() == before
+
+
+def test_devin_prepare_example_opens_pinned_fixture_records():
+    handoff = PREPARE_EXAMPLE / "prepare.json"
+    checked = subprocess.run(
+        [KIT / "scripts" / "check-stage-handoff", "--expect-operation", "prepare", handoff],
+        capture_output=True, text=True,
+    )
+    assert checked.returncode == 0, checked.stderr
+    prepare = json.loads(handoff.read_text(encoding="utf-8"))
+    assert {"spec_ref", "ticket_ref"}.isdisjoint(prepare)
+
+    records = json.loads((PREPARE_EXAMPLE / "decision.json").read_text(encoding="utf-8"))
+
+    def open_ref(reference):
+        filename, pointer = reference.split("#/", 1)
+        assert filename == "decision.json"
+        record = records
+        for key in pointer.split("/"):
+            record = record[key]
+        return record
+
+    decision = open_ref(prepare["decision_ref"])
+    assert prepare["decision_ref"].endswith(f'/{decision["id"]}@{decision["revision"]}')
+    assert decision["scope_ref"] == prepare["scope_ref"]
+    assert decision["acceptance"] == prepare["acceptance"]
+    assert decision["dependency_refs"] == prepare["dependency_refs"]
+    assert open_ref(decision["basis_ref"])
+    assert open_ref(prepare["scope_ref"])["fixture_only"] is True
+    assert all(open_ref(reference) for reference in prepare["dependency_refs"])
+
+    routes = [open_ref(reference) for reference in prepare["needed_route_refs"]]
+    assert [route["skill_id"] for route in routes] == list(PREPARE_IDS)
+    assert records["upstream"] == {
+        "repository": "https://github.com/mattpocock/skills",
+        "revision": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    }
+    for route in routes:
+        exact_id = route["skill_id"]
+        assert route["source"] == f"{exact_id}/SKILL.md"
+        assert route["invocation_policy"] == "agent-callable"
+        frontmatter = (PREPARE_EXAMPLE / route["source"]).read_text(encoding="utf-8").split("---")[1]
+        assert f"\nname: {exact_id}\n" in frontmatter
+        assert re.search(r"^description: .+", frontmatter, re.MULTILINE)
+        assert "disable-model-invocation: true" not in frontmatter
 
 
 def unique_object(pairs):

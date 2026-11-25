@@ -54,6 +54,31 @@ spec and approval instead of drafting a replacement. Resolve only needed routes
 at their step. Preparation routes cannot publish or apply effects. Accept a
 user-invoked route's artifact only after checking authority and compatibility.
 
+### Devin prepare fixture
+
+Select this route only for an explicit [fixture opt-in](../harness-setup/ACTIVATION.md#opt-in-to-the-devin-prepare-fixture).
+Validate the v1 [prepare envelope](../../../kit/STAGE-CONTRACTS.md#setup-or-evolve--implement-prepare).
+Resolve its `decision.json#/…` references as local JSON pointers relative to
+the fixture handoff. Match request scope, decision revision and basis,
+acceptance and dependencies to those records. Unreadable or mismatched input
+blocks drafting; do not open or infer a tracker destination.
+
+Use the missing-artifact table above, with
+[`harness-m2-to-spec`](../../../examples/devin-prepare/harness-m2-to-spec/SKILL.md)
+and [`harness-m2-to-tickets`](../../../examples/devin-prepare/harness-m2-to-tickets/SKILL.md)
+as the fixture's draft routes only. On subsequent requests, pass only the
+still-needed route refs. With a compatible ticket, do not draft another.
+Before resolving tickets, reopen the exact spec revision and apply
+[H5](WORK.md#spec-approval-h5). Return `AwaitSpecApproval` when the spec is
+missing, stale or unapproved. Resume on a new prepare request without
+reauthoring a compatible spec or re-asking for a current approval.
+
+Before each needed native call, match the project, caller, exact ID, registered
+and resolved source, pin/digest and agent-callable policy. Recheck the load
+before using it. On a mismatch or ambiguous result, stop without fallback.
+Return drafts inline; do not assume a `draft_ref` is durable. This fixture has
+no publish, claim, Git, label or other execution route.
+
 ## Evidence and minimal handoff
 
 Inspect the actual project, host, effective configuration and invocation
