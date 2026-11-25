@@ -63,7 +63,8 @@ def test_skill_links_to_packaged_host_routes_and_qualification():
             "stop the dependent operation on unresolved id/source conflicts",
         )),
         ("HOST.md", "Qualify in an isolated Bot", (
-            "one active card for the action and at most one delivery",
+            "one active card for the action and one initial delivery",
+            "zero additional deliveries on replay",
             "zero effect grants",
             "zero results delivered across routes",
             "manual reconciliation is evidence only for the manual route",
