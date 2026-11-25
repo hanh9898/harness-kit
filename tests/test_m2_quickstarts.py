@@ -326,10 +326,9 @@ def test_pinned_host_fixture_keeps_internal_routes_out_of_default_inventory(devi
         assert default_prompt() == before
 
 
-@pytest.fixture
-def devin_prepare_records():
-    prepare = json.loads((PREPARE_EXAMPLE / "prepare.json").read_text(encoding="utf-8"))
-    records = json.loads((PREPARE_EXAMPLE / "decision.json").read_text(encoding="utf-8"))
+def read_prepare_records(handoff_path):
+    prepare = json.loads(handoff_path.read_text(encoding="utf-8"))
+    records = json.loads(handoff_path.with_name("decision.json").read_text(encoding="utf-8"))
 
     def open_ref(reference):
         filename, pointer = reference.split("#/", 1)
@@ -340,6 +339,11 @@ def devin_prepare_records():
         return record
 
     return prepare, records, open_ref
+
+
+@pytest.fixture
+def devin_prepare_records():
+    return read_prepare_records(PREPARE_EXAMPLE / "prepare.json")
 
 
 def check_prepare_handoff(handoff):
@@ -388,7 +392,10 @@ def test_devin_prepare_fixture_replays_missing_artifacts_and_h5(devin_prepare_re
     fixture_h5_receipt = (approved_spec_ref, prepare["decision_ref"], prepare["scope_ref"])
     ticket_ref = {"instance": "fixture", "namespace": "harness", "id": "draft-check", "revision": 1}
 
-    def replay(handoff, h5_receipt=None):
+    def replay(handoff, open_ref, h5_receipt=None):
+        decision = open_ref(handoff["decision_ref"])
+        assert decision["scope_ref"] == handoff["scope_ref"]
+        assert open_ref(decision["basis_ref"])
         facts = set()
         spec_ref = handoff.get("spec_ref")
         if spec_ref and h5_receipt == (spec_ref, handoff["decision_ref"], handoff["scope_ref"]):
@@ -404,15 +411,15 @@ def test_devin_prepare_fixture_replays_missing_artifacts_and_h5(devin_prepare_re
             calls.append(route["skill_id"])
         return calls, "DraftOnly"
 
-    assert replay(prepare) == ([spec], "AwaitSpecApproval")
+    assert replay(prepare, open_ref) == ([spec], "AwaitSpecApproval")
     with_spec = {**prepare, "spec_ref": approved_spec_ref}
-    assert replay(with_spec) == ([], "AwaitSpecApproval")
-    assert replay({**with_spec, "spec_ref": "inline:verification-spec@2"}, fixture_h5_receipt) == (
+    assert replay(with_spec, open_ref) == ([], "AwaitSpecApproval")
+    assert replay({**with_spec, "spec_ref": "inline:verification-spec@2"}, open_ref, fixture_h5_receipt) == (
         [], "AwaitSpecApproval",
     )
-    assert replay({**prepare, "ticket_ref": ticket_ref}) == ([spec], "DraftOnly")
-    assert replay({**with_spec, "ticket_ref": ticket_ref}, fixture_h5_receipt) == ([], "DraftOnly")
-    assert replay(with_spec, fixture_h5_receipt) == ([tickets], "DraftOnly")
+    assert replay({**prepare, "ticket_ref": ticket_ref}, open_ref) == ([spec], "DraftOnly")
+    assert replay({**with_spec, "ticket_ref": ticket_ref}, open_ref, fixture_h5_receipt) == ([], "DraftOnly")
+    assert replay(with_spec, open_ref, fixture_h5_receipt) == ([tickets], "DraftOnly")
 
     resumed = {
         **with_spec,
@@ -424,7 +431,11 @@ def test_devin_prepare_fixture_replays_missing_artifacts_and_h5(devin_prepare_re
     resumed_path = tmp_path / "resume.json"
     resumed_path.write_text(json.dumps(resumed), encoding="utf-8")
     check_prepare_handoff(resumed_path)
-    assert replay(resumed, fixture_h5_receipt) == ([tickets], "DraftOnly")
+    with pytest.raises(FileNotFoundError, match="decision.json"):
+        read_prepare_records(resumed_path)
+    shutil.copy2(PREPARE_EXAMPLE / "decision.json", tmp_path)
+    reopened, _, open_resumed_ref = read_prepare_records(resumed_path)
+    assert replay(reopened, open_resumed_ref, fixture_h5_receipt) == ([tickets], "DraftOnly")
 
 
 def unique_object(pairs):
