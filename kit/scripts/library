@@ -758,7 +758,12 @@ def main():
             result = revoke_write(args)
         elif args.command in ("show", "history", "compare"):
             with read_store(args.store, require_existing_store=True) as db:
-                row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (args.id,)).fetchone()
+                row = None
+                if has_table(db, "revisions"):
+                    row = db.execute(
+                        "SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1",
+                        (args.id,),
+                    ).fetchone()
                 if row is None:
                     raise ValueError("Resource not found; inspect the intended store and identity.")
                 if args.command == "compare":

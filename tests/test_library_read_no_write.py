@@ -1,6 +1,8 @@
 """No-write regression cases run against the public Library CLI."""
 
+import ctypes
 import json
+import os
 import select
 import sqlite3
 import subprocess
@@ -10,11 +12,21 @@ import pytest
 
 from conftest import run
 from test_library_cli import CLI, draft, save
+from test_library_selection import REREAD, decision
 
 
 EXPLICIT = ("show", "history", "compare")
 OPTIONAL = ("search", "selection", "selection-history")
 READS = [(name, False) for name in EXPLICIT + OPTIONAL] + [(name, True) for name in OPTIONAL]
+NO_WRITE_UNAVAILABLE = "cannot enforce a no-write SQLite open on this host"
+
+
+@pytest.fixture(scope="module")
+def no_write_host():
+    if (sys.platform != "linux" or os.uname().machine not in ("x86_64", "aarch64")
+            or ctypes.sizeof(ctypes.c_void_p) != 8):
+        return False
+    return ctypes.CDLL(None).syscall(444, None, ctypes.c_size_t(0), 1) >= 3
 
 
 def read_args(store, candidate, command, strict):
@@ -47,7 +59,7 @@ def library(tmp_path):
 
 @pytest.mark.parametrize(("command", "strict"), READS)
 @pytest.mark.parametrize("state", ["wal-idle", "wal-active", "rollback", "malformed", "missing"])
-def test_public_reads_do_not_change_store_files(library, command, strict, state):
+def test_public_reads_do_not_change_store_files(library, command, strict, state, no_write_host):
     store, candidate = library
     sidecars = {store.name + "-wal", store.name + "-shm"}
     writer = None
@@ -76,6 +88,10 @@ def test_public_reads_do_not_change_store_files(library, command, strict, state)
             f"removed={sorted(before.keys() - after.keys())}, "
             f"changed={sorted(p for p in before.keys() & after.keys() if before[p] != after[p])}"
         )
+        if state == "rollback" and not no_write_host:
+            assert (result.returncode, result.stdout) == (2, "")
+            assert NO_WRITE_UNAVAILABLE in result.stderr
+            return
         optional_missing = state == "missing" and command in OPTIONAL and not strict
         if state != "rollback" and not optional_missing:
             assert (result.returncode, result.stdout) == (2, "")
@@ -106,7 +122,9 @@ def test_public_reads_do_not_change_store_files(library, command, strict, state)
 
 
 @pytest.mark.parametrize("invalid", ["{", "{}"])
-def test_malformed_compare_candidate_is_rejected_without_writes(library, invalid):
+def test_malformed_compare_candidate_is_rejected_without_writes(library, invalid, no_write_host):
+    if not no_write_host:
+        pytest.skip("Candidate parsing needs a qualified no-write store")
     store, candidate = library
     candidate.write_text(invalid, encoding="utf-8")
     before = files(store.parent)
@@ -133,7 +151,22 @@ runpy.run_path(sys.argv[0], run_name='__main__')
                              *read_args(store, candidate, "show", False)],
                             capture_output=True, text=True, timeout=10)
     assert (result.returncode, result.stdout) == (2, "")
-    assert "cannot enforce a no-write SQLite open on this host" in result.stderr
+    assert NO_WRITE_UNAVAILABLE in result.stderr
+    assert files(store.parent) == before
+
+
+@pytest.mark.parametrize("command", EXPLICIT)
+def test_selection_only_store_reports_missing_resource(tmp_path, command, no_write_host):
+    if not no_write_host:
+        pytest.skip("Resource lookup needs a qualified no-write store")
+    store, candidate = tmp_path / "library.sqlite3", tmp_path / "candidate.json"
+    disabled = run(CLI, "--store", store, "disable", REREAD, "--source", "supplied",
+                   "--input", decision(tmp_path), "--expect-selection-revision", 0)
+    assert disabled.returncode == 0, disabled.stderr
+    before = files(store.parent)
+    result = run(CLI, *read_args(store, candidate, command, False))
+    assert (result.returncode, result.stdout) == (2, "")
+    assert "Resource not found" in result.stderr
     assert files(store.parent) == before
 
 
@@ -153,7 +186,9 @@ runpy.run_path(sys.argv[0], run_name='__main__')
 
 @pytest.mark.parametrize(("command", "strict"), [("search", True), ("show", False)])
 @pytest.mark.parametrize("transition", ["wal", "wal-active", "replace-empty"])
-def test_database_changed_between_preflight_and_open_is_rejected(library, command, strict, transition):
+def test_database_changed_between_preflight_and_open_is_rejected(library, command, strict, transition, no_write_host):
+    if not no_write_host:
+        pytest.skip("The race seam needs a qualified no-write store")
     store, candidate = library
     args = read_args(store, candidate, command, strict)
     with subprocess.Popen([sys.executable, "-I", "-c", PAUSE_BEFORE_SQLITE_OPEN, str(CLI), *args],
