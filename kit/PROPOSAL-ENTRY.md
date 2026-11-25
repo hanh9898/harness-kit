@@ -18,7 +18,7 @@ cross-check a useful lead. Use related chat or sessions, the repo and its
 history, the bound store, or connected integrations such as Slack or Linear
 only as relevant and within the current ACL. Reuse evidence while it is
 current. Do not quote private chat or disclose private channel names. Setup
-and discovery topics use only intent, stack, decisions and static facts;
+and discovery topics use only intent, stack, settled choices and static facts;
 use repo history only for static provenance, not operational history. Do not
 probe Inbox or Memory routes that lack opt-in.
 
