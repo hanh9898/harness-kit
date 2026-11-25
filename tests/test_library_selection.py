@@ -5,7 +5,9 @@ import os
 import re
 import shlex
 import shutil
+import sqlite3
 import subprocess
+from contextlib import closing
 
 import pytest
 
@@ -44,6 +46,11 @@ def selection(root, source='supplied', id=REREAD, history=False):
 
 def supplied(root):
     shutil.copytree(ROOT / 'kit', root / 'kit')
+
+
+def initialize_empty_store(store):
+    with closing(sqlite3.connect(store)) as db:
+        db.execute('VACUUM')
 
 
 def upgrade_catalog(root, keep_legacy_id=False):
@@ -315,6 +322,12 @@ def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
     command = template.replace('<selected-path>', shlex.quote(str(store))).replace('<id>', REREAD)
     monkeypatch.setenv('PATH', str(CLI.parent), prepend=os.pathsep)
 
+    missing = subprocess.run(command, shell=True, capture_output=True, text=True)
+    assert (missing.returncode, missing.stdout) == (2, '')
+    assert f'Store is missing: {store}' in missing.stderr
+    assert not store.exists()
+
+    initialize_empty_store(store)
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
     assert result.returncode == 0, result.stderr
@@ -371,6 +384,112 @@ def test_reads_fail_when_store_symlink_target_goes_missing(tmp_path, command):
     assert not failed.stdout
     assert f'Store symlink target is missing: {link}' in failed.stderr
     assert not store.exists()
+
+
+def test_configured_missing_store_never_restores_excluded_search_result(tmp_path):
+    supplied(tmp_path)
+    identity = 'evidence-labels'
+    disabled = change(tmp_path, 'disable', 0, id=identity)
+    assert disabled.returncode == 0, disabled.stderr
+    store = tmp_path / 'library.sqlite3'
+    typo = tmp_path / 'libary.sqlite3'
+    before = store.read_bytes(), set(tmp_path.iterdir())
+
+    for args in [('selection', identity, '--source', 'supplied'), ('search', identity)]:
+        legacy = run(CLI, '--store', typo, *args)
+        assert legacy.returncode == 0, legacy.stderr
+        result = json.loads(legacy.stdout)
+        if args[0] == 'selection':
+            assert result['effective'] is True
+        else:
+            assert [match['id'] for match in result['matches']] == [identity]
+
+        failed = run(CLI, '--store', typo, '--require-existing-store', *args)
+        assert failed.returncode == 2
+        assert failed.stdout == ''
+        assert f'Store is missing: {typo}' in failed.stderr
+
+        live = run(CLI, '--store', store, '--require-existing-store', *args)
+        assert live.returncode == 0, live.stderr
+        result = json.loads(live.stdout)
+        if args[0] == 'selection':
+            assert (result['effective'], result['revision']) == (False, 1)
+        else:
+            assert result['matches'] == [] and result['excluded'] == 1
+            inspected = run(CLI, '--store', store, '--require-existing-store', *args, '--include-disabled')
+            assert inspected.returncode == 0, inspected.stderr
+            assert [(match['id'], match['enabled']) for match in json.loads(inspected.stdout)['matches']] == [(identity, False)]
+            failed = run(CLI, '--store', typo, '--require-existing-store', *args, '--include-disabled')
+            assert (failed.returncode, failed.stdout) == (2, '')
+
+    assert (store.read_bytes(), set(tmp_path.iterdir())) == before
+
+
+def test_resume_distinguishes_existing_empty_history_from_missing_store(tmp_path):
+    store = tmp_path / 'library.sqlite3'
+    initialize_empty_store(store)
+    missing = tmp_path / 'offline.sqlite3'
+    link = tmp_path / 'store-link'
+    link.symlink_to(missing.name)
+    directory = tmp_path / 'directory'
+    directory.mkdir()
+    not_sqlite = tmp_path / 'not.sqlite3'
+    not_sqlite.write_bytes(b'not a SQLite database')
+    empty = tmp_path / 'empty.sqlite3'
+    empty.touch()
+    truncated = tmp_path / 'truncated.sqlite3'
+    truncated.write_bytes(store.read_bytes()[:100])
+    before = store.read_bytes(), set(tmp_path.iterdir())
+
+    for command in ('selection', 'selection-history'):
+        args = (command, REREAD, '--source', 'supplied')
+        legacy_ready = run(CLI, '--store', store, *args)
+        legacy_missing = run(CLI, '--store', missing, *args)
+        assert legacy_ready.returncode == legacy_missing.returncode == 0
+        assert legacy_ready.stdout == legacy_missing.stdout
+
+        live = run(CLI, '--store', store, '--require-existing-store', *args)
+        assert live.returncode == 0, live.stderr
+        result = json.loads(live.stdout)
+        if command == 'selection-history':
+            assert result == []
+        else:
+            assert (result['revision'], result['record'], result['effective']) == (0, None, True)
+
+        for path, state in [(missing, 'missing'), (link, 'missing'), (directory, 'unreadable'),
+                            (not_sqlite, 'unreadable'), (empty, 'unreadable'), (truncated, 'unreadable')]:
+            failed = run(CLI, '--store', path, '--require-existing-store', *args)
+            assert (failed.returncode, failed.stdout) == (2, '')
+            assert f'Store is {state}: {path}' in failed.stderr
+
+    assert (store.read_bytes(), set(tmp_path.iterdir())) == before
+    assert link.is_symlink() and os.readlink(link) == missing.name
+    assert not_sqlite.read_bytes() == b'not a SQLite database'
+    assert empty.read_bytes() == b''
+    assert truncated.read_bytes() == before[0][:100]
+    assert list(directory.iterdir()) == []
+
+
+def test_strict_read_leaves_wal_sidecars_uncreated(tmp_path):
+    store = tmp_path / 'library.sqlite3'
+    with closing(sqlite3.connect(store)) as db:
+        assert db.execute('PRAGMA journal_mode=WAL').fetchone() == ('wal',)
+    before = store.read_bytes()
+    assert list(tmp_path.iterdir()) == [store]
+
+    failed = run(CLI, '--store', store, '--require-existing-store', 'search', REREAD)
+    assert (failed.returncode, failed.stdout) == (2, '')
+    assert f'Store is unreadable: {store}' in failed.stderr
+    assert list(tmp_path.iterdir()) == [store]
+    assert store.read_bytes() == before
+
+
+@pytest.mark.parametrize('args', [('show', REREAD), ('save', '--input', 'missing.json', '--expect-revision', '0')])
+def test_require_existing_store_rejects_other_commands(tmp_path, args):
+    failed = run(CLI, '--store', tmp_path / 'library.sqlite3', '--require-existing-store', *args)
+    assert (failed.returncode, failed.stdout) == (2, '')
+    assert '--require-existing-store applies only to search, selection and selection-history' in failed.stderr
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_supplied_patterns_and_delegation_use_the_same_explicit_selection_boundary(tmp_path):

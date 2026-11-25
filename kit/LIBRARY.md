@@ -5,13 +5,43 @@ The public entry is `harness-library`. `scripts/kit` retrieves supplied pieces, 
 Choose an existing suitable store first. For the local operation, pass an explicitly authorized SQLite file path with `--store`. Its parent must already exist. Project-governed stores should live in project-versioned storage when appropriate; commit or otherwise sync the store under the project's policy for continuation beyond the current machine. A local file alone does not survive disposal. Personal stores need an authorized durable personal location. No default silently writes outside the invoking project. Local SQLite is supported on a filesystem with working SQLite locks; remote filesystems and synchronization of independently edited database copies are unqualified.
 
 ```
-<kit>/scripts/library --store <path> search "focused term"
+<kit>/scripts/library --store <path> --require-existing-store search "focused term"
 <kit>/scripts/library --store <path> save --input <resource.json> --expect-revision 0
 <kit>/scripts/library --store <path> show report-facts
 <kit>/scripts/library --store <path> history report-facts
 ```
 
 `search` reads effective supplied pieces/rules and that one store, returns at most 12 summaries by default (`--limit` 1–50), and reports truncation. Narrow a truncated query; it is not proof that no reusable material exists. Use `kit list P` and `kit list delegation` for those references. `search --include-disabled` also exposes excluded matches with `enabled: false`; it is inspection, not restoration. Filtering precedes the result limit. `show` retrieves a saved resource by exact ID with its current selection state; supplied IDs use `kit show`. Read-only operations never create a store. Corrupt or inaccessible stores fail visibly rather than masquerading as empty results.
+
+## Configured store reads
+
+Before consuming Library results, resolve the authorized binding: store, scope,
+owner, canonical target and continuity references. For local SQLite, compare
+the resolved path and owner-pinned target plus same-host file continuity
+(for example device/inode) and any required revision/history. Do not carry an
+inode across hosts or use a changing database checksum as the store ID.
+
+| Store state | Read behavior |
+| --- | --- |
+| `unconfigured` | Only when configuration confirms no binding: inspect the raw `kit` catalog. It is provenance, not effective selection. |
+| `missing` | The configured path or symlink target is absent. Stop the dependent read. |
+| `unreadable` | The target cannot be inspected or queried read-only. Stop the dependent read. |
+| `wrong-identity` | The target exists but does not match the authorized binding, or continuity is unverified. Stop before consuming results, even if SQLite opens it. |
+| `ready` | The binding matches and the strict read succeeds. A resource with no recorded selection can legitimately have revision 0 and empty selection history. |
+
+Put the global flag `--require-existing-store` before `search`, `selection`
+or `selection-history`. Missing or unreadable targets exit 2 with empty stdout
+and a path to reconcile. Strict reads require a regular, initialized SQLite
+file and reject WAL-mode stores, since SQLite may write sidecars even when
+opened read-only. The flag does not verify identity or authority; the
+consumer checks those separately. Other commands do not accept it.
+
+Do not treat an invalid binding as unconfigured, create a replacement or fall
+back to another path. Recover the original or verify an owner-authorized
+rebind before proceeding. A moved or replaced file needs authoritative
+continuity evidence; a matching filename or revision 0 is not evidence.
+Without the flag, the legacy CLI still allows catalog-only results for a
+missing path. Do not use that compatibility path for a configured store.
 
 ## Save input
 
@@ -79,9 +109,9 @@ This is a local guard for calls through the current Library CLI, not an authenti
 Selection is an overlay in the authorized store, separate from supplied files and saved content revisions. Its identity is `(source, exact resource ID)` in that store: `supplied` denotes this harness-kit catalog, `saved` denotes this store's draft. Matching ID strings in the two sources remain independent. Replacing or moving the supplied distribution, saving or updating content (including parent replacement and carry-forward), or temporarily removing and reintroducing a supplied ID does not clear its exclusion. Keep the authoritative store when updating the distribution. Copying/resetting a store is not a distribution update.
 
 ```
-<kit>/scripts/library --store <path> selection reread-source-before-write --source supplied
+<kit>/scripts/library --store <path> --require-existing-store selection reread-source-before-write --source supplied
 <kit>/scripts/library --store <path> disable reread-source-before-write --source supplied --input <decision.json> --expect-selection-revision 0
-<kit>/scripts/library --store <path> selection-history reread-source-before-write --source supplied
+<kit>/scripts/library --store <path> --require-existing-store selection-history reread-source-before-write --source supplied
 <kit>/scripts/library --store <path> restore reread-source-before-write --source supplied --input <decision.json> --expect-selection-revision 1
 ```
 

@@ -5,6 +5,12 @@ already exist. Find the authoritative current view and linked history from the
 project's existing pointers. Inspect live state that can affect the next action.
 Retain completed effects, adequate conventions, accepted scope and valid grants.
 
+For a recorded Library binding, recover its original store, scope, owner and
+continuity before using [strict selection or history reads](../harness-library/READ.md).
+Use `--require-existing-store` before either subcommand. A ready store can
+have revision 0 and empty history; missing, unreadable or wrong-identity is
+not empty history. Stop dependent work without rebinding or falling back.
+
 For unavailable records or uncertain writes, use [persistence recovery](../../../kit/PERSISTENCE.md) to qualify capture and reconcile per-target effects before continuing.
 
 For failures spanning tasks, artifacts or shared prerequisites, use [coordinated recovery](../../../kit/RECOVERY.md) while retaining setup's foundation completion criteria.
