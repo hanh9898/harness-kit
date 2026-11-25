@@ -6,23 +6,25 @@ passes, decision map, checkpoints and synthesis; a topic returns input for
 one node. Use tree paths as decision identities, not skill IDs or Library
 groups. Evolve can reference the map without calling Setup's routes.
 
-| Order | Exact route | Parent route | Tree path |
-| --- | --- | --- | --- |
-| 1.1 | [`environment-discovery`](../../discovery/environment-discovery/SKILL.md) | — | Environment & authority |
-| 1.2 | [`guidance-discovery`](../../discovery/guidance-discovery/SKILL.md) | — | Guidance & knowledge |
-| 1.3 | [`capabilities-discovery`](../../discovery/capabilities-discovery/SKILL.md) | — | Capabilities |
-| 1.4 | [`agent-role-discovery`](../../discovery/agent-role-discovery/SKILL.md) | — | Agent configuration & roles |
-| 1.5 | [`coordination-discovery`](../../discovery/coordination-discovery/SKILL.md) | — | Coordination |
-| 1.6 | [`verification-discovery`](../../discovery/verification-discovery/SKILL.md) | — | Verification & feedback |
-| 1.7 | [`state-continuation-discovery`](../../discovery/state-continuation-discovery/SKILL.md) | — | State & continuation |
-| 2.1 | [`skill-discovery`](../../discovery/skill-discovery/SKILL.md) | `capabilities-discovery` | Capabilities / Skills |
-| 2.2 | [`workflow-discovery`](../../discovery/workflow-discovery/SKILL.md) | `coordination-discovery` | Coordination / Workflows |
-| 2.3 | [`hooks-discovery`](../../discovery/hooks-discovery/SKILL.md) | `coordination-discovery` | Coordination / On demand / Hooks |
-| 2.4 | [`automation-discovery`](../../discovery/automation-discovery/SKILL.md) | `coordination-discovery` | Coordination / On demand / Automation |
+| Order | Exact route | Parent route | Tree path | Areas handled by this branch |
+| --- | --- | --- | --- | --- |
+| 1.1 | [`environment-discovery`](../../discovery/environment-discovery/SKILL.md) | — | Environment & authority | Context isolation; Runtime environment; Execution authority |
+| 1.2 | [`guidance-discovery`](../../discovery/guidance-discovery/SKILL.md) | — | Guidance & knowledge | Host entry points; Authoritative sources |
+| 1.3 | [`capabilities-discovery`](../../discovery/capabilities-discovery/SKILL.md) | — | Capabilities | CLI; MCP; Other tools |
+| 1.4 | [`agent-role-discovery`](../../discovery/agent-role-discovery/SKILL.md) | — | Agent configuration & roles | Model profiles; Roles and subagents |
+| 1.5 | [`coordination-discovery`](../../discovery/coordination-discovery/SKILL.md) | — | Coordination | On demand; Software Factory fit |
+| 1.6 | [`verification-discovery`](../../discovery/verification-discovery/SKILL.md) | — | Verification & feedback | Product verification; Harness verification; Evidence |
+| 1.7 | [`state-continuation-discovery`](../../discovery/state-continuation-discovery/SKILL.md) | — | State & continuation | Decision records; Handoff and resume |
+| 2.1 | [`skill-discovery`](../../discovery/skill-discovery/SKILL.md) | `capabilities-discovery` | Capabilities / Skills | — |
+| 2.2 | [`workflow-discovery`](../../discovery/workflow-discovery/SKILL.md) | `coordination-discovery` | Coordination / Workflows | — |
+| 2.3 | [`hooks-discovery`](../../discovery/hooks-discovery/SKILL.md) | `coordination-discovery` | Coordination / On demand / Hooks | — |
+| 2.4 | [`automation-discovery`](../../discovery/automation-discovery/SKILL.md) | `coordination-discovery` | Coordination / On demand / Automation | — |
 
-Pass one visits all seven branches in order, with no child load. Batch only
-actionable open questions after reviewing all seven, authority first;
-include clear recommendations in the synthesis. Pass two opens all applicable
+Pass one visits all seven branches in order, with no child load. Keep each
+material branch-area choice or open question at its own tree path for H2.
+Areas in the last column use their branch's route, not a separate skill ID.
+Batch only actionable open questions after reviewing all seven, authority
+first; include clear recommendations in the synthesis. Pass two opens all applicable
 children, one working context at a time. Take the earliest eligible route in
 table order unless a recorded dependency requires another order. A deferred parent
 skips its children; lack of direction or a blocked dependency holds only

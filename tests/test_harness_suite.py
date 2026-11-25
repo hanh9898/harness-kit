@@ -149,6 +149,15 @@ def test_discovery_routes_match_pass_order_and_parents():
     assert "not default entries" in text
 
 
+def test_discovery_retains_branch_choices_without_extra_topic_routes():
+    path = SKILL_ROOT / "harness-setup" / "DISCOVERY.md"
+    text = path.read_text(encoding="utf-8")
+    assert "Environment & authority | Context isolation; Runtime environment; Execution authority |" in text
+    assert "Agent configuration & roles | Model profiles; Roles and subagents |" in text
+    assert "open question at its own tree path for H2" in text
+    assert "use their branch's route, not a separate skill ID" in text
+
+
 def test_bot_discovery_returns_intent_without_enabling_a_wake():
     role = (DISCOVERY / "agent-role-discovery/SKILL.md").read_text()
     automation = (DISCOVERY / "automation-discovery/SKILL.md").read_text()
