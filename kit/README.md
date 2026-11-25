@@ -67,9 +67,11 @@ scripts/library --store "$store" search "bot role template" --limit 30
 scripts/library --store "$store" selection software-factory --source supplied
 ```
 
-Without an authorized store, use `kit show` for provenance only. Lookup and
-selection do not create or install a Bot, activate a schedule, grant access
-or qualify a host.
+Without an authorized store, use `kit show` for provenance only. A supplied
+selection snapshot identifies the CSV row, not the linked Markdown. Pin the
+kit distribution revision (for example, the Git commit) and read both the
+role and contract from it before using them. Lookup and selection do not
+create or install a Bot, activate a schedule, grant access or qualify a host.
 
 ## Optional factory
 
