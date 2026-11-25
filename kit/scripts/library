@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Scoped reusable drafts. JSON input/output; see kit/LIBRARY.md for the contract.
 
-Use an explicitly authorized --store. This records grants; host permissions enforce them.
+Use an explicitly authorized --store. Guarded stores also check local write grants.
 """
 import argparse
 import csv
@@ -13,12 +13,16 @@ import shlex
 import sqlite3
 import subprocess
 import sys
+import time
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
+from uuid import uuid4
 
 CONSUMPTION = "Requires checking conditions and gaps; saving is not adoption."
 MARKDOWN_ENTRY_NOT_FOUND = 3  # kit show found no matching pattern or delegation entry.
+WRITE_OPERATIONS = ("save", "update", "disable", "restore")
 
 
 def unique_object(pairs):
@@ -185,6 +189,63 @@ def has_table(db, name):
     return db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)).fetchone() is not None
 
 
+@contextmanager
+def write_transaction(store, mode="rw"):
+    with closing(sqlite3.connect(store.resolve().as_uri() + "?mode=" + mode, uri=True)) as db, db:
+        db.execute("PRAGMA synchronous=FULL")
+        db.execute("BEGIN IMMEDIATE")
+        yield db
+
+
+def grant_write(args):
+    if args.operation in ("save", "update") and args.source != "saved":
+        raise ValueError("Content write grants require --source saved.")
+    if not 0 <= args.expect_revision < 2**63:
+        raise ValueError("Expected revision must be a nonnegative SQLite integer.")
+    if not 1 <= args.ttl_seconds <= 86400:
+        raise ValueError("Write grant lifetime must be 1–86400 seconds.")
+    digest = hashlib.sha256(args.input.read_bytes()).hexdigest()
+    mode = "rw" if store_exists(args.store) else "rwc"
+    grant_id = uuid4().hex
+    with write_transaction(args.store, mode) as db:
+        db.execute("""CREATE TABLE IF NOT EXISTS write_grants (
+            operation TEXT NOT NULL, source TEXT NOT NULL, id TEXT NOT NULL,
+            grant_id TEXT NOT NULL UNIQUE, expected_revision INTEGER NOT NULL,
+            input_digest TEXT NOT NULL, expires_at REAL NOT NULL,
+            PRIMARY KEY (operation, source, id)
+        )""")
+        expires_at = time.time() + args.ttl_seconds
+        db.execute("INSERT OR REPLACE INTO write_grants VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   (args.operation, args.source, args.id, grant_id, args.expect_revision, digest, expires_at))
+    return dict(write_grant=grant_id, expires_at=datetime.fromtimestamp(expires_at, timezone.utc).isoformat())
+
+
+def revoke_write(args):
+    with write_transaction(args.store) as db:
+        if (not has_table(db, "write_grants")
+                or db.execute("DELETE FROM write_grants WHERE grant_id=?", (args.grant_id,)).rowcount != 1):
+            raise ValueError("No current write grant to revoke.")
+    return dict(revoked=True)
+
+
+def consume_write_grant(db, args, source, identity, revision, payload):
+    guarded = has_table(db, "write_grants")
+    if not guarded and args.write_grant is None:
+        return
+    if (not guarded or args.write_grant is None
+            or db.execute("""DELETE FROM write_grants
+                WHERE operation=? AND source=? AND id=? AND grant_id=?
+                  AND expected_revision=? AND input_digest=? AND expires_at>?""",
+                          (args.command, source, identity, args.write_grant, revision,
+                           hashlib.sha256(payload).hexdigest(), time.time())).rowcount != 1):
+        raise ValueError("No current write grant matches this mutation.")
+
+
+def read_write_input(path):
+    payload = path.read_bytes()
+    return json.loads(payload.decode("utf-8"), object_pairs_hook=unique_object), payload
+
+
 def selection_records(db, source, identity):
     if db is None or not has_table(db, "selection_revisions"):
         return []
@@ -254,7 +315,7 @@ def read_selection(store, kit_dir, source, identity, history=False):
 
 
 def change_selection(args):
-    facts = json.loads(args.input.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+    facts, request_bytes = read_write_input(args.input)
     if not isinstance(facts, dict):
         raise ValueError("Selection input must be an object.")
     # Reuse the existing attributable-record contract without making a content revision.
@@ -265,10 +326,9 @@ def change_selection(args):
     before = read_selection(args.store, args.kit_dir, args.source, args.id)
     if not before["available"]:
         raise ValueError("Resource unavailable; inspect its source and identity before changing selection.")
-    mode = "rwc" if args.expect_selection_revision == 0 and args.command == "disable" else "rw"
-    with sqlite3.connect(args.store.resolve().as_uri() + "?mode=" + mode, uri=True) as db:
-        db.execute("PRAGMA synchronous=FULL")
-        db.execute("BEGIN IMMEDIATE")
+    mode = "rwc" if (args.write_grant is None and args.expect_selection_revision == 0
+                     and args.command == "disable") else "rw"
+    with write_transaction(args.store, mode) as db:
         current = selection_view(db, args.kit_dir, args.source, args.id)
         if current["revision"] != args.expect_selection_revision:
             raise ValueError(f"Selection revision conflict: expected {args.expect_selection_revision}, found {current['revision']}; inspect selection/history before retry.")
@@ -287,6 +347,7 @@ def change_selection(args):
                       saved_at=datetime.now(timezone.utc).isoformat())
         payload = json.dumps(record, ensure_ascii=False, allow_nan=False)
         db.execute("CREATE TABLE IF NOT EXISTS selection_revisions (source TEXT, id TEXT, revision INTEGER, record TEXT NOT NULL, PRIMARY KEY (source, id, revision))")
+        consume_write_grant(db, args, args.source, args.id, current["revision"], request_bytes)
         db.execute("INSERT INTO selection_revisions VALUES (?, ?, ?, ?)",
                    (args.source, args.id, record["revision"], payload))
     return read_selection(args.store, args.kit_dir, args.source, args.id)
@@ -343,6 +404,15 @@ def main():
     change.add_argument("id")
     change.add_argument("--input", required=True, type=Path)
     change.add_argument("--expect-revision", required=True, type=int)
+    grant = sub.add_parser("grant-write", help="Enable guarding and issue a single-use, expiring write grant")
+    grant.add_argument("operation", choices=WRITE_OPERATIONS)
+    grant.add_argument("id")
+    grant.add_argument("--source", required=True, choices=("supplied", "saved"))
+    grant.add_argument("--input", required=True, type=Path)
+    grant.add_argument("--expect-revision", required=True, type=int)
+    grant.add_argument("--ttl-seconds", required=True, type=int)
+    revoke = sub.add_parser("revoke-write", help="Revoke the exact grant without changing resource history")
+    revoke.add_argument("grant_id")
     find = sub.add_parser("search", help="Focused supplied and saved resource summaries")
     find.add_argument("query")
     find.add_argument("--kit-dir", type=Path, default=Path(__file__).resolve().parent.parent)
@@ -356,6 +426,8 @@ def main():
         if command in ("disable", "restore"):
             parser.add_argument("--input", required=True, type=Path)
             parser.add_argument("--expect-selection-revision", required=True, type=int)
+    for command in WRITE_OPERATIONS:
+        sub.choices[command].add_argument("--write-grant", help="Current grant ID for a guarded store")
     args = ap.parse_args()
     try:
         if args.command == "search":
@@ -364,6 +436,10 @@ def main():
             result = read_selection(args.store, args.kit_dir, args.source, args.id, args.command == "selection-history")
         elif args.command in ("disable", "restore"):
             result = change_selection(args)
+        elif args.command == "grant-write":
+            result = grant_write(args)
+        elif args.command == "revoke-write":
+            result = revoke_write(args)
         elif args.command in ("show", "history", "compare"):
             with sqlite3.connect(args.store.resolve().as_uri() + "?mode=ro", uri=True) as db:
                 row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (args.id,)).fetchone()
@@ -377,28 +453,26 @@ def main():
                 if args.command == "show":
                     result["selection"] = selection_view(db, None, "saved", args.id)
         elif args.command == "update":
-            request = json.loads(args.input.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
-            with sqlite3.connect(args.store.resolve().as_uri() + "?mode=rw", uri=True) as db:
-                db.execute("PRAGMA synchronous=FULL")
-                db.execute("BEGIN IMMEDIATE")
+            request, request_bytes = read_write_input(args.input)
+            with write_transaction(args.store) as db:
                 row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (args.id,)).fetchone()
                 if row is None or row[1] != args.expect_revision:
                     raise ValueError("Revision conflict or missing resource; read show/history and reconcile.")
                 resource = update(db, row, request)
                 payload = json.dumps(resource, ensure_ascii=False, allow_nan=False)
+                consume_write_grant(db, args, "saved", args.id, row[1], request_bytes)
                 db.execute("INSERT INTO revisions VALUES (?, ?, ?, ?)",
                            (args.id, row[1] + 1, payload, datetime.now(timezone.utc).isoformat()))
                 result = view((args.id, row[1] + 1, payload))
         else:
-            resource = json.loads(args.input.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+            resource, request_bytes = read_write_input(args.input)
             validate(resource)
             if args.expect_revision < 0:
                 raise ValueError("Expected revision must be zero (create) or the inspected revision.")
             payload = json.dumps(resource, ensure_ascii=False, allow_nan=False)
-            mode = "rwc" if args.expect_revision == 0 and not store_exists(args.store) else "rw"
-            with sqlite3.connect(args.store.resolve().as_uri() + "?mode=" + mode, uri=True) as db:
-                db.execute("PRAGMA synchronous=FULL")
-                db.execute("BEGIN IMMEDIATE")
+            mode = "rwc" if (args.write_grant is None and args.expect_revision == 0
+                             and not store_exists(args.store)) else "rw"
+            with write_transaction(args.store, mode) as db:
                 db.execute("CREATE TABLE IF NOT EXISTS revisions (id TEXT, revision INTEGER, resource TEXT NOT NULL, saved_at TEXT NOT NULL, PRIMARY KEY (id, revision))")
                 previous = db.execute("SELECT revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (resource["id"],)).fetchone()
                 current = previous[0] if previous else 0
@@ -410,6 +484,7 @@ def main():
                         if prior[key] != resource[key]:
                             raise ValueError(f"Changing {key} changes identity/provenance; save a separately identified resource with an explicit relationship instead.")
                 revision = current + 1
+                consume_write_grant(db, args, "saved", resource["id"], current, request_bytes)
                 db.execute("INSERT INTO revisions VALUES (?, ?, ?, ?)",
                            (resource["id"], revision, payload, datetime.now(timezone.utc).isoformat()))
             result = view((resource["id"], revision, payload))

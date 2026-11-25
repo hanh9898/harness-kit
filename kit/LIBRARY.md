@@ -58,6 +58,22 @@ Content, decision references, evidence and continuation commit together. Their f
 
 For later consumer adoption or legacy upgrade, evolve's [adoption procedure](../skills/harness/harness-evolve/ADOPTION.md) reconciles the actual targets, contracts and grants. A saved content or selection revision is not per-target application evidence.
 
+## Guarded writes
+
+Use a guarded store for automated writes whose authority can be withdrawn. A trusted caller with authority to manage grants issues one against the **target store**, after inspecting the target revision and approving the exact input file. The first successful `grant-write` creates or enables guarding on that store. Existing stores that never enabled guarding keep their prior CLI behavior. A guarded store always requires a grant for `save`, `update`, `disable` and `restore`, even when no active grants remain. Reads are unchanged.
+
+```
+<kit>/scripts/library --store <path> grant-write disable H14 --source supplied --input <decision.json> --expect-revision 0 --ttl-seconds 60
+<kit>/scripts/library --store <path> disable H14 --source supplied --input <decision.json> --expect-selection-revision 0 --write-grant <write_grant>
+<kit>/scripts/library --store <path> revoke-write <write_grant>
+```
+
+`grant-write` returns JSON with `write_grant` (the ID to pass to the mutation) and `expires_at` (UTC). Use `--source saved` for content operations. The grant's `--expect-revision` is the selection revision for `disable` and `restore`, and the content revision for `save` and `update`. The grant matches the store, operation, source, exact resource ID, expected revision and input bytes. Issuing another grant for the same operation, source and ID invalidates the old grant. Choose a short lifetime between 1 and 86400 seconds; expiry uses the local clock.
+
+To cancel before the worker writes, use `revoke-write` against the same store with the original grant ID. An old ID cannot revoke its replacement. The mutation checks and consumes the grant in the same SQLite write transaction that compares the revision and appends history. If revocation commits first, the mutation fails with no history change even if its revision is still current. If the mutation commits first, revocation does not undo it. A rolled-back transaction does not consume the grant; when the outcome is uncertain, inspect history before retrying.
+
+This is a local guard for calls through the current Library CLI, not an authentication or permissions boundary. The host must establish who may issue or revoke grants, confirm the route and supplied catalog, and prevent workers from bypassing the CLI or issuing their own grants. An upstream claim or decision changing does not revoke a grant here: revoke it at the target. Do not rely on this guard for older CLIs, raw SQLite writes, independent database copies or non-Library targets.
+
 ## Exclusion and explicit restoration
 
 Selection is an overlay in the authorized store, separate from supplied files and saved content revisions. Its identity is `(source, exact resource ID)` in that store: `supplied` denotes this harness-kit catalog, `saved` denotes this store's draft. Matching ID strings in the two sources remain independent. Replacing or moving the supplied distribution, saving or updating content (including parent replacement and carry-forward), or temporarily removing and reintroducing a supplied ID does not clear its exclusion. Keep the authoritative store when updating the distribution. Copying/resetting a store is not a distribution update. Renamed IDs and other distributors require explicit identity reconciliation; no alias or provenance relationship is inferred.
