@@ -5,18 +5,19 @@
   check_kit.py --log FILE        check a harness/progress.log for revised=, observe work=/labels=, need-to-piece groups= and double quotes
   check_kit.py --situation FILE  check a nine-field key:value harness/situation.md and print selected branches
 
-Check required columns and cells; legos.csv and rules.csv rows must not exceed their headers.
+Check CSV quoting, required columns and cells; legos.csv and rules.csv rows must not exceed their headers.
 Rung must be instruction-file | skill | script-cli | mcp,
 IDs in legos.csv, rules.csv and gates.csv are unique and every group has a name in groups.csv (id,name).
 If gates.csv exists, gate=yes rules need an ISO verified_on date
 in rules.csv, stated certainty, verify_method=raw-grep and a nonempty verified_quote; gate=no requires a note.
 When gates.csv exists, only rules with gate=yes may carry verified_on.
-Print one legos.csv:line error per line; exit 1 on errors, 0 when clean.
+Print one error per line; exit 1 on errors, 0 when clean.
 """
 import argparse
 import csv
 import re
 import sys
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 
@@ -28,45 +29,57 @@ GATE_METHODS = ["raw-grep", "webfetch", "unreadable"]
 ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
+@contextmanager
+def _strict_csv(path):
+    with path.open(encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f, strict=True)
+        try:
+            yield reader
+        except csv.Error as e:
+            # DictReader only updates its line number after a successful read.
+            raise csv.Error(f"{path.name}:{reader.reader.line_num}: malformed CSV ({e}); fix: check CSV field quoting") from e
+
+
 def check(kit_dir):
-    path = kit_dir / "legos.csv"
+    errs, seen, used_groups = [], {}, {}
     try:
-        f = path.open(encoding="utf-8", newline="")
+        with _strict_csv(kit_dir / "legos.csv") as reader:
+            missing = [c for c in COLUMNS if c not in (reader.fieldnames or [])]
+            if missing:
+                return [f"legos.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(COLUMNS)}"]
+            for n, r in enumerate(reader, 2):
+                if None in r:
+                    errs.append(f"legos.csv:{reader.line_num}: {r.get('id') or '?'} has extra cells beyond the header; fix: match the row to the header")
+                for c in COLUMNS:
+                    if not (r.get(c) or "").strip():
+                        errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has an empty `{c}` cell; fix: supply a value")
+                if r["rung"] and r["rung"] not in RUNGS:
+                    errs.append(f"legos.csv:{n}: {r['id']} rung `{r['rung']}` is not in {' | '.join(RUNGS)}; fix: choose one of these four values")
+                if r["id"] in seen:
+                    errs.append(f"legos.csv:{n}: duplicate id {r['id']} from line {seen[r['id']]}; fix: choose another ID")
+                seen.setdefault(r["id"], n)
+                group = r["group"]
+                if group and group.strip():
+                    used_groups.setdefault(group, n)
+    except csv.Error as e:
+        return errs + [str(e)]
     except OSError as e:
         return [f"legos.csv: cannot read file ({e}); fix: create legos.csv in {kit_dir}"]
-    with f:
-        reader = csv.DictReader(f)
-        missing = [c for c in COLUMNS if c not in (reader.fieldnames or [])]
-        if missing:
-            return [f"legos.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(COLUMNS)}"]
-        errs, seen, used_groups = [], {}, {}
-        for n, r in enumerate(reader, 2):
-            if None in r:
-                errs.append(f"legos.csv:{reader.line_num}: {r.get('id') or '?'} has extra cells beyond the header; fix: match the row to the header")
-            for c in COLUMNS:
-                if not (r.get(c) or "").strip():
-                    errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has an empty `{c}` cell; fix: supply a value")
-            if r["rung"] and r["rung"] not in RUNGS:
-                errs.append(f"legos.csv:{n}: {r['id']} rung `{r['rung']}` is not in {' | '.join(RUNGS)}; fix: choose one of these four values")
-            if r["id"] in seen:
-                errs.append(f"legos.csv:{n}: duplicate id {r['id']} from line {seen[r['id']]}; fix: choose another ID")
-            seen.setdefault(r["id"], n)
-            group = r["group"]
-            if group and group.strip():
-                used_groups.setdefault(group, n)
-        return errs + check_groups(kit_dir, used_groups)
+    return errs + check_groups(kit_dir, used_groups)
 
 
 def read_groups(kit_dir):
-    """{group ID: name} from groups.csv; raise OSError if the file is missing."""
-    with (kit_dir / "groups.csv").open(encoding="utf-8", newline="") as f:
-        return {(r.get("id") or "").strip(): (r.get("name") or "").strip() for r in csv.DictReader(f)}
+    """{group ID: name} from groups.csv; raise on file or CSV errors."""
+    with _strict_csv(kit_dir / "groups.csv") as reader:
+        return {(r.get("id") or "").strip(): (r.get("name") or "").strip() for r in reader}
 
 
 def check_groups(kit_dir, used):
     """Every group used by legos.csv needs a name in groups.csv."""
     try:
         names = read_groups(kit_dir)
+    except csv.Error as e:
+        return [str(e)]
     except OSError as e:
         return [f"groups.csv: cannot read file ({e}); fix: create groups.csv with id,name columns"]
     return [f"legos.csv:{n}: group `{g}` has no name in groups.csv; fix: add `{g},<group name>`"
@@ -81,8 +94,7 @@ def check_rules_and_gates(kit_dir):
         return []
     errs, rules, rule_lines = [], {}, {}
     try:
-        with rpath.open(encoding="utf-8", newline="") as f:
-            reader = csv.DictReader(f)
+        with _strict_csv(rpath) as reader:
             missing = [c for c in RULE_COLUMNS if c not in (reader.fieldnames or [])]
             if missing:
                 return [f"rules.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(RULE_COLUMNS)}"]
@@ -99,12 +111,13 @@ def check_rules_and_gates(kit_dir):
                 rules[rid] = r
         if not has_gates:
             return errs
-        with gpath.open(encoding="utf-8", newline="") as f:
-            reader = csv.DictReader(f)
+        with _strict_csv(gpath) as reader:
             missing = [c for c in GATE_COLUMNS if c not in (reader.fieldnames or [])]
             if missing:
                 return errs + [f"gates.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(GATE_COLUMNS)}"]
             gates = [(reader.line_num, g) for g in reader]
+    except csv.Error as e:
+        return errs + [str(e)]
     except (OSError, KeyError) as e:
         if has_gates:
             return errs + [f"gates.csv: cannot cross-check rules.csv ({e}); fix: provide rules.csv with an id column"]
@@ -304,6 +317,8 @@ def main(argv=None):
     if a.log:
         try:
             errs = check_progress_log(Path(a.log).read_text(encoding="utf-8"), set(read_groups(Path(a.dir))))
+        except csv.Error as e:
+            errs = [str(e)]
         except OSError as e:
             errs = [f"progress.log: cannot read file ({e})"]
         for e in errs:
