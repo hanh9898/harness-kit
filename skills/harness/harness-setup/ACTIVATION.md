@@ -3,8 +3,9 @@
 ## Verify upstream prerequisites
 
 Verify the originals `grilling` and `domain-modeling` before dependent discovery.
-Before override authoring, verify `writing-for-agents` and the originals
-`to-spec`, `to-tickets` and `implement`. Check extra methods only where used.
+Before authoring a selected override, verify `writing-for-agents` and that
+override's original: `to-spec`, `to-tickets` or `implement`. Skip originals
+for unselected overrides. Check extra methods only where used.
 Use the upstream originals, not vendored copies.
 
 Check exact ID, source, revision, caller and invocation policy on the consuming
