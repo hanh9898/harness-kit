@@ -27,6 +27,31 @@ def test_quoted_multiline_detail_passes(tmp_path):
     assert r.returncode == 0, r.stdout + r.stderr
 
 
+@pytest.mark.parametrize(("gap", "line"), [("", 5), ("\n", 6)], ids=["adjacent", "blank-line"])
+def test_lego_diagnostics_use_physical_lines_after_multiline_cell(tmp_path, gap, line):
+    root = write_kit(
+        tmp_path, [row("A01", detail="First line\nSecond line"), row("A02")], groups={"A": "Intake"}
+    )
+    invalid = row("A02", group="B", summary="", rung="plugin")
+    with (root / "legos.csv").open("a", encoding="utf-8", newline="") as f:
+        f.write(gap)
+        csv.writer(f).writerow([*(invalid[c] for c in COLUMNS), "extra"])
+
+    r = run(CHECK_KIT, "--dir", root)
+
+    assert r.returncode == 1
+    assert not r.stderr, r.stderr
+    prefix = f"ERROR: legos.csv:{line}: "
+    assert r.stdout.splitlines() == [
+        prefix + "A02 has extra cells beyond the header; fix: match the row to the header",
+        prefix + "A02 has an empty `summary` cell; fix: supply a value",
+        prefix + "A02 rung `plugin` is not in instruction-file | skill | script-cli | mcp; fix: choose one of these four values",
+        prefix + "duplicate id A02 from line 4; fix: choose another ID",
+        prefix + "group `B` has no name in groups.csv; fix: add `B,<group name>`",
+        "5 data errors.",
+    ]
+
+
 @pytest.mark.parametrize(("filename", "data"), [
     ("legos.csv", ",".join(COLUMNS) + '\nA01,A,Alpha,s,w,skill,stated,src,"detail\nA02,A,Beta,s,w,skill,stated,src,detail\n'),
     ("groups.csv", 'id,name\nA,"Group A\nB,Group B\n'),
