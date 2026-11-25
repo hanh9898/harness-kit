@@ -76,13 +76,16 @@ caller and invocation policy. H3 does not authorize registration. Use the
 and verify that every destination resolves inside the project and the grant
 before writing. H4 does not authorize execution.
 
-Read back the effective configuration and resolve each registered ID with
-the native tool in the intended caller and project. Match exact ID, Source
-(resolved path), revision or digest, caller and effective invocation policy.
-Check that each ID has a single binding and that the originals retain their
-sources and manual invocation policy. Do not invoke a user-only original to
-check it. Use permitted no-write probes to verify output and denial; test a
-fresh or child context only when the route uses it.
+First read back the effective configuration in the intended caller and project.
+Match exact ID, Source (resolved path), revision or digest, caller and effective
+invocation policy. Check that each ID has a single binding and that the
+originals retain their sources and manual invocation policy. Do not invoke a
+user-only original to check it.
+
+After matching the binding, resolve the exact ID with the native tool and
+recheck what loaded. Use a permitted no-write probe to collect output or denial
+evidence. Do not require prior output evidence for the first probe. Test a fresh
+or child context only when the route uses it.
 
 Record the verified binding and evidence for each route independently. A
 verified preparation pair without verified execution is draft-only. Apply the

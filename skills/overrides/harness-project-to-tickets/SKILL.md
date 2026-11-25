@@ -5,7 +5,8 @@ description: Draft Harness tickets from an approved project spec. Return drafts 
 
 # Draft Harness tickets
 
-Accept only a verified project binding and caller for this route. Require the
+Accept only a current project binding that matches readback and the intended
+caller. Require the
 exact spec revision approved at H5, its current decision basis, work scope
 and dependencies. Return a blocker for missing or stale approval, conflicting
 inputs or a mismatched binding.

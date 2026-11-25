@@ -130,6 +130,8 @@ def test_h4_is_a_separate_registration_gate_and_pair_is_draft_only():
     assert "H4 does not authorize execution" in registration
     assert "draft-only" in registration
     assert "route-readiness" in registration
+    assert registration.index("First read back") < registration.index("permitted no-write probe")
+    assert "Do not require prior output evidence for the first probe" in registration
 
 
 def test_checklist_file_exists():

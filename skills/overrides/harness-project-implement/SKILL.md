@@ -5,7 +5,8 @@ description: Apply one authorized Harness effect for an assigned ticket. Return 
 
 # Apply one Harness effect
 
-Accept only the verified execution binding for the assigned caller. Require
+Accept only a current execution binding that matches readback and the assigned
+caller. Require
 `DispatchReady` from Harness Implement, the exact effect and target, current
 assignment ID and epoch, expected target revision, applicable selection and
 live effect grant (H8). Registration or a draft is not authority.

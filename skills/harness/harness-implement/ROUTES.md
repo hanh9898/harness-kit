@@ -57,6 +57,10 @@ Check resolved source, immutable revision or file digest, caller and policy.
 Neither a listing nor a frontmatter flag proves the effective binding.
 Test a separate child context only if the workflow uses it.
 
+Match the current binding before probing for output. A matching readback allows
+a permitted no-write probe without prior output evidence. It does not make the
+route `verified` or authorize an effect.
+
 Record ID, source and override revision/digest, host, scope, caller, effective
 invocation policy, expected output, selection/exclusion conditions, dependencies,
 allowed effects, status and evidence pointer. Use `verified` for a current

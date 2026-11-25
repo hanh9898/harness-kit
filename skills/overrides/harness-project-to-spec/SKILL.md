@@ -5,7 +5,8 @@ description: Draft a missing Harness spec from a settled project decision. Retur
 
 # Draft a Harness spec
 
-Accept only a verified project binding and caller for this route. Require
+Accept only a current project binding that matches readback and the intended
+caller. Require
 `DesignReady`, the pinned decision and basis, affected and protected scope,
 and acceptance checks. Return a blocker if the binding or inputs do not match.
 
