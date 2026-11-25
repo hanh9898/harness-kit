@@ -21,7 +21,7 @@ directories with `npx skills add <checkout>`: the copied Library skill cannot
 resolve `kit/scripts/library` from its real directory. Do not install globally.
 
 Set `KIT` and `PROJECT` to absolute directory paths and `KIT_COMMIT` to the
-approved full commit ID. Run in a shell with Git and `realpath`:
+approved full commit ID. Run in a shell with Git, `realpath` and Python 3:
 
 ```sh
 (
@@ -33,11 +33,14 @@ approved full commit ID. Run in a shell with Git and `realpath`:
       test -L "$dst" && test -r "$dst/SKILL.md" && test "$actual" = "$expected" ||
       blocked "existing entry does not resolve to $src: $dst"
   }
-  case "$KIT" in /*) ;; *) blocked 'KIT must be an absolute checkout path';; esac
-  case "$PROJECT" in /*) ;; *) blocked 'PROJECT must be an absolute project path';; esac
+  case "${KIT:-}" in /*) ;; *) blocked 'KIT must be an absolute checkout path';; esac
+  case "${PROJECT:-}" in /*) ;; *) blocked 'PROJECT must be an absolute project path';; esac
   test -d "$PROJECT" || blocked "project not found: $PROJECT"
+  for tool in git realpath mkdir ln python3; do
+    command -v "$tool" >/dev/null || blocked "required executable not found: $tool"
+  done
   head=$(git -C "$KIT" rev-parse --verify HEAD) || blocked "cannot read checkout: $KIT"
-  test "$head" = "$KIT_COMMIT" || blocked "checkout is not at the approved commit: $KIT"
+  test "$head" = "${KIT_COMMIT:-}" || blocked "checkout is not at the approved commit: $KIT"
   state=$(git --no-optional-locks -C "$KIT" status --porcelain --untracked-files=normal) ||
     blocked "cannot inspect checkout: $KIT"
   test -z "$state" || blocked "checkout is not clean: $KIT"
@@ -57,6 +60,8 @@ approved full commit ID. Run in a shell with Git and `realpath`:
     fi
   done
 
+  PYTHONDONTWRITEBYTECODE=1 "$KIT/kit/scripts/library" --help >/dev/null ||
+    blocked "cannot run the pinned Library helper with python3: $KIT"
   mkdir -p "$skills" || blocked "cannot create $skills"
   for id; do
     if [ ! -e "$skills/$id" ] && [ ! -L "$skills/$id" ]; then
@@ -66,7 +71,8 @@ approved full commit ID. Run in a shell with Git and `realpath`:
   done
   check_link harness-library
   test -x "$actual/../../../kit/scripts/library" || blocked "cannot resolve the linked Library helper"
-  PYTHONDONTWRITEBYTECODE=1 "$actual/../../../kit/scripts/library" --help
+  PYTHONDONTWRITEBYTECODE=1 "$actual/../../../kit/scripts/library" --help ||
+    blocked "cannot run the linked Library helper: $actual"
 )
 ```
 

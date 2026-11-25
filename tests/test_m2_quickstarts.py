@@ -35,13 +35,13 @@ def devin_project(tmp_path):
     return checkout, project, git("rev-parse", "HEAD")
 
 
-def bootstrap_devin(checkout, project, revision):
+def bootstrap_devin(checkout, project, revision, **env):
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     section = readme.split("### Devin — project scope (v1 pilot)\n", 1)[1].split("\n### ", 1)[0]
     (command,) = re.findall(r"```sh\n(.*?)\n```", section, re.DOTALL)
     return subprocess.run(
         ["sh", "-c", command],
-        env={**os.environ, "KIT": str(checkout), "PROJECT": str(project), "KIT_COMMIT": revision},
+        env={**os.environ, "KIT": str(checkout), "PROJECT": str(project), "KIT_COMMIT": revision, **env},
         capture_output=True,
         text=True,
     )
@@ -133,6 +133,21 @@ def test_devin_registration_rejects_redirected_skills_directory(devin_project, t
     assert result.returncode == 2
     assert "not a project-local directory" in result.stderr
     assert not list(outside.iterdir())
+
+
+@pytest.mark.parametrize("missing", ["python3", "realpath"])
+def test_devin_registration_checks_runtime_before_writing(devin_project, tmp_path, missing):
+    checkout, project, revision = devin_project
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    for command in {"sh", "git", "realpath", "mkdir", "ln", "python3"} - {missing}:
+        (bin_dir / command).symlink_to(shutil.which(command))
+
+    result = bootstrap_devin(checkout, project, revision, PATH=str(bin_dir))
+
+    assert result.returncode == 2
+    assert missing in result.stderr.lower()
+    assert not (project / ".devin").exists()
 
 
 def test_host_adapters_cover_each_capability_and_its_fallback():
