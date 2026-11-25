@@ -345,6 +345,11 @@ class Instance:
 
 
 @dataclass(frozen=True)
+class Caller(Instance):
+    caller_ref: str
+
+
+@dataclass(frozen=True)
 class Automation:
     automation_id: str
     target_bot_id: str
@@ -469,31 +474,35 @@ def occurrence_rows(db):
 @pytest.fixture
 def wake_fixture(two_bots, tmp_path):
     bots, routes = parse_routes(json.dumps(two_bots))
+    callers = {
+        bot_id: Caller(bound.instance_id, bound.scope_ref, bound.binding_revision, f"caller:{bot_id}")
+        for bot_id, bound in bots.items()
+    }
     ledgers = {}
-    for bot_id, bound in bots.items():
+    for bot_id, caller in callers.items():
         db = tmp_path / f"{bot_id}.db"
         with sqlite3.connect(db) as conn:
             conn.executescript("""
                 PRAGMA user_version = 1;
-                CREATE TABLE fence (instance TEXT, scope TEXT, revision TEXT);
+                CREATE TABLE fence (instance TEXT, scope TEXT, revision TEXT, caller TEXT);
                 CREATE TABLE occurrences (key TEXT PRIMARY KEY, state TEXT NOT NULL);
             """)
-            conn.execute("INSERT INTO fence VALUES (?, ?, ?)", fence_row(bound))
+            conn.execute("INSERT INTO fence VALUES (?, ?, ?, ?)", fence_row(caller))
         ledgers[bot_id] = db
-    return bots, routes, ledgers
+    return callers, routes, ledgers
 
 
-def fence_row(bound):
-    return bound.instance_id, bound.scope_ref, json.dumps(bound.binding_revision)
+def fence_row(caller):
+    return caller.instance_id, caller.scope_ref, json.dumps(caller.binding_revision), caller.caller_ref
 
 
 def receive(wake_fixture, bot_id, caller, delivery, occurrence_id, *,
             ingress="authenticated-automation", active_trigger="trigger-a1", crash=None):
-    bots, routes, ledgers = wake_fixture
+    callers, routes, ledgers = wake_fixture
     if (ingress != "authenticated-automation" or bot_id != delivery.target_bot_id
             or routes.get(delivery.automation_id) != delivery
             or not revision(delivery.binding_revision) or not ref(occurrence_id)
-            or bots.get(bot_id) != caller or active_trigger != delivery.trigger_ref):
+            or callers.get(bot_id) != caller or active_trigger != delivery.trigger_ref):
         return ()
     db = ledgers[bot_id]
     key = json.dumps([bot_id, delivery.automation_id, delivery.source_id, occurrence_id])
@@ -528,6 +537,7 @@ def test_wake_rejects_mismatched_delivery_and_isolates_occurrences(wake_fixture)
     a1, a2, b1 = (routes[f"automation-{suffix}"] for suffix in ("a1", "a2", "b1"))
     assert receive(wake_fixture, "bot-b", b, a1, "event", active_trigger=a1.trigger_ref) == ()
     assert receive(wake_fixture, "bot-a", b, a1, "event") == ()
+    assert receive(wake_fixture, "bot-a", replace(a, caller_ref=b.caller_ref), a1, "event") == ()
     assert receive(wake_fixture, "bot-a", a, a1, "event", active_trigger=None) == ()
     for field, value in [("trigger_ref", a2.trigger_ref), ("source_id", "other-event-source"),
                          ("scope_ref", "scope-b"), ("binding_revision", 0)]:
