@@ -327,8 +327,7 @@ def change_selection(args):
     before = read_selection(args.store, args.kit_dir, args.source, args.id)
     if not before["available"]:
         raise ValueError("Resource unavailable; inspect its source and identity before changing selection.")
-    first_disable = args.command == "disable" and args.expect_selection_revision == 0 and renamed_from is None
-    mode = "rwc" if first_disable else "rw"
+    mode = "rwc" if args.expect_selection_revision == 0 and args.command == "disable" else "rw"
     with sqlite3.connect(args.store.resolve().as_uri() + "?mode=" + mode, uri=True) as db:
         db.execute("PRAGMA synchronous=FULL")
         db.execute("BEGIN IMMEDIATE")
