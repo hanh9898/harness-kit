@@ -221,9 +221,7 @@ def cmd_show(rows, query, patterns, head, deleg, rules, aliases):
             print(f"gate: yes ({g['verify_method']})\nverified_quote: {g['verified_quote']}\ngate_note: {g['note']}")
         return 0
     identity = aliases.canonical(q)
-    hit = [r for r in rows if q and r["id"].lower() == identity]
-    if not hit:
-        hit = [r for r in rows if q and r["name"].lower() == q]
+    hit = [r for r in rows if q and (r["id"].lower() == identity or r["name"].lower() == q)]
     if len(hit) != 1:
         why = "matches no piece" if not hit else "matches more than one piece"
         return fail(f"`{query}` {why}.\nNext step: run `kit list` then `kit list <group>` to find the correct ID.")

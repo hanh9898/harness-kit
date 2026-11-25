@@ -25,6 +25,13 @@ def test_piece_lookup_uses_canonical_slug_for_legacy_id_and_name():
     listed = run(KIT_CLI, "list", "J")
     assert "durable-schedule\t" in listed.stdout and "J02" not in listed.stdout
 
+
+def test_piece_lookup_rejects_id_and_exact_name_ambiguity(tmp_path):
+    root = write_kit(tmp_path, [row("alpha-hook"), row("beta-hook", name="Alpha-Hook")])
+    result = run(KIT_CLI, "--dir", root, "show", "alpha-hook")
+    assert result.returncode == 2 and "matches more than one piece" in result.stderr
+
+
 def test_list_without_group_shows_group_names_with_counts_not_pieces(tmp_path):
     r = kit(tmp_path, "list")
     assert r.returncode == 0
