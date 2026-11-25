@@ -5,8 +5,8 @@ description: Diagnose, assess or improve an existing Harness. Use for drift, age
 
 # Harness Evolve
 
-Use the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md) before
-choosing the scope of work. An explicit request takes the direct path.
+An explicit request takes the direct path. Otherwise, start with silent,
+read-only research under the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md).
 
 Start from the requested result, the actual consuming host and its current
 authority. Keep existing records, including `needs-change` work, and reopen only

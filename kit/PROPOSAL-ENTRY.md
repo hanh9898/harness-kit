@@ -13,9 +13,9 @@ proposal. Keep its route, scope and effect gates.
 
 ## No request: research silently
 
-Before asking anything, with no progress narration, read only enough to
-cross-check a useful lead. Use related chat or sessions, the repo and its
-history, the bound store, or connected integrations such as Slack or Linear
+Send no acknowledgement or progress narration before or during research.
+Read only enough to cross-check a useful lead. Use related chat or sessions,
+the repo and its history, the bound store, or integrations such as Slack or Linear
 only as relevant and within the current ACL. Reuse evidence while it is
 current. Do not quote private chat or disclose private channel names. Setup
 and discovery topics use only intent, stack, settled choices and static facts;

@@ -118,7 +118,7 @@ def test_proposal_entry_covers_both_routes_and_does_not_grant_effects():
     assert "Direct" in direct and "0 proposal steps" in direct
     assert "material" in direct and "clarification" in direct
     assert "read-only" in research and "ACL" in research
-    assert "no progress narration" in research and "WAL/SHM" in research
+    assert "no acknowledgement or progress narration" in research and "WAL/SHM" in research
     assert "0 writes" in research and "opt-in" in research
     assert "1–2" in offer and "8 short lines" in offer and "60 words" in offer
     assert "verified evidence in parentheses" in offer and "NoProposal" in offer
