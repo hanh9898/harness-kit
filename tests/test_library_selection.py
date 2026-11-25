@@ -415,57 +415,57 @@ def test_catalog_pin_controls_search_detail_lifecycle_and_grant(tmp_path):
     assert read('selection', *selector) == bundled
 
 
-def test_two_bots_keep_scoped_decisions_and_grants_in_one_library(tmp_path):
+def test_two_bots_cannot_reuse_a_scoped_decision_for_the_same_supplied_resource(tmp_path):
     supplied(tmp_path)
     pin = ('--kit-dir', tmp_path / 'kit')
     store = tmp_path / 'library.sqlite3'
     initialize_empty_store(store)
-    bots = [tmp_path / 'bot-a', tmp_path / 'bot-b']
-    ids = [REREAD, 'evidence-labels']
-    projects, requests, grants = [], [], []
-    for bot, identity in zip(bots, ids):
+    bot_a, bot_b = tmp_path / 'bot-a', tmp_path / 'bot-b'
+    consumers = {}
+    for bot in (bot_a, bot_b):
         bot.mkdir()
         project = bot / 'active-config'
-        project.write_text(f'Independently adopted content for {bot.name}\n', encoding='utf-8')
-        projects.append((project, project.read_bytes()))
-        request = decision(bot, scope=f'project:{bot}')
-        requests.append(request)
-        granted = invoke(tmp_path, 'grant-write', 'disable', identity, '--source', 'supplied',
-                         *pin, '--input', request, '--expect-revision', 0, '--ttl-seconds', 60)
-        assert granted.returncode == 0, granted.stderr
-        grants.append(json.loads(granted.stdout)['write_grant'])
+        consumers[project] = f'Independently adopted content for {bot.name}\n'
+        project.write_text(consumers[project], encoding='utf-8')
+    request_a = decision(bot_a, scope=f'project:{bot_a}')
+    request_b = decision(bot_b, scope=f'project:{bot_b}')
+    selector = (REREAD, '--source', 'supplied', *pin)
 
-    for index, identity in enumerate(ids):
-        selector = (identity, '--source', 'supplied', *pin)
-        strict = ('--require-existing-store',)
-        commit = ('disable', *selector, '--expect-selection-revision', 0)
-        for request, grant in [(requests[index], grants[1 - index]),
-                               (requests[1 - index], grants[index])]:
-            denied = invoke(tmp_path, *commit, '--input', request, '--write-grant', grant)
-            assert (denied.returncode, denied.stdout) == (2, '')
-            assert 'No current write grant' in denied.stderr
-        history = invoke(tmp_path, *strict, 'selection-history', *selector)
-        assert history.returncode == 0, history.stderr
-        assert json.loads(history.stdout) == []
+    def read_as(bot, command):
+        result = subprocess.run([str(CLI), '--store', str(store), '--require-existing-store',
+                                 command, *map(str, selector)],
+                                cwd=bot, capture_output=True, text=True)
+        assert result.returncode == 0, result.stderr
+        return json.loads(result.stdout)
 
-        committed = invoke(tmp_path, *commit, '--input', requests[index], '--write-grant', grants[index])
-        assert committed.returncode == 0, committed.stderr
-        readback = invoke(tmp_path, *strict, 'selection', *selector)
-        assert readback.returncode == 0, readback.stderr
-        observed = json.loads(readback.stdout)
-        assert (observed['id'], observed['revision'], observed['effective']) == (identity, 1, False)
-        assert observed['record']['scope'] == f'project:{bots[index]}'
-        assert 'applied consumers remain unchanged' in observed['consumption']
+    assert read_as(bot_a, 'selection')['record'] is None
+    assert read_as(bot_b, 'selection')['record'] is None
+    issued = invoke(tmp_path, 'grant-write', 'disable', *selector, '--input', request_a,
+                    '--expect-revision', 0, '--ttl-seconds', 60)
+    assert issued.returncode == 0, issued.stderr
+    commit = ('disable', *selector, '--expect-selection-revision', 0,
+              '--write-grant', json.loads(issued.stdout)['write_grant'])
+    denied = invoke(tmp_path, *commit, '--input', request_b)
+    assert (denied.returncode, denied.stdout) == (2, '')
+    assert 'No current write grant' in denied.stderr
+    assert read_as(bot_b, 'selection-history') == []
 
-        denied = invoke(tmp_path, 'grant-write', 'restore', *selector,
-                        '--input', requests[1 - index], '--expect-revision', 1, '--ttl-seconds', 60)
-        assert (denied.returncode, denied.stdout) == (2, '')
-        assert 'Changing selection scope' in denied.stderr
-        history = invoke(tmp_path, *strict, 'selection-history', *selector)
-        assert history.returncode == 0, history.stderr
-        assert json.loads(history.stdout) == [observed['record']]
+    committed = invoke(tmp_path, *commit, '--input', request_a)
+    assert committed.returncode == 0, committed.stderr
+    selected_a = read_as(bot_a, 'selection')
+    observed_b = read_as(bot_b, 'selection')
+    assert observed_b == selected_a
+    assert (selected_a['revision'], selected_a['effective']) == (1, False)
+    assert observed_b['record']['scope'] == f'project:{bot_a}'
+    assert observed_b['record']['scope'] != f'project:{bot_b}'
+    assert 'applied consumers remain unchanged' in observed_b['consumption']
 
-    assert all(project.read_bytes() == before for project, before in projects)
+    denied = invoke(tmp_path, 'grant-write', 'restore', *selector, '--input', request_b,
+                    '--expect-revision', observed_b['revision'], '--ttl-seconds', 60)
+    assert (denied.returncode, denied.stdout) == (2, '')
+    assert 'Changing selection scope' in denied.stderr
+    assert read_as(bot_b, 'selection-history') == [selected_a['record']]
+    assert {project: project.read_text(encoding='utf-8') for project in consumers} == consumers
 
 
 def test_exclusion_survives_supplied_update_and_explicit_restore_preserves_provenance(tmp_path):
