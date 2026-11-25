@@ -53,4 +53,22 @@ Selection establishes intent, not permission to create a record, install or
 execute. Both entry routes still require the destination's exact grant and
 the skill's own checks before any effect. A read-only request remains
 read-only even with a prior grant. Chat, @mentions and Inbox replies are
-interactive input, never background wake triggers.
+interactive input, never [background wake](PERSISTENCE.md#automation-wake) triggers.
+
+Enter Apply only when the explicit or selected request includes that Apply goal.
+
+```v1-gates
+[
+  {"id": "access.read-only", "requires": []},
+  {"id": "authority.live-effect", "requires": []},
+  {"id": "entry.effect.direct", "requires": ["entry.explicit-request", "authority.live-effect"]},
+  {"id": "entry.effect.selected", "requires": ["entry.selected-request", "authority.live-effect"]},
+  {"id": "entry.explicit-apply", "requires": []},
+  {"id": "entry.explicit-request", "requires": []},
+  {"id": "entry.no-explicit-request", "requires": []},
+  {"id": "entry.offer", "requires": ["entry.research"]},
+  {"id": "entry.research", "requires": ["entry.no-explicit-request", "access.read-only"]},
+  {"id": "entry.selected-request", "requires": ["entry.offer", "user.selection"]},
+  {"id": "user.selection", "requires": []}
+]
+```

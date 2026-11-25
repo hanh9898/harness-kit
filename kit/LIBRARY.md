@@ -254,3 +254,14 @@ selection operations supply local persistence; the host checks the meaning of
 correction links, ownership, retention and actual references. Archival through
 explicit exclusion keeps content and histories inspectable. No CLI operation
 purges history or deletes consumers; a preview is not a disposal grant.
+
+```v1-gates
+[
+  {"id": "library.bound-store", "requires": []},
+  {"id": "library.cas", "requires": []},
+  {"id": "library.commit", "requires": ["library.exact-grant", "library.cas"]},
+  {"id": "library.exact-grant", "requires": []},
+  {"id": "library.no-sidecar", "requires": []},
+  {"id": "library.read", "requires": ["library.no-sidecar", "library.bound-store"]}
+]
+```

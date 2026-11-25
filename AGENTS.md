@@ -21,3 +21,23 @@ For an optional preference with a reasonable default within existing authority, 
 If ending the run while awaiting an optional answer in T3, create a one-time `schedule_task` bound to the current thread for the deadline. Its prompt must identify the question, default, scope, and checkpoint; it must first check for an answer, cancellation, completion, or an already-applied default. Disable an obsolete timer when the answer is handled early. Use delegate completion events for delegate waits, not scheduled polling. If scheduling is unavailable or fails, report that automatic resumption is not armed.
 
 Required permission, indispensable missing facts, secrets, and required human review remain prerequisites. Silence does not supply them. Keep only dependent work blocked, preserve a concrete continuation, and complete independent authorized work. A user pause or cancellation takes precedence over a timeout.
+
+## v1 structural guard
+
+Run `python3 -m pytest -q tests/test_v1_structural_contract.py tests/test_library_read_no_write.py`.
+Each gate has one owner and one `v1-gates` JSON block of `{id, requires}` records
+per owner. Keep alternative routes in separate leaves. A root is an observed
+fact, not authority by itself. When a contract intentionally changes, update
+its owner, caller links and the guard together.
+
+| Rule | Check |
+| --- | --- |
+| Apply, override readiness, spec revision, publication and continuation keep their prerequisites. | Gate owners, required edges and caller links. |
+| Only an automation for the exact Bot can claim; durable dedupe precedes ACK. Configuring, rebinding, piloting and enabling remain separate. | Wake and lifecycle edges, no chat ingress, and the Tasks/Inbox boundary. |
+| Discovery and override routes do not become default entries. | Entry inventories, proposal links, discovery order and parents, and override IDs. |
+| Library reads do not write; Inbox and Memory retain distinct authority and store gates. | Public Library CLI no-write tests, and Library, Inbox and Memory edges. |
+
+The `v1-guard` PR job is a structural and CLI regression check, not proof of
+host behavior, TLC properties, or live ACL enforcement. Reproduce red cases in
+a scratch checkout, never on the review branch. The repository owner sets the
+required check on the protected branch; do not bypass this gate.

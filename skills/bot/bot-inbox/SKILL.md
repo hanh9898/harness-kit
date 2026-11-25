@@ -15,6 +15,7 @@ with an open ask. Use [host routes](HOST.md#resolve-the-route) to find the pinne
 Inbox for this Bot and caller. Read related cards and current target state before
 writing; continue work that does not need an ask. Do not keep an Inbox in memory,
 the resource Library, or a separate queue.
+Keep cards separate from [canonical work and claims](../../harness/harness-implement/WORK.md#tasks-board-and-inbox).
 
 ## Keep one active card per action
 
@@ -85,7 +86,8 @@ Do not disclose the answer on another route.
 
 ## Reconcile PR review cards
 
-On a verified wake or when the Bot resumes, use the canonical repo and PR ID.
+On a [verified automation wake](../../../kit/PERSISTENCE.md#automation-wake) or
+when the Bot resumes interactively, use the canonical repo and PR ID.
 Read live state from the authoritative target. An event is a hint to reconcile,
 not proof that the PR is terminal.
 
@@ -102,3 +104,11 @@ its card. See [wake and qualification](HOST.md#qualify-in-an-isolated-bot) befor
 background reconciliation. Without a qualified wake route, reconcile only on
 resume or by operator action; do not promise immediate auto-close or poll in a
 loop.
+
+```v1-gates
+[
+  {"id": "inbox.authenticated-yes", "requires": []},
+  {"id": "inbox.grant-request", "requires": ["inbox.match-revision", "inbox.authenticated-yes"]},
+  {"id": "inbox.match-revision", "requires": []}
+]
+```

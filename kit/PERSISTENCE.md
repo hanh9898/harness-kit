@@ -147,3 +147,33 @@ authorized, reopenable source reference, if available, and the exact next
 step. Do not create a substitute record or widen access. In the fresh
 session, reopen the original source and verify its identity and current
 state before taking the next step.
+
+## Automation wake
+
+Accept only an authenticated automation occurrence from an allowed schedule or
+integration source. Chat, @mentions, Bot messages, direct requests and Inbox
+replies never wake a Bot. Verify the exact `automation_id`, single
+`target_bot_id`, source, scope and current binding revision, and read back
+the exact trigger as active before claiming. Missing or mismatched input has
+no default target, claim, positive ACK or dispatch.
+
+Commit the occurrence claim, durable uniqueness and resumable pending state
+against that Bot's occurrence key before acknowledging delivery. A duplicate
+can acknowledge only after reading the committed record for the same mapping.
+Do not claim or dispatch it again. A delivery ACK is not an effect receipt or
+a Tasks claim. For an `Unknown` effect, keep its checkpoint and reconcile at
+the original target; do not replay because delivery was acknowledged.
+
+```v1-gates
+[
+  {"id": "continuation.handoff", "requires": ["method.handoff", "evidence.access"]},
+  {"id": "evidence.access", "requires": []},
+  {"id": "wake.ack", "requires": ["wake.claim", "wake.durable-dedupe"]},
+  {"id": "wake.automation-only", "requires": []},
+  {"id": "wake.claim", "requires": ["wake.automation-only", "wake.exact-target", "wake.current-binding", "wake.trigger-active-readback"]},
+  {"id": "wake.current-binding", "requires": []},
+  {"id": "wake.durable-dedupe", "requires": []},
+  {"id": "wake.exact-target", "requires": []},
+  {"id": "wake.trigger-active-readback", "requires": []}
+]
+```

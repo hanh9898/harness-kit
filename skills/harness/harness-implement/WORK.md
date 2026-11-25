@@ -58,7 +58,17 @@ Deduplicate at the authoritative write boundary. In the exact Harness namespace,
 
 Publish prerequisites first under their own approvals and grants; link dependencies by stable Harness IDs. Product predecessors are read-only references, not tracker links that update the other side. Return canonical `ticket_ref` only after reading back the exact destination, ID, revision, content, links and state. Resolve an `Unknown` attempt by its effect or request ID and stable `work_id` at the same destination. The write boundary also applies to status changes and closure.
 
+## Tasks board and Inbox
+
+Use the bound Tasks board for canonical work. Distinguish a human assignee
+from a session claim. Before claiming or dispatching, read back the canonical
+ticket, current claim and dependencies and verify authority on that board.
+Inbox cards and replies do not authorize a Tasks claim or replace canonical
+work, PR status, or an effect grant.
+
 ## Dispatch and integrate
+
+For a Bot work claim, apply the [Tasks board and Inbox boundary](#tasks-board-and-inbox).
 
 Recompute `DispatchReady` from the read-back Harness ticket and its current decision/revision, scope, spec and prerequisites; the exclusive, live assignment ID and epoch; the exact execution route in the assigned caller context; and the live authority for the planned effect at the expected target revision. A stale claim, wrong route or revoked grant blocks the write. Do not reassign until the old session has stopped or its assignment cannot still write. Isolate and serialize effects to overlapping targets; use one integration owner for dependent tickets.
 
@@ -84,3 +94,19 @@ Use the live exact-effect grant: match principal, operation, target and scope, p
 Return a v1 [`result`](../../../kit/STAGE-CONTRACTS.md#implement--setup-or-evolve-result): assignment and target references, observed revision (expected if not known), effect or request ID, `Applied`, `Denied` or `Unknown`, receipt or authoritative history reference, separate verification and accessible evidence references, and the next step. For `Unknown`, a history reference can be where to reconcile, not proof of a receipt. If required evidence is missing, report the gap; do not invent a complete result.
 
 Verify Harness behavior and at-risk product behavior separately. Report applied state, verified behavior, activation and measured improvement separately; route product findings back without writing product issues. Setup or Evolve checks the assignment and acceptance before marking `Verified`, closes under separate authority and updates its own decision map.
+
+```v1-gates
+[
+  {"id": "authority.spec-decision", "requires": []},
+  {"id": "authority.work-claim", "requires": []},
+  {"id": "prepare.spec-approved", "requires": ["spec.exact-revision", "authority.spec-decision"]},
+  {"id": "prepare.tickets", "requires": ["prepare.spec-approved"]},
+  {"id": "publish.apply", "requires": ["publish.split-current", "publish.exact-grant", "publish.harness-target"]},
+  {"id": "publish.exact-grant", "requires": []},
+  {"id": "publish.harness-target", "requires": []},
+  {"id": "publish.split-current", "requires": []},
+  {"id": "spec.exact-revision", "requires": []},
+  {"id": "work.canonical-task", "requires": []},
+  {"id": "work.claim", "requires": ["work.canonical-task", "authority.work-claim"]}
+]
+```
