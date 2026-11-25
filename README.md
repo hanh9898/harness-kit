@@ -21,7 +21,9 @@ directories with `npx skills add <checkout>`: the copied Library skill cannot
 resolve `kit/scripts/library` from its real directory. Do not install globally.
 
 Set `KIT` and `PROJECT` to absolute directory paths and `KIT_COMMIT` to the
-approved full commit ID. Run in a shell with Git, `realpath` and Python 3:
+approved full commit ID. The consuming project must be outside the pinned kit
+checkout so registration cannot dirty the source. Run in a shell with Git,
+`realpath` and Python 3:
 
 ```sh
 (
@@ -39,6 +41,11 @@ approved full commit ID. Run in a shell with Git, `realpath` and Python 3:
   for tool in git realpath mkdir ln python3; do
     command -v "$tool" >/dev/null || blocked "required executable not found: $tool"
   done
+  kit_root=$(realpath "$KIT") || blocked "cannot resolve checkout: $KIT"
+  project_root=$(realpath "$PROJECT") || blocked "cannot resolve project: $PROJECT"
+  case "$project_root" in
+    "$kit_root"|"$kit_root"/*) blocked "PROJECT must be outside the pinned kit checkout: $project_root";;
+  esac
   head=$(git -C "$KIT" rev-parse --verify HEAD) || blocked "cannot read checkout: $KIT"
   test "$head" = "${KIT_COMMIT:-}" || blocked "checkout is not at the approved commit: $KIT"
   state=$(git --no-optional-locks -C "$KIT" status --porcelain --untracked-files=normal) ||

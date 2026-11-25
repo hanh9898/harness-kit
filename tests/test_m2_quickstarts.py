@@ -159,6 +159,21 @@ def test_devin_registration_checks_runtime_before_writing(devin_project, tmp_pat
     assert not (project / ".devin").exists()
 
 
+@pytest.mark.parametrize("subdir", [False, True], ids=["same-checkout", "nested-project"])
+def test_devin_registration_does_not_dirty_the_pinned_checkout(devin_project, subdir):
+    checkout, _, revision = devin_project
+    project = checkout
+    if subdir:
+        project /= "nested"
+        project.mkdir()
+
+    result = bootstrap_devin(checkout, project, revision)
+
+    assert result.returncode == 2
+    assert "outside the pinned kit checkout" in result.stderr
+    assert not (project / ".devin").exists()
+
+
 def test_host_adapters_cover_each_capability_and_its_fallback():
     document = (KIT / "HOST-ADAPTERS.md").read_text(encoding="utf-8")
     table = document.split("## Capability map\n", 1)[1].split("\n## ", 1)[0]
