@@ -21,6 +21,44 @@ def test_named_extra_column_passes(tmp_path):
     assert run(CHECK_KIT, "--dir", root).returncode == 0
 
 
+def test_quoted_multiline_detail_passes(tmp_path):
+    root = write_kit(tmp_path, [row("A01", detail='First line, with "quotes"\nSecond line'), row("A02")])
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
+@pytest.mark.parametrize(("filename", "data"), [
+    ("legos.csv", ",".join(COLUMNS) + '\nA01,A,Alpha,s,w,skill,stated,src,"detail\nA02,A,Beta,s,w,skill,stated,src,detail\n'),
+    ("groups.csv", 'id,name\nA,"Group A\nB,Group B\n'),
+    ("rules.csv", 'id,topic,rule,source,certainty,check,verified_on\nR01,t,r,s,stated,c,"\nR02,t,r,s,stated,c,\n'),
+    ("gates.csv", 'id,gate,verify_method,verified_quote,note\nR01,no,unreadable,,"note\nR02,no,unreadable,,note\n'),
+], ids=["legos", "groups", "rules", "gates"])
+def test_unclosed_csv_quote_rejected(tmp_path, filename, data):
+    root = write_kit(tmp_path, [row("A01")])
+    if filename == "gates.csv":
+        (root / "rules.csv").write_text(
+            "id,topic,rule,source,certainty,check,verified_on\nR01,t,r,s,stated,c,\nR02,t,r,s,stated,c,\n",
+            encoding="utf-8",
+        )
+    (root / filename).write_text(data, encoding="utf-8")
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert f"ERROR: {filename}:3: malformed CSV" in r.stdout
+    assert not r.stderr, r.stderr
+
+
+def test_progress_log_reports_malformed_groups_csv(tmp_path):
+    (tmp_path / "groups.csv").write_text('id,name\nA,"Group A\n', encoding="utf-8")
+    log = tmp_path / "progress.log"
+    log.touch()
+
+    r = run(CHECK_KIT, "--dir", tmp_path, "--log", log)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "ERROR: groups.csv:2: malformed CSV" in r.stdout
+    assert not r.stderr, r.stderr
+
+
 def test_missing_column_reported(tmp_path):
     header = [c for c in COLUMNS if c != "certainty"]
     root = write_kit(tmp_path, [row("A01")], header=header)
