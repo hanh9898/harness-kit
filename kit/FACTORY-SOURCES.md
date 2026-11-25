@@ -24,8 +24,8 @@ provider route. Surveys apply when product selection is actually requested;
 this change selects no product for a consumer and makes no current vendor claim.
 
 Existing #25 authority, #26 tasks/team, #27 operations, #28 observation/assessment
-and #29 recovery retain ownership of their contracts. N06 determines focused
-pointers; E07/E08 inform current state and logical history without requiring a
+and #29 recovery retain ownership of their contracts. agent-document-conventions determines focused
+pointers; current-state-file/decision-log-and-state-machine inform current state and logical history without requiring a
 new logging implementation. The new contribution is the connected arrangement
 and per-path readiness assessment through the existing entries. Qualification
 conditions, original-method digests and observed effects are retained with the

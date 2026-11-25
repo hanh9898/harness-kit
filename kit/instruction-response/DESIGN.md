@@ -39,7 +39,7 @@ handoffs; preserve its invocation prerequisites and applicable references.
 An unavailable required provider blocks dependent authoring, not inspection or
 reporting the prerequisite. Use [writing scope](WRITING.md) for the accepted
 STE-inspired recommendation and [examples](EXAMPLES.md) when constructing or
-checking the contract. Retrieve N06 and relevant output resources through the
+checking the contract. Retrieve agent-document-conventions and relevant output resources through the
 kit CLI; source certainty remains separate from observed use.
 
 Give the consumer these meanings in its existing suitable form:
@@ -98,8 +98,8 @@ This procedure is inferred implementation guidance for accepted
 [spec 15, especially 15/34–37 and A27/A31](https://github.com/hanh9898/harness-kit/issues/15)
 and [ticket 23](https://github.com/hanh9898/harness-kit/issues/23).
 Those sources establish the selected product contract, not host-specific
-precedence or runtime qualification. N01/N03 are inferred output conventions;
-N06 remains open catalog guidance. The current original writing method supplies
+precedence or runtime qualification. result-and-brief-templates/presentation-conventions are inferred output conventions;
+agent-document-conventions remains open catalog guidance. The current original writing method supplies
 the authoring discipline. Local examples and checks operationalize the accepted
 contract; their acceptance does not certify a standard or establish another
 host's behavior. Preserve actual method/version, source certainty, grants and

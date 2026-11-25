@@ -13,7 +13,7 @@ def test_source_map_resource_reaches_task_context_contract(tmp_path):
     plugin = tmp_path / "relocated plugin"
     for folder in ("skills", "kit"):
         shutil.copytree(ROOT / folder, plugin / folder)
-    result = run(plugin / "kit/scripts/kit", "show", "B08")
+    result = run(plugin / "kit/scripts/kit", "show", "reference-store-and-source-map")
     assert result.returncode == 0, result.stdout + result.stderr
     # The public retrieval response must carry a usable package-relative route,
     # not only a generic suggestion to keep a source map.

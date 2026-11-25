@@ -21,6 +21,10 @@ from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "kit" / "scripts"))
+from piece_ids import ALIAS_FILE, PieceAliases
+sys.path.pop(0)
+
 COLUMNS = ["id", "group", "name", "summary", "needed_when", "rung", "certainty", "sources", "detail"]
 RUNGS = ["instruction-file", "skill", "script-cli", "mcp"]
 RULE_COLUMNS = ["id", "topic", "rule", "source", "certainty", "check", "verified_on"]
@@ -42,6 +46,7 @@ def _strict_csv(path):
 
 def check(kit_dir):
     errs, seen, used_groups = [], {}, {}
+    entries = []
     try:
         with _strict_csv(kit_dir / "legos.csv") as reader:
             missing = [c for c in COLUMNS if c not in (reader.fieldnames or [])]
@@ -49,6 +54,7 @@ def check(kit_dir):
                 return [f"legos.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(COLUMNS)}"]
             for r in reader:
                 n = reader.line_num
+                entries.append((n, r))
                 if None in r:
                     errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has extra cells beyond the header; fix: match the row to the header")
                 for c in COLUMNS:
@@ -66,6 +72,17 @@ def check(kit_dir):
         return errs + [str(e)]
     except OSError as e:
         return [f"legos.csv: cannot read file ({e}); fix: create legos.csv in {kit_dir}"]
+    if (kit_dir / ALIAS_FILE).exists():
+        rule_ids = []
+        try:
+            with _strict_csv(kit_dir / "rules.csv") as reader:
+                rule_ids = [row.get("id") for row in reader]
+        except (OSError, csv.Error):
+            pass  # check_rules_and_gates handles rule catalog diagnostics.
+        try:
+            PieceAliases.load(kit_dir, entries, rule_ids)
+        except (ValueError, OSError) as e:
+            errs.append(str(e))
     return errs + check_groups(kit_dir, used_groups)
 
 

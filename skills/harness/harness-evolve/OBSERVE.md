@@ -3,9 +3,9 @@
 Answer the operating question at its requested time and scope. Observation can finish with facts, conflicts and limits; an experiment, diagnosis or harness change is a separate result. Use accessible existing platform views, exports, records and supplied artifacts within the read grant. A missing live source limits the answer to the available snapshot.
 
 Through `harness-library`, verify selection and retrieve relevant guidance:
-`H15` for evidence meaning, `M02` for multi-run state or `H09` for spend and
-usage. Preserve source, applicability and certainty. M02 favors the existing
-platform view; H09 informs attributable usage, not a cap or telemetry install.
+`evidence-labels` for evidence meaning, `multisession-overview` for multi-run state or `cost-and-usage-measurement` for spend and
+usage. Preserve source, applicability and certainty. multisession-overview favors the existing
+platform view; cost-and-usage-measurement informs attributable usage, not a cap or telemetry install.
 If a resource is excluded or unverified, skip it and name any dependent limit.
 Use [CHANGE-FLOW.md](CHANGE-FLOW.md) for applicable original methods. Direct
 inspection of supplied facts does not require a research or authoring method.

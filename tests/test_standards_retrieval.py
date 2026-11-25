@@ -3,7 +3,7 @@ from conftest import KIT_CLI, run
 
 
 def test_document_standards_are_retrievable_with_applicability_and_source():
-    result = run(KIT_CLI, "show", "N08")
+    result = run(KIT_CLI, "show", "standards-selection-and-document-checks")
     assert result.returncode == 0, result.stdout + result.stderr
     assert "certainty: inferred" in result.stdout
     assert "standards/SELECT.md" in result.stdout

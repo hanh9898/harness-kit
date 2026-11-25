@@ -18,7 +18,7 @@ The planning figure of 13 appears only in design notes; report 26 itself never s
 
 ## legos: ids
 
-Source ids such as `A1` are written as `A01` so ids sort. Nothing was merged or split.
+The original generator padded source ids such as `A1` to `A01` so they sorted. Nothing was merged or split. The live catalog now uses descriptive slugs and retains the padded IDs as [compatibility aliases](../kit/LIBRARY.md#upgrading-from-letter-number-piece-ids). The historical generator and seed still use the original IDs.
 
 ## delegation: why four axes
 

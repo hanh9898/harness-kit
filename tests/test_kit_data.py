@@ -3,12 +3,27 @@ import csv
 
 import pytest
 
-from conftest import CHECK_KIT, KIT, COLUMNS, run, row, write_kit
+from conftest import CHECK_KIT, KIT, COLUMNS, run, row, write_kit, write_piece_aliases
 
 
 def test_real_kit_is_valid():
     r = run(CHECK_KIT, "--dir", KIT)
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+@pytest.mark.parametrize("alias_pairs, location, error", [
+    ([("A01", "P2")], "piece-aliases.csv:2", "invalid or reserved piece slug"),
+    ([("A01", "axis1")], "piece-aliases.csv:2", "invalid or reserved piece slug"),
+    ([("A01", "a01")], "piece-aliases.csv:2", "invalid or reserved piece slug"),
+    ([("A1", "valid-piece")], "piece-aliases.csv:2", "invalid or reserved legacy_id"),
+    ([("A01", "valid-piece"), ("A01", "other-piece")], "piece-aliases.csv:3", "duplicate legacy_id"),
+    ([("A01", "valid-piece"), ("A02", "valid-piece")], "piece-aliases.csv:3", "duplicate alias target"),
+])
+def test_piece_alias_validation(tmp_path, alias_pairs, location, error):
+    root = write_kit(tmp_path, [row("valid-piece")])
+    write_piece_aliases(root, *alias_pairs)
+    result = run(CHECK_KIT, "--dir", root)
+    assert result.returncode == 1 and f"{location}: {error}" in result.stdout
 
 
 def test_good_sample_passes(tmp_path):

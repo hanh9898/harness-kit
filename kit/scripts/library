@@ -20,6 +20,10 @@ from io import StringIO
 from pathlib import Path
 from uuid import uuid4
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from piece_ids import PieceAliases
+sys.path.pop(0)
+
 CONSUMPTION = "Requires checking conditions and gaps; saving is not adoption."
 MARKDOWN_ENTRY_NOT_FOUND = 3  # kit show found no matching pattern or delegation entry.
 WRITE_OPERATIONS = ("save", "update", "disable", "restore")
@@ -204,6 +208,9 @@ def write_transaction(store, mode="rw"):
 def grant_write(args):
     if args.operation in ("save", "update") and args.source != "saved":
         raise ValueError("Content write grants require --source saved.")
+    if args.source == "supplied":
+        _, aliases = supplied_catalog(args.kit_dir)
+        require_canonical_id(args.id, aliases.canonical(args.id))
     if not 0 <= args.expect_revision < 2**63:
         raise ValueError("Expected revision must be a nonnegative SQLite integer.")
     if not 1 <= args.ttl_seconds <= 86400:
@@ -258,11 +265,16 @@ def selection_records(db, source, identity):
         (source, identity))]
 
 
-def supplied_rows(kit_dir):
+def supplied_catalog(kit_dir):
+    catalog, pieces = [], []
     for filename, kind in (("legos.csv", "piece"), ("rules.csv", "rule")):
         with (kit_dir / filename).open(encoding="utf-8", newline="") as stream:
-            for row in csv.DictReader(stream):
-                yield filename, kind, row
+            reader = csv.DictReader(stream)
+            for row in reader:
+                if kind == "piece":
+                    pieces.append((reader.line_num, row))
+                catalog.append((filename, kind, row))
+    return catalog, PieceAliases.load(kit_dir, pieces, (row["id"] for _, kind, row in catalog if kind == "rule"))
 
 
 def latest_selections(db):
@@ -291,10 +303,12 @@ def row_signature(kind, row):
     return kind, tuple(sorted((k, v) for k, v in row.items() if k != "id"))
 
 
-def pending_renames(catalog, records, reconciled):
+def pending_renames(catalog, records, reconciled, aliases):
     live_ids = {row["id"] for _, _, row in catalog}
+    reconciled = {(aliases.canonical(identity), revision) for identity, revision in reconciled}
     retired = {}
     for (source, identity), record in records.items():
+        identity = aliases.canonical(identity)
         if (source != "supplied" or identity in live_ids or record["enabled"]
                 or (identity, record["revision"]) in reconciled):
             continue
@@ -302,8 +316,26 @@ def pending_renames(catalog, records, reconciled):
         if snapshot["kind"] in ("piece", "rule"):
             signature = row_signature(snapshot["kind"], snapshot["resource"])
             if signature is not None:
-                retired.setdefault(signature, []).append(identity)
+                retired.setdefault(signature, set()).add(identity)
     return retired
+
+
+def selection_key(records, source, identity, aliases):
+    legacy = aliases.by_slug.get(identity) if source == "supplied" else None
+    if legacy is None:
+        return identity
+    if (source, identity) in records:
+        if (source, legacy) in records:
+            raise ValueError(f"Conflicting selection histories for `{identity}` and `{legacy}`; "
+                             "inspect selection-history to reconcile both streams before selection.")
+        return identity
+    # Use the former storage key even for new records so older catalogs see the same stream.
+    return legacy
+
+
+def require_canonical_id(identity, canonical):
+    if identity != canonical:
+        raise ValueError(f"Use the canonical supplied ID `{canonical}` for selection writes and grants.")
 
 
 def resource_snapshot(db, kit_dir, source, identity, catalog):
@@ -334,21 +366,23 @@ def resource_snapshot(db, kit_dir, source, identity, catalog):
     return snapshot
 
 
-def selection_view(db, kit_dir, source, identity):
-    catalog = list(supplied_rows(kit_dir)) if source == "supplied" else []
+def selection_view(db, kit_dir, source, identity, catalog=(), aliases=None):
     snapshot = resource_snapshot(db, kit_dir, source, identity, catalog)
     pending = []
-    if source == "supplied" and snapshot and snapshot["kind"] in ("piece", "rule"):
+    key = identity
+    if source == "supplied" and (identity in aliases.by_slug or
+                                (snapshot and snapshot["kind"] in ("piece", "rule"))):
         records, reconciled = latest_selections(db)
-        record = records.get((source, identity))
-        if record is None:
-            pending = pending_renames(catalog, records, reconciled).get(
+        key = selection_key(records, source, identity, aliases)
+        record = records.get((source, key))
+        if record is None and snapshot:
+            pending = pending_renames(catalog, records, reconciled, aliases).get(
                 row_signature(snapshot["kind"], snapshot["resource"]), [])
     else:
         history = selection_records(db, source, identity)
         record = history[-1] if history else None
     enabled = record["enabled"] if record else not pending
-    return dict(source=source, id=identity, revision=record["revision"] if record else 0,
+    return key, dict(source=source, id=identity, revision=record["revision"] if record else 0,
                 enabled=enabled, available=snapshot is not None, effective=enabled and snapshot is not None,
                 record=record, current_snapshot=snapshot,
                 **({"possible_previous_ids": sorted(pending)} if pending else {}),
@@ -365,11 +399,29 @@ def store_exists(store):
     return True
 
 
+def selection_result(db, kit_dir, source, identity, history):
+    catalog, aliases = (), PieceAliases()
+    if source == "supplied":
+        try:
+            catalog, aliases = supplied_catalog(kit_dir)
+        except FileNotFoundError:
+            if not history:
+                raise
+            aliases = PieceAliases.load(kit_dir, (), ())
+    identity = aliases.canonical(identity)
+    if history:
+        legacy = aliases.by_slug.get(identity)
+        current = selection_records(db, source, identity)
+        previous = selection_records(db, source, legacy) if legacy else []
+        return previous + current
+    return selection_view(db, kit_dir, source, identity, catalog, aliases)[1]
+
+
 def read_selection(store, kit_dir, source, identity, history=False):
     if not store_exists(store):
-        return [] if history else selection_view(None, kit_dir, source, identity)
-    with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
-        return selection_records(db, source, identity) if history else selection_view(db, kit_dir, source, identity)
+        return selection_result(None, kit_dir, source, identity, history)
+    with closing(sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+        return selection_result(db, kit_dir, source, identity, history)
 
 
 def change_selection(args):
@@ -390,12 +442,15 @@ def change_selection(args):
         if not store_exists(args.store):
             raise ValueError("confirm_rename_from requires a predecessor in the selection store.")
     before = read_selection(args.store, args.kit_dir, args.source, args.id)
+    require_canonical_id(args.id, before["id"])
     if not before["available"]:
         raise ValueError("Resource unavailable; inspect its source and identity before changing selection.")
     mode = "rwc" if (args.write_grant is None and args.expect_selection_revision == 0
                      and args.command == "disable") else "rw"
     with write_transaction(args.store, mode) as db:
-        current = selection_view(db, args.kit_dir, args.source, args.id)
+        catalog, aliases = supplied_catalog(args.kit_dir) if args.source == "supplied" else ((), PieceAliases())
+        require_canonical_id(args.id, aliases.canonical(args.id))
+        storage_id, current = selection_view(db, args.kit_dir, args.source, args.id, catalog, aliases)
         if current["revision"] != args.expect_selection_revision:
             raise ValueError(f"Selection revision conflict: expected {args.expect_selection_revision}, found {current['revision']}; inspect selection/history before retry.")
         if not current["available"]:
@@ -407,7 +462,8 @@ def change_selection(args):
         if renamed_from is not None:
             if renamed_from not in pending:
                 raise ValueError("confirm_rename_from needs a possible predecessor listed by selection.")
-            prior = selection_records(db, args.source, renamed_from)[-1]
+            records, _ = latest_selections(db)
+            prior = records[args.source, selection_key(records, args.source, renamed_from, aliases)]
             lineage = dict(id=renamed_from, revision=prior["revision"])
         if pending and enabled:
             raise ValueError("Possible rename is unresolved; disable with confirm_rename_from before restoring.")
@@ -426,7 +482,7 @@ def change_selection(args):
         db.execute("CREATE TABLE IF NOT EXISTS selection_revisions (source TEXT, id TEXT, revision INTEGER, record TEXT NOT NULL, PRIMARY KEY (source, id, revision))")
         consume_write_grant(db, args, args.source, args.id, current["revision"], request_bytes)
         db.execute("INSERT INTO selection_revisions VALUES (?, ?, ?, ?)",
-                   (args.source, args.id, record["revision"], payload))
+                   (args.source, storage_id, record["revision"], payload))
     return read_selection(args.store, args.kit_dir, args.source, args.id)
 
 
@@ -435,7 +491,7 @@ def search(store, kit_dir, query, limit, include_disabled=False):
         raise ValueError("Supply a focused nonempty query and a limit from 1 to 50.")
     needle = query.casefold()
     matches = []
-    catalog = list(supplied_rows(kit_dir))
+    catalog, aliases = supplied_catalog(kit_dir)
     records, reconciled = {}, set()
     saved_matches = []
     if store_exists(store):
@@ -450,12 +506,14 @@ def search(store, kit_dir, query, limit, include_disabled=False):
                                               kind=resource["kind"], owner=resource["owner"], scope=resource["scope"],
                                               origin="saved", retrieve=retrieve,
                                               enabled=records.get(("saved", row[0]), {}).get("enabled", True)))
-    retired = pending_renames(catalog, records, reconciled)
+    retired = pending_renames(catalog, records, reconciled, aliases)
     for _, kind, row in catalog:
-        if needle in " ".join(row.values()).casefold():
-            identity = row["id"]
+        identity = row["id"]
+        legacy = aliases.by_slug.get(identity, "")
+        if needle == legacy.casefold() or needle in " ".join(row.values()).casefold():
             retrieve = shlex.join(("kit", "--dir", str(kit_dir.absolute()), "show", identity))
-            record = records.get(("supplied", identity))
+            key = selection_key(records, "supplied", identity, aliases)
+            record = records.get(("supplied", key))
             pending = retired.get(row_signature(kind, row), []) if record is None and retired else []
             matches.append(dict(id=identity, name=row.get("name", row.get("rule")), kind=kind,
                                 origin="supplied", certainty=row["certainty"],
@@ -489,6 +547,7 @@ def main():
     grant.add_argument("operation", choices=WRITE_OPERATIONS)
     grant.add_argument("id")
     grant.add_argument("--source", required=True, choices=("supplied", "saved"))
+    grant.add_argument("--kit-dir", type=Path, default=Path(__file__).resolve().parent.parent)
     grant.add_argument("--input", required=True, type=Path)
     grant.add_argument("--expect-revision", required=True, type=int)
     grant.add_argument("--ttl-seconds", required=True, type=int)
@@ -532,7 +591,7 @@ def main():
                     result = view(row) if args.command == "show" else [view(r) for r in db.execute(
                         "SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision", (args.id,))]
                 if args.command == "show":
-                    result["selection"] = selection_view(db, None, "saved", args.id)
+                    result["selection"] = selection_view(db, None, "saved", args.id)[1]
         elif args.command == "update":
             request, request_bytes = read_write_input(args.input)
             with write_transaction(args.store) as db:

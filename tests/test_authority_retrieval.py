@@ -3,7 +3,7 @@ from conftest import KIT_CLI, ROOT, run
 
 
 def test_authority_route_is_independently_retrievable():
-    result = run(KIT_CLI, 'show', 'D24')
+    result = run(KIT_CLI, 'show', 'authority-design-and-calibration')
     assert result.returncode == 0
     assert 'authority/DESIGN.md' in result.stdout
     assert 'certainty: inferred' in result.stdout
@@ -19,7 +19,7 @@ def test_legacy_retrieval_identifies_history_and_replacement_without_losing_rows
         assert result.returncode == 0
         assert retained in result.stdout
         assert 'historical' in result.stdout.lower()
-        assert 'D24' in result.stdout
+        assert 'authority-design-and-calibration' in result.stdout
 
 
 def test_authority_references_survive_plugin_relocation(tmp_path):

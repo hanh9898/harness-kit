@@ -41,8 +41,8 @@ def test_library_helpers_resolve_from_a_linked_skill_in_a_foreign_checkout(tmp_p
     instructions = (registered / "READ.md").read_text()
     helper_path, = re.findall(r"`<skill-dir>/([^`]+/)`", instructions)
     helpers = registered.resolve() / helper_path
-    assert run(helpers / "kit", "show", "H14").returncode == 0
+    assert run(helpers / "kit", "show", "reread-source-before-write").returncode == 0
     result = run(helpers / "library", "--store", tmp_path / "selected.sqlite3",
-                 "selection", "H14", "--source", "supplied")
+                 "selection", "reread-source-before-write", "--source", "supplied")
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["effective"] is True

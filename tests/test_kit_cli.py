@@ -3,7 +3,7 @@ import os
 import re
 import subprocess
 
-from conftest import CHECK_KIT, KIT, KIT_CLI, run, row, write_kit
+from conftest import CHECK_KIT, KIT, KIT_CLI, run, row, write_kit, write_piece_aliases
 
 
 def kit(tmp_path, *args):
@@ -12,6 +12,31 @@ def kit(tmp_path, *args):
         row("B01", "B", "Beta script", rung="script-cli"),
     ])
     return run(KIT_CLI, "--dir", root, *args)
+
+
+def test_piece_lookup_uses_canonical_slug_for_legacy_id_and_name():
+    canonical = run(KIT_CLI, "show", "durable-schedule")
+    assert canonical.returncode == 0
+    assert canonical.stdout.startswith("id: durable-schedule\n")
+    assert "legacy_id:" not in canonical.stdout
+    for query in ("J02", "j02", "Durable schedule"):
+        lookup = run(KIT_CLI, "show", query)
+        assert (lookup.returncode, lookup.stdout) == (0, canonical.stdout)
+    listed = run(KIT_CLI, "list", "J")
+    assert "durable-schedule\t" in listed.stdout and "J02" not in listed.stdout
+
+
+def test_piece_lookup_rejects_id_and_exact_name_ambiguity(tmp_path):
+    root = write_kit(tmp_path, [row("alpha-hook"), row("beta-hook", name="Alpha-Hook")])
+    result = run(KIT_CLI, "--dir", root, "show", "alpha-hook")
+    assert result.returncode == 2 and "matches more than one piece" in result.stderr
+
+
+def test_piece_lookup_supports_custom_group_alias(tmp_path):
+    root = write_kit(tmp_path, [row("custom-hook", "Z")])
+    write_piece_aliases(root, ("Z01", "custom-hook"))
+    result = run(KIT_CLI, "--dir", root, "show", "Z01")
+    assert result.returncode == 0 and result.stdout.startswith("id: custom-hook\n")
 
 
 def test_list_without_group_shows_group_names_with_counts_not_pieces(tmp_path):

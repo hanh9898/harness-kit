@@ -19,8 +19,8 @@ in the scope. Keep tracker status in its authoritative tracker and reference it
 from the record; a local summary is not another tracker.
 
 Select applicable original methods and standards through the owning entry.
-For agent-read authoring, use original writing-for-agents with N06; use E07/E08
-for current state/history and E16 for retention. Their suggested tools do not
+For agent-read authoring, use original writing-for-agents with agent-document-conventions; use current-state-file/decision-log-and-state-machine
+for current state/history and retention-and-cleanup for retention. Their suggested tools do not
 require a new runtime when native operations are adequate. Read the relevant
 source detail, not just these summaries.
 

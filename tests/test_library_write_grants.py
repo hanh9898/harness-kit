@@ -7,13 +7,13 @@ import sys
 import pytest
 
 from test_library_cli import draft, save
-from test_library_selection import CLI, decision, invoke, rename_supplied, selection, supplied
+from test_library_selection import CLI, REREAD, decision, invoke, rename_supplied, selection, supplied, upgrade_catalog
 from test_library_updates import OLD, plan
 
 
-def issue(root, operation, source, identity, payload, expected):
+def issue(root, operation, source, identity, payload, expected, *catalog):
     result = invoke(root, "grant-write", operation, identity, "--source", source,
-                    "--input", payload, "--expect-revision", expected, "--ttl-seconds", 60)
+                    "--input", payload, "--expect-revision", expected, "--ttl-seconds", 60, *catalog)
     assert result.returncode == 0, result.stderr
     return json.loads(result.stdout)["write_grant"]
 
@@ -44,48 +44,76 @@ def assert_denied(result):
     assert "No current write grant matches this mutation" in result.stderr
 
 
+def test_slug_upgrade_requires_canonical_grant_without_resetting_revision(tmp_path):
+    upgrade_catalog(tmp_path, keep_legacy_id=True)
+    target = ("--kit-dir", tmp_path / "kit")
+    payload = decision(tmp_path)
+    grant = issue(tmp_path, "disable", "supplied", "H14", payload, 0, *target)
+    result = invoke(tmp_path, *request("disable", "supplied", "H14", payload, 0),
+                    *target, "--write-grant", grant)
+    assert result.returncode == 0, result.stderr
+    legacy_grant = issue(tmp_path, "restore", "supplied", "H14", payload, 1, *target)
+
+    upgrade_catalog(tmp_path)
+    rejected = invoke(tmp_path, "grant-write", "restore", "H14", "--source", "supplied",
+                      "--input", payload, "--expect-revision", 1, "--ttl-seconds", 60, *target)
+    assert rejected.returncode == 2 and REREAD in rejected.stderr
+    mutation = (*request("restore", "supplied", REREAD, payload, 1), *target)
+    assert_denied(invoke(tmp_path, *mutation, "--write-grant", legacy_grant))
+    assert selection(tmp_path, id=REREAD)["effective"] is False
+
+    grant = issue(tmp_path, "restore", "supplied", REREAD, payload, 1, *target)
+    stale = invoke(tmp_path, *request("restore", "supplied", REREAD, payload, 0),
+                   *target, "--write-grant", grant)
+    assert stale.returncode == 2 and "Selection revision conflict" in stale.stderr
+    result = invoke(tmp_path, *mutation, "--write-grant", grant)
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["revision"] == 2
+    assert revoke(tmp_path, grant).returncode == 2
+
+
 def test_guarded_rename_preserves_exclusion_without_replaying_a_revoked_write(tmp_path):
     supplied(tmp_path)
     payload = decision(tmp_path)
-    disable = request("disable", "supplied", "H14", payload, 0)
-    grant = issue(tmp_path, "disable", "supplied", "H14", payload, 0)
+    disable = request("disable", "supplied", REREAD, payload, 0)
+    grant = issue(tmp_path, "disable", "supplied", REREAD, payload, 0)
     first = invoke(tmp_path, *disable, "--write-grant", grant)
     assert first.returncode == 0, first.stderr
-    old_history = selection(tmp_path, id="H14", history=True)
-    rename_supplied(tmp_path, "H14", "H98")
-    assert selection(tmp_path, id="H98")["possible_previous_ids"] == ["H14"]
+    old_history = selection(tmp_path, id=REREAD, history=True)
+    rename_supplied(tmp_path, REREAD, "replacement-hook")
+    assert selection(tmp_path, id="replacement-hook")["possible_previous_ids"] == [REREAD]
 
-    payload = decision(tmp_path, confirm_rename_from="H14")
-    inherit = (*request("disable", "supplied", "H98", payload, 0), "--kit-dir", tmp_path / "kit")
-    grant = issue(tmp_path, "disable", "supplied", "H98", payload, 0)
+    payload = decision(tmp_path, confirm_rename_from=REREAD)
+    inherit = (*request("disable", "supplied", "replacement-hook", payload, 0), "--kit-dir", tmp_path / "kit")
+    grant = issue(tmp_path, "disable", "supplied", "replacement-hook", payload, 0)
     assert revoke(tmp_path, grant).returncode == 0
     assert_denied(invoke(tmp_path, *inherit, "--write-grant", grant))
-    assert selection(tmp_path, id="H98", history=True) == []
-    assert not selection(tmp_path, id="H98")["effective"]
+    assert selection(tmp_path, id="replacement-hook", history=True) == []
+    assert not selection(tmp_path, id="replacement-hook")["effective"]
 
-    fresh = issue(tmp_path, "disable", "supplied", "H98", payload, 0)
+    fresh = issue(tmp_path, "disable", "supplied", "replacement-hook", payload, 0)
     applied = invoke(tmp_path, *inherit, "--write-grant", fresh)
     assert applied.returncode == 0, applied.stderr
-    state = selection(tmp_path, id="H98")
+    state = selection(tmp_path, id="replacement-hook")
     assert not state["effective"]
-    assert state["record"]["renamed_from"] == {"id": "H14", "revision": 1}
-    assert len(selection(tmp_path, id="H98", history=True)) == 1
-    assert selection(tmp_path, id="H14", history=True) == old_history
-    assert selection(tmp_path, id="H15")["effective"]
+    assert state["record"]["renamed_from"] == {"id": REREAD, "revision": 1}
+    assert len(selection(tmp_path, id="replacement-hook", history=True)) == 1
+    assert selection(tmp_path, id=REREAD, history=True) == old_history
+    assert selection(tmp_path, id="evidence-labels")["effective"]
 
 
 def test_guarded_store_never_falls_back_to_legacy_writes(tmp_path):
     # An empty grant table is the durable marker even after the last grant is gone.
     with sqlite3.connect(tmp_path / "library.sqlite3") as db:
         db.execute("CREATE TABLE write_grants (grant_id TEXT)")
-    args = request("disable", "supplied", "H14", decision(tmp_path), 0)
+    args = request("disable", "supplied", REREAD, decision(tmp_path), 0)
     assert_denied(invoke(tmp_path, *args))
-    assert read(tmp_path, "selection-history", "H14", "--source", "supplied") == []
+    assert read(tmp_path, "selection-history", REREAD, "--source", "supplied") == []
 
 
 @pytest.mark.parametrize("operation", ["save", "update", "disable", "restore"])
 def test_revoked_grant_leaves_history_unchanged_at_still_current_revision(tmp_path, operation):
-    source, identity = ("saved", "report-rule") if operation in ("save", "update") else ("supplied", "H14")
+    source, identity = ("saved", "report-rule") if operation in ("save", "update") else ("supplied", REREAD)
     selection = source == "supplied"
     expected = 0
     if selection:
@@ -121,20 +149,20 @@ def test_revoked_grant_leaves_history_unchanged_at_still_current_revision(tmp_pa
 
 def test_grant_is_exact_and_reissuing_prevents_use_or_revocation_by_old_token(tmp_path):
     payload = decision(tmp_path)
-    grant = ("disable", "supplied", "H14", payload, 0)
+    grant = ("disable", "supplied", REREAD, payload, 0)
     args = request(*grant)
-    assert save(tmp_path, draft(id="H14")).returncode == 0
+    assert save(tmp_path, draft(id=REREAD)).returncode == 0
     old = issue(tmp_path, *grant)
     token = issue(tmp_path, *grant)
     assert revoke(tmp_path, old).returncode == 2
     assert_denied(invoke(tmp_path, *args, "--write-grant", old))
-    saved = request("disable", "saved", "H14", payload, 0)
-    other_id = request("disable", "supplied", "H15", payload, 0)
+    saved = request("disable", "saved", REREAD, payload, 0)
+    other_id = request("disable", "supplied", "evidence-labels", payload, 0)
     for wrong_request in (saved, other_id):
         assert_denied(invoke(tmp_path, *wrong_request, "--write-grant", token))
-    wrong_op = issue(tmp_path, "restore", "supplied", "H14", payload, 0)
+    wrong_op = issue(tmp_path, "restore", "supplied", REREAD, payload, 0)
     assert_denied(invoke(tmp_path, *args, "--write-grant", wrong_op))
-    future = issue(tmp_path, "disable", "supplied", "H14", payload, 1)
+    future = issue(tmp_path, "disable", "supplied", REREAD, payload, 1)
     assert_denied(invoke(tmp_path, *args, "--write-grant", future))
     token = issue(tmp_path, *grant)
     other_store = tmp_path / "other"
@@ -149,13 +177,13 @@ def test_grant_is_exact_and_reissuing_prevents_use_or_revocation_by_old_token(tm
 
 
 def test_expired_grant_cannot_disable_or_fall_back_to_legacy(tmp_path):
-    grant = ("disable", "supplied", "H14", decision(tmp_path), 0)
+    grant = ("disable", "supplied", REREAD, decision(tmp_path), 0)
     token = issue(tmp_path, *grant)
     with sqlite3.connect(tmp_path / "library.sqlite3") as db:
         db.execute("UPDATE write_grants SET expires_at = 0")
     assert_denied(invoke(tmp_path, *request(*grant), "--write-grant", token))
     assert_denied(invoke(tmp_path, *request(*grant)))
-    assert read(tmp_path, "selection-history", "H14", "--source", "supplied") == []
+    assert read(tmp_path, "selection-history", REREAD, "--source", "supplied") == []
 
 
 def test_grant_consumption_rolls_back_if_resource_insert_fails(tmp_path):
@@ -178,14 +206,14 @@ def test_grant_consumption_rolls_back_if_resource_insert_fails(tmp_path):
 
 
 def test_unknown_grant_cannot_create_a_store(tmp_path):
-    args = request("disable", "supplied", "H14", decision(tmp_path), 0)
+    args = request("disable", "supplied", REREAD, decision(tmp_path), 0)
     assert invoke(tmp_path, *args, "--write-grant", "unknown").returncode == 2
     assert not (tmp_path / "library.sqlite3").exists()
 
 
 def test_revocation_just_before_begin_immediate_is_observed(tmp_path, monkeypatch, capsys):
     payload = decision(tmp_path)
-    grant = ("disable", "supplied", "H14", payload, 0)
+    grant = ("disable", "supplied", REREAD, payload, 0)
     token = issue(tmp_path, *grant)
     store = tmp_path / "library.sqlite3"
     real_connect = sqlite3.connect
@@ -211,4 +239,4 @@ def test_revocation_just_before_begin_immediate_is_observed(tmp_path, monkeypatc
     assert result.value.code == 2
     output = capsys.readouterr()
     assert not output.out and "No current write grant matches this mutation" in output.err
-    assert read(tmp_path, "selection-history", "H14", "--source", "supplied") == []
+    assert read(tmp_path, "selection-history", REREAD, "--source", "supplied") == []
