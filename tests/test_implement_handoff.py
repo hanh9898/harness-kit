@@ -24,12 +24,12 @@ def section(path, heading):
 def test_implement_routes_v1_and_legacy_to_the_same_operation_gates():
     entry = (IMPLEMENT / "SKILL.md").read_text(encoding="utf-8")
     intake = section(IMPLEMENT / "WORK.md", "Handoff intake")
-    for operation, section in {
+    for operation, anchor in {
         "prepare": "prepare",
         "publish": "publish-or-update",
         "execute": "dispatch-and-integrate",
     }.items():
-        assert f"[`{operation}`](WORK.md#{section})" in entry
+        assert f"[`{operation}`](WORK.md#{anchor})" in entry
     assert "](../../../kit/STAGE-CONTRACTS.md)" in intake
     assert "--expect-operation <operation> <file>" in intake
     assert "do not reinterpret a rejected handoff as legacy input" in intake

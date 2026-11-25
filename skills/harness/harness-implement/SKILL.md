@@ -15,4 +15,4 @@ Read [handoff intake](WORK.md#handoff-intake) for versioned and legacy inputs, t
 | [`publish`](WORK.md#publish-or-update) | Pin the Harness namespace and verify authority for the exact publication or update. | Keep drafts; never fall back to a product tracker. |
 | [`execute`](WORK.md#dispatch-and-integrate) | Recompute `DispatchReady` from the canonical ticket, dependencies, assignment, route and target authority. | Block dependent work; a published ticket or publish grant is not execution authority. |
 
-After execute preflight, use [execution methods](EXECUTION.md) for the work at hand. For every write use the [late-write gate](WORK.md#write-boundary-and-reconciliation). Return the [operation result](WORK.md#execution-result) without claiming the caller's verification or closure.
+For every write use the [late-write gate](WORK.md#write-boundary-and-reconciliation). After execute preflight, use [execution methods](EXECUTION.md) and return the [execution result](WORK.md#execution-result) without claiming the caller's verification or closure.
