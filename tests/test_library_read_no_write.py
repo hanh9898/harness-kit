@@ -1,0 +1,160 @@
+"""No-write regression cases run against the public Library CLI."""
+
+import json
+import select
+import sqlite3
+import subprocess
+import sys
+from contextlib import closing
+
+import pytest
+
+from conftest import run
+from test_library_cli import CLI, draft, save
+
+
+EXPLICIT = ("show", "history", "compare")
+OPTIONAL = ("search", "selection", "selection-history")
+READS = [(name, False) for name in EXPLICIT + OPTIONAL] + [(name, True) for name in OPTIONAL]
+
+
+def read_args(store, candidate, command, strict):
+    args = ["--store", str(store)]
+    if strict:
+        args.append("--require-existing-store")
+    args += [command, "report-rule"]
+    if command in ("selection", "selection-history"):
+        args += ["--source", "saved"]
+    if command == "compare":
+        args += ["--candidate", str(candidate)]
+    return args
+
+
+def files(root):
+    return {p.relative_to(root).as_posix(): None if p.is_dir() else p.read_bytes()
+            for p in root.rglob("*")}
+
+
+@pytest.fixture
+def library(tmp_path):
+    store = tmp_path / "library.sqlite3"
+    result = save(tmp_path, draft(), store=store)
+    assert result.returncode == 0, result.stderr
+    candidate = tmp_path / "candidate.json"
+    candidate.write_text(json.dumps(dict(reference="kit:report-rule", revision="new", snapshot="New text.")),
+                         encoding="utf-8")
+    return store, candidate
+
+
+@pytest.mark.parametrize(("command", "strict"), READS)
+@pytest.mark.parametrize("state", ["wal-idle", "wal-active", "rollback", "malformed", "missing"])
+def test_public_reads_do_not_change_store_files(library, command, strict, state):
+    store, candidate = library
+    sidecars = {store.name + "-wal", store.name + "-shm"}
+    writer = None
+    if state.startswith("wal-"):
+        writer = sqlite3.connect(store)
+        assert writer.execute("PRAGMA journal_mode=WAL").fetchone() == ("wal",)
+        if state == "wal-active":
+            writer.execute("CREATE TABLE active_writer (id INTEGER)")
+            writer.commit()
+        else:
+            writer.close()
+            writer = None
+    elif state == "malformed":
+        store.write_bytes(b"not a SQLite database")
+    elif state == "missing":
+        store.unlink()
+        store = store.parent / "absent" / store.name
+
+    try:
+        before = files(candidate.parent)
+        assert sidecars.intersection(before) == (sidecars if state == "wal-active" else set())
+        result = run(CLI, *read_args(store, candidate, command, strict))
+        after = files(candidate.parent)
+        assert after == before, (
+            f"{command} exit={result.returncode}, added={sorted(after.keys() - before.keys())}, "
+            f"removed={sorted(before.keys() - after.keys())}, "
+            f"changed={sorted(p for p in before.keys() & after.keys() if before[p] != after[p])}"
+        )
+        optional_missing = state == "missing" and command in OPTIONAL and not strict
+        if state != "rollback" and not optional_missing:
+            assert (result.returncode, result.stdout) == (2, "")
+            error = "missing" if state == "missing" else "unreadable"
+            assert f"Store is {error}: {store}" in result.stderr
+            return
+
+        assert (result.returncode, result.stderr) == (0, "")
+        payload = json.loads(result.stdout)
+        if command == "search":
+            saved = [hit["id"] for hit in payload["matches"] if hit["origin"] == "saved"]
+            assert saved == ([] if optional_missing else ["report-rule"])
+        elif command in ("selection", "selection-history"):
+            if command == "selection":
+                assert (payload["revision"], payload["record"], payload["effective"]) == (
+                    0, None, not optional_missing)
+            else:
+                assert payload == []
+        elif command == "history":
+            assert [(item["id"], item["revision"]) for item in payload] == [("report-rule", 1)]
+        else:
+            assert (payload["id"], payload["revision"]) == ("report-rule", 1)
+            if command == "compare":
+                assert payload["candidate"]["snapshot"] == "New text."
+    finally:
+        if writer is not None:
+            writer.close()
+
+
+@pytest.mark.parametrize("invalid", ["{", "{}"])
+def test_malformed_compare_candidate_is_rejected_without_writes(library, invalid):
+    store, candidate = library
+    candidate.write_text(invalid, encoding="utf-8")
+    before = files(store.parent)
+    result = run(CLI, *read_args(store, candidate, "compare", False))
+    assert (result.returncode, result.stdout) == (2, "")
+    assert ("Expecting property name" if invalid == "{" else "Candidate needs") in result.stderr
+    assert files(store.parent) == before
+
+
+PAUSE_BEFORE_SQLITE_OPEN = """
+import runpy, sqlite3, sys
+connect = sqlite3.connect
+def paused_connect(*args, **kwargs):
+    print('ready', file=sys.stderr, flush=True)
+    if not sys.stdin.readline():
+        raise RuntimeError('Missing race trigger')
+    return connect(*args, **kwargs)
+sqlite3.connect = paused_connect
+sys.argv = sys.argv[1:]
+runpy.run_path(sys.argv[0], run_name='__main__')
+"""
+
+
+@pytest.mark.parametrize(("command", "strict"), [("search", True), ("show", False)])
+@pytest.mark.parametrize("transition", ["wal", "replace-empty"])
+def test_database_changed_between_preflight_and_open_is_rejected(library, command, strict, transition):
+    store, candidate = library
+    args = read_args(store, candidate, command, strict)
+    with subprocess.Popen([sys.executable, "-I", "-c", PAUSE_BEFORE_SQLITE_OPEN, str(CLI), *args],
+                          stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          text=True) as reader:
+        try:
+            assert select.select([reader.stderr], [], [], 10)[0], "CLI never reached SQLite open"
+            assert reader.stderr.readline() == "ready\n"
+            if transition == "wal":
+                with closing(sqlite3.connect(store)) as writer:
+                    assert writer.execute("PRAGMA journal_mode=WAL").fetchone() == ("wal",)
+            else:
+                replacement = store.with_suffix(".replacement")
+                replacement.touch()
+                replacement.replace(store)
+                store.with_name(store.name + "-wal").write_bytes(b"existing sidecar")
+            before = files(store.parent)
+            stdout, stderr = reader.communicate("\n", timeout=10)
+        finally:
+            if reader.poll() is None:
+                reader.kill()
+        assert files(store.parent) == before
+        assert (reader.returncode, stdout) == (2, "")
+        assert f"Store is unreadable: {store}" in stderr
