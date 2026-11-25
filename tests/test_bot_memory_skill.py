@@ -110,6 +110,7 @@ def test_host_qualification_names_negative_cases_and_evidence():
     qualification = " ".join(section("HOST.md", "Qualify on an isolated Bot").split())
     for case in (
         "pinned source", "confirmed unconfigured", "missing, unreadable, or has the wrong identity",
+        "unavailable configuration returns `Blocked` without probing a store",
         "Audit zero store creation",
         "Resume the old worker", "drop the response after a test write commits",
         "outbound attempts for zero resubmissions", "exactly one committed batch",

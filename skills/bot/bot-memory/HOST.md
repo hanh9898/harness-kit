@@ -47,8 +47,10 @@ not silently switch routes.
 
 1. From the actual Bot and worker, invoke exact `bot-memory` and record its
    pinned source. Check that a confirmed unconfigured binding and a ready
-   store with no matching rule return no rules. Check that a configured store
-   that is missing, unreadable, or has the wrong identity returns `Blocked`.
+   store with no matching rule return no rules. Check that unavailable
+   configuration returns `Blocked` without probing a store. Check that a
+   configured store that is missing, unreadable, or has the wrong identity
+   returns `Blocked`.
    Audit zero store creation, writes, and write-side syncs in these read cases.
 2. Open a worker on the old published revision. Record one owner-authorized
    standing rule at `high` and sync it. In a fresh authorized worker on the
