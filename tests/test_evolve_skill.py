@@ -54,6 +54,12 @@ def test_preparation_reuses_compatible_artifacts():
     assert "reuse the canonical ticket rather than publishing again" in guidance
 
 
+def test_bot_rebind_preserves_the_role_source():
+    guidance = " ".join((SKILL / "ADOPTION.md").read_text().split())
+    assert "reuse approved direct pins without provisioning a store" in guidance
+    assert "Do not fall back to direct pins from a failed configured store" in guidance
+
+
 @pytest.mark.parametrize(("runbook", "guard"), [
     ("ADOPTION.md", "Missing, unreadable or wrong-identity stores block dependent work"),
     ("ADOPTION.md", "do not reinstall"),

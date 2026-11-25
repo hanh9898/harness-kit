@@ -32,8 +32,8 @@ route blocks its dependent step; do not reinstall, bootstrap, or substitute
 another host, tool or caller to make reconciliation pass.
 
 Read the selected source and complete assembly contents, including applicable
-child material. Call `harness-library` for source identity, content/origin
-history, lineage and independent selection history in the exact store.
+child material. For Library-backed material, call `harness-library` for source
+identity, content/origin history, lineage and selection history in the exact store.
 For a configured Library, first verify the pinned store, owner, scope and
 identity against the original binding, then use `--require-existing-store`
 before `selection` or `selection-history`. Missing, unreadable or wrong-identity
@@ -47,9 +47,9 @@ target bytes. JSON display escaping is not evidence of literal content escapes.
 Claim a normalization only when a before/after comparison demonstrates it;
 otherwise leave the transformation unestablished. Preserve a mistaken historical
 claim with a linked correction when reconciling evidence.
-Check the intended store's effective selection even for directly retrieved
-supplied material. Preserve disabled selections until explicit authorized
-restoration. Exclusion alone neither removes an already-applied consumer nor
+Check the intended store's effective selection for Library-backed material,
+even if its supplied text was retrieved directly. Preserve disabled selections
+until explicit authorized restoration. Exclusion alone neither removes an already-applied consumer nor
 revokes its authority; inspect whether that prior use is still valid.
 
 Distinguish historical origin, current library selection and actual target
@@ -133,11 +133,17 @@ history event. Reopen a blocker only when new evidence or authority can resolve 
 
 ### Bot binding changes
 
-Only enter this branch for an affected Bot target. Resolve the selected role
-and `bot-portable-template` separately through Library, pinning the role and
-contract text to the same distribution revision. Hold adoption if either
-selection is disabled, unavailable or unverified. When changing hosts, confirm
-old triggers are off, drain or fence old work, and reconcile all `Unknown`
+Only enter this branch for an affected Bot target. Reopen the role template
+and its linked contract at the same pinned distribution revision, as in
+[Setup](../harness-setup/FOUNDATION.md). If the approved role has no Library
+selection dependency, reuse approved direct pins without provisioning a store.
+For a Library-backed role, resolve both the role and `bot-portable-template`
+separately in the bound store; either disabled, unavailable or unverified
+selection blocks adoption. Do not fall back to direct pins from a failed
+configured store.
+
+When changing hosts, confirm old triggers are off, drain or fence old work,
+and reconcile all `Unknown`
 effects before the owner rebinds and reads back the disabled configuration.
 While draining, the new host may only inspect or run isolated fixtures.
 Keep the instance only if the new host can reopen the approved authoritative
@@ -147,9 +153,8 @@ or schedules. Do not allow two hosts to send effects for the same scope.
 
 After applying and reading back the changed Bot configuration, hand the operator
 one [`bot-setup`](../../../kit/STAGE-CONTRACTS.md#setup-or-evolve--bot-operator-bot-setup)
-v1. Reference the
-observed instance, scope, adapter and configuration, the pinned template and
-contract, accessible evidence and the capability IDs actually read back as
+v1. Reference the observed instance, scope, adapter and configuration, the
+pinned template and contract, accessible evidence and the capability IDs read back as
 disabled. If readback is incomplete, report the blocker; repo-only and
 unchanged runs do not emit `bot-setup`. For example:
 

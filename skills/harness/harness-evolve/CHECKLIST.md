@@ -32,6 +32,7 @@ this source tree.
 | Scoped adoption | Only assigned targets change; original methods and standards remain prerequisites; one-call durable effects do not create standing or wider-scope authority |
 | Repo-only or combined Repo and Bot change | Repo-only emits no `bot-setup` or Bot calls. For both targets, track independent grants, revisions and outcomes; hold only genuinely dependent work, without cross-target rollback. |
 | Changed Bot binding | Old host triggers are off and work is drained or fenced before a cross-host rebind. Emit v1 `bot-setup` only after readback, with observed disabled capability IDs; do not activate a trigger. |
+| Rebind a Bot already using direct role and contract pins | Reopen both pins at the same approved revision without creating a Library store. A failed configured store never becomes a direct-pin fallback. |
 
 Inspect transcript order as well as final files. A pre-action record written after the effect fails even if its final contents look right. A claim of unchanged scope requires actual snapshots of that scope. Passing a local single-writer case establishes no remote concurrency or native enforcement guarantee.
 
