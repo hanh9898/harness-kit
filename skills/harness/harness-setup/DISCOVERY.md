@@ -21,7 +21,7 @@ groups. Evolve can reference the map without calling Setup's routes.
 | 2.4 | [`automation-discovery`](../../discovery/automation-discovery/SKILL.md) | `coordination-discovery` | Coordination / On demand / Automation |
 
 Pass one visits all seven branches in order, with no child load. Batch only
-actionable unresolved decisions after reviewing all seven, authority first;
+actionable open questions after reviewing all seven, authority first;
 include clear recommendations in the synthesis. Pass two opens all applicable
 children, one working context at a time. Take the earliest eligible route in
 table order unless a recorded dependency requires another order. A deferred parent
@@ -62,7 +62,7 @@ affected nodes. Continue independent work. Checkpoint through the
    consequence, explicit deferrals with reasons and revisit triggers, or
    blockers. Route answers to their originating node.
 
-Use the Harness Glossary for terms and ADRs for qualifying decisions. Reuse
+Use the Harness Glossary for terms and ADRs for qualifying choices. Reuse
 adequate documents and follow an existing glossary map. Point to the ADR
 instead of duplicating it in the decision record. Return new text inline;
 only the authorized apply path may persist it. Product Glossary and ADRs
