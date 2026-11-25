@@ -242,6 +242,56 @@ def test_implement_keeps_destination_authority_and_reconciliation_separate():
     assert "Do not replay, reassign, close or roll back pending reconciliation" in write
 
 
+def test_publish_entries_use_the_same_gate():
+    publish = section(IMPLEMENT / "WORK.md", "Publish or update")
+    handoff = section(KIT / "STAGE-CONTRACTS.md", "Setup or Evolve → Implement: `publish`")
+    assert "Direct publish, v1 handoffs and legacy records use the same gate" in publish
+    assert "WORK.md#publish-or-update" in handoff
+    assert "The checker validates shape only" in handoff
+
+
+@pytest.mark.parametrize(("case", "outcome"), [
+    ("Draft revision changed", "Keep the draft; do not publish."),
+    ("Material split with missing, mismatched or revoked owner approval", "Keep the draft; do not publish."),
+    ("Product role or mismatched Harness locator", "Keep the draft; do not write to any destination."),
+    ("Missing, stale, revoked or mismatched publish grant", "Keep the draft; do not publish."),
+    ("Timeout after send", "Record `Unknown`; reconcile at the same destination without resending."),
+])
+def test_publish_failure_contract(case, outcome):
+    publish = section(IMPLEMENT / "WORK.md", "Publish or update")
+    assert f"| {case} | {outcome} |" in publish
+
+
+def test_publish_split_approval_binds_the_draft_and_material_diff():
+    publish = " ".join(section(IMPLEMENT / "WORK.md", "Publish or update").split())
+    assert "ownership, acceptance, dependencies, scope or impact" in publish
+    assert "exact draft reference and revision, material diff, decision basis and scope" in publish
+    assert "authorized decision owner" in publish
+    assert "H6 does not replace H5 or H7" in publish
+    assert "An unchanged split may reuse the current decision" in publish
+
+
+@pytest.mark.parametrize("role", ["harness", "product"])
+def test_publish_checker_only_validates_shape(tmp_path, role):
+    envelope = {
+        "version": 1,
+        "operation": "publish",
+        "draft_ref": "draft:HARNESS-FIX-01@2",
+        "target": {"instance": "local-records:fixture", "namespace": "harness:fixture", "role": role},
+        "work_id": "harness:fixture:verification-rule",
+        "grant_ref": "authority:fixture-publish@2",
+    }
+    original = json.dumps(envelope).encode()
+    handoff = tmp_path / "publish.json"
+    handoff.write_bytes(original)
+
+    checked = run(CHECKER, "--expect-operation", "publish", handoff)
+
+    assert checked.returncode == 0, checked.stderr
+    assert handoff.read_bytes() == original
+    assert list(tmp_path.iterdir()) == [handoff]
+
+
 @pytest.mark.parametrize("source", ["supplied", "saved"])
 def test_live_selection_readback_has_source_specific_v1_evidence(tmp_path, source):
     identity = REREAD if source == "supplied" else draft()["id"]
