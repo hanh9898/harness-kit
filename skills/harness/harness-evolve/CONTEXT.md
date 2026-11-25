@@ -6,8 +6,8 @@ Deliver context that the consuming task can actually use: selected attributable 
 
 Identify the consuming task, target, audience and decision or fact that needs
 support. Read adequate source maps and project guidance before broad search.
-Through `harness-library`, verify selection and retrieve `B08` for source maps
-or `B06` for a trigger or pointer when needed. Preserve selection and origin;
+Through `harness-library`, verify selection and retrieve `reference-store-and-source-map` for source maps
+or `on-demand-context-routing` for a trigger or pointer when needed. Preserve selection and origin;
 skip excluded or unverified material. These are reference patterns, not
 requirements to install a registry, create a skill or replace conventions.
 

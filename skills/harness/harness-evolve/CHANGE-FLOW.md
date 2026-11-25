@@ -23,11 +23,11 @@ and applicability are unchanged; a summary or remembered ID is not that read.
 
 | Proposed work | Read before the dependent recommendation or action |
 | --- | --- |
-| Construct or review agent-read guidance, including a small pointer | `N06` (subject to the [bootstrap rule](#authoring-an-override-in-a-new-project)) and [the writing method](#providers-and-authority), including skill mechanics for a skill |
-| Change current state or choice history | `E07`, `E08` and [UPDATE.md](UPDATE.md); record edits also follow the applicable writing discipline |
-| Create or change unattended work or a background schedule | `J05`, `D22` and the applicable [flow controls](../../../kit/team-workflow/FLOW.md) |
-| Read changing sources incrementally on a schedule | `J06`; decide how existing source state and read failures are handled |
-| Report background completion or a need for human attention | `J07`; establish the available delivery route and its limits |
+| Construct or review agent-read guidance, including a small pointer | `agent-document-conventions` (subject to the [bootstrap rule](#authoring-an-override-in-a-new-project)) and [the writing method](#providers-and-authority), including skill mechanics for a skill |
+| Change current state or choice history | `current-state-file`, `decision-log-and-state-machine` and [UPDATE.md](UPDATE.md); record edits also follow the applicable writing discipline |
+| Create or change unattended work or a background schedule | `unattended-run-permissions-and-caps`, `hard-run-caps` and the applicable [flow controls](../../../kit/team-workflow/FLOW.md) |
+| Read changing sources incrementally on a schedule | `scheduled-source-bookmark`; decide how existing source state and read failures are handled |
+| Report background completion or a need for human attention | `background-notifications`; establish the available delivery route and its limits |
 
 These triggers cover supporting effects as well as the main deliverable; use
 other relevant kit groups for the requested capability. A required unreadable
@@ -53,12 +53,12 @@ before effects; local guidance and an adequate legacy foundation complement it.
 
 Use the writing method below, including skill mechanics: load the original
 `writing-for-agents` or a declared replacement qualified for skill authoring,
-through its permitted route. Invoke `harness-library` for scoped `N06`
+through its permitted route. Invoke `harness-library` for scoped `agent-document-conventions`
 selection and guidance. For first-time Devin override bootstrap only, if
 Library confirms no store is configured for this scope, keep selection
 unverified and use the packaged [writing scope](../../../kit/instruction-response/WRITING.md)
 and current host/project standards with the selected method. These are base
-references, not a selection or adoption of `N06`. Do not create a store to
+references, not a selection or adoption of `agent-document-conventions`. Do not create a store to
 perform this check. If a store is configured but unreadable, if the scope
 or Library call cannot be verified, or if the required item is excluded,
 do not use the bootstrap exception.
@@ -85,7 +85,7 @@ These are applicability branches, not a universal pipeline. Mixed artifacts can 
 
 ## Providers and authority
 
-Matt's original methods are recommended. For agent-read authoring, current original writing-for-agents is the selected prerequisite unless a declared replacement has applicable writing criteria and evidence of compatibility. Kit N06 complements it; N06 is not a substitute for the method.
+Matt's original methods are recommended. For agent-read authoring, current original writing-for-agents is the selected prerequisite unless a declared replacement has applicable writing criteria and evidence of compatibility. Kit agent-document-conventions complements it; agent-document-conventions is not a substitute for the method.
 
 Before dependent work, establish that the selected method can actually load and run under the host's invocation policy, including its applicable references and required nested methods. Respect explicit-only settings: invoking the outer workflow does not invoke an explicit-only child method. Source access cannot override an invocation restriction. An unavailable provider, unreadable required source or restricted invocation blocks that part; report completed work, the exact missing source/invocation/grant and the action that will resume it. Read-only inspection and independent authorized work can continue. Manual reproduction is not a fallback for a required method.
 
@@ -95,7 +95,7 @@ Selection alone does not grant installation or invocation-policy edits. Reuse su
 
 ## Standards and handoffs
 
-Carry applicable project knowledge, language/content criteria, grants, selected source references, relevant live state, evidence and continuation into each method. Use substantive kit material in suggestions, construction and review, including when changing this kit. N06 informs single-source guidance and pointers; E07 informs current state; E08 informs consequential-choice history. Their applicability and certainty still matter; selecting a resource does not require building its suggested tool.
+Carry applicable project knowledge, language/content criteria, grants, selected source references, relevant live state, evidence and continuation into each method. Use substantive kit material in suggestions, construction and review, including when changing this kit. agent-document-conventions informs single-source guidance and pointers; current-state-file informs current state; decision-log-and-state-machine informs consequential-choice history. Their applicability and certainty still matter; selecting a resource does not require building its suggested tool.
 
 The [STE-inspired writing scope](../../../kit/instruction-response/WRITING.md) complements writing-for-agents: strict structure for English agent instructions and handoffs, flavored guidance for human documentation, and structural habits for Vietnamese conversation. Read it when constructing or reviewing these artifacts. Preserve the consumer's language/content criteria. This is not formal certification or adoption of a source dictionary or linter.
 

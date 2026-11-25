@@ -23,8 +23,8 @@ access block dependent work, with the exact prerequisite and permitted next step
 A settled comparison does not need an invented diagnosis or interview.
 
 Use `harness-library` to verify selection and retrieve relevant guidance from
-`H09` for attributable usage, `H15` for evidence and `H02` for quality checks.
-For deliberately measured optimization, also check `I06` for noise and
+`cost-and-usage-measurement` for attributable usage, `evidence-labels` for evidence and `harness-artifact-eval` for quality checks.
+For deliberately measured optimization, also check `measured-improvement` for noise and
 held-out-case guidance. Skip excluded or unverified resources.
 Use available observations to justify variability checks and case separation for
 the actual claim. These resources prescribe neither a new evaluation platform

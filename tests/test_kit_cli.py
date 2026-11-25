@@ -14,6 +14,17 @@ def kit(tmp_path, *args):
     return run(KIT_CLI, "--dir", root, *args)
 
 
+def test_piece_lookup_uses_canonical_slug_for_legacy_id_and_name():
+    canonical = run(KIT_CLI, "show", "durable-schedule")
+    assert canonical.returncode == 0
+    assert canonical.stdout.startswith("id: durable-schedule\n")
+    assert "legacy_id:" not in canonical.stdout
+    for query in ("J02", "j02", "Durable schedule"):
+        lookup = run(KIT_CLI, "show", query)
+        assert (lookup.returncode, lookup.stdout) == (0, canonical.stdout)
+    listed = run(KIT_CLI, "list", "J")
+    assert "durable-schedule\t" in listed.stdout and "J02" not in listed.stdout
+
 def test_list_without_group_shows_group_names_with_counts_not_pieces(tmp_path):
     r = kit(tmp_path, "list")
     assert r.returncode == 0

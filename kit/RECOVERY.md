@@ -55,7 +55,7 @@ cycle or conflicting prerequisite needs a named resolution, not an invented orde
 Reuse [tool operations](TOOL-OPERATIONS.md) for protocol/effect classification and
 bounded cause-specific repair. Count prior attempts across resumes and routes.
 Local operation success does not establish artifact truth, required review or
-whole-chain completion. For an actual file checkpoint choice, retrieve E11 through
+whole-chain completion. For an actual file checkpoint choice, retrieve recovery-checkpoint through
 the entry's kit CLI and inspect the platform's real coverage. File restoration
 does not undo service effects. There is no universal rollback.
 

@@ -2,9 +2,9 @@
 
 Assess the selected outcome independently of observation, experimentation or adoption. Reuse supplied artifacts, human review, checks and existing operating evidence. Telemetry is optional; qualitative evidence can answer a qualitative criterion. When operating facts need correlation, use [OBSERVE.md](OBSERVE.md). An unavailable source limits its dependent conclusion, not every criterion.
 
-Through `harness-library`, verify selection for `H15` (evidence meaning),
-`H02` (representative cases and rubric) and, for a measured-improvement
-experiment only, `I06` (noise and held-out cases). Retrieve only relevant,
+Through `harness-library`, verify selection for `evidence-labels` (evidence meaning),
+`harness-artifact-eval` (representative cases and rubric) and, for a measured-improvement
+experiment only, `measured-improvement` (noise and held-out cases). Retrieve only relevant,
 verified guidance. Excluded or unverified resources cannot supply a criterion;
 continue with independently supported criteria. No evaluation platform,
 composite score or experiment is implied. Select original methods through

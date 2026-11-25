@@ -1,7 +1,7 @@
 # Authority guidance and historical delegation
 
 For the current recommended model, independent review/calibration and concrete
-effect grants, use [D24: authority design](authority/DESIGN.md). PSW with
+effect grants, use [authority-design-and-calibration: authority design](authority/DESIGN.md). PSW with
 Shavit recording/review and Lee–See calibration replaces the supplied default
 below. The four axes and Delegation Poker remain historical, partially sourced
 material, not active replacement instructions.

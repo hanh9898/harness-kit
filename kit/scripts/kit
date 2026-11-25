@@ -6,7 +6,7 @@
   kit show <id|name>    every column of exactly one piece
   kit list P            one line per team architecture pattern (patterns.md)
   kit show P<number>    every column of exactly one pattern, for example P6
-  kit list delegation   historical four axes/seven levels; current authority: kit show D24
+  kit list delegation   historical four axes/seven levels; current authority: kit show authority-design-and-calibration
   kit show axis<number> one axis (1 to 4); kit show step<number> one level (1 to 7)
   kit show combine      the "How the axes combine" section of delegation.md
   kit list rules        gate rules (gates.csv, gate=yes), one line per rule: ID, topic, check
@@ -25,13 +25,18 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from piece_ids import PieceAliases, public_piece
+sys.path.pop(0)
+
 
 MARKDOWN_ENTRY_NOT_FOUND = 3
 
 
 def load(kit_dir):
     with (kit_dir / "legos.csv").open(encoding="utf-8", newline="") as f:
-        return list(csv.DictReader(f))
+        reader = csv.DictReader(f)
+        return [(reader.line_num, row) for row in reader]
 
 
 def load_groups(kit_dir):
@@ -136,7 +141,7 @@ def cmd_list_rules(rules, gates, topic, dir_override=None):
 
 
 LEGACY_NOTICE = ("Historical partial delegation material; current recommended authority: "
-                 "kit show D24 (kit/authority/DESIGN.md). Reconcile selected legacy rules "
+                 "kit show authority-design-and-calibration (kit/authority/DESIGN.md). Reconcile selected legacy rules "
                  "under prior adoption authority before replacement.")
 
 
@@ -177,7 +182,7 @@ def cmd_list(rows, group, patterns=None, deleg=None, rules=None, topic=None, nam
     return 0
 
 
-def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
+def cmd_show(rows, query, patterns, head, deleg, rules, aliases):
     q = query.strip().lower()
     axes, steps, combine, heads = deleg or ({}, {}, [], {})
     if q == "combine":
@@ -215,7 +220,10 @@ def cmd_show(rows, query, patterns=None, head=None, deleg=None, rules=None):
         if g:
             print(f"gate: yes ({g['verify_method']})\nverified_quote: {g['verified_quote']}\ngate_note: {g['note']}")
         return 0
-    hit = [r for r in rows if q and (r["id"].lower() == q or r["name"].lower() == q)]
+    identity = aliases.canonical(q)
+    hit = [r for r in rows if q and r["id"].lower() == identity]
+    if not hit:
+        hit = [r for r in rows if q and r["name"].lower() == q]
     if len(hit) != 1:
         why = "matches no piece" if not hit else "matches more than one piece"
         return fail(f"`{query}` {why}.\nNext step: run `kit list` then `kit list <group>` to find the correct ID.")
@@ -237,7 +245,7 @@ def main(argv=None):
     if dir_override is None:
         a.dir = str(Path(__file__).resolve().parent.parent)
     try:
-        rows, names = load(Path(a.dir)), load_groups(Path(a.dir))
+        entries, names = load(Path(a.dir)), load_groups(Path(a.dir))
     except OSError as e:
         return fail(f"Cannot read legos.csv or groups.csv in {a.dir} ({e}).")
     try:
@@ -245,10 +253,15 @@ def main(argv=None):
         deleg = load_delegation(Path(a.dir))
     except ValueError as e:
         return fail(e)
-    rules = load_rules(Path(a.dir))
+    try:
+        rules = load_rules(Path(a.dir))
+        aliases = PieceAliases(entries, (row["id"] for row in rules[0]))
+    except (OSError, ValueError) as e:
+        return fail(e)
+    rows = [public_piece(row) for _, row in entries]
     if a.cmd == "list":
         return cmd_list(rows, a.group, patterns, deleg, rules, a.topic, names, dir_override=dir_override)
-    return cmd_show(rows, a.query, patterns, head, deleg, rules)
+    return cmd_show(rows, a.query, patterns, head, deleg, rules, aliases)
 
 
 if __name__ == "__main__":

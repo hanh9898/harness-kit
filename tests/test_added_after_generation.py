@@ -1,4 +1,4 @@
-"""Post-generation additions (ticket 07, step 1): lego H18, two rules and three detail updates.
+"""Post-generation additions (ticket 07, step 1): lego review-checklist-for-harnesses, two rules and three detail updates.
 After initial generation, CSV is authoritative; the generator and seeds do not track these additions."""
 import csv
 import re
@@ -12,7 +12,7 @@ def rows(name):
 
 
 def test_h18_review_checklist_has_six_points():
-    h = rows("legos.csv")["H18"]
+    h = rows("legos.csv")["review-checklist-for-harnesses"]
     assert h["group"] == "H" and h["certainty"] == "inferred"
     points = re.findall(r"(?:^|\. )([1-6])\) ", h["detail"])
     assert points == ["1", "2", "3", "4", "5", "6"], h["detail"]
@@ -20,7 +20,7 @@ def test_h18_review_checklist_has_six_points():
 
 
 def test_h18_is_shown_by_the_cli():
-    r = run(KIT_CLI, "--dir", KIT, "show", "H18")
+    r = run(KIT_CLI, "--dir", KIT, "show", "review-checklist-for-harnesses")
     assert r.returncode == 0 and "checklist" in r.stdout.lower()
 
 
@@ -37,21 +37,21 @@ def test_practice_rules_come_after_all_generated_rules_and_stay_unverified():
 
 def test_post_generation_additions_retain_their_original_order():
     ids = list(rows("legos.csv"))
-    assert ids.index("H18") < ids.index("G13") < ids.index("G14")
+    assert ids.index("review-checklist-for-harnesses") < ids.index("team-responsibilities-and-review") < ids.index("task-contracts-and-workflow")
 
 
 def test_l08_detail_gives_checkable_completion_condition():
-    d = rows("legos.csv")["L08"]["detail"]
+    d = rows("legos.csv")["worktree-merge-no-overwrite"]["detail"]
     assert "120000" in d and "absolute path" in d
 
 
 def test_i04_detail_lists_the_five_classes():
-    d = rows("legos.csv")["I04"]["detail"]
+    d = rows("legos.csv")["failure-class-catalog"]["detail"]
     for letter in "ABCDE":
         assert f"{letter}." in d, letter
 
 
 def test_d04_detail_records_the_disagreement_without_picking_a_side():
-    d = rows("legos.csv")["D04"]["detail"].lower()
+    d = rows("legos.csv")["stop-hook"]["detail"].lower()
     assert "disagree" in d and "not settled" in d
     assert "warn first" in d and "does not pick a side" in d

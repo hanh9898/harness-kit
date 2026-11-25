@@ -9,7 +9,7 @@ def test_current_history_and_retention_routes_survive_relocation(tmp_path):
     plugin = tmp_path / 'relocated plugin'
     for folder in ('skills', 'kit'):
         shutil.copytree(ROOT / folder, plugin / folder)
-    for identity in ('E07', 'E08', 'E16'):
+    for identity in ('current-state-file', 'decision-log-and-state-machine', 'retention-and-cleanup'):
         result = run(plugin / 'kit/scripts/kit', 'show', identity)
         assert result.returncode == 0
         assert 'kit/MAINTENANCE.md' in result.stdout

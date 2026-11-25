@@ -11,6 +11,22 @@ def test_real_kit_is_valid():
     assert r.returncode == 0, r.stdout + r.stderr
 
 
+@pytest.mark.parametrize("slug,legacy,other,error", [
+    ("P2", "A01", "other-piece", "invalid or reserved piece slug"),
+    ("axis1", "A01", "other-piece", "invalid or reserved piece slug"),
+    ("a01", "", "other-piece", "invalid or reserved piece slug"),
+    ("valid-piece", "A1", "other-piece", "invalid or reserved legacy_id"),
+    ("valid-piece", "A02", "other-piece", "duplicate legacy_id"),
+    ("valid-piece", "", "valid-piece", "duplicate id"),
+])
+def test_piece_alias_validation(tmp_path, slug, legacy, other, error):
+    root = write_kit(tmp_path, [row(slug, legacy_id=legacy, detail="first\nsecond"),
+                                row(other, legacy_id="A02")], header=[*COLUMNS, "legacy_id"])
+    result = run(CHECK_KIT, "--dir", root)
+    assert result.returncode == 1 and error in result.stdout
+    assert "legos.csv:" in result.stdout
+
+
 def test_good_sample_passes(tmp_path):
     root = write_kit(tmp_path, [row("A01"), row("A02", rung="skill"), row("A03", rung="mcp")])
     assert run(CHECK_KIT, "--dir", root).returncode == 0

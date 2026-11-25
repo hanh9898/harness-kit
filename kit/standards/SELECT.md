@@ -96,7 +96,7 @@ This inferred procedure implements [spec 15, clauses 15/34/42 and A27/A35](https
 [ticket 24](https://github.com/hanh9898/harness-kit/issues/24) and the accepted
 [Q93 recovery](https://github.com/hanh9898/harness-kit/issues/13#issuecomment-6816002303).
 These establish product selections, not external certification or host support.
-N06 informs focused pointers; E07/E08 inform records and choice history. Existing
+agent-document-conventions informs focused pointers; current-state-file/decision-log-and-state-machine inform records and choice history. Existing
 consumer standards and source facts remain authoritative for their own work.
 Qualification requires actual host/use evidence with provider, revisions, grants
 and limits; selected guidance alone proves neither execution nor improvement.

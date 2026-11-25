@@ -5,7 +5,7 @@ from conftest import KIT_CLI, ROOT, run
 
 
 def test_selected_factory_arrangement_is_retrievable():
-    result = run(KIT_CLI, 'show', 'J13')
+    result = run(KIT_CLI, 'show', 'optional-factory-arrangement')
     assert result.returncode == 0, result.stdout + result.stderr
     assert 'certainty: inferred' in result.stdout
     assert 'FACTORY.md' in result.stdout

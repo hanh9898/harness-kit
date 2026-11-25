@@ -39,6 +39,10 @@ not reconciled, return unverified for that candidate, even if the new ID appears
 enabled. Do not block unrelated verified candidates. A verified equivalent must
 retain the old exclusion in the same authorized scope; never auto-restore.
 
+For the [shipped piece-slug upgrade](../../../kit/LIBRARY.md#upgrading-from-letter-number-piece-ids),
+the catalog's explicit alias resolves to one selection stream even after content
+edits. Read the live selection via the slug and use it for writes and grants.
+
 The [supplied rename guard](../../../kit/LIBRARY.md#renaming-an-excluded-supplied-piece-or-rule)
 only holds exact ID-only supplied piece/rule matches to absent predecessors in
 the **same store**. `possible_previous_ids` is evidence of a hold, not proof

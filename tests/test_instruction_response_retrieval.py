@@ -6,7 +6,7 @@ from conftest import KIT_CLI, ROOT, run
 
 
 def test_instruction_design_is_retrievable_with_its_source_scope():
-    result = run(KIT_CLI, "show", "N07")
+    result = run(KIT_CLI, "show", "instruction-and-response-design")
     assert result.returncode == 0, result.stdout + result.stderr
     assert "certainty: inferred" in result.stdout
     assert "instruction-response/DESIGN.md" in result.stdout

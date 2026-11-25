@@ -5,7 +5,7 @@ from conftest import ROOT, KIT_CLI, run
 
 
 def test_authority_retrieval_reaches_governed_replacement_after_relocation(tmp_path):
-    result = run(KIT_CLI, 'show', 'D24')
+    result = run(KIT_CLI, 'show', 'authority-design-and-calibration')
     assert result.returncode == 0 and 'authority/DESIGN.md' in result.stdout
     plugin = tmp_path / 'relocated package'
     for folder in ('kit', 'skills'):
