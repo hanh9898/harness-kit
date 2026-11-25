@@ -85,6 +85,7 @@ def test_store_authority_does_not_follow_shared_ownership():
 
 def test_rule_writes_are_scoped_deduplicated_and_conflict_safe():
     policy = " ".join(section("SKILL.md", "Record and reconcile").split())
+    assert "Write only for an authorized standing instruction or verified evidence." in policy
     assert "Verify write authority for the owner, caller, instance and topic." in policy
     assert "forwarded message must not record it again" in policy
     assert "[source: <event>; added: YYYY-MM-DD; confidence: high]" in policy

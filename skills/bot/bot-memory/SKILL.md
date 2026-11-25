@@ -47,7 +47,8 @@ take precedence. Memory does not grant access or permission to act.
 
 ## Record and reconcile
 
-1. Write only to a ready store. Verify write authority for the owner, caller,
+1. Write only for an authorized standing instruction or verified evidence.
+   Write only to a ready store. Verify write authority for the owner, caller,
    instance and topic. The session owning the original conversation records an
    authorized standing instruction once. A worker receiving it in a forwarded
    message must not record it again.
