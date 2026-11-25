@@ -39,14 +39,18 @@ def unique_object(pairs):
     return result
 
 
+def require_resource_id(identity):
+    if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._-]*", identity):
+        raise ValueError("Use a stable resource id containing letters, numbers, dots, underscores or hyphens.")
+
+
 def validate(resource):
     if not isinstance(resource, dict):
         raise ValueError("Input must be a resource object.")
     for key in ("id", "name", "owner", "scope", "kind", "content", "continuation"):
         if not isinstance(resource.get(key), str) or not resource[key].strip():
             raise ValueError(f"Missing or ambiguous {key}; supply it before saving.")
-    if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._-]*", resource["id"]):
-        raise ValueError("Use a stable resource id containing letters, numbers, dots, underscores or hyphens.")
+    require_resource_id(resource["id"])
     scope = resource["scope"]
     if scope != "personal" and not (scope.startswith("project:") and Path(scope[8:]).is_absolute()):
         raise ValueError("Scope must be personal or project:<absolute project path>.")
@@ -133,8 +137,6 @@ def compare(row, candidate):
 
 
 def update(db, row, request):
-    if not isinstance(request, dict):
-        raise ValueError("Update input must be an object.")
     comparison = compare(row, request.get("candidate"))
     if request.get("comparison_token") != comparison["token"]:
         raise ValueError("Comparison changed or missing; compare the live resource and candidate again.")
@@ -207,25 +209,45 @@ def write_transaction(store, mode="rw"):
 
 
 def grant_write(args):
-    if args.operation in ("save", "update") and args.source != "saved":
+    content_write = args.operation in ("save", "update")
+    if content_write and args.source != "saved":
         raise ValueError("Content write grants require --source saved.")
-    if args.source == "supplied":
-        _, aliases = supplied_catalog(args.kit_dir)
-        require_canonical_id(args.id, aliases.canonical(args.id))
     if not 0 <= args.expect_revision < 2**63:
         raise ValueError("Expected revision must be a nonnegative SQLite integer.")
     if not 1 <= args.ttl_seconds <= 86400:
         raise ValueError("Write grant lifetime must be 1–86400 seconds.")
-    digest = hashlib.sha256(args.input.read_bytes()).hexdigest()
-    mode = "rw" if store_exists(args.store) else "rwc"
-    grant_id = uuid4().hex
+    request, request_bytes = read_write_input(args.input)
+    if content_write:
+        validate_content_input(args.operation, request)
+        require_resource_id(args.id)
+        if args.operation == "save" and request["id"] != args.id:
+            raise ValueError("Save input id must match the grant resource ID.")
+    else:
+        validate_selection_input(args.operation, args.source, args.id, request)
+
+    def validate_target(db):
+        if content_write:
+            record = prepare_content_write(db, args.operation, args.id, args.expect_revision, request)
+        else:
+            _, record = prepare_selection_write(db, args.kit_dir, args.operation, args.source,
+                                                args.id, args.expect_revision, request)
+        encode_write_record(record)
+
+    mode = "rw"
+    if not store_exists(args.store):
+        # Opening with mode=rwc can leave a file even if the transaction rolls back.
+        validate_target(None)
+        mode = "rwc"
     with write_transaction(args.store, mode) as db:
+        validate_target(db)
         db.execute("""CREATE TABLE IF NOT EXISTS write_grants (
             operation TEXT NOT NULL, source TEXT NOT NULL, id TEXT NOT NULL,
             grant_id TEXT NOT NULL UNIQUE, expected_revision INTEGER NOT NULL,
             input_digest TEXT NOT NULL, expires_at REAL NOT NULL,
             PRIMARY KEY (operation, source, id)
         )""")
+        grant_id = uuid4().hex
+        digest = hashlib.sha256(request_bytes).hexdigest()
         expires_at = time.time() + args.ttl_seconds
         db.execute("INSERT OR REPLACE INTO write_grants VALUES (?, ?, ?, ?, ?, ?, ?)",
                    (args.operation, args.source, args.id, grant_id, args.expect_revision, digest, expires_at))
@@ -253,9 +275,70 @@ def consume_write_grant(db, args, source, identity, revision, payload):
         raise ValueError("No current write grant matches this mutation.")
 
 
+def reject_json_constant(value):
+    raise ValueError(f"Nonstandard JSON constant: {value}.")
+
+
 def read_write_input(path):
     payload = path.read_bytes()
-    return json.loads(payload.decode("utf-8"), object_pairs_hook=unique_object), payload
+    return json.loads(payload.decode("utf-8"), object_pairs_hook=unique_object,
+                      parse_constant=reject_json_constant), payload
+
+
+def encode_write_record(record):
+    payload = json.dumps(record, ensure_ascii=False, allow_nan=False)
+    payload.encode("utf-8")  # Reject surrogate escapes SQLite cannot store.
+    return payload
+
+
+def validate_content_input(operation, request):
+    if operation == "save":
+        validate(request)
+    elif not isinstance(request, dict):
+        raise ValueError("Update input must be an object.")
+
+
+def prepare_content_write(db, operation, identity, expected, request):
+    row = None
+    if db is not None and has_table(db, "revisions"):
+        row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1",
+                         (identity,)).fetchone()
+    current = row[1] if row else 0
+    if current != expected:
+        raise ValueError(f"Revision conflict: expected {expected}, found {current}; read show/history and reconcile.")
+    if operation == "update":
+        if row is None:
+            raise ValueError("Update requires a saved resource; read show/history and reconcile.")
+        return update(db, row, request)
+    if row:
+        prior = json.loads(row[2])
+        for key in ("scope", "owner", "origin"):
+            if prior[key] != request[key]:
+                raise ValueError(f"Changing {key} changes identity/provenance; save a separately identified resource with an explicit relationship instead.")
+    return request
+
+
+def write_content(args):
+    request, request_bytes = read_write_input(args.input)
+    validate_content_input(args.command, request)
+    saving = args.command == "save"
+    identity = request["id"] if saving else args.id
+    expected = args.expect_revision
+    if saving and expected < 0:
+        raise ValueError("Expected revision must be zero (create) or the inspected revision.")
+    mode = "rw"
+    if saving and args.write_grant is None and expected == 0 and not store_exists(args.store):
+        encode_write_record(request)
+        mode = "rwc"
+    with write_transaction(args.store, mode) as db:
+        resource = prepare_content_write(db, args.command, identity, expected, request)
+        payload = encode_write_record(resource)
+        if saving:
+            db.execute("CREATE TABLE IF NOT EXISTS revisions (id TEXT, revision INTEGER, resource TEXT NOT NULL, saved_at TEXT NOT NULL, PRIMARY KEY (id, revision))")
+        consume_write_grant(db, args, "saved", identity, expected, request_bytes)
+        db.execute("INSERT INTO revisions VALUES (?, ?, ?, ?)",
+                   (identity, expected + 1, payload, datetime.now(timezone.utc).isoformat()))
+    return view((identity, expected + 1, payload))
 
 
 def selection_records(db, source, identity):
@@ -463,63 +546,76 @@ def read_selection(store, kit_dir, source, identity, history=False, *, require_e
         return selection_result(db, kit_dir, source, identity, history)
 
 
-def change_selection(args):
-    facts, request_bytes = read_write_input(args.input)
+def validate_selection_input(operation, source, identity, facts):
     if not isinstance(facts, dict):
         raise ValueError("Selection input must be an object.")
     # Reuse the existing attributable-record contract without making a content revision.
-    validate(dict(facts, id=args.id, name=args.id, kind="piece", content="Selection decision",
+    validate(dict(facts, id=identity, name=identity, kind="piece", content="Selection decision",
                   origin=None, sources=[], conditions=[], gaps=[]))
-    if args.expect_selection_revision < 0:
-        raise ValueError("Expected selection revision must be zero or the inspected revision.")
-    renamed_from = facts.get("confirm_rename_from")
-    if "confirm_rename_from" in facts and (not isinstance(renamed_from, str) or not renamed_from.strip()):
-        raise ValueError("confirm_rename_from must name a predecessor ID.")
-    if renamed_from is not None:
-        if args.command != "disable" or args.source != "supplied":
+    if "confirm_rename_from" in facts:
+        renamed_from = facts["confirm_rename_from"]
+        if not isinstance(renamed_from, str) or not renamed_from.strip():
+            raise ValueError("confirm_rename_from must name a predecessor ID.")
+        if operation != "disable" or source != "supplied":
             raise ValueError("confirm_rename_from applies only to disabling supplied catalog pieces and rules.")
-        if not store_exists(args.store):
-            raise ValueError("confirm_rename_from requires a predecessor in the selection store.")
-    before = read_selection(args.store, args.kit_dir, args.source, args.id)
-    require_canonical_id(args.id, before["id"])
-    if not before["available"]:
+
+
+def prepare_selection_write(db, kit_dir, operation, source, identity, expected, facts):
+    catalog, aliases = supplied_catalog(kit_dir) if source == "supplied" else ((), PieceAliases())
+    require_canonical_id(identity, aliases.canonical(identity))
+    storage_id, current = selection_view(db, kit_dir, source, identity, catalog, aliases)
+    if current["revision"] != expected:
+        raise ValueError(f"Selection revision conflict: expected {expected}, found {current['revision']}; "
+                         "read selection or selection-history before retry.")
+    if not current["available"]:
         raise ValueError("Resource unavailable; inspect its source and identity before changing selection.")
-    mode = "rwc" if (args.write_grant is None and args.expect_selection_revision == 0
-                     and args.command == "disable") else "rw"
+    enabled = operation == "restore"
+    prior = current["record"]
+    pending = current.get("possible_previous_ids", [])
+    lineage = None
+    renamed_from = facts.get("confirm_rename_from")
+    if renamed_from is not None:
+        if renamed_from not in pending:
+            raise ValueError("confirm_rename_from needs a possible predecessor listed by selection.")
+        records, _ = latest_selections(db)
+        prior = records[source, selection_key(records, source, renamed_from, aliases)]
+        lineage = dict(id=renamed_from, revision=prior["revision"])
+    if pending and enabled:
+        raise ValueError("Possible rename is unresolved; disable with confirm_rename_from before restoring.")
+    if not pending and current["enabled"] == enabled:
+        raise ValueError("Selection already has the requested state; retain it rather than append a duplicate effect.")
+    if prior:
+        for key in ("owner", "scope"):
+            if prior[key] != facts[key]:
+                raise ValueError(f"Changing selection {key} requires a separately authorized store/identity.")
+    record = dict(facts, source=source, id=identity, revision=expected + 1,
+                  enabled=enabled, action=operation, snapshot=current["current_snapshot"],
+                  saved_at=datetime.now(timezone.utc).isoformat())
+    if lineage:
+        record.update(action="inherit-disable", renamed_from=lineage)
+    return storage_id, record
+
+
+def change_selection(args):
+    facts, request_bytes = read_write_input(args.input)
+    validate_selection_input(args.command, args.source, args.id, facts)
+    expected = args.expect_selection_revision
+    if expected < 0:
+        raise ValueError("Expected selection revision must be zero or the inspected revision.")
+
+    def prepare(db):
+        return prepare_selection_write(db, args.kit_dir, args.command, args.source, args.id, expected, facts)
+
+    mode = "rw"
+    if (not store_exists(args.store) and args.write_grant is None and expected == 0
+            and args.command == "disable"):
+        encode_write_record(prepare(None)[1])
+        mode = "rwc"
     with write_transaction(args.store, mode) as db:
-        catalog, aliases = supplied_catalog(args.kit_dir) if args.source == "supplied" else ((), PieceAliases())
-        require_canonical_id(args.id, aliases.canonical(args.id))
-        storage_id, current = selection_view(db, args.kit_dir, args.source, args.id, catalog, aliases)
-        if current["revision"] != args.expect_selection_revision:
-            raise ValueError(f"Selection revision conflict: expected {args.expect_selection_revision}, found {current['revision']}; inspect selection/history before retry.")
-        if not current["available"]:
-            raise ValueError("Resource unavailable; selection remains unchanged.")
-        enabled = args.command == "restore"
-        prior = current["record"]
-        pending = current.get("possible_previous_ids", [])
-        lineage = None
-        if renamed_from is not None:
-            if renamed_from not in pending:
-                raise ValueError("confirm_rename_from needs a possible predecessor listed by selection.")
-            records, _ = latest_selections(db)
-            prior = records[args.source, selection_key(records, args.source, renamed_from, aliases)]
-            lineage = dict(id=renamed_from, revision=prior["revision"])
-        if pending and enabled:
-            raise ValueError("Possible rename is unresolved; disable with confirm_rename_from before restoring.")
-        if not pending and current["enabled"] == enabled:
-            raise ValueError("Selection already has the requested state; retain it rather than append a duplicate effect.")
-        if prior:
-            for key in ("owner", "scope"):
-                if prior[key] != facts[key]:
-                    raise ValueError(f"Changing selection {key} requires a separately authorized store/identity.")
-        record = dict(facts, source=args.source, id=args.id, revision=current["revision"] + 1,
-                      enabled=enabled, action=args.command, snapshot=current["current_snapshot"],
-                      saved_at=datetime.now(timezone.utc).isoformat())
-        if lineage:
-            record.update(action="inherit-disable", renamed_from=lineage)
-        payload = json.dumps(record, ensure_ascii=False, allow_nan=False)
+        storage_id, record = prepare(db)
+        payload = encode_write_record(record)
         db.execute("CREATE TABLE IF NOT EXISTS selection_revisions (source TEXT, id TEXT, revision INTEGER, record TEXT NOT NULL, PRIMARY KEY (source, id, revision))")
-        consume_write_grant(db, args, args.source, args.id, current["revision"], request_bytes)
+        consume_write_grant(db, args, args.source, args.id, expected, request_bytes)
         db.execute("INSERT INTO selection_revisions VALUES (?, ?, ?, ?)",
                    (args.source, storage_id, record["revision"], payload))
     return read_selection(args.store, args.kit_dir, args.source, args.id)
@@ -638,42 +734,8 @@ def main():
                         "SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision", (args.id,))]
                 if args.command == "show":
                     result["selection"] = selection_view(db, None, "saved", args.id)[1]
-        elif args.command == "update":
-            request, request_bytes = read_write_input(args.input)
-            with write_transaction(args.store) as db:
-                row = db.execute("SELECT id, revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (args.id,)).fetchone()
-                if row is None or row[1] != args.expect_revision:
-                    raise ValueError("Revision conflict or missing resource; read show/history and reconcile.")
-                resource = update(db, row, request)
-                payload = json.dumps(resource, ensure_ascii=False, allow_nan=False)
-                consume_write_grant(db, args, "saved", args.id, row[1], request_bytes)
-                db.execute("INSERT INTO revisions VALUES (?, ?, ?, ?)",
-                           (args.id, row[1] + 1, payload, datetime.now(timezone.utc).isoformat()))
-                result = view((args.id, row[1] + 1, payload))
         else:
-            resource, request_bytes = read_write_input(args.input)
-            validate(resource)
-            if args.expect_revision < 0:
-                raise ValueError("Expected revision must be zero (create) or the inspected revision.")
-            payload = json.dumps(resource, ensure_ascii=False, allow_nan=False)
-            mode = "rwc" if (args.write_grant is None and args.expect_revision == 0
-                             and not store_exists(args.store)) else "rw"
-            with write_transaction(args.store, mode) as db:
-                db.execute("CREATE TABLE IF NOT EXISTS revisions (id TEXT, revision INTEGER, resource TEXT NOT NULL, saved_at TEXT NOT NULL, PRIMARY KEY (id, revision))")
-                previous = db.execute("SELECT revision, resource FROM revisions WHERE id=? ORDER BY revision DESC LIMIT 1", (resource["id"],)).fetchone()
-                current = previous[0] if previous else 0
-                if current != args.expect_revision:
-                    raise ValueError(f"Revision conflict: expected {args.expect_revision}, found {current}; read show/history and reconcile.")
-                if previous:
-                    prior = json.loads(previous[1])
-                    for key in ("scope", "owner", "origin"):
-                        if prior[key] != resource[key]:
-                            raise ValueError(f"Changing {key} changes identity/provenance; save a separately identified resource with an explicit relationship instead.")
-                revision = current + 1
-                consume_write_grant(db, args, "saved", resource["id"], current, request_bytes)
-                db.execute("INSERT INTO revisions VALUES (?, ?, ?, ?)",
-                           (resource["id"], revision, payload, datetime.now(timezone.utc).isoformat()))
-            result = view((resource["id"], revision, payload))
+            result = write_content(args)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except StoreReadError as exc:
