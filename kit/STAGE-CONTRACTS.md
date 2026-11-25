@@ -84,8 +84,9 @@ canonical `id`, integer `selection_revision`, booleans `enabled`, `available`,
 and `effective` (equal to `enabled` and `available`), and `evidence_refs` for
 provenance. Include a `distribution_revision` for supplied content, or a
 `content_revision` for saved content (which may be omitted if unavailable);
-never use both. Include `digest` when available. Include `lineage_ref` or
-`hold_ref` when relevant.
+never use both. Include the snapshot `digest` for available supplied content;
+the saved snapshot uses its content revision and does not require a digest.
+Include `lineage_ref` or `hold_ref` when relevant.
 
 Reread the [Library selection](LIBRARY.md) before applying it. A supplied
 snapshot pins the catalog row, not the linked content: pin the template and

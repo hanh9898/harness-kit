@@ -176,8 +176,8 @@ def validate(handoff, expected_operation):
             raise ValueError(f"selection.{other_revision} does not match selection.source")
         if (supplied or handoff["available"]) and revision not in handoff:
             raise ValueError(f"selection.{revision} is required for this source and availability")
-        if handoff["available"] and "digest" not in handoff:
-            raise ValueError("selection.digest is required when available")
+        if supplied and handoff["available"] and "digest" not in handoff:
+            raise ValueError("selection.digest is required for an available supplied resource")
         if handoff["effective"] != (handoff["enabled"] and handoff["available"]):
             raise ValueError("selection.effective must equal enabled and available")
     elif operation == "result":

@@ -107,6 +107,19 @@ def test_selection_checks_revision_kind_and_internal_status(tmp_path):
     assert result.returncode == 0, result.stderr
 
 
+def test_saved_selection_accepts_content_revision_without_digest(tmp_path):
+    handoff = dict(fixture("selection"), source="saved", id="saved-checklist", content_revision=3)
+    del handoff["digest"], handoff["distribution_revision"]
+    result = check(tmp_path, handoff)
+    assert result.returncode == 0, result.stderr
+
+
+def test_available_supplied_selection_requires_snapshot_digest(tmp_path):
+    handoff = fixture("selection")
+    del handoff["digest"]
+    assert_invalid(check(tmp_path, handoff), "selection.digest is required")
+
+
 def test_result_needs_effect_identity_and_reconciliation_reference(tmp_path):
     handoff = fixture("result")
     del handoff["effect_id"]
