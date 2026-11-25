@@ -121,12 +121,72 @@ invocation and evidence. This does not establish execution readiness.
 
 ## Configure and qualify a Bot
 
-For a new Bot, verify the selected logical `bot_id` and intended host,
-workspace, owner and scope against its recorded intent. That intent is not a
-wake target or proof of an existing host binding. H19 authorizes configuring
-only that Bot with all triggers disabled. Read back the host identity, exact
-binding and disabled triggers before making the binding effective or returning
-one `bot-setup` handoff. Do not change a neighboring Bot.
+### Add a disabled Bot
+
+Match the proposed `bot_id`, host, workspace, owner and scope to the recorded
+intent. The intent is not an effective binding or a wake target. Use the
+[adapter runbook](../../../kit/HOST-ADAPTERS.md) for the intended host and caller.
+
+For the Library-backed quickstart, pin the approved distribution and read
+[`software-factory`](../../../kit/BOT-ROLES.md#software-factory) and
+[`bot-portable-template`](../../../kit/BOT-TEMPLATE.md) separately in the new
+Bot's scope. Resolve the
+[configured store](../../../kit/LIBRARY.md#configured-store-reads) first. In
+these commands, `library` and `kit` stand for the absolute helpers from the
+verified skill distribution. Disable Python bytecode writes:
+
+```sh
+for id in software-factory bot-portable-template; do
+  library --store "$BOT_STORE" --require-existing-store selection "$id" --source supplied --kit-dir "$PINNED_KIT_DIR" || exit
+  PYTHONDONTWRITEBYTECODE=1 kit --dir "$PINNED_KIT_DIR" show "$id" || exit
+done
+```
+
+Keep two independent [selection handoffs](../harness-library/READ.md#selection-handoff).
+For each, verify exact Bot, store, owner/scope, source, ID, revision and
+effective state. Verify the supplied row digest and separately compare the
+digest of the linked file to the approved distribution revision. Open the
+selected role section and portable contract from that pin, not another checkout.
+Neither a shared store nor the same role ID lets one Bot reuse another's evidence.
+
+Only a confirmed unconfigured store permits catalog-only preview, using
+the same pinned `kit show` command without claiming an effective selection.
+A bound store that is missing, wrong-identity or unreadable is **Blocked**; do
+not create a store, retry at a different path or fall back to catalog selections. Missing
+permission, pin or linked digest, effective selection, or host role/tool
+evidence keeps the Add in preview. Preview makes no writes, schedules nothing
+and sends no notification.
+
+Only in Apply, require H19 for the exact new Bot, binding and disabled
+configuration effect. Submit only that effect. Read back the actual instance,
+binding, configuration revision and every trigger as disabled (or absent);
+then make that binding effective and emit one
+[`bot-setup` v1](../../../kit/STAGE-CONTRACTS.md#setup-or-evolve--bot-operator-bot-setup)
+for that instance. Incomplete or inconsistent readback is blocked, not a
+receipt; reconcile at the original target before retrying. Adding or denying
+this Bot never changes another Bot's binding, grant, revision, receipt or
+triggers.
+
+### Read-only smoke
+
+Time the readback from the first pinned selection read through the last
+verified readback. Report what was read and whether anything was written,
+scheduled or sent. This smoke is not H15 qualification or authority to wake.
+
+- **Devin:** Check the exact instance and caller, observed Instructions and
+  Memory, and the read-only route. Read the approved fixture and observe
+  **Needs you** without creating an ask. Never substitute another Bot.
+- **Pi:** Use an isolated project and HOME. Check the installed version's
+  flags and verify the effective tool list is read-only and the selected role
+  is in the actual prompt. A package load does not inject the role. Render a
+  role draft outside the target only with separate draft-write authority;
+  otherwise keep it inline. Without real role and tool evidence, stop in
+  preview.
+
+A local fixture replay does not prove native caller ACLs or role loading.
+Do not commit, create a PR or ticket, notify, or schedule from the smoke.
+
+### Rebind or qualify an existing Bot
 
 Before H14 rebind, disable and read back every trigger on the old binding,
 drain or fence its work, and reconcile all `Unknown` effects at their original
