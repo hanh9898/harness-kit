@@ -38,7 +38,8 @@ For a configured Library, first verify the pinned store, owner, scope and
 identity against the original binding, then use `--require-existing-store`
 before `selection` or `selection-history`. Missing, unreadable or wrong-identity
 stores block dependent work; none is equivalent to an unconfigured store or
-revision 0. No fallback store or raw catalog selection. Reread the scoped
+revision 0 from a verified store with no selection row. No fallback store or raw
+catalog selection. Reread the scoped
 [v1 selection](../harness-library/READ.md#selection-handoff), including source,
 canonical ID, effective status and the applicable revisions, digest and lineage.
 Base provenance and transformation claims on decoded source values and actual

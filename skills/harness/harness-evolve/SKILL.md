@@ -13,8 +13,9 @@ to `harness-library`. Classify a change by what it changes, not where it was
 reported or where its files live.
 
 Use the existing decision and live configuration to identify the affected target
-and caller. For a repo-only request without an explicit Bot scope, stay on the
-repo path: no Bot questions or opt-ins, Inbox/Memory access, or store writes.
+and caller. A request about the repo alone stays `repo-only`, with `interactive`
+as the default when no persistent runtime is bound. Do not add Bot questions or
+opt-ins, Inbox/Memory access or store writes to the repo path.
 Use [Adoption](ADOPTION.md#1-reconcile-selections-and-live-targets) to reconcile
 an affected binding, not to bootstrap or reinstall it.
 
