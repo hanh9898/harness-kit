@@ -315,11 +315,14 @@ def test_rename_hold_lists_ambiguous_candidates_without_choosing(tmp_path):
 
 
 def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
+    supplied(tmp_path)
+    update_supplied(tmp_path)
     skill = ROOT / 'skills/harness/harness-library/READ.md'
     template, = re.findall(r'`(library (?:[^`\n]+ )?selection [^`\n]+)`',
                            skill.read_text(encoding='utf-8'))
     store = tmp_path / 'selected library.sqlite3'
-    command = template.replace('<selected-path>', shlex.quote(str(store))).replace('<id>', REREAD)
+    command = (template.replace('<selected-path>', shlex.quote(str(store))).replace('<id>', REREAD)
+               .replace('<pinned-catalog>', shlex.quote(str(tmp_path / 'kit'))))
     monkeypatch.setenv('PATH', str(CLI.parent), prepend=os.pathsep)
 
     missing = subprocess.run(command, shell=True, capture_output=True, text=True)
@@ -331,7 +334,9 @@ def test_library_skill_selection_command_runs(tmp_path, monkeypatch):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
     assert result.returncode == 0, result.stderr
-    assert json.loads(result.stdout)['effective'] is True
+    selected = json.loads(result.stdout)
+    assert selected['effective'] is True
+    assert selected['current_snapshot']['resource']['name'] == 'Updated hook policy'
 
 
 def test_exclusion_survives_supplied_update_and_explicit_restore_preserves_provenance(tmp_path):
