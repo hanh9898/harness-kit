@@ -5,7 +5,7 @@ import shutil
 
 import pytest
 
-from conftest import ROOT, run
+from conftest import KIT, ROOT, run
 
 SKILL_ROOT = ROOT / "skills/harness"
 ENTRIES = {"harness-setup", "harness-evolve", "harness-implement", "harness-library"}
@@ -26,10 +26,19 @@ def test_manifests_expose_the_same_four_installed_entries():
 @pytest.mark.parametrize("name", sorted(ENTRIES))
 def test_entry_runbooks_have_package_local_links(name):
     for path in (SKILL_ROOT / name).glob("*.md"):
-        for target in re.findall(r"\]\(([^)]+)\)", path.read_text()):
-            if "://" in target or target.startswith("#") or "<" in target:
-                continue
-            assert (path.parent / target.split("#")[0]).is_file(), (path.name, target)
+        assert_package_local_links(path)
+
+
+@pytest.mark.parametrize("name", ["M2-CONFIG.md", "STAGE-CONTRACTS.md"])
+def test_stage_and_config_contracts_have_package_local_links(name):
+    assert_package_local_links(KIT / name)
+
+
+def assert_package_local_links(path):
+    for target in re.findall(r"\]\(([^)]+)\)", path.read_text(encoding="utf-8")):
+        if "://" in target or target.startswith("#") or "<" in target:
+            continue
+        assert (path.parent / target.split("#")[0]).is_file(), (path.name, target)
 
 
 def test_library_helpers_resolve_from_a_linked_skill_in_a_foreign_checkout(tmp_path):

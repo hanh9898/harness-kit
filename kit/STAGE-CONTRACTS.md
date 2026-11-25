@@ -7,6 +7,9 @@ when a machine must read it. If you cannot save it, return a draft in the
 session and do not promise automatic continuation. The original records remain
 authoritative. This contract does not require a new store or migration.
 
+Keep the [M2 target profile and runtime mode](M2-CONFIG.md) in their owning
+records, not in these envelopes.
+
 ## Envelope and local check
 
 Use one UTF-8 JSON object with integer `version: 1`, string `operation`, and
@@ -21,13 +24,14 @@ be empty unless noted.
 kit/scripts/check-stage-handoff --expect-operation execute tests/fixtures/stage-handoffs/execute.json
 ```
 
-The checker reads one local file and exits 0 for valid shape, nonzero for a
-read or validation error. Receivers that expect a specific operation should
-pass `--expect-operation` to reject even a correctly formed handoff for a
-different operation. The checker does not resolve any references, access the
-network or SQLite, write files, or assess authority. A valid shape is not
-proof that a reference exists, is current, agrees with another reference, or
-grants any permission. Send references, never credentials or live grant tokens.
+The checker reads one local file and exits 0 for valid shape, 1 for a read or
+validation error, and 2 for incorrect command usage. Pass `--expect-operation`
+when the receiver expects a specific operation, to reject even a correctly
+formed handoff for a different operation. The checker does not resolve
+references, access the network or SQLite, write files, or assess authority.
+A valid shape is not proof that a reference exists, is current, agrees with
+another reference, or grants any permission. Send references, never
+credentials or live grant tokens.
 
 The receiver reopens the authoritative inputs in its own scope. On an unknown
 version, wrong operation, missing field, conflicting identity or unreadable
@@ -38,8 +42,9 @@ change what any existing skill runs.
 ## Setup or Evolve → Implement: `prepare`
 
 Required: exactly one of `request` (original non-blank text) or `request_ref`
-(immutable original request); `scope_ref` (project and scope); `decision_ref`
-(decision ID, revision and basis); `acceptance` (one or more non-blank criteria);
+(immutable original request); `scope_ref` (selected repo or workspace scope);
+`decision_ref` (decision ID, revision and basis);
+`acceptance` (one or more non-blank criteria);
 `dependency_refs`; `needed_route_refs` (evidence for only the still-needed
 drafting routes).
 
@@ -57,9 +62,17 @@ Required: `draft_ref` (ID and revision), `target` (object with `instance`,
 `namespace` and `role` references), stable deduplication `work_id`, and
 `grant_ref` for this exact publish or update.
 
-Check prerequisites, the exact Harness tracker namespace (not a product
-tracker or a different view of one), and the tracker write gate. Return the
-canonical ticket only after reading back its ID, content and links.
+Emit only for a specific approved draft under a live grant at the exact
+Harness destination. For a tracker, verify its Harness namespace (not a
+Product namespace or another view of it). For small work, a
+selected local Harness record can be the destination if it has a real
+instance, namespace and Harness role, and the record is durable and readable
+by the receiver. It is not a fallback for a failed tracker write; do not
+invent a binding.
+
+Check prerequisites and the destination write gate. Return the canonical
+ticket only after reading back its ID, content and links. After a timeout,
+reconcile the same work ID at the destination instead of sending again.
 
 ## Coordinator → Implement: `execute`
 
@@ -107,11 +120,15 @@ criteria before marking `Verified`, closing under separate authority, or
 updating the decision map. Keep applied, verified, activated and measured
 improvement separate.
 
-## Bot Setup → Bot operator: `bot-setup`
+## Setup or Evolve → Bot operator: `bot-setup`
 
 Required: `instance_id`, pinned `template_ref` and `contract_ref`, `scope_ref`,
 `adapter_ref` (adapter profile and caller), `configuration_ref` (observed
-readback), `evidence_refs`, and `disabled_capabilities` (IDs).
+readback), `evidence_refs`, and `disabled_capabilities` (actual disabled
+capability IDs from readback).
 
-Only an authorized owner or adapter can recheck the relevant capability and
-authorize activation. A configured instance is not permission to run it.
+Emit only after an authorized change to a Bot target and actual configuration
+readback, never for a repo-only change. The operator evaluates activation;
+configuration and this handoff authorize no trigger. Read back the configuration,
+exercise a permitted manual route and verify fresh-worker resume and deduplication
+before obtaining a separate grant and reading back activation for each trigger.
