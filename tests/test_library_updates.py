@@ -38,9 +38,16 @@ def test_comparison_exposes_actual_three_versions_and_missing_basis_without_writ
     other = tmp_path / "unknown"
     other.mkdir()
     assert save(other, draft(origin=None, content=CUSTOM)).returncode == 0
-    missing = json.loads(operation(other, "compare", NEW).stdout)
+    r = operation(other, "compare", NEW)
+    assert r.returncode == 0, r.stderr
+    missing = json.loads(r.stdout)
     assert missing["basis"] == "missing" and missing["old_origin"] is None
+    assert missing["diffs"]["customization"] is None
     assert missing["diffs"]["origin"] is None
+    assert missing["diffs"]["selection_to_candidate"] == (
+        "--- selection\n+++ candidate\n@@ -1,2 +1,2 @@\n"
+        "-Review facts with Linh.\n-Publish weekly.\n+Review facts.\n+Publish monthly.\n"
+    )
     assert missing["unknowns"] and read(other)["revision"] == 1
 
 
@@ -59,7 +66,7 @@ def test_comparison_separates_unterminated_diff_lines(tmp_path):
                          f"-Old review\n{marker}+Local review\n{marker}",
         "origin": "--- old-origin\n+++ candidate\n@@ -1 +1 @@\n"
                   f"-Old review\n{marker}+New review\n{marker}",
-        "selection_to_candidate": "--- old-origin\n+++ candidate\n@@ -1 +1 @@\n"
+        "selection_to_candidate": "--- selection\n+++ candidate\n@@ -1 +1 @@\n"
                                   f"-Local review\n{marker}+New review\n{marker}",
     }
     assert comparison["old_origin"] == old
@@ -85,7 +92,7 @@ def test_comparison_distinguishes_adding_and_removing_only_final_newline(tmp_pat
         "customization": f"--- old-origin\n+++ customization\n{hunk}"
                          f"-Publish weekly.\n{marker}+Publish weekly.\n",
         "origin": "",
-        "selection_to_candidate": f"--- old-origin\n+++ candidate\n{hunk}"
+        "selection_to_candidate": f"--- selection\n+++ candidate\n{hunk}"
                                   f"-Publish weekly.\n+Publish weekly.\n{marker}",
     }
 
