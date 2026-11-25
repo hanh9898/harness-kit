@@ -45,9 +45,9 @@ def test_prepare_routes_cover_only_missing_artifacts():
     rows = dict(re.findall(r"^\| ((?:Spec|Ticket|Neither)[^|]*?) \| (.*?) \|$", prepare, re.M))
     assert rows == {
         "Spec and ticket": "None",
-        "Spec only": "`harness-project-to-tickets`",
+        "Spec only": "`harness-project-to-tickets` after H5",
         "Ticket only": "`harness-project-to-spec`",
-        "Neither": "`harness-project-to-spec`, await spec approval, then `harness-project-to-tickets`",
+        "Neither": "`harness-project-to-spec`, then `harness-project-to-tickets` after H5",
     }
 
 
@@ -186,6 +186,36 @@ def test_fixture_preparation_load_trace(override_project, case, approval, roles)
     loaded = [p.parent.name for p in opened]
     print(f"prepare {case}: {', '.join(loaded) or '(none)'}")
     assert loaded == [routes[role] for role in roles]
+
+
+@pytest.mark.parametrize("entry", ["direct or legacy preparation", "v1 `prepare` handoffs"])
+@pytest.mark.parametrize("status", ["missing", "stale", "revoked"])
+def test_prepare_holds_unapproved_spec_before_to_tickets(entry, status):
+    prepare = section(IMPLEMENT / "WORK.md", "Prepare")
+    _, heading, approval = prepare.partition("\n### Spec approval (H5)\n")
+    assert heading, f"{entry} has no spec approval gate"
+    assert entry in approval
+    denied = re.search(r"^\| (Missing.*?) \| (.*?) \|$", approval, re.M)
+    assert denied, f"{entry} has no blocked approval outcome"
+    assert status in denied[1].lower().split(", ")
+    assert "`AwaitSpecApproval`" in denied[2]
+    assert "Do not invoke `to-tickets`" in denied[2]
+
+
+def test_prepare_reuses_only_current_spec_approval():
+    prepare = section(IMPLEMENT / "WORK.md", "Prepare")
+    _, heading, approval = prepare.partition("\n### Spec approval (H5)\n")
+    assert heading
+    for required in (
+        "authoritative spec or decision source",
+        "authorized spec owner",
+        "exact spec reference and revision",
+        "decision reference and basis",
+        "scope",
+        "acceptance criteria and dependencies still match",
+    ):
+        assert required in approval
+    assert "| Current and matching | Invoke `to-tickets` without asking again. |" in approval
 
 
 def test_implement_keeps_destination_authority_and_reconciliation_separate():
