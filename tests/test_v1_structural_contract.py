@@ -1,8 +1,10 @@
 """Check the RFC-001 v1 contract without interpreting prompts at runtime."""
 
 import json
+import os
 import re
 import sqlite3
+import subprocess
 from contextlib import closing
 from graphlib import CycleError, TopologicalSorter
 from pathlib import Path
@@ -289,6 +291,19 @@ def test_default_opt_in_and_override_inventory():
             continue
         name = re.match(r"\A---\n(?:.*\n)*?name:\s*([\w-]+)\s*\n", read(path.relative_to(ROOT)))
         assert path.parent.name not in originals and (name is None or name[1] not in originals), f"Vendored original: {path}"
+
+
+def test_checked_in_devin_registrations_only_expose_default_entries():
+    registry = Path(".devin/skills")
+    entries = {path.relative_to(ROOT) for path in (ROOT / registry).glob("*/SKILL.md")}
+    if entries and (ROOT / ".git").exists():
+        indexed = subprocess.check_output(
+            ["git", "ls-files", "-z", "--", registry.as_posix()], cwd=ROOT,
+        )
+        tracked = {Path(os.fsdecode(path)) for path in indexed.split(b"\0") if path}
+        entries = {path for path in entries if {path, path.parent, registry} & tracked}
+    extra = {path.parent.name for path in entries} - {path.name for path in DEFAULT}
+    assert not extra, f"Non-default Devin registrations in the source tree: {sorted(extra)}"
 
 
 @pytest.mark.parametrize(("source", "heading", "policy"), [
