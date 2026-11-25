@@ -20,6 +20,12 @@ Use targeted `kit list <group>`, `kit list rules <topic>`, `kit list P` or
 resources, not discovery nodes. Raw kit output is provenance, not evidence
 of current selection.
 
+For [Bot role templates](../../../kit/README.md#bot-role-templates), look up
+the exact role by slug or use the literal query `bot role template` with
+`--limit 30`. Open only the selected role section and its portable contract
+as needed. Treat both as supplied instruction-file pieces, not installed
+Bots, grants, schedules or evidence of host readiness.
+
 For a supplied resource use `library --store <selected-path> selection <id> --source supplied`;
 use `--source saved` for saved resources. Pin the actual catalog and store.
 Check effective state, source, exact ID and revision (content or catalog

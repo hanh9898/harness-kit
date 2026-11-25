@@ -170,7 +170,8 @@ references include [context](skills/harness/harness-evolve/CONTEXT.md),
 [standards](kit/standards/SELECT.md), [team and task contracts](kit/team-workflow/TASKS.md),
 [authority](kit/authority/DESIGN.md), [tool operations](kit/TOOL-OPERATIONS.md),
 [recovery](kit/RECOVERY.md), [persistence](kit/PERSISTENCE.md),
-[maintenance](kit/MAINTENANCE.md), and explicitly selected [factory design](kit/FACTORY.md).
+[maintenance](kit/MAINTENANCE.md), [Bot role templates](kit/README.md#bot-role-templates),
+and explicitly selected [factory design](kit/FACTORY.md).
 
 Use [observation](skills/harness/harness-evolve/OBSERVE.md) and
 [assessment](skills/harness/harness-evolve/ASSESS.md) for operating questions;
