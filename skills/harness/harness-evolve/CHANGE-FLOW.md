@@ -23,7 +23,7 @@ and applicability are unchanged; a summary or remembered ID is not that read.
 
 | Proposed work | Read before the dependent recommendation or action |
 | --- | --- |
-| Construct or review agent-read guidance, including a small pointer | `N06` and current original writing-for-agents; its skill-mechanics reference for a skill |
+| Construct or review agent-read guidance, including a small pointer | `N06` (subject to the [bootstrap rule](#authoring-an-override-in-a-new-project)) and [the writing method](#providers-and-authority), including skill mechanics for a skill |
 | Change current state or choice history | `E07`, `E08` and [UPDATE.md](UPDATE.md); record edits also follow the applicable writing discipline |
 | Create or change unattended work or a background schedule | `J05`, `D22` and the applicable [flow controls](../../../kit/team-workflow/FLOW.md) |
 | Read changing sources incrementally on a schedule | `J06`; decide how existing source state and read failures are handled |
@@ -48,6 +48,20 @@ work or evidence.
 **Done:** each distinct harness change has applicable sources and methods loaded and a
 traceable choice/check, or an explicit dependent blocker. State this selection
 before effects; local guidance and an adequate legacy foundation complement it.
+
+## Authoring an override in a new project
+
+Use the writing method below, including skill mechanics: load the original
+`writing-for-agents` or a declared replacement qualified for skill authoring,
+through its permitted route. Invoke `harness-library` for scoped `N06`
+selection and guidance. For first-time Devin override bootstrap only, if
+Library confirms no store is configured for this scope, keep selection
+unverified and use the packaged [writing scope](../../../kit/instruction-response/WRITING.md)
+and current host/project standards with the selected method. These are base
+references, not a selection or adoption of `N06`. Do not create a store to
+perform this check. If a store is configured but unreadable, if the scope
+or Library call cannot be verified, or if the required item is excluded,
+do not use the bootstrap exception.
 
 ## Original methods
 

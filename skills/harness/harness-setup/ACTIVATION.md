@@ -10,12 +10,10 @@ with distinct IDs, matching frontmatter names and narrow descriptions. Use the
 host's permitted project-skill mechanism; confirm loadability for this project
 before relying on it. Keep global installed skills unchanged.
 
-Before authoring or changing an override, follow
-[method selection](../harness-evolve/CHANGE-FLOW.md#kit-selection-before-dependent-action)
-for agent-read guidance. Invoke `harness-library` for the scoped `N06` lookup;
-load the selected original `writing-for-agents` method and its skill mechanics
-through the permitted route. If a required source or method cannot be used,
-leave the dependent override unchanged and report what would unblock it.
+Before authoring or changing an override, use the
+[agent-read guidance contract](../harness-evolve/CHANGE-FLOW.md#authoring-an-override-in-a-new-project).
+If a required source or method cannot be used, leave the dependent override
+unchanged and report what would unblock it.
 
 For each selected override record the source revision/license and the limited
 contract changes. Preserve upstream notices when adapting material. Implement

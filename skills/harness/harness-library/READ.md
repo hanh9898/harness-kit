@@ -4,8 +4,10 @@ Identify the relevant authorized store, owner and scope. Personal, project
 and shared scopes are distinct, even when they refer to the same catalog.
 Confirm the actual consumer and distribution/revision, not the invoking
 checkout by default. Report unreadable or unverified stores as such. Do not
-create a store for discovery; if none exists, inspect only supplied provenance
-and report that selection for a store was not verified.
+create a store for discovery. If current configuration confirms that no store
+is configured for the requested scope, report that condition separately from
+an unreadable store or an unverified scope. Inspect only supplied provenance
+without a store and report that selection was not verified.
 
 Resolve the skill's real directory; `library` and `kit` below mean the
 executables in `<skill-dir>/../../../kit/scripts/`, not assumed PATH entries.
