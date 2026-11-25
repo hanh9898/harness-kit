@@ -75,7 +75,9 @@ def test_inbox_identity_contract(key, fields):
             "active card in the bound bot's inbox",
             "authenticated respondent, canonical subject, current subject revision, kind, exact action and approved reply thread",
             "do not settle on a mismatch",
+            "the reply's subject revision must match both the card and the live subject",
             "record a matching answer once",
+            "a duplicate does not settle or submit it again",
             "decline settles only the card",
             "only an authenticated yes can send the existing request to the independent grant gate",
             "a reply cannot wake a bot or mint a grant",
@@ -86,7 +88,7 @@ def test_inbox_identity_contract(key, fields):
             "if native cannot prove the reply's subject revision, require manual review with no effect",
         )),
         ("HOST.md", "Qualify in an isolated Bot", (
-            "one active card for the action and one initial delivery",
+            "one active card per action and one initial delivery",
             "zero additional deliveries on replay",
             "zero effect grants",
             "zero results delivered across routes",

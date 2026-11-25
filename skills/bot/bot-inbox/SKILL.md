@@ -14,28 +14,31 @@ the resource Library, or a separate queue.
 
 ## Keep one active card per action
 
-Use the existing Inbox to record the Bot owner, authorized respondent, ask kind
-(`ask`, `approval`, or `review`), canonical subject, exact requested operation,
-source and stable issue/PR/request ID, and approved delivery and reply routes.
-Use authenticated identities and target IDs, not display names or message text.
+**Card key:** `(bot_id, respondent, subject-id, subject-revision, kind, exact-action)`
+within the bound Bot's Inbox. Use the authenticated respondent, canonical
+subject ID and authoritative revision, ask kind (`ask`, `approval`, or
+`review`), and exact requested operation. Record source, stable ask ID and
+approved delivery and reply routes. Resolve aliases before building the key.
 
-- Deduplicate by authorized respondent, canonical subject and requested action
-  within the Bot's Inbox. The action includes the ask kind and operation. Resolve
-  aliases before building the key; retries and thread changes do not create a
-  new action. A deferred card still owns its key. Upsert using store-enforced
-  uniqueness or a verified single writer that serializes reads and writes for
-  the key. If neither exists, keep a draft and do not create a card or send an
-  ask.
+- Retries, thread changes and nonmaterial edits do not create a new action.
+  A deferred card still owns its key. Upsert using store-enforced uniqueness
+  or a verified single writer. If neither exists, keep a draft. Do not create
+  a card or send an ask.
+- When the revision or requested decision changes materially, supersede the
+  old card before opening its replacement under the new key. Suppress its
+  pending delivery and keep its history and receipts. Guard supersession and
+  reply settlement against concurrent changes to the active card or live
+  subject revision. If the route cannot do that, stop automated replacement
+  and settlement.
 - The Bot creates or updates its own cards and ranks them by priority, urgency,
   effort and engagement. The Bot may defer a card with an explicit expiry. A
   worker proposes a card to the Bot or edits/closes a card within its current
   delegation; it cannot set priority or defer cards. Ranking never authorizes a
   send.
-- Close a card when answered, declined, superseded or no longer needed, with the
-  reason and evidence. Suppress any pending delivery when its ask is no longer
-  current. Check settled card history as well as active cards; a repeated or late
-  event does not reopen a settled ask. Verify that a new decision is needed
-  before creating another card.
+- Use card-close authority to settle a card with its reason and evidence.
+  Suppress pending delivery for asks that are no longer current. Check active
+  cards and settled history: a repeated or late event does not reopen a settled
+  ask. Verify that a new decision is needed before creating a card.
 
 ## Deliver and handle replies separately
 
@@ -44,31 +47,41 @@ Use authenticated identities and target IDs, not display names or message text.
    not allow sending. Check cadence independently of rank, per person and
    channel; hold or group only current asks for the same approved audience and
    route. Do not send periodic status pings or move delivery to another thread.
-2. **Deduplicate delivery:** Use a stable delivery key per logical delivery on an
-   approved route, separate from the card key. Replays reuse that key; a card
-   edit is not a new delivery. Track which asks a grouped delivery covers so
-   regrouping cannot resend them. Check the destination receipt/history and
-   use destination dedupe or a verified serialized sender with durable receipts.
-   On unknown outcome, reconcile before retrying; if the effect cannot be read
-   back or deduplicated, stop automatic retries.
-3. **Validate the reply:** Match the authenticated respondent, subject, exact
-   action, active card and configured reply route, including the thread. A reply
-   from the wrong person or thread, a forwarded reply without provenance, or an
-   answer to a superseded request does not settle the card. Do not disclose the
-   result or acknowledge it on a different route.
-4. **Gate the effect:** Record a matching answer once. If it is an approval,
-   route it to the independent grant gate with the stable request ID and exact
-   actor and operation. The gate verifies current authority, target scope and
-   payload before issuing a grant. Read back the gate's receipt before retrying
-   an uncertain handoff. Neither the reply, a button click, a card, nor send
-   permission is itself a grant. Replying back, when needed, requires its own
-   send check on the approved route.
+2. **Delivery key:** `(card-key, logical-delivery-id, approved-route-id)`.
+   Replay, card edits, cadence changes and regrouping reuse the same keys.
+   Save each destination receipt with the ask IDs and delivery keys it covers,
+   including every ask in a group. Check coverage before sending. Do not resend
+   covered asks. Use destination dedupe or a verified serialized sender with
+   durable receipts. On unknown outcome, reconcile before retrying. Stop
+   automatic retries if the original outcome cannot be read back or deduplicated.
+   A delivery receipt does not change Tasks status, assignee or session claim,
+   or GitHub PR status. It is not a reply, effect receipt or grant.
+
+## Validate and record replies
+
+Resolve the Bot from the verified binding, not the message or thread. Find the
+active card in the bound Bot's Inbox. Match the authenticated respondent,
+canonical subject, current subject revision, kind, exact action and approved
+reply thread to that card. Do not settle on a mismatch, a superseded card or a
+forwarded reply without verified provenance. The reply's subject revision
+must match both the card and the live subject. Follow the
+[host fallback](HOST.md#resolve-the-route) if the revision cannot be proved.
+
+Record a matching answer once. A duplicate does not settle or submit it again.
+A decline settles only the card. For an approval, only an authenticated yes
+can send the existing request to the independent grant gate. Include the
+stable request ID, actor and exact operation. The gate checks authority, scope,
+revision and payload. Read back its receipt before retrying an uncertain
+handoff. A reply cannot wake a Bot or mint a grant. Neither a card, a button
+click nor send authority grants the effect. Any acknowledgment needs its own
+send check on the approved route.
+Do not disclose the answer on another route.
 
 ## Reconcile PR review cards
 
-On a verified wake or when the Bot resumes, use the canonical PR ID and read
-live state from the authoritative target. An event is a hint to reconcile, not
-proof that the PR is terminal.
+On a verified wake or when the Bot resumes, use the canonical repo and PR ID.
+Read live state from the authoritative target. An event is a hint to reconcile,
+not proof that the PR is terminal.
 
 | Live PR state | Card action |
 | --- | --- |
