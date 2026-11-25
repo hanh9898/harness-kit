@@ -13,7 +13,7 @@ configuration records, not as extra v1 fields.
 | Operation | Setup boundary |
 | --- | --- |
 | `prepare` | After `DesignReady`, send the original request or immutable request ref, scoped decision/revision and basis, acceptance, dependencies and only still-needed drafting routes. Carry compatible spec/ticket refs; leave unavailable artifacts out. Reuse drafts without publishing them. |
-| `publish` | With a live grant for the exact draft revision and verified Harness destination, send that draft, exact tracker instance/namespace/role, stable work ID and grant reference. Keep the same work ID on timeout and reconcile at the destination before continuing; no Product fallback. |
+| `publish` | With a live grant for the exact draft revision and verified Harness destination, send that draft, the destination's exact instance/namespace/role, stable work ID and grant reference. A selected durable local record uses its own verified binding, not a placeholder tracker. Keep the same work ID on timeout and reconcile at the destination before continuing; no Product fallback. |
 | `execute` | The coordinator constructs it, not discovery. Require a canonical ticket, live `DispatchReady` evidence and current exclusive claim/epoch; use the verified route, expected target revision, exact effect and applicable selection. Publish does not authorize execution. |
 | `result` | Validate shape and reopen the assignment, effect, target state and recipient-readable evidence. For `Unknown`, keep the checkpoint and reconcile without retry, rollback or reassigning the dependent work. Check an `Applied` result against acceptance before `Verified`; closure requires separate permission. |
 | `bot-setup` | Emit to the operator only after reading back an authorized Bot-target configuration, the actual instance and capabilities still disabled. Include the pinned role template and contract, adapter and observed configuration refs, scope and evidence. Neither the handoff nor readback activates a trigger. |
@@ -43,14 +43,15 @@ A repo-only Setup can emit this `prepare` without Bot data:
 }
 ```
 
-An independently granted publication of the resulting draft:
+An independently granted publication to a selected local work record
+that already has a verified Harness binding:
 
 ```json
 {
   "version": 1,
   "operation": "publish",
   "draft_ref": "draft:docs-guidance@3",
-  "target": {"instance": "tracker:team", "namespace": "harness", "role": "harness"},
+  "target": {"instance": "local:docs-work-records", "namespace": "harness:docs", "role": "harness"},
   "work_id": "work:docs-guidance",
   "grant_ref": "grant-ref:docs-guidance-publish"
 }

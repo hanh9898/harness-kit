@@ -53,8 +53,17 @@ def test_documented_setup_payloads_pass_the_stage_checker(tmp_path):
         result = run(KIT / "scripts/check-stage-handoff", "--expect-operation", operation, handoff)
         assert result.returncode == 0, result.stderr
     assert set(examples) == {"prepare", "publish", "bot-setup"}
-    assert examples["publish"]["target"]["role"] == "harness"
+    target = examples["publish"]["target"]
+    assert target["instance"].startswith("local:")
+    assert target["role"] == "harness"
     assert examples["bot-setup"]["disabled_capabilities"] == ["wake"]
+
+
+def test_canonical_publish_contract_allows_the_selected_local_harness_target():
+    contract = (KIT / "STAGE-CONTRACTS.md").read_text(encoding="utf-8")
+    publish = contract.split("→ Implement: `publish`\n", 1)[1].split("\n## ", 1)[0]
+    assert "selected local Harness record" in publish
+    assert "not a fallback" in publish
 
 
 def test_upstream_install_is_reached_before_discovery_and_override_authoring():

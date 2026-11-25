@@ -63,10 +63,16 @@ Required: `draft_ref` (ID and revision), `target` (object with `instance`,
 `grant_ref` for this exact publish or update.
 
 Emit only for a specific approved draft under a live grant at the exact
-Harness tracker namespace (not a Product tracker or a different view of one).
-Check prerequisites and the tracker write gate. Return the canonical ticket
-only after reading back its ID, content and links. After a timeout, reconcile
-the same work ID at the destination instead of sending again.
+Harness destination. For a tracker, verify its Harness namespace (not a
+Product namespace or another view of it). For small work, a
+selected local Harness record can be the destination if it has a real
+instance, namespace and Harness role, and the record is durable and readable
+by the receiver. It is not a fallback for a failed tracker write; do not
+invent a binding.
+
+Check prerequisites and the destination write gate. Return the canonical
+ticket only after reading back its ID, content and links. After a timeout,
+reconcile the same work ID at the destination instead of sending again.
 
 ## Coordinator → Implement: `execute`
 

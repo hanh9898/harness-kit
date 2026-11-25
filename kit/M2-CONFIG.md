@@ -174,7 +174,7 @@ binding, source, caller or target changes.
 | Transition | Evidence and authority required |
 | --- | --- |
 | Draft → DesignReady | Current approved decision/revision, basis, acceptance, dependencies and read/preparation authority. Allows `prepare`, not publishing or execution. |
-| DesignReady → Published | Live grant for the exact draft in the exact Harness namespace, stable `work_id` and canonical ticket readback. Never fall back to Product. On timeout, look up the same work ID rather than sending again. |
+| DesignReady → Published | Live grant for the exact draft and [Harness destination](STAGE-CONTRACTS.md), stable `work_id` and canonical ticket readback. Never fall back to Product. On timeout, look up the same work ID rather than sending again. |
 | Published → DispatchReady | Reread the current decision, dependencies, exclusive claim/epoch, caller/source, applicable selections and bound authority. Readiness is derived from live state, never from parsing a handoff. |
 | DispatchReady → Applied / Denied / Unknown | At commit, the destination checks authority, applicable claim/epoch, expected revision and effect. A prior read, process lock or tracker grant is not a substitute. If a required fence is missing, stop; only if policy allows a non-atomic route may an authorized person supervise and confirm each send, never unattended. A timeout after send is Unknown. |
 | Unknown → Applied / Denied | Reconcile the exact effect using sufficient destination evidence (receipt, history or readback). Absence alone is not proof of no effect. Until resolved, keep the checkpoint and do not retry, roll back, republish, transfer the claim, advance the affected cursor or start a competing wake. Independent work may continue. |
