@@ -5,6 +5,10 @@ description: Prepare, publish or execute Harness work from a settled Setup or Ev
 
 # Harness Implement
 
+Use the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md) before
+choosing an operation. A concrete, authorized caller request goes straight
+to intake, not to a proposal or permission shortcut.
+
 Setup, Evolve and coordinators call `harness-implement` by exact ID through the host. Accept one requested operation and only its relevant context. Do not install providers, change a decision or start another operation on your own. The first v1 pilot host is Devin, within an approved project scope.
 
 Read [handoff intake](WORK.md#handoff-intake) for versioned and legacy inputs, then the work contract for the requested operation. Open the [route contract](ROUTES.md) only for a step that needs a skill. Keep these gates independent:

@@ -5,6 +5,10 @@ description: Find, verify or change reusable Harness resources in an authorized 
 
 # Harness Library
 
+Use the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md) before
+choosing an operation. A scoped request or focused caller question goes
+straight to the relevant Library path.
+
 Accept the requested operation, focused question or exact identity, consumer,
 store/scope and relevant authority or expected revision. Setup and Evolve call
 this skill internally when needed; Implement calls it before applying a

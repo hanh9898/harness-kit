@@ -5,6 +5,10 @@ description: Reconcile Bot Inbox cards for owner input, approvals, and PR review
 
 # Bot Inbox
 
+Use the [proposal entry guard](../../../kit/PROPOSAL-ENTRY.md) before
+choosing an operation. A concrete request goes direct. Without opt-in, do
+not probe an Inbox route or use a card to offer choices.
+
 Load this opt-in skill before asking or blocking on an authorized person, when
 an answer arrives or the card's purpose changes, and before handing off work
 with an open ask. Use [host routes](HOST.md#resolve-the-route) to find the pinned
