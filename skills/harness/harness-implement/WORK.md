@@ -6,6 +6,8 @@ Use existing authorized records. This contract does not install a tracker, workf
 
 Use [stage handoffs v1](../../../kit/STAGE-CONTRACTS.md) for `prepare`, `publish` and `execute`. For a versioned handoff, check shape and match the operation to the caller's request before resolving references or loading routes. For an existing JSON file, use the real skill directory to locate `../../../kit/scripts/check-stage-handoff --expect-operation <operation> <file>`. For an in-session handoff, compare against the same contract without requiring a file. Unknown version, wrong operation or invalid shape stops the dependent step; do not reinterpret a rejected handoff as legacy input.
 
+For v1 `prepare`, `needed_route_refs` can identify the ticket drafting route but do not authorize invocation. Apply [H5](#spec-approval-h5) before resolving or invoking it.
+
 For an unversioned legacy caller or manual record, gather existing references for the requested operation and fill gaps only from authoritative sources you can read. Do not require a migration or invent authority. Both inputs use the same operation checks below: reopen the original records, hold the draft or stop dependent work on missing, conflicting or unreadable required evidence, and do not treat a reference as a grant.
 
 ## Prepare
@@ -17,6 +19,21 @@ Check both artifacts for compatibility before resolving any drafting route, incl
 - **Spec:** describe the problem, target behavior, protected scope, design choices and checks through agreed public seams. Confirm only missing details that do not reopen the decision. The spec does not replace an ADR or decision.
 - **Tickets:** each implementation ticket cites one decision/revision and its spec, has a target and acceptance check, and states real dependencies. One small spec and one ticket can be enough. Split into independently checkable slices; for a mechanical migration, stage compatibility, migrate, then remove the old path. State any checks that require the integrated result.
 - Return compatible artifact references or in-session drafts, plus unresolved points. Persist drafts only where a separate grant allows it. Do not pass posting credentials or effect authority to draft methods. Confirm any changed split before publishing.
+
+### Spec approval (H5)
+
+Apply H5 to direct or legacy preparation and v1 `prepare` handoffs. It covers both the legacy `to-tickets` route and `harness-project-to-tickets`. A compatible spec, `DesignReady`, or valid handoff shape does not prove approval.
+
+Before resolving or invoking the ticket drafting route, reopen the spec, decision, and approval evidence at the selected authoritative spec or decision source. Verify explicit approval by the authorized spec owner. Match the exact spec reference and revision, decision reference and basis, and scope. Confirm the acceptance criteria and dependencies still match. Do not infer approval from general assent, ticket status, an Inbox card, or a publish grant.
+
+A changed basis or a material change to ownership, acceptance, dependencies, scope, or impact invalidates approval. Check revocation and current approver authority at the source.
+
+| Approval | Next step when a ticket is missing |
+| --- | --- |
+| Current and matching | Use the [verified drafting route](ROUTES.md#prepare-only-missing-artifacts) without asking again. |
+| Missing, stale, revoked, or unverifiable | Hold the draft and return `AwaitSpecApproval`. Do not resolve or invoke a ticket drafting route. |
+
+For `AwaitSpecApproval`, return the spec reference, revision, basis, scope, and blocker to the caller. The caller resolves the blocker and requests H5 from the authorized spec owner only if a new approval is needed. Resume only on a new `prepare` request. Recheck approval on resume.
 
 ## Publish or update
 
