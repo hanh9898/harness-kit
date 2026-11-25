@@ -549,7 +549,7 @@ def read_store(store, *, require_existing_store):
                 raise StoreReadError("unreadable", store)
             db.execute("PRAGMA temp_store=MEMORY")
             db.execute("BEGIN")
-            db.execute("SELECT name FROM main.sqlite_schema LIMIT 1").fetchone()
+            db.execute("SELECT name FROM main.sqlite_master LIMIT 1").fetchone()
             if db.execute("PRAGMA main.journal_mode").fetchone() != ("delete",):
                 raise StoreReadError("unreadable", store)
             yield db
