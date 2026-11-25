@@ -250,6 +250,14 @@ def test_publish_entries_use_the_same_gate():
     assert "The checker validates shape only" in handoff
 
 
+def test_publish_preflight_keeps_deduplication_at_the_selected_destination():
+    publish = " ".join(section(IMPLEMENT / "WORK.md", "Publish or update").split())
+    assert "Preflight is read-only" in publish
+    assert "use the local record's own instance, namespace and role" in publish
+    assert "Never switch to Product or fall back to local after a tracker error" in publish
+    assert "look up the stable `work_id` once and search by node, question and intended outcome" in publish
+
+
 @pytest.mark.parametrize(("case", "outcome"), [
     ("Draft revision changed", "Keep the draft; do not publish."),
     ("Material split with missing, mismatched or revoked owner approval", "Keep the draft; do not publish."),
