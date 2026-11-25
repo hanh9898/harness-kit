@@ -14,7 +14,7 @@ import pytest
 
 from conftest import ROOT, run
 from test_harness_suite import DISCOVERY_ROUTES
-from test_library_read_no_write import CLI, READS, library, read_args
+from test_library_read_no_write import CLI, READS, library, no_write_host, read_args
 
 
 SKILLS = Path("skills")
@@ -317,6 +317,11 @@ def test_prose_states_the_boundary_at_the_gate(source, heading, policy):
     prose, _ = split_markdown(read(source))
     section = re.search(rf"^##+ {re.escape(heading)}\n(.*?)(?=\n##+ |\Z)", prose, re.M | re.S)
     assert section and policy in " ".join(section[1].split()), f"{source}#{heading}: missing policy: {policy}"
+
+
+def test_ci_host_can_verify_successful_library_reads(no_write_host):
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        assert no_write_host, "GitHub Actions must exercise successful Library reads and the SQLite race cases"
 
 
 @pytest.mark.parametrize(("command", "strict"), READS)
