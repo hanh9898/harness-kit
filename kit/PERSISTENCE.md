@@ -175,7 +175,12 @@ the original target; do not replay because delivery was acknowledged.
 Use `(bot_id, automation_id, source_id, occurrence_id)`: schedule occurrences
 use the scheduled UTC instant, integration events use the provider event ID.
 Fence application and resume with the Bot's current `instance_id` and
-`binding_revision`. Rebind preserves the Bot's occurrence ledger or keeps
+`binding_revision`. This key supersedes the instance-based wake key in
+[M2 configuration](M2-CONFIG.md#readiness-and-authority-gates) for `bots[]`.
+An instance-keyed ledger is not an empty ledger under the new key. Keep its
+triggers off until an authorized transition proves continuity of claims and
+pending work under the new key. Do not dual-write, guess mappings or start
+with an empty ledger. Rebind preserves the Bot's occurrence ledger or keeps
 the trigger off; never copy ledger state to another Bot. See
 [automation binding](HOST-ADAPTERS.md#bind-automation-to-one-bot).
 

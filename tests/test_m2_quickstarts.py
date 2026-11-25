@@ -474,6 +474,7 @@ def wake_fixture(two_bots, tmp_path):
         db = tmp_path / f"{bot_id}.db"
         with sqlite3.connect(db) as conn:
             conn.executescript("""
+                PRAGMA user_version = 1;
                 CREATE TABLE fence (instance TEXT, scope TEXT, revision TEXT);
                 CREATE TABLE occurrences (key TEXT PRIMARY KEY, state TEXT NOT NULL);
             """)
@@ -498,7 +499,8 @@ def receive(wake_fixture, bot_id, caller, delivery, occurrence_id, *,
     key = json.dumps([bot_id, delivery.automation_id, delivery.source_id, occurrence_id])
     with sqlite3.connect(db) as conn:
         conn.execute("BEGIN IMMEDIATE")
-        if conn.execute("SELECT * FROM fence").fetchone() != fence_row(caller):
+        if (conn.execute("PRAGMA user_version").fetchone() != (1,)
+                or conn.execute("SELECT * FROM fence").fetchone() != fence_row(caller)):
             return ()
         claimed = conn.execute(
             "INSERT INTO occurrences VALUES (?, 'pending') ON CONFLICT(key) DO NOTHING", (key,),
@@ -582,3 +584,15 @@ def test_rebind_fences_old_instance_without_resetting_ledgers(wake_fixture):
     assert receive(wake_fixture, "bot-a", new, new_route, "event") == ("ack",)
     assert receive(wake_fixture, "bot-b", b, b1, "event", active_trigger=b1.trigger_ref) == ("ack",)
     assert {bot_id: occurrence_rows(db) for bot_id, db in ledgers.items()} == before
+
+
+def test_legacy_instance_key_does_not_accept_redelivery_as_a_new_occurrence(wake_fixture):
+    bots, routes, ledgers = wake_fixture
+    bound, route, db = bots["bot-a"], routes["automation-a1"], ledgers["bot-a"]
+    old_key = json.dumps([bound.instance_id, route.source_id, "event"])
+    with sqlite3.connect(db) as conn:
+        conn.execute("PRAGMA user_version = 0")
+        conn.execute("INSERT INTO occurrences VALUES (?, 'pending')", (old_key,))
+    assert receive(wake_fixture, "bot-a", bound, route, "event") == ()
+    assert occurrence_rows(db) == [(old_key, "pending")]
+    assert occurrence_rows(ledgers["bot-b"]) == []
