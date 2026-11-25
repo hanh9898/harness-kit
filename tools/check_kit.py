@@ -47,9 +47,10 @@ def check(kit_dir):
             missing = [c for c in COLUMNS if c not in (reader.fieldnames or [])]
             if missing:
                 return [f"legos.csv:1: missing columns {', '.join(missing)}; fix: include all columns {', '.join(COLUMNS)}"]
-            for n, r in enumerate(reader, 2):
+            for r in reader:
+                n = reader.line_num
                 if None in r:
-                    errs.append(f"legos.csv:{reader.line_num}: {r.get('id') or '?'} has extra cells beyond the header; fix: match the row to the header")
+                    errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has extra cells beyond the header; fix: match the row to the header")
                 for c in COLUMNS:
                     if not (r.get(c) or "").strip():
                         errs.append(f"legos.csv:{n}: {r.get('id') or '?'} has an empty `{c}` cell; fix: supply a value")
