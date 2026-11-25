@@ -1,0 +1,1459 @@
+' PlantUML 1.2025.10: -tsvg or -tpng renders one file per named diagram.
+' The delivered SVG/PNG assemble those renders without text reflow.
+' Normative sources: arc42-harness-v1.md #skill-inventory #human-gates #diagram-contract.
+
+@startuml 01-harness-setup
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>harness-setup</b></size>\n<size:14>01  /  Lõi · Setup</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+:Đọc repo, stack, facts tĩnh; xác định mode,\nquyền, profile và tracker đúng role.;
+if (Scope, biên, autonomy chưa\nrõ?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt scope, biên, autonomy và\nintent.;
+|Agent/Skill|
+endif
+if (Scope phụ thuộc chưa chốt?) then (Có)
+:Giữ phần phụ thuộc; tiếp tục phần độc lập.;
+stop
+endif
+if (Inspect / advice / probe?) then (Có)
+:Trả nhận định và blocker; không gọi\ninstaller, ghi hoặc gửi.;
+stop
+endif
+if (Cần bootstrap trước?) then (Có)
+|Human|
+#FFE5A6:<b>H19</b> · Chủ đích cấp grant bootstrap đúng\neffect.;
+|Agent/Skill|
+:Chỉ bootstrap đã có grant; đọc lại tại\nđích. Thiếu quyền: giữ nháp.;
+endif
+:Resolve upstream exact ID/source/caller.\nAmbiguous không phải missing.;
+if (Apply, prerequisite thiếu\nthật?) then (Có)
+|Human|
+#FFE5A6:<b>H3</b> · Admin duyệt cài đúng ID còn thiếu,\nhost/project, pin, paths và\nlockfile.;
+|Agent/Skill|
+:Kiểm grant; nếu đạt thì cài đúng phần thiếu\nvà đọc lại source/caller. Nếu không, chặn\nnode phụ thuộc.;
+endif
+:Lượt 1: cả 7 nhánh cha, chưa vào node con;\nhỏi gộp câu còn mở. Mốc mỗi nhánh inline\nnếu thiếu grant lưu.;
+:Lượt 2: parent đã định hướng, không defer\nvà đủ dependency; nạp từng topic. Chặn\nriêng node lỗi.;
+:Tổng hợp findings, ADR/Glossary refs,\ntiêu chí và deps; tách Product.\nNếu có Bot, chọn từng bot_id trong bots[];
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt bản Setup đúng revision,\nbasis, scope, tiêu chí và\ndependencies.;
+|Agent/Skill|
+if (Bản hiện hành chưa được chốt?) then (Có)
+:Giữ nháp; chưa DesignReady.;
+stop
+endif
+if (Cần route project mới?) then (Có)
+:Dùng writing-for-agents và đối chiếu\noriginals để soạn bộ ba override.;
+|Human|
+#FFE5A6:<b>H4</b> · Admin duyệt ghi/đăng ký đúng ba\noverride tại project.;
+|Agent/Skill|
+:Đích kiểm grant\nID/source/revision/caller/policy/output.\nThiếu hoặc lệch: không register, chưa\nexecution-ready.;
+endif
+if (Cần ghi record hoặc Glossary/ADR?) then (Có)
+|Human|
+#FFE5A6:<b>H19</b> · Chủ đích cấp grant riêng cho\ntừng effect ghi đúng đích.;
+|Agent/Skill|
+:Chỉ ghi khi grant khớp; đọc lại tại đích.\nThiếu quyền: giữ nháp.;
+endif
+if (Có Bot mới được chọn?) then (Có)
+while (Còn bot_id mới đã chọn?) is (Có)
+:Resolve role và contract đã pin.\nXác định binding đích của đúng Bot.;
+|Human|
+#FFE5A6:<b>H19</b> · Chủ đích cấp exact grant cấu hình\nBot tắt cho bot_id và binding này.;
+|Agent/Skill|
+if (Grant đúng Bot/binding/effect?) then (Có)
+:Cấu hình Bot này với mọi trigger tắt.\nĐọc lại identity, binding và các trigger.;
+if (Readback xác minh đều tắt?) then (Có)
+:Phát receipt bot-setup riêng của Bot này.;
+else (Không)
+:Báo blocker; không phát receipt thành công.;
+endif
+else (Không)
+:Giữ nháp/Blocked cho riêng Bot này.;
+endif
+endwhile (Hết)
+:Handoff binding đã xác minh tắt.\nPilot rồi duyệt từng trigger ở luồng Bot;\nSetup không bật và không đổi Bot khác.;
+endif
+:DesignReady → harness-implement / prepare.\nPublish, execute, close và trigger có cổng\nriêng.;
+stop
+@enduml
+
+@startuml 02-harness-evolve
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>harness-evolve</b></size>\n<size:14>02  /  Lõi · Evolve</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+:Đọc evidence runtime trong ACL và nền hiện\ncó; đối chiếu drift. Gọi Library đúng\nscope/pin.;
+if (Observe / advice?) then (Có)
+:Trả delta và blocker; không ghi dù check\nfail.;
+stop
+endif
+if (Delta vượt delegation?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt phần đổi, đích, rủi ro,\ntiêu chí hoặc giới hạn thử nghiệm.;
+|Agent/Skill|
+if (Delta chưa chốt?) then (Có)
+:Giữ phần phụ thuộc; tiếp tục phần độc lập.;
+stop
+endif
+endif
+while (Còn delta Bot được chọn?) is (Có)
+:Resolve bot_id và binding đích;\nkhông gộp scope, grant hoặc receipt.;
+if (Delta thêm Bot vào bots[]?) then (Có)
+:Resolve role và contract đã pin\ncho Bot mới.;
+|Human|
+#FFE5A6:<b>H19</b> · Chủ đích cấp exact grant cấu hình\nBot tắt cho bot_id và binding này.;
+|Agent/Skill|
+:Nếu grant khớp, cấu hình mọi trigger tắt.\nĐọc lại identity, binding và các trigger;\nphát bot-setup riêng nếu đã xác minh.;
+elseif (Delta rebind?) then (Có)
+:Tắt trigger đúng binding cũ khi có quyền.\nĐọc lại, drain/fence và đối soát Unknown\nở đích gốc.;
+if (Binding cũ đã dừng và đối soát xong?) then (Có)
+|Human|
+#FFE5A6:<b>H14</b> · Bot owner duyệt binding mới\ncho đúng bot_id và scope sau drain.;
+|Agent/Skill|
+:Kiểm grant; giữ bot_id, đổi generation.\nĐọc lại binding mới vẫn tắt. Không chuyển\nsecret, trigger hay grant từ binding cũ.;
+else (Không)
+:Giữ Blocked/Unknown cho riêng Bot này;\nchuyển ca bế tắc sang luồng đối soát Bot.;
+endif
+else (Không)
+:Không cấu hình lại Bot ngoài delta.;
+endif
+endwhile (Hết)
+:Handoff Bot đã xác minh tắt sang pilot\ntrên từng binding rồi duyệt từng trigger.\nEvolve không bật và không đổi Bot khác.;
+:Reuse artifacts còn đúng; chỉ delta mới gọi\nprepare/publish qua cổng Implement. Resolve\nexecution route độc lập.;
+:Đọc receipt và verify từng đích. Không\nauto-adopt hoặc rollback chéo.;
+if (Cần quyền nghiệm thu riêng?) then (Có)
+|Human|
+#FFE5A6:<b>H17</b> · Chủ nghiệm thu chốt writeback hoặc\nclose cần thẩm quyền.;
+|Agent/Skill|
+endif
+:Chỉ writeback/close phần Verified có quyền.\nHandoff phần đã làm và còn chặn.;
+stop
+@enduml
+
+@startuml 03-harness-implement
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>harness-implement</b></size>\n<size:14>03  /  Lõi · Implement</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+:Resolve basis và artifact. Material change\nquay lại Setup/Evolve; reuse phần đã hợp\nlệ.;
+if (Thiếu spec hợp lệ?) then (Có)
+:Gọi harness-project-to-spec để soạn phần\nthiếu; chưa phải approval.;
+endif
+if (Chưa có H5 còn hiệu lực?) then (Có)
+|Human|
+#FFE5A6:<b>H5</b> · Chủ spec duyệt đúng spec revision,\nbasis, scope và acceptance.;
+|Agent/Skill|
+endif
+if (Spec approval thiếu, stale,\nrevoke?) then (Có)
+:Không gọi to-tickets; giữ nháp.;
+stop
+endif
+if (Thiếu ticket draft hợp lệ?) then (Có)
+:Gọi harness-project-to-tickets; chỉ nhận\nnháp.;
+endif
+if (Publish được yêu cầu?) then (Có)
+if (Split đổi material?) then (Có)
+|Human|
+#FFE5A6:<b>H6</b> · Chủ quyết định chốt đúng draft\nrevision và dependencies.;
+|Agent/Skill|
+endif
+if (Split approval không khớp?) then (Có)
+:Giữ nháp; không publish.;
+stop
+endif
+if (Chưa có publish grant phù\nhợp?) then (Có)
+|Human|
+#FFE5A6:<b>H7</b> · Người có quyền tracker cấp grant\nexact draft/payload.;
+|Agent/Skill|
+endif
+if (Grant/namespace/dedupe không\nđạt?) then (Có)
+:Không publish hay fallback Product/local.;
+stop
+endif
+:Tracker Harness kiểm grant, deps, dedupe;\ncaller đọc lại ID/links/content/revision\ncanonical.;
+endif
+if (Không yêu cầu execute / chưa\nDispatchReady?) then (Có)
+:Trả draft/published ref; không gửi effect.;
+stop
+endif
+if (Chưa có execute grant phù\nhợp?) then (Có)
+|Human|
+#FFE5A6:<b>H8</b> · Người ủy quyền đích cấp grant\nexecute đúng một effect.;
+|Agent/Skill|
+endif
+if (Grant/assignment/epoch/revision/route/selection\nlệch?) then (Có)
+:Dừng; publish/dispatch không cấp execute.;
+stop
+endif
+if (Route không atomic?) then (Có)
+if (Thiếu fence bắt buộc hoặc\npolicy cấm?) then (Có)
+:Blocked; không có đường H9.;
+stop
+endif
+|Human|
+#FFE5A6:<b>H9</b> · Người có quyền giám sát và xác nhận\nngay từng lần gửi.;
+|Agent/Skill|
+if (Không xác nhận lần gửi này?) then (Có)
+:Không gửi hoặc chạy nền.;
+stop
+endif
+endif
+:Gọi harness-project-implement; đích kiểm\ntại commit. Nhận Applied/Denied/Unknown\nhoặc Blocked trước send.;
+if (Kết quả Unknown?) then (Có)
+:Chỉ đọc đích gốc theo stable ID/receipt;\nvắng record không chứng minh chưa ghi.;
+if (Vẫn thiếu evidence?) then (Có)
+|Human|
+#FFE5A6:<b>H13</b> · Operator giữ, lấy evidence hoặc xử\nlý ngoài luồng có quyền riêng.;
+|Agent/Skill|
+:Giữ Unknown; không\nretry/reassign/rollback/close hay advance\ncheckpoint.;
+stop
+endif
+:Applied/Denied khi có bằng chứng. Proven\nno-write: chỉ xét lần gửi mới với grant\nmới.;
+endif
+if (Chưa chứng minh Applied?) then (Có)
+:Trả kết quả; không nghiệm thu giả.;
+stop
+endif
+:Caller verify acceptance bằng evidence mở\nđược; tách Harness và Product criteria.;
+if (Cần quyền nghiệm thu của\nngười?) then (Có)
+|Human|
+#FFE5A6:<b>H17</b> · Chủ nghiệm thu quyết\nclosure/writeback cần quyền riêng.;
+|Agent/Skill|
+endif
+:Thiếu evidence giữ Applied; thiếu quyền giữ\nVerified. Chỉ close/writeback khi đủ cả\nhai.;
+stop
+@enduml
+
+@startuml 04-harness-library
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>harness-library</b></size>\n<size:14>04  /  Lõi · Library</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+:Resolve store identity và catalog pin đúng\nscope.\nLocate/search/show/history/compare/selection\nlà read-only.;
+if (Xác nhận unconfigured?) then (Có)
+:Chỉ raw catalog theo pin; không coi như\nSQLite sẵn sàng.;
+stop
+endif
+if (Missing, unreadable hoặc\nwrong-identity?) then (Có)
+:Fail closed; không coi là rỗng, không\nfallback catalog.;
+stop
+endif
+if (Ready nhưng no-write guard\nkhông đạt?) then (Có)
+:Dừng trước open; WAL chưa qualify không là\ntrạng thái thứ sáu.;
+stop
+endif
+:Strict read nếu cần; ready không có row mới\nlà revision 0. Kiểm exclusion/lineage,\nre-read ở consumer.;
+if (Chỉ đọc hoặc chọn?) then (Có)
+:Trả refs/provenance/selection; không tự\nadopt, không ghi sidecar.;
+stop
+endif
+:Chuẩn bị exact bytes, operation/ID,\nexpected revision và store; thiếu quyền thì\ndraft inline.;
+|Human|
+#FFE5A6:<b>H10</b> · Issuer được ủy quyền cấp hoặc thu\nhồi grant đúng kho SQLite.;
+|Agent/Skill|
+:Store kiểm issue CAS/expiry; stale issue\ngiữ grant cũ. Revoke trước commit chặn; sau\ncommit không undo.;
+if (Grant cho effect thiếu hoặc\nkhông khớp?) then (Có)
+:Không ghi. Trả trạng thái cấp/thu hồi hoặc\ndraft inline.;
+stop
+endif
+:Commit kiểm grant/revision/bytes và consume\ncùng history transaction. Trả readback;\nkhông ghi repo/tracker/host.;
+stop
+@enduml
+
+@startuml 05-bot-inbox
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>bot-inbox</b></size>\n<size:14>05  /  Lõi opt-in · Inbox</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chưa\nopt-in: không dò route.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Thiếu opt-in, bot_id, binding hoặc ACL?) then (Có)
+:Blocked; không dò Inbox của Bot khác.;
+stop
+endif
+:Phiên con dùng Inbox của Bot đã tạo nó.\nResolve card key và logical delivery\ntrong đúng bot_id; không dedupe liên Bot.;
+:Needs you tập trung quyết định, quyền,\nPR cần review/merge và thông tin cần đọc.\nItem có thể là board ticket có card kind.;
+:Active / On hold / Done / Canceled\nlà trạng thái ask, không phải Tasks hay PR.\nĐổi material thì supersede đúng card.;
+if (Cần upsert / gửi ask?) then (Có)
+|Human|
+#FFE5A6:<b>H19</b> · Chủ đích cấp grant riêng cho\nupsert/send đúng bot_id, binding, ask\nvà route.;
+|Agent/Skill|
+:Thiếu quyền: draft inline. Đích đọc lại\ncard/delivery receipt; không ping, lặp hoặc\nđổi thread.;
+endif
+if (Có phản hồi cho ask?) then (Có)
+|Human|
+#FFE5A6:<b>H11</b> · Respondent được chỉ định trả lời\nexact action tại thread và revision\nđúng.;
+|Agent/Skill|
+if (Bot/actor/card active/subject/\nrevision/action/thread lệch?) then (Có)
+:Không duyệt hoặc mint grant; giữ/supersede\nđúng card.;
+stop
+endif
+:Đồng ý chỉ chuyển request tới cổng đã có.\nReply không cấp grant, claim hay wake.\nThread chỉ gắn với ask của đúng Bot.;
+endif
+:GitHub giữ trạng thái PR canonical;\nđọc closure/merge ở GitHub và đọc lại\nnative auto-settle nếu có.\nĐóng card riêng cần quyền; không merge PR.;
+stop
+@enduml
+
+@startuml 06-bot-memory
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>bot-memory</b></size>\n<size:14>06  /  Lõi opt-in · Memory</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chưa\nopt-in: không dò route.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Thiếu opt-in đúng bot_id/topic?) then (Có)
+:Không dò route Memory chưa chọn.;
+stop
+endif
+:Resolve store, owner và ACL riêng theo\nbot_id/topic. Phân biệt unconfigured với\nbound store lỗi; không đọc Memory Bot khác.;
+if (Cần đổi ACL?) then (Có)
+|Human|
+#FFE5A6:<b>H12</b> · Chủ Memory hoặc admin ACL duyệt\nBot/store, chủ thể, read/write\nscope và ACL revision.;
+|Agent/Skill|
+:Đọc lại ACL bằng worker thật; không đọc/ghi\nngoài ACL.;
+endif
+if (Store bound lỗi hoặc ACL\nkhông khớp?) then (Có)
+:Blocked; không coi là kho rỗng.;
+stop
+endif
+:Chỉ tự dùng high đúng scope, còn hiệu lực,\nkhông tranh chấp. Low không tự nâng.;
+if (Có ghi được ủy quyền?) then (Có)
+:Chỉ nguồn nhận trực tiếp hoặc promotion\nđược duyệt; không sync bản forward.\nGiữ provenance; xung đột giữ bản gốc.;
+:Một batch CAS/sync, worker mới đọc lại cùng\nBot/store/topic.;
+endif
+:Trả rule refs hoặc blocker; không mở rộng\nACL. Memory không giữ task state,\noccurrence claim hay secret.;
+stop
+@enduml
+
+@startuml 07-environment-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>environment-discovery</b></size>\n<size:14>07  /  Lượt 1.1 · Nhánh cha</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+:Câu lõi: Biên nào áp dụng? Đối chiếu\nbootstrap, isolation, autonomy, store và\ntracker đúng role.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 08-guidance-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>guidance-discovery</b></size>\n<size:14>08  /  Lượt 1.2 · Nhánh cha</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+:Câu lõi: Agent đọc gì trước? Đối chiếu\nAGENTS.md, standards, Harness Glossary/ADR;\nbusiness glossary chỉ đọc nếu chưa được\nphép improve.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 09-capabilities-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>capabilities-discovery</b></size>\n<size:14>09  /  Lượt 1.3 · Nhánh cha</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+:Câu lõi: Cần khả năng nào? So inventory\nskill, CLI, MCP và tools/scripts; đề xuất\nhướng trước khi mở skill topic.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 10-agent-role-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>agent-role-discovery</b></size>\n<size:14>10  /  Lượt 1.4 · Nhánh cha</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+:Ai làm gì với profile nào? So model, role\nvà subagent. Repo-only không hỏi Bot.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add. Với profile có Bot, đề xuất\nrole và contract riêng theo từng bot_id.\nRole không cấp quyền hay chọn tuyến wake.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 11-coordination-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>coordination-discovery</b></size>\n<size:14>11  /  Lượt 1.5 · Nhánh cha</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+:Câu lõi: Điều phối ở đâu? Xác định\nworkflow, hooks, automations và Software\nFactory có áp dụng không.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 12-verification-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>verification-discovery</b></size>\n<size:14>12  /  Lượt 1.6 · Nhánh cha</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+:Câu lõi: Kiểm kết quả bằng gì? Tách Product\nchecks và Harness checks; xác định receipt,\nevidence và quyền mở.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 13-state-continuation-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>state-continuation-discovery</b></size>\n<size:14>13  /  Lượt 1.7 · Nhánh cha</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+:Câu lõi: Run sau lấy state ở đâu? Xác định\ndecision, checkpoint, handoff và resume;\nphân định nguồn canonical.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 14-skill-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>skill-discovery</b></size>\n<size:14>14  /  Lượt 2 · capabilities-discovery</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Parent chưa định hướng /\ndefer?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker; không load route khác.;
+stop
+endif
+:Câu lõi: Skill nào cần giữ, thêm, đổi? Tách\nentry, opt-in, route nội bộ và thứ tự ưu\ntiên load.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 15-workflow-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>workflow-discovery</b></size>\n<size:14>15  /  Lượt 2 · coordination-discovery</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Parent chưa định hướng /\ndefer?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker; không load route khác.;
+stop
+endif
+:Câu lõi: Trình tự, owner và handoff nào\ncần? Map dependency và owner; tách\ndecision, handoff và effect.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 16-hooks-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>hooks-discovery</b></size>\n<size:14>16  /  Lượt 2 · coordination-discovery</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Parent chưa định hướng /\ndefer?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker; không load route khác.;
+stop
+endif
+:Câu lõi: Hook nào, ở điểm nào? Phân biệt\ncheck local và side effect; nêu guard và\nđích.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả findings/intent/ask hoặc blocker + refs\ncho Setup; không cài, ghi, sync hoặc\npublish.;
+stop
+@enduml
+
+@startuml 17-automation-discovery
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>automation-discovery</b></size>\n<size:14>17  /  Lượt 2 · coordination-discovery</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL. Chỉ dùng\nfacts tĩnh.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+if (Parent chưa định hướng /\ndefer?) then (Có)
+:Trả Setup blocker hoặc defer; không nạp\nroute khác.;
+stop
+endif
+if (Node/caller/source không\nkhớp?) then (Có)
+:Trả Setup blocker; không load route khác.;
+stop
+endif
+:Tín hiệu nào đáng tự động hóa?\nChỉ xét lịch hoặc sự kiện tích hợp.\nĐề xuất automation_id → đúng một\ntarget_bot_id và binding trong scope.;
+:Ghi yêu cầu claim occurrence + khóa\ndedupe bền, atomic trước ACK.\nKiểm actor, scope, cách dừng; không dùng\nchat hoặc role để chọn đích.;
+:Đọc facts tĩnh; gọi grilling +\ndomain-modeling gốc và harness-library đúng\nscope/pin. Không route đạt: báo Setup.;
+:Chỉ đề nghị intent hợp lệ: keep, add,\nimprove, move-layer/replace, remove, link,\ndefer.;
+if (Còn fact / intent material?) then (Có)
+|Human|
+#FFE5A6:<b>H2</b> · Owner chốt thông tin/ý định của\nnode khi Setup hỏi, hoặc ghi defer\ncó điều kiện.;
+|Agent/Skill|
+:Setup giữ ask và revision. Chưa chốt, giữ\nphần phụ thuộc.;
+endif
+:Node rỗng chỉ add/defer; link sau khi hai\nđầu keep/add.;
+:Trả mapping đơn đích, guards và blocker\ncho Setup. Không cài, ghi, publish,\ncấu hình hoặc bật trigger.;
+stop
+@enduml
+
+@startuml 18-harness-project-to-spec
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>harness-project-to-spec</b></size>\n<size:14>18  /  Override · to-spec</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+
+:Caller kiểm binding project exact\nID/source/caller/policy; nhận DesignReady,\nbasis, scope, acceptance, pin.;
+if (Route/inputs không khớp?) then (Có)
+:Blocked; không shadow original hay giả gọi.;
+stop
+endif
+:Soạn phần spec còn thiếu. Thiếu quyền lưu\ntrả inline; trả draft/ref và revision cho\ncaller.;
+|Human|
+#FFE5A6:<b>H5</b> · Chủ spec duyệt đúng revision tại\ncaller, không tại override.;
+|Agent/Skill|
+:Caller verify basis/scope/acceptance/policy\ntại nguồn. Draft không thay H5.;
+stop
+@enduml
+
+@startuml 19-harness-project-to-tickets
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>harness-project-to-tickets</b></size>\n<size:14>19  /  Override · to-tickets</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+
+if (Chưa có approval H5 còn hiệu\nlực?) then (Có)
+|Human|
+#FFE5A6:<b>H5</b> · Chủ spec duyệt đúng revision tại\ncaller trước khi load override.;
+|Agent/Skill|
+endif
+if (Caller/binding hoặc H5 không\nkhớp?) then (Có)
+:Không load to-tickets; trả blocker. Không\ncoi ticket là spec approval.;
+stop
+endif
+:Override nhận scope/deps cùng basis; soạn\nphần ticket draft còn thiếu và trả caller.;
+if (Caller thấy split đổi\nmaterial?) then (Có)
+|Human|
+#FFE5A6:<b>H6</b> · Chủ quyết định chốt draft revision\nmới tại caller.;
+|Agent/Skill|
+endif
+if (Caller muốn publish và draft\nhợp lệ?) then (Có)
+|Human|
+#FFE5A6:<b>H7</b> · Người có quyền tracker cấp grant\nexact payload tại caller.;
+|Agent/Skill|
+endif
+:Caller xử lý H6/H7 và canonical readback.\nKhông publish trong override.;
+stop
+@enduml
+
+@startuml 20-harness-project-implement
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>harness-project-implement</b></size>\n<size:14>20  /  Override · implement</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+
+:Caller resolve DispatchReady và route\nproject execution đã qualify.;
+|Human|
+#FFE5A6:<b>H8</b> · Người ủy quyền đích cấp grant cho\nđúng một effect tại caller.;
+|Agent/Skill|
+if (Grant/epoch/revision/selection/route\nlệch?) then (Có)
+:Blocked trước send.;
+stop
+endif
+if (Non-atomic, policy cho phép?) then (Có)
+|Human|
+#FFE5A6:<b>H9</b> · Người có quyền giám sát và xác nhận\nlần gửi này.;
+|Agent/Skill|
+endif
+if (Thiếu fence bắt buộc hoặc H9\ncần mà thiếu?) then (Có)
+:Blocked; không gửi.;
+stop
+endif
+:Override gửi một effect; đích kiểm grant và\nfence tại commit. Trả\nApplied/Denied/Unknown hoặc Blocked + ref\ncho caller.;
+if (Unknown, caller đối soát\nthiếu evidence?) then (Có)
+|Human|
+#FFE5A6:<b>H13</b> · Operator can thiệp ở caller, không\nđặt trạng thái tại đích.;
+|Agent/Skill|
+endif
+if (Verified và cần quyền nghiệm\nthu?) then (Có)
+|Human|
+#FFE5A6:<b>H17</b> · Chủ nghiệm thu quyết\nclosure/writeback ngoài override.;
+|Agent/Skill|
+endif
+:Caller giữ recovery/closure. Override không\nretry, rollback, merge hoặc close.;
+stop
+@enduml
+
+@startuml 21-hi-i-m-devin
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #536C85
+skinparam ArrowFontColor #243C54
+skinparam swimlaneBorderColor #9BB0C4
+skinparam swimlaneBorderThickness 1
+skinparam swimlaneTitleFontColor #203A54
+skinparam swimlaneTitleFontStyle bold
+skinparam activity {
+  BackgroundColor #E8F2FB
+  BorderColor #7698B8
+  FontColor #162D45
+  DiamondBackgroundColor #F0F5F9
+  DiamondBorderColor #7698B8
+  DiamondFontColor #162D45
+  StartColor #415D78
+  EndColor #415D78
+}
+!pragma useVerticalIf on
+title <size:23><b>hi-i-m-devin</b></size>\n<size:14>21  /  Mẫu entry tùy chọn · Không là skill Harness</size>
+|#FFF7DF|Human|
+|#F4F8FD|Agent/Skill|
+start
+if (Chưa có yêu cầu rõ?) then (Có)
+:Khảo sát thầm, chỉ đọc trong ACL.;
+if (Không có đề xuất đủ căn cứ?) then (Có)
+:Không đề xuất; không tạo request.;
+stop
+endif
+:Đưa 1–2 đề xuất có căn cứ, title nguyên văn\n+ “Something else”.;
+|Human|
+#FFE5A6:<b>H1</b> · Người yêu cầu chọn đúng title hoặc\nnêu intent khác.;
+|Agent/Skill|
+if (Không có lựa chọn rõ?) then (Có)
+:Không mở request; không tạo effect.;
+stop
+endif
+else (Yêu cầu rõ / node cụ thể)
+
+endif
+:Request đã rõ chuyển caller; bất kỳ effect\nnào vẫn cần gate và exact grant riêng.;
+stop
+@enduml
