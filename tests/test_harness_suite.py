@@ -161,7 +161,8 @@ def test_discovery_retains_branch_choices_without_extra_topic_routes():
     text = path.read_text(encoding="utf-8")
     assert "Environment & authority | Context isolation; Runtime environment; Execution authority |" in text
     assert "Agent configuration & roles | Model profiles; Roles and subagents |" in text
-    assert "open question at its own tree path for H2" in text
+    assert "choice or open question with its tree path under that branch" in text
+    assert "Setup records each result at that path for H2" in text
     assert "use their branch's route, not a separate skill ID" in text
 
 

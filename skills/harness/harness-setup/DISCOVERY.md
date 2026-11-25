@@ -20,13 +20,15 @@ groups. Evolve can reference the map without calling Setup's routes.
 | 2.3 | [`hooks-discovery`](../../discovery/hooks-discovery/SKILL.md) | `coordination-discovery` | Coordination / On demand / Hooks | — |
 | 2.4 | [`automation-discovery`](../../discovery/automation-discovery/SKILL.md) | `coordination-discovery` | Coordination / On demand / Automation | — |
 
-Pass one visits all seven branches in order, with no child load. Keep each
-material branch-area choice or open question at its own tree path for H2.
-Areas in the last column use their branch's route, not a separate skill ID.
-Batch only actionable open questions after reviewing all seven, authority
-first; include clear recommendations in the synthesis. Pass two opens all applicable
-children, one working context at a time. Take the earliest eligible route in
-table order unless a recorded dependency requires another order. A deferred parent
+Pass one visits all seven branches in order, with no child load. Areas in the
+last column use their branch's route, not a separate skill ID. The topic labels
+each material choice or open question with its tree path under that branch.
+Setup records each result at that path for H2, even when it batches questions.
+Review all seven before batching actionable questions, authority first.
+Include clear recommendations in the synthesis.
+
+Pass two opens all applicable children, one working context at a time. Take the
+earliest eligible route in table order unless a recorded dependency requires another order. A deferred parent
 skips its children; lack of direction or a blocked dependency holds only
 affected nodes. Continue independent work. Checkpoint through the
 [decision map](DECISION-MAP.md); do not checkpoint in a topic.
