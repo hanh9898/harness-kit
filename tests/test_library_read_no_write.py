@@ -5,7 +5,6 @@ import select
 import sqlite3
 import subprocess
 import sys
-from contextlib import closing
 
 import pytest
 
@@ -117,6 +116,27 @@ def test_malformed_compare_candidate_is_rejected_without_writes(library, invalid
     assert files(store.parent) == before
 
 
+def test_existing_store_is_not_opened_when_no_write_cannot_be_enforced(library):
+    store, candidate = library
+    before = files(store.parent)
+    code = """
+import ctypes, runpy, sqlite3, sys
+from types import SimpleNamespace
+ctypes.CDLL = lambda *_: SimpleNamespace(syscall=lambda *_: -1)
+def reject_open(*args, **kwargs):
+    raise AssertionError('SQLite open was not blocked')
+sqlite3.connect = reject_open
+sys.argv = sys.argv[1:]
+runpy.run_path(sys.argv[0], run_name='__main__')
+"""
+    result = subprocess.run([sys.executable, "-I", "-c", code, str(CLI),
+                             *read_args(store, candidate, "show", False)],
+                            capture_output=True, text=True, timeout=10)
+    assert (result.returncode, result.stdout) == (2, "")
+    assert "cannot enforce a no-write SQLite open on this host" in result.stderr
+    assert files(store.parent) == before
+
+
 PAUSE_BEFORE_SQLITE_OPEN = """
 import runpy, sqlite3, sys
 connect = sqlite3.connect
@@ -132,19 +152,26 @@ runpy.run_path(sys.argv[0], run_name='__main__')
 
 
 @pytest.mark.parametrize(("command", "strict"), [("search", True), ("show", False)])
-@pytest.mark.parametrize("transition", ["wal", "replace-empty"])
+@pytest.mark.parametrize("transition", ["wal", "wal-active", "replace-empty"])
 def test_database_changed_between_preflight_and_open_is_rejected(library, command, strict, transition):
     store, candidate = library
     args = read_args(store, candidate, command, strict)
     with subprocess.Popen([sys.executable, "-I", "-c", PAUSE_BEFORE_SQLITE_OPEN, str(CLI), *args],
                           stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                           text=True) as reader:
+        writer = None
         try:
             assert select.select([reader.stderr], [], [], 10)[0], "CLI never reached SQLite open"
             assert reader.stderr.readline() == "ready\n"
-            if transition == "wal":
-                with closing(sqlite3.connect(store)) as writer:
-                    assert writer.execute("PRAGMA journal_mode=WAL").fetchone() == ("wal",)
+            if transition.startswith("wal"):
+                writer = sqlite3.connect(store)
+                assert writer.execute("PRAGMA journal_mode=WAL").fetchone() == ("wal",)
+                if transition == "wal-active":
+                    writer.execute("CREATE TABLE active_writer (id INTEGER)")
+                    writer.commit()
+                else:
+                    writer.close()
+                    writer = None
             else:
                 replacement = store.with_suffix(".replacement")
                 replacement.touch()
@@ -152,9 +179,11 @@ def test_database_changed_between_preflight_and_open_is_rejected(library, comman
                 store.with_name(store.name + "-wal").write_bytes(b"existing sidecar")
             before = files(store.parent)
             stdout, stderr = reader.communicate("\n", timeout=10)
+            assert files(store.parent) == before
+            assert (reader.returncode, stdout) == (2, "")
+            assert f"Store is unreadable: {store}" in stderr
         finally:
             if reader.poll() is None:
                 reader.kill()
-        assert files(store.parent) == before
-        assert (reader.returncode, stdout) == (2, "")
-        assert f"Store is unreadable: {store}" in stderr
+            if writer is not None:
+                writer.close()

@@ -31,10 +31,18 @@ inode across hosts or use a changing database checksum as the store ID.
 
 Put the global flag `--require-existing-store` before `search`, `selection`
 or `selection-history`. Missing or unreadable targets exit 2 with empty stdout
-and a path to reconcile. Strict reads require a regular, initialized SQLite
-file and reject WAL-mode stores, since SQLite may write sidecars even when
-opened read-only. The flag does not verify identity or authority; the
-consumer checks those separately. Other commands do not accept it.
+and a path to reconcile. `show`, `history` and `compare` always require an
+existing store. All reads of an existing store require a resolved regular
+SQLite file in rollback-journal mode. If the header shows WAL, the CLI
+stops before opening SQLite. SQLite can create or change WAL and SHM
+files even with `mode=ro`. The CLI blocks filesystem writes before
+opening SQLite and rechecks the journal mode in the read transaction.
+
+Live reads require Linux on x86-64 or ARM64 with Landlock ABI 3 or later.
+If the host cannot enforce the write restriction, stop the dependent read.
+Do not checkpoint, change permissions or read the live store as immutable
+to get around the restriction. The CLI does not verify the authorized
+identity or scope. The consumer checks those separately.
 
 Do not treat an invalid binding as unconfigured, create a replacement or fall
 back to another path. Recover the original or verify an owner-authorized
