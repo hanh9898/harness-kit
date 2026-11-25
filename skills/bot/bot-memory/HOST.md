@@ -17,16 +17,22 @@ not silently switch routes.
 
 ## Store requirements
 
-- Enforce caller, instance and topic access before any read. Resolve the
-  published revision through a read-only refresh or read the available published
-  snapshot; do not use a sync operation that could publish, initialize a store,
-  or flush local changes on a read. Missing stores are not provisioned by this
-  skill. Provisioning is a separate authorized effect.
+- Enforce caller, instance, and topic access before probing the store. The
+  same owner does not authorize reads or writes across Bot instances. Resolve
+  the configured route and verify the canonical store target and continuity
+  against the binding. Report `Blocked` on denied access or when identity,
+  continuity, or read access cannot be verified. Confirm unconfigured status
+  from the Bot binding, never from a failed store lookup.
+- Read the published revision with a read-only refresh or an authorized
+  published snapshot. Limit the read to the index and requested topic within
+  scope. On a read, do not use a sync operation that could publish, initialize
+  a store, or flush local changes. Provisioning is a separate authorized effect.
 - Before enabling writes, verify that the store can publish an authorized
   batch only if its expected revision is still current, or use an authorized
   single-writer route that checks the revision and publishes under the same
   exclusive access. Recheck write authority at publication; do not automate
-  writes if the route cannot prove these checks hold at the target.
+  writes if the route cannot prove these checks hold at the target. A stale
+  revision is a conflict, not permission to retry.
 - Keep drafts separate from effective rules. Surface an unresolved conflict
   for the affected rule to authorized readers through scoped host state without
   publishing the draft or blocking unrelated rules. Clear it after
@@ -40,15 +46,22 @@ not silently switch routes.
 ## Qualify on an isolated Bot
 
 1. From the actual Bot and worker, invoke exact `bot-memory` and record its
-   pinned source. Exercise an absent store and a no-op read of an existing
-   store; audit zero store creation, writes and write-side syncs.
+   pinned source. Check that a confirmed unconfigured binding and a ready
+   store with no matching rule return no rules. Check that unavailable
+   configuration returns `Blocked` without probing a store. Check that a
+   configured store that is missing, unreadable, or has the wrong identity
+   returns `Blocked`.
+   Audit zero store creation, writes, and write-side syncs in these read cases.
 2. Open a worker on the old published revision. Record one owner-authorized
-   standing rule at `high`, sync it, and verify its exact revision and effect
-   in a fresh worker. Resume the old worker and verify a read-only refresh
-   picks up the new revision before rules are applied, with no writes or
+   standing rule at `high` and sync it. In a fresh authorized worker on the
+   same Bot instance, store, and topic, verify the exact revision, rule, and
+   original event provenance. Resume the old worker. Verify that a read-only
+   refresh picks up the new revision before applying rules, with no writes or
    write-side syncs. Forward the same instruction to a worker and verify no
    duplicate rule or batch. The accepted change must account for at most one
-   sync batch in the store log.
+   sync batch in the store log. Measure readback time from the fresh worker's
+   scoped read request to verification. Check that the read accessed no topics
+   outside the requested scope.
 3. In a separate case, drop the response after a test write commits. From a
    fresh authorized session, reconcile `Unknown` from the authoritative
    receipt or history and verify the published revision. Audit the caller's
@@ -59,9 +72,10 @@ not silently switch routes.
    auto-applied. Attempt a stale conflicting write and check that the
    published revision and draft are preserved, the disputed rule is blocked,
    and unrelated rules are unaffected until reconciliation.
-5. Try an out-of-scope read and verify access is denied before disclosure.
-   Seed only synthetic private data; verify none of it appears in the
-   worker's context, shared rules or receipts.
+5. Use only synthetic private data. Try an out-of-scope read. Attempt both a
+   read and a write across two Bots with the same owner. Verify denial before
+   disclosure and no changes to either store. Check that no private data appears
+   in the worker's context, shared rules, or receipts.
 
 Save revision, caller, scoped receipt and outcome evidence without private
 data. Report skipped cases and the route exercised; package checks do not
