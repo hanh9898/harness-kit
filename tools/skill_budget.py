@@ -19,25 +19,60 @@ DEFAULT_DIRS = [".claude/skills", ".agents/skills"]
 CHARS_PER_TOKEN = 4
 
 
+def _block_scalar(lines, i, style, indicators):
+    indent = next((int(c) for c in indicators if c.isdigit()), 0)
+    if not indent:
+        indent = 1
+        for line in lines[i:]:
+            indent = max(indent, len(line) - len(line.lstrip(" ")))
+            if line.strip(" "):
+                break
+
+    prefix = " " * indent
+    content = []
+    while i < len(lines):
+        line = lines[i]
+        if (not line and i + 1 == len(lines)) or (not line.startswith(prefix) and line.strip(" ")):
+            break
+        content.append(line[indent:])
+        i += 1
+
+    text = "\n".join(content)
+    if content and i < len(lines):
+        text += "\n"
+    if style == ">":
+        # Between ordinary lines, a single break folds to a space; blank lines fold out one break.
+        text = re.sub(r"(?m)^([^ \t\n][^\n]*)\n(\n*)(?=[^ \t\n])", lambda m: m[1] + (m[2] or " "), text)
+
+    if "+" in indicators:
+        return text, i
+    value = text.rstrip("\n")
+    if "-" not in indicators and value and text.endswith("\n"):
+        value += "\n"
+    return value, i
+
+
 def _scalar(lines, i):
     """Read the YAML scalar at lines[i]; return (value, next line index)."""
     rest = lines[i].split(":", 1)[1].strip()
     if rest.startswith("#"):
         rest = ""
     j = i + 1
+    while not rest and j < len(lines) and (lines[j].startswith((" ", "\t")) or not lines[j].strip()):
+        line = lines[j].strip()
+        if line and not line.startswith("#"):
+            rest = line
+        j += 1
+    block = re.fullmatch(r"([|>])([1-9][-+]?|[-+][1-9]?)?(?:[ \t]+#.*)?", rest)
+    if block:
+        return _block_scalar(lines, j, block[1], block[2] or "")
+
     cont = []
     while j < len(lines) and (lines[j].startswith((" ", "\t")) or not lines[j].strip()):
-        line = lines[j].strip()
-        if rest:
-            cont.append(line)
-        elif line and not line.startswith("#"):
-            rest = line
+        cont.append(lines[j].strip())
         j += 1
     while cont and not cont[-1]:
         cont.pop()
-    if rest[:1] in (">", "|"):
-        sep = " " if rest[0] == ">" else "\n"
-        return sep.join(cont), j
     text = " ".join([rest] + cont) if cont else rest
     quoted = re.match(r"""("(?:[^"\\]|\\.)*"|'(?:[^']|'')*')\s+#""", text)
     if quoted:
@@ -56,7 +91,7 @@ def _scalar(lines, i):
 
 def frontmatter(path):
     """Return name/description from SKILL.md; omit missing keys."""
-    lines = path.read_text(encoding="utf-8").splitlines()
+    lines = path.read_text(encoding="utf-8").split("\n")
     if not lines or lines[0].strip() != "---":
         return {}
     out, i = {}, 1
