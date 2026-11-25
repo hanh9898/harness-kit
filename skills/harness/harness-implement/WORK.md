@@ -34,6 +34,11 @@ Recompute `DispatchReady` from the read-back Harness ticket and its current deci
 
 If the effect uses a Library selection, require `selection_ref` and call `harness-library` before applying it. Reread its [selection handoff](../harness-library/READ.md#selection-handoff) against the intended store, scope, source, ID, revisions, digest and lineage as applicable. Stop dependent work on a stale, disabled, unavailable or unreconciled selection; do not fall back to the raw catalog. A Library write also goes through that skill under separate store authority. Selection readback is not proof of adoption or a cross-system fence.
 
+On resume and before use, return to the original authorized store binding and
+verify its identity. Put `--require-existing-store` before `selection` or
+`selection-history`. Missing, unreadable and wrong-identity each block dependent
+work; do not treat them as revision 0, empty history or no configured store.
+
 Before each effect or closure, reopen mutable inputs from authoritative sources and compare the current assignment, decision, scope, route, selection and target state. A missing source, a denied read and an unverified result are different blockers. If a premise changes, hold affected tickets, notify the current owner and preserve independent progress. A new policy cannot authorize its own activation. Commit, branch/worktree creation, cleanup, push, PR and merge are separate effects; do not inherit them from upstream methods.
 
 ## Write boundary and reconciliation

@@ -3,15 +3,16 @@
 Identify the relevant authorized store, owner and scope. Personal, project
 and shared scopes are distinct, even when they refer to the same catalog.
 Confirm the actual consumer and distribution/revision, not the invoking
-checkout by default. Report unreadable or unverified stores as such. Do not
-create a store for discovery. If current configuration confirms that no store
-is configured for the requested scope, report that condition separately from
-an unreadable store or an unverified scope. Inspect only supplied provenance
-without a store and report that selection was not verified.
+checkout by default. Follow the [configured store read boundary](../../../kit/LIBRARY.md#configured-store-reads):
+check the authorized binding and continuity, not just file existence.
+Report missing, unreadable and wrong-identity separately; block the dependent
+read until the original binding is recovered or an authorized rebind is
+verified. Only confirmed unconfigured scopes may read raw catalog provenance;
+do not create a store or report effective selection for those scopes.
 
 Resolve the skill's real directory; `library` and `kit` below mean the
 executables in `<skill-dir>/../../../kit/scripts/`, not assumed PATH entries.
-For an inspected store, use `library --store <selected-path> search <term>`:
+For a verified binding, use `library --store <selected-path> --require-existing-store search <term>`:
 text matching is literal, not semantic. Narrow queries on truncation; an
 empty result proves nothing beyond that scope. Open only useful candidates via
 `kit show` for supplied resources or `library show` for saved resources.
@@ -27,13 +28,15 @@ as needed, from the pinned distribution revision. The selection snapshot
 covers the catalog row, not the linked instructions. Treat both pieces as
 guidance, not installed Bots, grants, schedules or proof of host readiness.
 
-For a supplied resource use `library --store <selected-path> selection <id> --source supplied`.
+For a supplied resource use `library --store <selected-path> --require-existing-store selection <id> --source supplied`.
 If the pinned distribution is not the bundled one, add
 `--kit-dir <pinned-catalog>` pointing to its verified kit directory. Do not
 use the bundled catalog as a fallback. Use `--source saved` for saved resources.
 Check effective state, source, exact ID and revision (content or catalog
-revision and selection revision as applicable); open scoped history only
-as needed. The same ID in `supplied` and `saved` means distinct resources.
+revision and selection revision as applicable); use the same strict flag with
+`selection-history` as needed. Revision 0 and empty history are valid only
+after a ready-store read. The same ID in `supplied` and `saved` means distinct
+resources.
 
 ## Selection handoff
 

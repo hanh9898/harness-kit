@@ -7,6 +7,10 @@ Through `harness-library`, verify selection and retrieve relevant guidance:
 usage. Preserve source, applicability and certainty. multisession-overview favors the existing
 platform view; cost-and-usage-measurement informs attributable usage, not a cap or telemetry install.
 If a resource is excluded or unverified, skip it and name any dependent limit.
+For a configured Library binding, follow the [strict read](../harness-library/READ.md):
+verify the pinned store identity and use `--require-existing-store` before
+`search` or `selection`. A missing, unreadable or wrong-identity store blocks
+dependent guidance; do not reuse a raw catalog match as selection.
 Use [CHANGE-FLOW.md](CHANGE-FLOW.md) for applicable original methods. Direct
 inspection of supplied facts does not require a research or authoring method.
 

@@ -18,6 +18,7 @@ from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
+from stat import S_ISREG
 from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -399,6 +400,46 @@ def store_exists(store):
     return True
 
 
+class StoreReadError(ValueError):
+    def __init__(self, state, store):
+        super().__init__(f"Store is {state}: {store}")
+
+
+def strict_read_target(store):
+    try:
+        target = store.resolve(strict=True)
+        if not S_ISREG(target.stat().st_mode):
+            raise StoreReadError("unreadable", store)
+        with target.open("rb") as stream:
+            header = stream.read(100)
+    except FileNotFoundError:
+        raise StoreReadError("missing", store) from None
+    except (OSError, RuntimeError):
+        raise StoreReadError("unreadable", store) from None
+    # Even a read-only WAL connection can create or update SQLite sidecars.
+    if len(header) != 100 or not header.startswith(b"SQLite format 3\0") or header[18:20] != b"\x01\x01":
+        raise StoreReadError("unreadable", store)
+    return target
+
+
+@contextmanager
+def read_store(store, *, require_existing_store):
+    if require_existing_store:
+        target = strict_read_target(store)
+    elif store_exists(store):
+        target = store.resolve()
+    else:
+        yield None
+        return
+    try:
+        with closing(sqlite3.connect(target.as_uri() + "?mode=ro", uri=True)) as db:
+            yield db
+    except sqlite3.Error:
+        if require_existing_store:
+            raise StoreReadError("unreadable", store) from None
+        raise
+
+
 def selection_result(db, kit_dir, source, identity, history):
     catalog, aliases = (), PieceAliases()
     if source == "supplied":
@@ -417,10 +458,8 @@ def selection_result(db, kit_dir, source, identity, history):
     return selection_view(db, kit_dir, source, identity, catalog, aliases)[1]
 
 
-def read_selection(store, kit_dir, source, identity, history=False):
-    if not store_exists(store):
-        return selection_result(None, kit_dir, source, identity, history)
-    with closing(sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+def read_selection(store, kit_dir, source, identity, history=False, *, require_existing_store=False):
+    with read_store(store, require_existing_store=require_existing_store) as db:
         return selection_result(db, kit_dir, source, identity, history)
 
 
@@ -486,16 +525,16 @@ def change_selection(args):
     return read_selection(args.store, args.kit_dir, args.source, args.id)
 
 
-def search(store, kit_dir, query, limit, include_disabled=False):
+def search(store, kit_dir, query, limit, include_disabled=False, *, require_existing_store=False):
     if not query.strip() or not 1 <= limit <= 50:
         raise ValueError("Supply a focused nonempty query and a limit from 1 to 50.")
     needle = query.casefold()
     matches = []
-    catalog, aliases = supplied_catalog(kit_dir)
     records, reconciled = {}, set()
     saved_matches = []
-    if store_exists(store):
-        with sqlite3.connect(store.resolve().as_uri() + "?mode=ro", uri=True) as db:
+    with read_store(store, require_existing_store=require_existing_store) as db:
+        catalog, aliases = supplied_catalog(kit_dir)
+        if db is not None:
             records, reconciled = latest_selections(db)
             rows = db.execute("SELECT id, revision, resource FROM revisions r WHERE revision=(SELECT MAX(revision) FROM revisions WHERE id=r.id) ORDER BY id") if has_table(db, "revisions") else []
             for row in rows:
@@ -530,6 +569,8 @@ def search(store, kit_dir, query, limit, include_disabled=False):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--store", required=True, type=Path)
+    ap.add_argument("--require-existing-store", action="store_true",
+                    help="Fail if search, selection or selection-history cannot read the configured store")
     sub = ap.add_subparsers(dest="command", required=True)
     save = sub.add_parser("save", help="Create at revision 0 or edit the inspected revision")
     save.add_argument("--input", required=True, type=Path)
@@ -569,11 +610,16 @@ def main():
     for command in WRITE_OPERATIONS:
         sub.choices[command].add_argument("--write-grant", help="Current grant ID for a guarded store")
     args = ap.parse_args()
+    if args.require_existing_store and args.command not in ("search", "selection", "selection-history"):
+        ap.error("--require-existing-store applies only to search, selection and selection-history")
     try:
         if args.command == "search":
-            result = search(args.store, args.kit_dir, args.query, args.limit, args.include_disabled)
+            result = search(args.store, args.kit_dir, args.query, args.limit, args.include_disabled,
+                            require_existing_store=args.require_existing_store)
         elif args.command in ("selection", "selection-history"):
-            result = read_selection(args.store, args.kit_dir, args.source, args.id, args.command == "selection-history")
+            result = read_selection(args.store, args.kit_dir, args.source, args.id,
+                                    args.command == "selection-history",
+                                    require_existing_store=args.require_existing_store)
         elif args.command in ("disable", "restore"):
             result = change_selection(args)
         elif args.command == "grant-write":
@@ -630,6 +676,9 @@ def main():
             result = view((resource["id"], revision, payload))
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
+    except StoreReadError as exc:
+        print(f"ERROR: {exc}\nNext: reconcile the authorized store binding before retrying.", file=sys.stderr)
+        return 2
     except (OSError, ValueError, sqlite3.Error) as exc:
         print(f"ERROR: {exc}\nNext: inspect the live store before retry; no successful save is claimed.", file=sys.stderr)
         return 2
