@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "operation": "selection",
+  "store_ref": "project-library",
+  "scope_ref": "harness-test/project-a",
+  "source": "supplied",
+  "id": "software-factory",
+  "distribution_revision": "kit-4f02",
+  "digest": "snapshot-digest-71",
+  "selection_revision": 0,
+  "enabled": true,
+  "available": true,
+  "effective": true,
+  "evidence_refs": ["selection-readback-83"]
+}

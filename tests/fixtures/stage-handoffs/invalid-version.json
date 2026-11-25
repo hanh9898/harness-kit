@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "operation": "execute",
+  "request_ref": "req-7@3",
+  "scope_ref": "harness-test/project-a",
+  "decision_ref": "choice-11@4",
+  "ticket_ref": {"instance": "sandbox-a", "namespace": "harness", "id": "work-17", "revision": 6},
+  "assignment_ref": "assignment-82@2",
+  "route_ref": "route-check-19",
+  "effect_ref": "effect-plan-55",
+  "expected_target_revision": "41"
+}
