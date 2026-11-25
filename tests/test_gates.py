@@ -68,6 +68,17 @@ def test_truncated_rule_row_rejected(tmp_path, with_gates):
     assert "rules.csv:3: 9.02 is missing cells for verified_on;" in r.stdout
 
 
+def test_surplus_rule_cells_rejected(tmp_path):
+    root = write(tmp_path, [rule("9.01")], [gate("9.01")])
+    overflow = rule("9.02", verified_on="")
+    with (root / "rules.csv").open("a", encoding="utf-8", newline="") as f:
+        csv.writer(f).writerow([*(overflow[c] for c in RULE_COLS), "stray value"])
+
+    r = run(CHECK_KIT, "--dir", root)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "rules.csv:3: 9.02 has extra cells beyond the header;" in r.stdout
+
+
 @pytest.mark.parametrize("with_gates", [True, False], ids=["with-gates", "without-gates"])
 def test_duplicate_rule_id_rejected(tmp_path, with_gates):
     root = write(tmp_path, [rule("9.01", certainty="inferred", verified_on=""), rule("9.01")],
