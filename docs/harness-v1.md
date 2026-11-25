@@ -16,8 +16,8 @@ describes the design, not an executed pilot.
 | Skill budget | 20 files under `skills/`, 2,146 description characters, no missing names or name mismatches. | The two example skills are outside the default scan. Estimated tokens are not host telemetry. |
 | Regressions | The targeted run passed 205 cases, including the structural and Library no-write tests used by [v1-guard](../.github/workflows/v1-guard.yml). See the PR for the full-suite result. | Three generator tests need source reports that are not in the checkout. |
 | Handoff shape | `check-stage-handoff` accepted the example `prepare` envelope. Stage-contract tests cover all six operations and rejected shapes. | Shape validation does not resolve references or approve an effect. |
-| Architecture | Five PNGs decoded. PlantUML 1.2025.10 and Graphviz regenerated 30 SVG panels from the three bundled sources. Three Stage 2A HTML views rendered with the network blocked. | Did not reproduce the exact composite images or rerun TLC. Stage 2B HTML needs the Devin viewer runtime; use its PNGs offline. |
-| READMEs | Catalog reads, handoff validation, and both quickstarts run in a clean checkout. Registration links lead to the adapter guide and vendor docs. | The named ReadMe Generation playbook was not available. Used the RFC-005 checklist, technical-writing, and unslop instead. Host install and invocation were not run. |
+| Architecture | Five PNGs decoded. PlantUML 1.2025.10 and Graphviz regenerated 30 SVG panels from the three bundled sources. Three Stage 2A HTML views rendered with the network blocked. | Did not reproduce the exact composite images or rerun TLC. Stage 2B HTML needs the Devin viewer runtime; use its PNGs offline. See the [diagram gaps and erratum](architecture/harness-v1-stage-2a-index.md#giới-hạn-của-bộ-sơ-đồ-b8). |
+| READMEs | Catalog reads, handoff validation, and both quickstarts run in a clean checkout. Codex CLI registered the plugin marketplace and listed the plugin as installed and enabled in a disposable home. | The named ReadMe Generation playbook was not available. Used the RFC-005 checklist, technical-writing, and unslop instead. No authenticated host invocation was run. |
 
 Re-run the [source checks](../README.md#check-the-source) and the
 [prepare](../examples/devin-prepare/README.md) and
@@ -30,7 +30,7 @@ Re-run the [source checks](../README.md#check-the-source) and the
 | Devin | Four project-local links and pinned helper. Sampled internal routes reject wrong project and caller. Prepare and disabled Bot replays. | Unqualified. No approved isolated project run with exact-ID Source, caller access, and target evidence at this SHA. |
 | Pi | Four default entries from the package manifest. Same sampled route checks; disabled Bot replay with a temporary Pi home. | Unqualified. No Pi CLI or authenticated project session. |
 | Claude Code | Four default entries from the plugin manifest. Same sampled route checks. | Unqualified. No Claude Code CLI or authenticated project session. |
-| Codex | Four default project links under `.agents/skills/` in the fixture. Same sampled route checks. | Unqualified. No Codex CLI or authenticated project session. |
+| Codex | Four default project links under `.agents/skills/` in the fixture. Same sampled route checks. Separate CLI registration smoke in a disposable home. | Unqualified. No authenticated project session checked the exact skill ID, source, or caller. |
 
 **Route fixture** below means the [four B7a adapter fixtures](../tests/test_m2_quickstarts.py)
 read pinned files and check project, caller, source, commit, exact ID, and
@@ -119,6 +119,9 @@ counts, and target writes/receipts/cursors/dedup remains unmeasured. See the
    live Bot or trigger. Keep unqualified triggers off.
 4. Provide approved isolated candidates on different model families and
    a cross-family judge to finish blind Eval.
+5. Review the Implement swimlane erratum and approve any updated swimlane or
+   missing Library and Implement recovery sequence before it replaces or
+   extends the locked diagram set.
 
 ## Pilot runbook
 

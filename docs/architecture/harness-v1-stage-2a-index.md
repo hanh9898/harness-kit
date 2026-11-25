@@ -20,6 +20,16 @@ ngoài repository cần quyền mở tệp đính kèm Devin. Tải HTML về đ
 trình duyệt. HTML Stage 2B cần truy cập `static.devin.ai` để tải trình xem;
 dùng PNG khi không có mạng.
 
+## Giới hạn của bộ sơ đồ B8
+
+- Bộ tệp đã duyệt chỉ có sơ đồ Recovery Bot. Xem
+  [đặc tả Recovery Library và Implement](../arc42-harness-v1.md#diagram-contract)
+  cho hai sơ đồ chưa có trong bộ tệp. Cần duyệt riêng trước khi bổ sung.
+- Swimlane Implement đi qua H5 khi vẽ liền mạch từ soạn nháp đến thực thi.
+  Với yêu cầu `execute` trực tiếp, làm theo
+  [DispatchReady](../../skills/harness/harness-implement/WORK.md#dispatch-and-integrate).
+  H5 chỉ chặn gọi `to-tickets` khi chuẩn bị, không phải cổng của `execute`.
+
 ## Ghi chú từ lần đối chiếu thiết kế
 
 **Boundary Discipline.** Hai automation đi vào hai đích riêng theo target_bot_id. Tasks giữ trạng thái ticket và claim. Inbox của từng Bot giữ ask và disposition, không ghi thay Tasks hay GitHub.
