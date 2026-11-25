@@ -16,3 +16,5 @@ Read [handoff intake](WORK.md#handoff-intake) for versioned and legacy inputs, t
 | [`execute`](WORK.md#dispatch-and-integrate) | Recompute `DispatchReady` from the canonical ticket, dependencies, assignment, route and target authority. | Block dependent work; a published ticket or publish grant is not execution authority. |
 
 For every write use the [late-write gate](WORK.md#write-boundary-and-reconciliation). After execute preflight, use [execution methods](EXECUTION.md) and return the [execution result](WORK.md#execution-result) without claiming the caller's verification or closure.
+
+If work must continue in another session, use the [continuation handoff](../../../kit/PERSISTENCE.md#continuation-handoff) without changing the execution result.

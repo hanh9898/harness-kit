@@ -29,9 +29,30 @@ def test_entry_runbooks_have_package_local_links(name):
         assert_package_local_links(path)
 
 
-@pytest.mark.parametrize("name", ["M2-CONFIG.md", "STAGE-CONTRACTS.md"])
-def test_stage_and_config_contracts_have_package_local_links(name):
+@pytest.mark.parametrize("name", ["M2-CONFIG.md", "PERSISTENCE.md", "STAGE-CONTRACTS.md"])
+def test_kit_contracts_have_package_local_links(name):
     assert_package_local_links(KIT / name)
+
+
+@pytest.mark.parametrize("entry", [
+    "harness-setup/RESUME.md",
+    "harness-evolve/DESIGN-WRITEBACK.md",
+    "harness-implement/SKILL.md",
+    "harness-library/SKILL.md",
+])
+def test_continuation_uses_one_shared_handoff_contract(entry):
+    text = (SKILL_ROOT / entry).read_text(encoding="utf-8")
+    assert text.count("](../../../kit/PERSISTENCE.md#continuation-handoff)") == 1
+
+
+def test_handoff_distinguishes_effect_verification_and_blockers():
+    persistence = (KIT / "PERSISTENCE.md").read_text(encoding="utf-8")
+    _, _, handoff = persistence.partition("## Continuation handoff\n")
+    assert re.findall(r"^\| `(\w+)` \|", handoff, re.MULTILINE) == [
+        "Applied", "Verified", "Blocked", "Unknown",
+    ]
+    assert "recipient's scope" in handoff
+    assert "Do not claim `handoff` was invoked." in handoff
 
 
 def assert_package_local_links(path):
