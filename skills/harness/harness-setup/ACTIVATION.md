@@ -1,5 +1,15 @@
 # Selected provider activation
 
+## Bootstrap Harness on Devin
+
+Use the [adapter runbook](../../../kit/HOST-ADAPTERS.md#devin-project-links)
+to inspect the four Harness entries without writing, then link only in Apply
+with a grant for the exact project and paths. Verify the returned project
+Source, caller and pin before use. Missing access or unproven source blocks
+the route; do not reinstall to clear it. Resolve
+[internal routes on demand](../../../kit/HOST-ADAPTERS.md#load-internal-routes-on-demand);
+do not register the discovery or override directories by default.
+
 ## Verify upstream prerequisites
 
 Verify the originals `grilling` and `domain-modeling` before dependent discovery.

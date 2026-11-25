@@ -30,6 +30,13 @@ at its original identity. Compare intended data and authority references with
 what actually persisted, including each target's current bytes and checks.
 A matching label alone cannot establish identity or completed application.
 
+For a Bot route, use [host reconciliation](HOST-ADAPTERS.md) at the original
+target. A matching Applied receipt closes reconciliation, not verification or
+activation. Before reopening an absent effect, require authoritative evidence
+that the previous attempt cannot still apply late, then recheck live authority
+at the write gate. Keep the affected claim, checkpoint and wake unchanged
+while the outcome is `Unknown`; independent targets can continue.
+
 **Done:** each affected write/effect is observed completed, observed absent under
 a sufficient native view, or unresolved. Unknown outcomes stay explicit.
 
@@ -154,8 +161,9 @@ Accept only an authenticated automation occurrence from an allowed schedule or
 integration source. Chat, @mentions, Bot messages, direct requests and Inbox
 replies never wake a Bot. Verify the exact `automation_id`, single
 `target_bot_id`, source, scope and current binding revision, and read back
-the exact trigger as active before claiming. Missing or mismatched input has
-no default target, claim, positive ACK or dispatch.
+the exact trigger as active before claiming. Compare the bound caller and
+instance with the arrival context. A missing field, legacy Bot intent or
+mismatch has no default target, claim, positive ACK or dispatch.
 
 Commit the occurrence claim, durable uniqueness and resumable pending state
 against that Bot's occurrence key before acknowledging delivery. A duplicate
@@ -163,6 +171,18 @@ can acknowledge only after reading the committed record for the same mapping.
 Do not claim or dispatch it again. A delivery ACK is not an effect receipt or
 a Tasks claim. For an `Unknown` effect, keep its checkpoint and reconcile at
 the original target; do not replay because delivery was acknowledged.
+
+Use `(bot_id, automation_id, source_id, occurrence_id)`: schedule occurrences
+use the scheduled UTC instant, integration events use the provider event ID.
+Fence application and resume with the Bot's current `instance_id` and
+`binding_revision`. This key supersedes the instance-based wake key in
+[M2 configuration](M2-CONFIG.md#readiness-and-authority-gates) for `bots[]`.
+An instance-keyed ledger is not an empty ledger under the new key. Keep its
+triggers off until an authorized transition proves continuity of claims and
+pending work under the new key. Do not dual-write, guess mappings or start
+with an empty ledger. Rebind preserves the Bot's occurrence ledger or keeps
+the trigger off; never copy ledger state to another Bot. See
+[automation binding](HOST-ADAPTERS.md#bind-automation-to-one-bot).
 
 ```v1-gates
 [

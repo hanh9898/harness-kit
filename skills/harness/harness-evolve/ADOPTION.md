@@ -143,7 +143,10 @@ selection blocks adoption. Do not fall back to direct pins from a failed
 configured store.
 
 Use the shared [Bot lifecycle gates](../harness-setup/ACTIVATION.md#configure-and-qualify-a-bot)
-when adding a Bot or changing its binding.
+for the exact Bot being added or rebound. Inspect the proposed caller and
+routes with the [adapter runbook](../../../kit/HOST-ADAPTERS.md). If a source,
+grant or primitive is missing, report it without reinstalling or switching
+routes. A legacy `bot_ref` is migration input only, never a wake target.
 While draining, the new host may only inspect or run isolated fixtures.
 Keep the instance only if the new host can reopen the approved authoritative
 records; otherwise an independently authorized new instance needs scope

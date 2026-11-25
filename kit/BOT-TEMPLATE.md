@@ -56,9 +56,8 @@ live grants out of the template.
 
 ## Map capabilities to the host
 
-Only use the capabilities the role needs. Use the existing contracts below
-to design and qualify them; a prompt, an installed file or a declared adapter
-does not implement any of these guarantees.
+Use the [host capability map](HOST-ADAPTERS.md#capability-map) for routes and
+fallbacks. Qualify only the capabilities the role needs against these contracts.
 
 | Capability | What to establish |
 | --- | --- |

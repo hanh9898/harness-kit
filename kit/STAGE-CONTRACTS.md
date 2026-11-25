@@ -127,12 +127,14 @@ improvement separate.
 ## Setup or Evolve → Bot operator: `bot-setup`
 
 Required: `instance_id`, pinned `template_ref` and `contract_ref`, `scope_ref`,
-`adapter_ref` (adapter profile and caller), `configuration_ref` (observed
-readback), `evidence_refs`, and `disabled_capabilities` (actual disabled
-capability IDs from readback).
+`adapter_ref` (observed [host binding](M2-CONFIG.md#route-binding) for the
+actual caller), `configuration_ref` (observed readback), `evidence_refs`, and
+`disabled_capabilities` (actual disabled capability IDs from readback).
 
-Emit only after an authorized change to a Bot target and actual configuration
-readback, never for a repo-only change. The operator evaluates activation;
-configuration and this handoff authorize no trigger. Read back the configuration,
-exercise a permitted manual route and verify fresh-worker resume and deduplication
-before obtaining a separate grant and reading back activation for each trigger.
+Emit one handoff per changed Bot after authorized configuration readback,
+never for a repo-only change. Resolve `instance_id` and all refs to one
+current `bots[]` entry; reject mixed Bot or stale binding refs. The
+[adapter runbook](HOST-ADAPTERS.md) qualifies routes without changing the
+envelope or authorizing any trigger. Follow the
+[Bot lifecycle gates](../skills/harness/harness-setup/ACTIVATION.md#configure-and-qualify-a-bot)
+for manual rehearsal, fresh-worker resume and per-trigger authority.
