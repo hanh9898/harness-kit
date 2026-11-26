@@ -126,6 +126,18 @@ def line_mentions_writer(text, targets):
     return bool(WRITE_COMMAND.search(text))
 
 
+def writer_path_spellings(target, resolved):
+    spellings = {str(target.absolute()), str(resolved)}
+    home = Path(os.environ.get("HOME", "")).expanduser().absolute()
+    for candidate in (target.absolute(), resolved):
+        try:
+            relative = candidate.relative_to(home)
+        except ValueError:
+            continue
+        spellings.add(str(relative))
+    return dict.fromkeys(spellings)
+
+
 def scan_external_writers(targets):
     signals = []
     sources = []
@@ -219,7 +231,7 @@ def build_report(args):
     deploy_facts, deploy_signals = deployment_facts(resolved)
     report["facts"].update(deploy_facts)
     report["signals"].extend(deploy_signals)
-    report["signals"].extend(scan_external_writers(dict.fromkeys((str(target.absolute()), str(resolved)))))
+    report["signals"].extend(scan_external_writers(writer_path_spellings(target, resolved)))
 
     effects, effect_blockers = parse_effects(args.effect)
     report["effects"] = effects

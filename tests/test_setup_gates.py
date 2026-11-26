@@ -22,12 +22,13 @@ MAIN_BRANCHES = [
 ]
 
 
-def run_json(script, *args, env=None):
+def run_json(script, *args, env=None, cwd=None):
     result = subprocess.run(
         [sys.executable, "-I", str(script), *map(str, args), "--json"],
         capture_output=True,
         text=True,
         env=env,
+        cwd=cwd,
     )
     try:
         report = json.loads(result.stdout)
@@ -412,3 +413,20 @@ def test_relative_dot_target_does_not_match_unrelated_dotted_filenames(tmp_path)
     )
     assert result.returncode == 0, report
     assert "external-writer-candidate" not in {row["id"] for row in report["signals"]}
+
+
+def test_home_relative_cron_writer_is_detected_for_a_home_project(tmp_path):
+    home = tmp_path / "home"
+    project = home / "project"
+    project.mkdir(parents=True)
+    cron_line = "0 * * * * cd project && python3 deploy.py\n"
+    env = fake_path(tmp_path, crontab=cron_line)
+    result, report = run_json(
+        PREFLIGHT,
+        "--target", project,
+        "--mode", "apply",
+        "--effect", "write-record=grant:write@1",
+        env=env,
+    )
+    assert result.returncode == 1
+    assert "external-writer-unverified" in {row["id"] for row in report["blockers"]}
