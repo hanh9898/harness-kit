@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "scenarios": {
+    "eval-comparison": {
+      "name": "Eval comparison",
+      "ids": [
+        "opt-blind-comparison",
+        "opt-shared-premise-probe"
+      ]
+    },
+    "formal-model-checking": {
+      "name": "Formal model checking",
+      "ids": [
+        "opt-formal-model-resync"
+      ]
+    }
+  },
+  "items": {
+    "opt-blind-comparison": {
+      "name": "Blind comparison with one rubric",
+      "summary": "Have one independent reviewer grade both masked variants against a shared rubric.",
+      "needed_when": "An evaluation compares variants and requires subjective judgment.",
+      "kind": "playbook",
+      "node": "Verification & feedback",
+      "all": [
+        "compare-variants",
+        "subjective-grading"
+      ],
+      "none": [
+        "fully-objective"
+      ],
+      "body_sha256": "c5a91d8304f1998200c2828b7c80584eef867e4a22b755186c8113b279d00ae4",
+      "provenance": {
+        "url": "https://github.com/backnotprop/pstack/blob/c81f1bf680803f9e3f0cade6adb62593f43fb61f/skills/poteto-mode/playbooks/eval.md",
+        "license": "MIT"
+      }
+    },
+    "opt-shared-premise-probe": {
+      "name": "Test the shared premise before another fix",
+      "summary": "Check whether an assumption shared by failed fixes is true.",
+      "needed_when": "At least two fixes share a known assumption and fail the same verification gate.",
+      "kind": "principle",
+      "node": "Verification & feedback",
+      "all": [
+        "repeated-same-gate",
+        "shared-assumption"
+      ],
+      "none": [],
+      "body_sha256": "9c175206b3b1c7d62c3ccadb86495650e4fdb20edae6602996747f77a0003bc5",
+      "provenance": {
+        "url": "https://github.com/backnotprop/pstack/blob/c81f1bf680803f9e3f0cade6adb62593f43fb61f/skills/principle-attack-the-premise/SKILL.md",
+        "license": "MIT"
+      }
+    },
+    "opt-formal-model-resync": {
+      "name": "Resync a formal model to covered code",
+      "summary": "Check that modeled transitions still match the implementation.",
+      "needed_when": "Code covered by an existing formal model has changed since its recorded sync.",
+      "kind": "playbook",
+      "node": "Verification & feedback",
+      "all": [
+        "formal-model-exists",
+        "covered-code-changed"
+      ],
+      "none": [],
+      "body_sha256": "15d20de371623338c9cf153fa2cedf456bf85eb0a33907ec92860b1bc4da9997",
+      "provenance": {
+        "url": "https://github.com/backnotprop/pstack/blob/c81f1bf680803f9e3f0cade6adb62593f43fb61f/skills/maintain-formal-verification-skill/SKILL.md",
+        "license": "MIT"
+      }
+    }
+  }
+}

@@ -73,6 +73,50 @@ continuity evidence; a matching filename or revision 0 is not evidence.
 Without the flag, the legacy CLI still allows catalog-only results for a
 missing path. Do not use that compatibility path for a configured store.
 
+## Optional verification method pack
+
+The [verification methods](../packs/verification-methods/) are a separate
+distribution. They do not appear in default search or the skill inventory.
+Opt in only for an authorized consumer with an existing store and a reviewed
+core checkout and pack. Keep the binding in the consumer's configuration,
+not in the shared pack. Record the following JSON:
+
+| Field | Value |
+| --- | --- |
+| `schema` | Integer `1`. |
+| `owner`, `scope` | The authorized owner and `personal` or `project:<absolute path>`. |
+| `store` | `path` is the canonical absolute SQLite path; `device` and `inode` are the integers from `os.stat` on this host. |
+| `catalog` | `path` is the canonical absolute pinned `kit/` directory; `files` maps `legos.csv`, `rules.csv`, and `piece-aliases.csv` to their SHA-256 digests. |
+| `pack` | `path` is the canonical absolute pack directory; `index_sha256` is the reviewed `index.json` file's SHA-256 digest. |
+
+Record digests from the verified release bytes, not from a failing binding
+at read time. See the [RFC](../docs/rfc-optional-library-methods.md) for the
+fact vocabulary and update rules. Keep pack metadata with the pack; the
+index pins each body by SHA-256, independent of the core catalog.
+
+```sh
+library --store "$store" --pack-binding "$binding" pack-browse
+library --store "$store" --pack-binding "$binding" pack-browse --view scenarios --scenario eval-comparison
+library --store "$store" --pack-binding "$binding" pack-discover --node 'Verification & feedback' --fact compare-variants --fact subjective-grading
+library --store "$store" --pack-binding "$binding" pack-show opt-blind-comparison
+```
+
+Use the trusted executable as for core Library reads. Browsing is explicit
+and does not infer applicability. Discovery without a binding returns zero
+suggestions; a bad binding is a blocker, not an empty result. Grouped views
+refer to the same IDs and omit disabled methods. Only an exact open returns
+the body and provenance metadata. Opening rechecks effective selection;
+retrieval does not authorize applying the method.
+
+With the same binding, use `selection ID --source supplied` or
+`selection-history ID --source supplied` to inspect state. Use the existing
+grant, disable, and restore commands with the same binding for separately
+authorized changes. Pack changes require a matching write grant even if
+the store has not used guarded writes before. As with other Library grants,
+the first issuance enables the write guard for the whole store. Supply the
+pack binding with both issuance and mutation; switching the binding requires
+a fresh grant.
+
 ## Save input
 
 Pass UTF-8 JSON as a file; use a JSON serializer, never shell interpolation of resource content. Duplicate JSON fields are rejected as ambiguous. This is a full resource replacement at an expected revision. Example of a valid unfinished rule:

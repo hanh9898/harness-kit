@@ -20,4 +20,6 @@ jobs:
       - name: Check v1 structural contract and Library no-write seam
         run: |
           time "$RUNNER_TEMP/v1-guard/bin/python" -m pytest -q \
-            tests/test_v1_structural_contract.py tests/test_library_read_no_write.py
+            tests/test_v1_structural_contract.py tests/test_library_read_no_write.py tests/test_library_method_pack.py
+      - name: Check optional method pack boundaries
+        run: python3 -I tools/check_method_pack.py
