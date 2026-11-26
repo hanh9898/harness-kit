@@ -27,11 +27,14 @@ def check_overlay(index, catalog, overlay):
     for name, keys in (("legos.csv", ["id"]), ("rules.csv", ["id"]),
                        ("piece-aliases.csv", ["legacy_id", "slug"]), ("groups.csv", []), ("gates.csv", [])):
         shutil.copyfile(catalog / name, overlay / name)
-        if keys:
-            with (overlay / name).open(encoding="utf-8", newline="") as stream:
-                reader = csv.DictReader(stream, strict=True)
-                if name == "legos.csv":
-                    piece_fields = reader.fieldnames or ()
+        with (overlay / name).open(encoding="utf-8", newline="") as stream:
+            reader = csv.DictReader(stream, strict=True)
+            header = reader.fieldnames or ()
+            if len(header) != len(set(header)):
+                raise ValueError(f"{name}:1: duplicate columns in catalog header.")
+            if name == "legos.csv":
+                piece_fields = header
+            if keys:
                 for row in reader:
                     core_ids.update(row[key] for key in keys)
     method_pack.require_disjoint(index, core_ids)

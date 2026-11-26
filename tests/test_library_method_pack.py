@@ -361,6 +361,20 @@ def test_pack_checker_accepts_valid_catalog_layouts(bound, layout):
     assert checked.returncode == 0, checked.stdout + checked.stderr
 
 
+def test_pack_checker_rejects_duplicate_catalog_headers(bound):
+    _, pack, core, _ = bound
+    path = core / "legos.csv"
+    with path.open(encoding="utf-8", newline="") as stream:
+        header, *rows = csv.reader(stream)
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow(["id", *header])
+        writer.writerows(["conflicting-id", *row] for row in rows)
+    checked = run(CHECK, "--pack", pack, "--kit-dir", core)
+    assert checked.returncode == 1
+    assert "legos.csv:1: duplicate columns" in checked.stderr
+
+
 def test_pack_checker_scans_decoded_index_text(bound):
     _, pack, core, _ = bound
     update_index(bound, lambda index: index["items"][BLIND].update(summary='Use rubric:"shared" for both variants.'))
