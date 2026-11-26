@@ -91,6 +91,17 @@ judge from another model family. The repo requires Codex Sol for
 orchestration subagents. No approved separate qualification runners or
 cross-family judge were available. Do not promote a route on local evidence.
 
+### Devin Setup and revoked-read status
+
+| Slice | Status |
+| --- | --- |
+| Exact Devin Setup readback and `SAMPLE-001` | Unqualified. The [procedure](../examples/bot-first-run/README.md#devin-setup-readback-and-read-smoke) has not run on a native Devin Bot. |
+| Native target read/effect after revocation | Unqualified. No completed, isolated Devin run with correlated target counters is recorded here. |
+| Native catalog hiding, runtime refusal, and late target refusal | All unqualified. A local replay or deterministic selector cannot qualify a live model or a target-side refusal. |
+
+This status does not change the other host, wake, fresh-worker, or blind Eval
+requirements.
+
 ### Performance and effect counts
 
 | Fixture | Measured work | Not measured |
@@ -175,15 +186,18 @@ to unrelated claims, trackers, repository writes or host configuration.
    loads, not estimated token savings.
 4. Exercise the allowed path and refusals: draft only, wrong namespace,
    missing or stale assignment/authority, disabled or unreconciled Library
-   selection, and an unsupervised non-atomic target. Confirm late revocation
-   at the actual guarded target after the last caller read. Exercise an
-   authorized supervised send only where policy allows it. Simulate a lost
-   reply and reconcile once from receipts and destination history, without
-   automatic retry or rollback.
+   selection, and an unsupervised non-atomic target. For writes, confirm late
+   revocation at the guarded target after the last caller check. For reads,
+   use the [revocation evidence matrix](#record-read-and-revocation-evidence).
+   Exercise an authorized supervised send only where policy allows it.
+   Simulate a lost reply and reconcile once from receipts and destination
+   history, without automatic retry or rollback.
 5. Save the **actual executed flow diagram** with request/assignment IDs,
    revisions, permission gates and observed outputs. Record target receipts,
-   history and before/after effect counts from an independent read. Success
-   means one intended effect, zero blocked effects and no product writes.
+   history and before/after effect counts from an independent source. A
+   write should commit only its intended effect. Refusals must not commit
+   an effect. No case should write to a product destination. The read cases
+   have separate expectations below.
    Reopen evidence from a fresh authorized session; say if continuation or
    any other case was not verified. Never include credentials or live grants.
 
@@ -191,3 +205,47 @@ See the [Setup checklist](../skills/harness/harness-setup/CHECKLIST.md) and
 [Evolve checklist](../skills/harness/harness-evolve/CHECKLIST.md) for more
 cases. Keep the diagram of the actual run with its evidence, not in place of
 this reference flow.
+
+### Record read and revocation evidence
+
+Use one record per run. Match the evidence by `run_ref` or request ID, exact
+Bot, caller, target, binding, and revision. Record the measurement window
+and grant revision so the target can attribute its counts to that run.
+
+| Source | Record | How to interpret it |
+| --- | --- | --- |
+| Target, independent of the Bot | `target_reads_before`, `target_reads_after`, `target_effects_before`, `target_effects_after`, scope, window, `target_observation_ref` | Count a read when the authorized path touches the protected record. Count committed business mutations. If effects occur outside the database, correlate evidence from those systems too. Record ingress accept/deny separately. Discovery, denied requests, and operator measurements are not reads. Missing measurements are not zero. |
+| Runtime and authorization | `catalog_state`: `visible`, `hidden`, `unknown`. `tool_proposed` and `tool_submitted`: `yes`, `no`, `unknown`. `auth_outcome`: `allowed`, `denied`, `not_reached`, `unknown`. Include catalog, trace, and grant-revision refs. | Record whether a live model, deterministic selector, or test model made the choice. Use `no` only when a complete trace shows no such event. A request denied by the target was still submitted. |
+| Conversation | `completed`, `failed`, `timed_out`, or `unknown`, with message ref and ACL-redacted outcome | Verify a positive result against the tool response. In a negative run, require a completed refusal or no-tool result with no protected data returned. A timeout is not a refusal. |
+
+Subtract the before counts from the after counts. The table gives expected
+results, not observations. A zero read count does not mean no call was
+proposed or submitted. A proposal or denied request does not mean the target
+read data.
+
+| Case | Read / effect delta | Evidence and conclusion |
+| --- | --- | --- |
+| Read allowed | `1 / 0` | Correct tool result and target-confirmed caller. A retry that reads again exceeds the count. |
+| Revoked before discovery; tool hidden | `0 / 0` | With a complete trace: `hidden`, `no`, `no`, `not_reached`. Qualifies hiding only, not denial of a submitted request. |
+| Runtime rejects a proposal | `0 / 0` | `tool_proposed=yes`, `tool_submitted=no`, `auth_outcome=denied` with a trace of the runtime decision. Does not qualify target denial. |
+| Revoked after the last caller check | `0 / 0` | `tool_proposed=yes`, `tool_submitted=yes`, `auth_outcome=denied`. Show caller check, effective revocation, then denial by the target's current ACL before data access or commit. |
+| Incomplete runtime trace | Target result only | Record `unknown` for missing fields, even if both deltas are zero. Do not infer whether the tool was hidden, proposed, or submitted, or qualify the late-revocation case. |
+| Missing target counts or attribution, unfinished run, or unexpected result | Inconclusive or fail | Missing evidence or an unfinished run is inconclusive for the affected slice. An observed wrong delta, unauthorized read or effect, or protected data returned is a failure even with incomplete tracing. |
+
+Accept a revoked run's no-read/no-effect result only with a completed run,
+evidence of effective revocation, no protected data returned, and both
+zero deltas attributed to that run by the target.
+
+Run the revoked case in a separate conversation that has never seen the
+allowed result. Prefer a cold revoked run. After a positive run, use a
+fresh caller on the same Bot and verify it cannot see the old transcript,
+cache, or memory containing the value. Otherwise do not use the pair to
+judge disclosure. Keep the fixture revision, Bot ID, tool, and model or
+selector the same when comparing runs.
+
+For late revocation, only use an approved test barrier immediately before
+the target authorization check. Release the real test request after the
+target confirms revocation is effective. Never remove the ACL, replay
+credentials, or force the race on a live connection. Without the barrier
+and target trace, leave the race unqualified. Revocation after commit
+does not undo the effect. Keep the original receipt and counts.
