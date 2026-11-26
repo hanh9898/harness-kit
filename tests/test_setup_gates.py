@@ -354,14 +354,21 @@ def test_confirmed_child_branch_requires_its_own_outcome(tmp_path):
 
 
 def test_transition_checker_does_not_write_bytecode(tmp_path):
-    cache = TRANSITION.parent / "__pycache__"
-    if cache.exists():
-        import shutil
-        shutil.rmtree(cache)
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    shutil.copy2(TRANSITION, scripts / TRANSITION.name)
+    shutil.copy2(TRANSITION.with_name("check-stage-handoff"), scripts / "check-stage-handoff")
     path, _ = write_record(tmp_path, base_record())
-    result = run(TRANSITION, path)
+    env = os.environ.copy()
+    env.pop("PYTHONDONTWRITEBYTECODE", None)
+    result = subprocess.run(
+        [sys.executable, "-I", str(scripts / TRANSITION.name), str(path)],
+        capture_output=True,
+        text=True,
+        env=env,
+    )
     assert result.returncode == 0, result.stderr
-    assert not cache.exists()
+    assert not (scripts / "__pycache__").exists()
 
 
 def test_writer_scan_checks_both_supplied_symlink_and_resolved_target(tmp_path):
@@ -394,7 +401,7 @@ def test_verified_rejects_execution_ticket_from_another_harness_namespace(tmp_pa
 def test_relative_dot_target_does_not_match_unrelated_dotted_filenames(tmp_path):
     project = tmp_path / "project"
     project.mkdir()
-    cron_line = "0 * * * * cd /opt/other && python3 cache.db-cleanup.py\n"
+    cron_line = "0 * * * * cd /opt/other && python3 cache.db-cleanup.py\\n"
     env = fake_path(tmp_path, crontab=cron_line)
     result, report = run_json(
         PREFLIGHT,
