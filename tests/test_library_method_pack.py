@@ -244,6 +244,32 @@ def test_retired_method_history_remains_readable_without_reopening_method(ready)
     blocked(call(ready, *cmd), "owner or scope")
 
 
+def test_moved_method_preserves_the_supplied_selection_history(ready):
+    store, _, core, _ = ready
+    source = ("--source", "supplied")
+    request = decision(store.parent)
+    path = core / "legos.csv"
+    original = path.read_bytes()
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = csv.DictReader(stream)
+        piece = next(rows)
+        fields = rows.fieldnames
+    with path.open("a", encoding="utf-8", newline="") as stream:
+        csv.DictWriter(stream, fields).writerow(dict(piece, id=BLIND))
+    legacy = result(call(ready, "disable", BLIND, *source, "--kit-dir", core, "--input", request,
+                         "--expect-selection-revision", "0", with_binding=False))["record"]
+    path.write_bytes(original)
+
+    cmd = ("selection-history", BLIND, *source)
+    assert result(call(ready, *cmd)) == [legacy]
+    grant = result(call(ready, "grant-write", "restore", BLIND, *source, "--input", request,
+                        "--expect-revision", "1", "--ttl-seconds", "60"))["write_grant"]
+    current = result(call(ready, "restore", BLIND, *source, "--input", request,
+                          "--expect-selection-revision", "1", "--write-grant", grant))["record"]
+    assert [record["snapshot"]["kind"] for record in (legacy, current)] == ["piece", "method"]
+    assert result(call(ready, *cmd)) == [legacy, current]
+
+
 @pytest.mark.parametrize(("variant", "diagnostic"), [
     ("index", "Pinned method pack index digest"),
     ("core", "Pinned core catalog digest"),

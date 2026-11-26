@@ -625,11 +625,9 @@ def read_selection(store, kit_dir, source, identity, history=False, *, require_e
             if not history:
                 return pack.selection(db, identity)
             records = selection_records(db, source, identity)
-            if not records:
+            if not any(record["snapshot"]["kind"] == "method" for record in records):
                 pack.require_id(identity)
             for record in records:
-                if record["snapshot"]["kind"] != "method":
-                    raise ValueError(f"Not a method selection history: {identity}.")
                 pack.binding.require_scope(record)
             return records
         return selection_result(db, kit_dir, source, identity, history)
