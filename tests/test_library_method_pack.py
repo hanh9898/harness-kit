@@ -1,5 +1,6 @@
 """Exercise optional method discovery and selection through the public CLI."""
 
+import csv
 import hashlib
 import json
 import shutil
@@ -290,3 +291,18 @@ def test_pack_checker_narrows_boundary_exception(bound, variant, diagnostic):
     checked = run(CHECK, "--pack", pack, "--kit-dir", core)
     assert checked.returncode == 1
     assert diagnostic in checked.stdout + checked.stderr
+
+
+@pytest.mark.parametrize("layout", ["reordered", "no-final-newline"])
+def test_pack_checker_accepts_valid_catalog_layouts(bound, layout):
+    _, pack, core, _ = bound
+    path = core / "legos.csv"
+    if layout == "reordered":
+        with path.open(encoding="utf-8", newline="") as stream:
+            rows = list(csv.reader(stream))
+        with path.open("w", encoding="utf-8", newline="") as stream:
+            csv.writer(stream).writerows(row[::-1] for row in rows)
+    else:
+        path.write_bytes(path.read_bytes().rstrip(b"\r\n"))
+    checked = run(CHECK, "--pack", pack, "--kit-dir", core)
+    assert checked.returncode == 0, checked.stdout + checked.stderr

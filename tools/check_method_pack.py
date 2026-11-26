@@ -23,16 +23,24 @@ PROVENANCE_ALLOWLIST_SHA256 = "1234be6f9c7af8264fb24a93d37839dd0fbea0303936ead0e
 def check_overlay(index, catalog, overlay):
     overlay.mkdir()
     core_ids = set()
+    piece_fields = ()
     for name, keys in (("legos.csv", ["id"]), ("rules.csv", ["id"]),
                        ("piece-aliases.csv", ["legacy_id", "slug"]), ("groups.csv", []), ("gates.csv", [])):
         shutil.copyfile(catalog / name, overlay / name)
         if keys:
             with (overlay / name).open(encoding="utf-8", newline="") as stream:
-                for row in csv.DictReader(stream, strict=True):
+                reader = csv.DictReader(stream, strict=True)
+                if name == "legos.csv":
+                    piece_fields = reader.fieldnames or ()
+                for row in reader:
                     core_ids.update(row[key] for key in keys)
     method_pack.require_disjoint(index, core_ids)
-    with (overlay / "legos.csv").open("a", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=check_kit.COLUMNS)
+    pieces = overlay / "legos.csv"
+    needs_newline = not pieces.read_bytes().endswith((b"\r", b"\n"))
+    with pieces.open("a", encoding="utf-8", newline="") as stream:
+        if needs_newline:
+            stream.write("\n")
+        writer = csv.DictWriter(stream, fieldnames=piece_fields)
         for identity, item in index["items"].items():
             writer.writerow(method_pack.catalog_row(identity, item))
     return check_kit.main(["--dir", str(overlay)])
