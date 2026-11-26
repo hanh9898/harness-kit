@@ -625,7 +625,11 @@ def read_selection(store, kit_dir, source, identity, history=False, *, require_e
             if not history:
                 return pack.selection(db, identity)
             records = selection_records(db, source, identity)
+            if not records:
+                pack.require_id(identity)
             for record in records:
+                if record["snapshot"]["kind"] != "method":
+                    raise ValueError(f"Not a method selection history: {identity}.")
                 pack.binding.require_scope(record)
             return records
         return selection_result(db, kit_dir, source, identity, history)
@@ -862,7 +866,8 @@ def main():
     try:
         pack = BoundPack.load(args.pack_binding) if args.pack_binding is not None else None
         if pack and method_selection:
-            pack.require_id(args.id)
+            if args.command != "selection-history":
+                pack.require_id(args.id)
             if args.kit_dir is not None and args.kit_dir != pack.binding.catalog:
                 raise ValueError("--kit-dir must match the method binding catalog when supplied.")
         if hasattr(args, "kit_dir") and args.kit_dir is None:

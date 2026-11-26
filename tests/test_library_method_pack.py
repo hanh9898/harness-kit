@@ -217,6 +217,33 @@ def test_exact_scoped_grants_disable_and_restore_both_views(ready):
     assert [entry["action"] for entry in history] == ["disable", "restore"]
 
 
+def test_retired_method_history_remains_readable_without_reopening_method(ready):
+    store = ready[0]
+    source = ("--source", "supplied")
+    request = decision(store.parent)
+    grant = result(call(ready, "grant-write", "disable", BLIND, *source, "--input", request,
+                        "--expect-revision", "0", "--ttl-seconds", "60"))["write_grant"]
+    result(call(ready, "disable", BLIND, *source, "--input", request,
+                "--expect-selection-revision", "0", "--write-grant", grant))
+    cmd = ("selection-history", BLIND, *source)
+    history = result(call(ready, *cmd))
+
+    def retire(index):
+        del index["items"][BLIND]
+        index["scenarios"]["eval-comparison"]["ids"].remove(BLIND)
+
+    update_index(ready, retire)
+    before = files(store.parent)
+    assert result(call(ready, *cmd)) == history
+    assert files(store.parent) == before
+    blocked(call(ready, "pack-show", BLIND), "Unknown method ID")
+    blocked(call(ready, "grant-write", "restore", BLIND, *source, "--input", request,
+                 "--expect-revision", "1", "--ttl-seconds", "60"), "Unknown method ID")
+    blocked(call(ready, "selection-history", "opt-unknown", *source), "Unknown method ID")
+    update_binding(ready, lambda binding: binding.update(owner="Different owner"))
+    blocked(call(ready, *cmd), "owner or scope")
+
+
 @pytest.mark.parametrize(("variant", "diagnostic"), [
     ("index", "Pinned method pack index digest"),
     ("core", "Pinned core catalog digest"),

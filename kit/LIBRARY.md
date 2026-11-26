@@ -109,7 +109,9 @@ the body and provenance metadata. Opening rechecks effective selection;
 retrieval does not authorize applying the method.
 
 With the same binding, use `selection ID --source supplied` or
-`selection-history ID --source supplied` to inspect state. Use the existing
+`selection-history ID --source supplied` to inspect state. History remains
+readable for retired methods in the same owner and scope; retrieval and
+selection changes still require a current method ID. Use the existing
 grant, disable, and restore commands with the same binding for separately
 authorized changes. Pack changes require a matching write grant even if
 the store has not used guarded writes before. As with other Library grants,
