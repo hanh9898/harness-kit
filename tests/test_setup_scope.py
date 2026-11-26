@@ -134,3 +134,16 @@ def test_scope_selection_never_authorizes_effects_or_missing_bot_configuration(t
     result = check(tmp_path, value)
     assert result.returncode == 1
     assert "configure-bot" in result.stderr
+
+
+def test_bare_request_cannot_use_empty_user_request_as_decision_evidence(tmp_path):
+    value = scenario(
+        request="",
+        intent="repo-only",
+        basis=["user-request"],
+        user_view={"text": "Scope: repo.", "shown_profile": "repo-only", "options": [], "bot_question_asked": False},
+        recorded_profile="repo-only",
+    )
+    result = check(tmp_path, value)
+    assert result.returncode == 1
+    assert "user-selection" in result.stderr

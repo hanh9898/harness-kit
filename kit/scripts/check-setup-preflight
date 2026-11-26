@@ -114,13 +114,13 @@ def deployment_facts(target):
     return facts, signals
 
 
-def line_mentions_writer(text, target):
-    if str(target) not in text:
+def line_mentions_writer(text, targets):
+    if not any(str(target) in text for target in targets):
         return False
     return bool(WRITE_COMMAND.search(text))
 
 
-def scan_external_writers(target):
+def scan_external_writers(targets):
     signals = []
     sources = []
 
@@ -130,7 +130,7 @@ def scan_external_writers(target):
         if result is not None and result.returncode == 0:
             for line in result.stdout.splitlines():
                 stripped = line.strip()
-                if stripped and not stripped.startswith("#") and line_mentions_writer(stripped, target):
+                if stripped and not stripped.startswith("#") and line_mentions_writer(stripped, targets):
                     sources.append("user crontab")
                     break
 
@@ -142,7 +142,7 @@ def scan_external_writers(target):
                 text = path.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            if line_mentions_writer(text, target):
+            if line_mentions_writer(text, targets):
                 sources.append(f"systemd user unit {path.name}")
 
     cron_d = Path("/etc/cron.d")
@@ -154,7 +154,7 @@ def scan_external_writers(target):
                 text = path.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            if line_mentions_writer(text, target):
+            if line_mentions_writer(text, targets):
                 sources.append(f"/etc/cron.d/{path.name}")
 
     for source in dict.fromkeys(sources):
@@ -213,7 +213,7 @@ def build_report(args):
     deploy_facts, deploy_signals = deployment_facts(resolved)
     report["facts"].update(deploy_facts)
     report["signals"].extend(deploy_signals)
-    report["signals"].extend(scan_external_writers(resolved))
+    report["signals"].extend(scan_external_writers(dict.fromkeys((str(target), str(resolved)))))
 
     effects, effect_blockers = parse_effects(args.effect)
     report["effects"] = effects

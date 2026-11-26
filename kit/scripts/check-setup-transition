@@ -13,6 +13,8 @@ import json
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+
 MAIN_BRANCHES = (
     "Environment & authority",
     "Guidance & knowledge",
@@ -160,6 +162,11 @@ def validate_branch_outcomes(record, confirmations, errors):
         if branch not in by_path:
             errors.append(f"missing branch outcome for {branch}")
 
+    covered_children = set().union(*confirmations.values(), set()) if confirmations else set()
+    for child in sorted(covered_children & set(CHILD_PARENTS)):
+        if child not in by_path:
+            errors.append(f"missing branch outcome for confirmed child branch {child}")
+
     for child, parent in CHILD_PARENTS.items():
         child_outcome = by_path.get(child)
         parent_outcome = by_path.get(parent)
@@ -243,8 +250,16 @@ def validate_transition(record):
         if handoff.get("decision_ref") != record["decision_ref"]:
             errors.append(f"handoffs.{operation}.decision_ref does not match transition decision_ref")
 
+    publish = handoffs.get("publish")
     execute = handoffs.get("execute")
     result = handoffs.get("result")
+    if publish is not None and execute is not None:
+        target = publish.get("target", {})
+        ticket = execute.get("ticket_ref", {})
+        if isinstance(target, dict) and isinstance(ticket, dict):
+            for field in ("instance", "namespace"):
+                if target.get(field) != ticket.get(field):
+                    errors.append(f"handoffs.execute.ticket_ref.{field} does not match handoffs.publish.target")
     if execute is not None and result is not None:
         if result.get("assignment_ref") != execute.get("assignment_ref"):
             errors.append("handoffs.result.assignment_ref does not match handoffs.execute.assignment_ref")

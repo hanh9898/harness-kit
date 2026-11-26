@@ -342,3 +342,50 @@ def test_transition_checker_rejects_mismatched_scope_or_assignment(tmp_path):
     result = run(TRANSITION, path)
     assert result.returncode == 1
     assert "scope_ref" in result.stderr
+
+
+def test_confirmed_child_branch_requires_its_own_outcome(tmp_path):
+    record = base_record()
+    record["confirmations"][0]["covered_paths"].append("Capabilities / Skills")
+    path, _ = write_record(tmp_path, record)
+    result = run(TRANSITION, path)
+    assert result.returncode == 1
+    assert "confirmed child branch" in result.stderr
+
+
+def test_transition_checker_does_not_write_bytecode(tmp_path):
+    cache = TRANSITION.parent / "__pycache__"
+    if cache.exists():
+        import shutil
+        shutil.rmtree(cache)
+    path, _ = write_record(tmp_path, base_record())
+    result = run(TRANSITION, path)
+    assert result.returncode == 0, result.stderr
+    assert not cache.exists()
+
+
+def test_writer_scan_checks_both_supplied_symlink_and_resolved_target(tmp_path):
+    real = tmp_path / "real-target"
+    real.mkdir()
+    link = tmp_path / "linked-target"
+    link.symlink_to(real, target_is_directory=True)
+    cron_line = f"0 * * * * cd {link} && git reset --hard origin/main\\n"
+    env = fake_path(tmp_path, crontab=cron_line)
+    result, report = run_json(
+        PREFLIGHT,
+        "--target", link,
+        "--mode", "apply",
+        "--effect", "write-record=grant:write@1",
+        env=env,
+    )
+    assert result.returncode == 1
+    assert "external-writer-unverified" in {row["id"] for row in report["blockers"]}
+
+
+def test_verified_rejects_execution_ticket_from_another_harness_namespace(tmp_path):
+    record = verified_record()
+    record["handoffs"]["execute"]["ticket_ref"]["namespace"] = "harness:other"
+    path, _ = write_record(tmp_path, record)
+    result = run(TRANSITION, path)
+    assert result.returncode == 1
+    assert "ticket_ref.namespace" in result.stderr

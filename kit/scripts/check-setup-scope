@@ -90,6 +90,8 @@ def validate(record):
         if recorded != "undecided" and context_only & set(record["basis"]) and not decisive & set(record["basis"]):
             errors.append("git-directory and agent-host cannot decide an unclear scope")
     else:
+        if not record["request"].strip() and "user-selection" not in record["basis"]:
+            errors.append("a bare request cannot decide scope without user-selection evidence")
         if recorded != intent:
             errors.append("recorded_profile must match the explicit or selected intent")
         if intent == "repo-only" and view["bot_question_asked"]:
