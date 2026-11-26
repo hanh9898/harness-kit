@@ -15,6 +15,26 @@ eligibility. Topic results are inline input to the map writer, not tickets
 or checkpoints of their own. An approved deferral records why and when to
 reopen it; a blocker or silence is not a deferral.
 
+## Branch answers and checkpoints
+
+Record every grilling answer against the exact tree path of the branch that
+asked it. A confirmation record has a stable ref and a `covered_paths` list.
+A batch yes may settle only the branch paths explicitly listed in that record.
+It never settles unasked or unlisted branches. Before moving to the next
+branch, save a checkpoint with the branch path, outcome, confirmation or
+deferral ref, open question or blocker, and the evidence refs needed to reopen it.
+
+Validate the local transition record at each state change:
+
+```sh
+<skill-dir>/../../../kit/scripts/check-setup-transition <transition.json>
+```
+
+A nonzero exit means the state claim is blocked. Do not report `DesignReady`,
+send `prepare`, or report `Verified` from that record. The checker validates
+structure and cross-references only; reopen the referenced authority and
+evidence at their authoritative sources.
+
 ## Record and close by result
 
 | Ticket | Close only when |
@@ -58,10 +78,15 @@ use the minimal inputs with room to execute and verify. Split by checkable
 scope and dependency order if needed; do not use a fixed token threshold.
 Record readiness and remaining blockers by scope and decision version; redo
 the affected check on a change. Readiness permits preparation, not publication
-or effect.
+or effect. Before reporting it, validate a `design-ready` transition record
+with every applicable branch outcome, branch-specific confirmation and branch
+checkpoint. Missing or invalid input means no `DesignReady` claim.
 
 Before closing or handing off, verify actual evidence from the record with
 receiving-session access. Use full tracker URLs or paths relative to a named
 durable source with the relevant revision. Do not promise resume from transient
 files. If evidence or record access is unverified, mark it and preserve a
-checkpoint with the next step.
+checkpoint with the next step. Before reporting `Verified`, validate a
+`verified` transition record with the required handoffs, an Applied result,
+acceptance evidence and separate close authority. Missing or invalid input
+means no `Verified` claim.

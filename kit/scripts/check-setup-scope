@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Check one user-visible Setup scope selection record without writing."""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+PROFILES = ("repo-only", "bot-only", "repo-and-bot")
+INTENTS = (*PROFILES, "unclear")
+BOT_EFFECTS = {"configure-bot", "enable-trigger", "wake-bot", "write-bot-config"}
+
+
+def reference(value):
+    return isinstance(value, str) and bool(value) and value == value.strip() and value.isprintable()
+
+
+def unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON field: {key!r}")
+        result[key] = value
+    return result
+
+
+def invalid_constant(value):
+    raise ValueError(f"invalid JSON constant: {value}")
+
+
+def validate(record):
+    errors = []
+    keys = {"version", "request", "intent", "basis", "user_view", "recorded_profile", "bot_identity", "effects"}
+    if set(record) != keys:
+        errors.append(f"scope record fields must be exactly: {', '.join(sorted(keys))}")
+        return errors
+    if type(record["version"]) is not int or record["version"] != 1:
+        errors.append("version must be the integer 1")
+    if not isinstance(record["request"], str):
+        errors.append("request must be a string")
+    intent = record["intent"]
+    if intent not in INTENTS:
+        errors.append(f"intent must be one of: {', '.join(INTENTS)}")
+    if not isinstance(record["basis"], list) or not all(reference(item) for item in record["basis"]):
+        errors.append("basis must be an array of references or fact labels")
+    view = record["user_view"]
+    if not isinstance(view, dict):
+        errors.append("user_view must be an object")
+        return errors
+    if set(view) != {"text", "shown_profile", "options", "bot_question_asked"}:
+        errors.append("user_view fields must be exactly text, shown_profile, options and bot_question_asked")
+        return errors
+    if not reference(view["text"]):
+        errors.append("user_view.text must show the scope wording")
+    if view["shown_profile"] not in (*PROFILES, "undecided"):
+        errors.append("user_view.shown_profile must be a profile or undecided")
+    if type(view["bot_question_asked"]) is not bool:
+        errors.append("user_view.bot_question_asked must be boolean")
+    if record["recorded_profile"] not in (*PROFILES, "undecided"):
+        errors.append("recorded_profile must be a profile or undecided")
+    if record["bot_identity"] not in ("verified", "missing", "not-applicable"):
+        errors.append("bot_identity must be verified, missing or not-applicable")
+    if not isinstance(record["effects"], list) or not all(reference(item) for item in record["effects"]):
+        errors.append("effects must be an array of effect names")
+
+    shown = view["shown_profile"]
+    recorded = record["recorded_profile"]
+    if shown != recorded:
+        errors.append("recorded_profile must match the profile shown to the user")
+
+    options = view["options"]
+    decisive = {"user-request", "user-selection"}
+    context_only = {"git-directory", "agent-host"}
+    if intent == "unclear":
+        if recorded != "undecided" or shown != "undecided":
+            errors.append("an unclear request must leave the scope undecided until the user chooses")
+        if not isinstance(options, list) or len(options) != 3:
+            errors.append("an undecided scope must show three user-visible options")
+        else:
+            ids = []
+            for index, option in enumerate(options):
+                if not isinstance(option, dict) or set(option) != {"id", "label"}:
+                    errors.append(f"user_view.options[{index}] must have id and label")
+                    continue
+                ids.append(option["id"])
+                if option["id"] not in PROFILES or not reference(option["label"]):
+                    errors.append(f"user_view.options[{index}] must use a known id and plain non-empty label")
+            if ids != ["repo-only", "bot-only", "repo-and-bot"]:
+                errors.append("the three scope options must be repo-only, bot-only and repo-and-bot")
+        if recorded != "undecided" and context_only & set(record["basis"]) and not decisive & set(record["basis"]):
+            errors.append("git-directory and agent-host cannot decide an unclear scope")
+    else:
+        if not record["request"].strip() and "user-selection" not in record["basis"]:
+            errors.append("a bare request cannot decide scope without user-selection evidence")
+        if recorded != intent:
+            errors.append("recorded_profile must match the explicit or selected intent")
+        if intent == "repo-only" and view["bot_question_asked"]:
+            errors.append("a clear repo-only request must not open Bot questions")
+        if not decisive & set(record["basis"]):
+            errors.append("a decided scope requires user-request or user-selection evidence")
+
+    if record["effects"]:
+        for effect in record["effects"]:
+            errors.append(f"scope selection does not authorize effect {effect}")
+    if record["bot_identity"] == "missing":
+        for effect in sorted(set(record["effects"]) & BOT_EFFECTS):
+            errors.append(f"missing Bot identity blocks {effect}")
+    return errors
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("record", type=Path, help="UTF-8 scope selection JSON")
+    args = parser.parse_args()
+    try:
+        record = json.loads(args.record.read_text(encoding="utf-8"), object_pairs_hook=unique_object,
+                            parse_constant=invalid_constant)
+        if not isinstance(record, dict):
+            raise ValueError("scope record must be an object")
+    except (OSError, ValueError, RecursionError) as error:
+        print(f"invalid scope selection: {error}", file=sys.stderr)
+        return 1
+    errors = validate(record)
+    if errors:
+        for error in errors:
+            print(f"invalid scope selection: {error}", file=sys.stderr)
+        return 1
+    print("OK: scope selection is visible and internally consistent")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

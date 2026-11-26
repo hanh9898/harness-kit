@@ -36,28 +36,46 @@ confirmed missing originals. Inspect and Advice report blockers without installi
 
 1. Confirm Setup is in Apply before entering this route. The
    [entry gate](../../../kit/PROPOSAL-ENTRY.md#selection-h1) does not grant installation.
+   Run the [target preflight](ENVIRONMENT.md#target-preflight-before-effects)
+   in Inspect mode with the tools the candidate route needs. This probes facts
+   only and does not require the install grant. If Node or npx is missing, stop at that blocker or use a separately
+   approved project-scoped toolchain. Never run sudo, a system package manager,
+   `npm install -g` or another machine-wide install.
+2. Choose the host route and include its exact command, destinations and
+   update behavior in the plan:
+
+   | Host | Approved route |
+   | --- | --- |
+   | Devin | Editable project files through `npx "skills@$INSTALLER_VERSION" add "$MATT_REPO_AT_PIN" -a devin --skill grilling domain-modeling`, with `.devin/skills/` and `skills-lock.json` as the only destinations. |
+   | Claude Code | Prefer the upstream plugin command `claude plugin install mattpocock-skills@claude-plugins-official` when host-managed updates are approved. If an exact pinned file install is required and the host or installer cannot provide it, report the blocker instead of substituting another route. |
+   | Another host | Use the upstream guide for that host only when the exact destination, revision and update behavior can be verified. |
+
    Present a scoped plan from the [upstream installation guide](https://github.com/mattpocock/skills#installation-30-second-setup).
    Require a fresh, explicit project administrator grant (H3) for this Apply.
    Bind the grant to the caller, host, project, exact missing IDs, installer
-   version and upstream revision, command, destinations and lockfile effects.
+   version or plugin route, upstream revision or approved host-managed update
+   policy, command, destinations and lockfile or settings effects.
    Without a matching grant, leave configuration unchanged and report the
    blocked methods and next action. Apply the [write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation),
-   including real-time confirmation for a permitted non-atomic send.
-2. Check bundled skills and all proposed writes before running the installer.
+   including real-time confirmation for a permitted non-atomic send. After H3,
+   rerun the preflight in Apply mode with the exact `install-upstream` effect
+   and grant ref before the installer.
+3. Check bundled skills and all proposed writes before running the installer.
    In Devin, use the target project root, `.devin/skills/` and `skills-lock.json`.
    Never install globally, use two install routes, or replace an existing source
    through this gate. With the approved installer version and upstream source
-   pinned to its approved revision, run this only if both IDs are missing:
+   pinned to its approved revision, run the Devin command only for confirmed
+   missing IDs:
 
    ```sh
    npx "skills@$INSTALLER_VERSION" add "$MATT_REPO_AT_PIN" -a devin --skill grilling domain-modeling
    ```
 
-   Pass only the confirmed missing IDs in scope. If the host requires a user or
+   Remove any already installed ID from the command. If the host requires a user or
    admin to install, give them the exact plan. The user runs
    `setup-matt-pocock-skills` only if per-repo configuration is needed and
    separately authorized. It is not a discovery prerequisite.
-3. Read back the lockfile, installed IDs, resolved source/path, revision or
+4. Read back the lockfile, installed IDs, resolved source/path, revision or
    digest, caller and invocation policy in the intended project. Verify host loading
    for agent-callable methods. If loading is pending or the install fails or
    is uncertain, hold dependent work until verified. Reconcile before retrying.
@@ -273,7 +291,8 @@ not unrelated qualified uses.
   {"id": "setup.author-overrides", "requires": ["method.writing-for-agents", "original.to-spec", "original.to-tickets", "original.implement"]},
   {"id": "setup.discovery", "requires": ["method.grilling", "method.domain-modeling"]},
   {"id": "setup.execution-ready", "requires": ["override.to-spec", "override.to-tickets", "override.implement"]},
-  {"id": "setup.install", "requires": ["entry.explicit-apply", "authority.install"]},
+  {"id": "setup.preflight", "requires": []},
+  {"id": "setup.install", "requires": ["entry.explicit-apply", "authority.install", "setup.preflight"]},
   {"id": "trigger.enable.initial", "requires": ["bot.pilot.initial", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
   {"id": "trigger.enable.rebound", "requires": ["bot.pilot.rebound", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
   {"id": "trigger.exact-id", "requires": []}

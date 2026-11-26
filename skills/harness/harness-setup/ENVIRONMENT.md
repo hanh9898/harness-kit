@@ -22,6 +22,29 @@ single status. An available CLI and valid manifest do not prove authentication,
 loading, invocation or behavior. Intended Claude Code, Codex and Pi routes remain
 explicitly unverified until exercised under their actual grants.
 
+## Target preflight before effects
+
+Before any Apply write, install, registration or activation, run the read-only
+preflight through the real skill directory:
+
+```sh
+<skill-dir>/../../../kit/scripts/check-setup-preflight --target <target> --mode apply --effect <effect>=<grant-ref> --json
+```
+
+Repeat `--effect` for each exact effect. Add `--requires-tool node` and
+`--requires-tool npx` when the selected route needs them. The command inspects
+the target, accessible scheduler entries, deployment indicators and required
+executables. It writes nothing. A nonzero exit is a stop: report the missing
+tool, grant, target-role evidence or writer evidence exactly as reported.
+
+Detached HEAD, no remote or a one-commit/shallow checkout is a review signal,
+not a conclusion that the target is a deploy copy. For Apply, resolve the signal
+with evidence that the target is the intended writable work location. Check
+cron, scheduler entries, CI or deploy configuration that can write the target.
+If an overwrite writer is possible and cannot be ruled out, stop before the
+effect. Do not scan unrelated projects or the user's whole home to clear the
+check.
+
 ## Layouts to distinguish
 
 | Layout | Discover and preserve |

@@ -8,12 +8,16 @@ can satisfy several outcomes together. Fill only actual gaps under the grant.
 
 Use the [M2 profile and mode contract](../../../kit/M2-CONFIG.md). Keep these
 values in existing authorized records, not mandatory new files. Reuse known
-owner, scope and bindings; ask only when a material input is missing.
+owner, scope and bindings; ask only when a material input is missing. Show the
+chosen target scope in plain language before recording it. Do not infer it from
+the current Git directory or the selected agent host. If intent is unclear,
+keep the profile undecided and let the user choose only this repository, only a
+Bot, or both before recording a profile.
 
 | Profile | Foundation in scope |
 | --- | --- |
-| `repo-only` | Default for a repo request. Keep the existing two-pass questions and checks. Do not open Bot discovery, load Inbox/Memory, add a store write, or emit `bot-setup`. |
-| `bot-only` | Use the real workspace, owner and scope. Skip repo and Product tracker inputs and Product verification. Keep a Harness work destination only where the work needs one; do not fabricate a repo or tracker. |
+| `repo-only` | Use for a clear repo-only request or user selection. State the scope briefly and continue. Do not open Bot discovery, load Inbox/Memory, add a store write, or emit `bot-setup`. |
+| `bot-only` | Use the real workspace, owner and scope. Bot intent may be recorded before a durable Bot identity exists; verify the exact Bot and grant before configuration. Skip repo and Product tracker inputs and Product verification. Keep a Harness work destination only where the work needs one; do not fabricate a repo or tracker. |
 | `repo-and-bot` | Select both targets only when both are to change. Keep separate bindings, revisions, grants, effects and results. If Bot work depends on unfinished Repo work, hold only that Bot branch; Bot denial does not roll back independent Repo work. |
 
 Use `interactive` for ordinary sessions and interactive Bot design or trials.

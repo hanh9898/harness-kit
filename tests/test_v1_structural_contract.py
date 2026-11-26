@@ -39,7 +39,7 @@ OVERRIDES = {name: f"harness-project-{name}" for name in ("to-spec", "to-tickets
 
 REQUIRED = {
     ACTIVATION: {
-        "setup.install": "entry.explicit-apply authority.install",
+        "setup.install": "entry.explicit-apply authority.install setup.preflight",
         "setup.discovery": "method.grilling method.domain-modeling",
         "setup.author-overrides": "method.writing-for-agents original.to-spec original.to-tickets original.implement",
         "setup.execution-ready": "override.to-spec override.to-tickets override.implement",

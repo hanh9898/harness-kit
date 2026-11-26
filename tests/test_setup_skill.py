@@ -33,7 +33,7 @@ def test_setup_guidance_keeps_bot_work_opt_in_and_repo_inputs_optional_for_bot_o
     foundation = (SKILL / "FOUNDATION.md").read_text(encoding="utf-8")
     repo_only, = re.findall(r"^\| `repo-only` \| (.*?) \|$", foundation, re.M)
     bot_only, = re.findall(r"^\| `bot-only` \| (.*?) \|$", foundation, re.M)
-    assert "existing two-pass questions" in repo_only
+    assert "State the scope briefly" in repo_only
     assert "Do not open Bot discovery" in repo_only
     assert "load Inbox/Memory" in repo_only
     assert "emit `bot-setup`" in repo_only
@@ -52,7 +52,7 @@ def test_documented_setup_payloads_pass_the_stage_checker(tmp_path):
         handoff.write_text(source, encoding="utf-8")
         result = run(KIT / "scripts/check-stage-handoff", "--expect-operation", operation, handoff)
         assert result.returncode == 0, result.stderr
-    assert set(examples) == {"prepare", "publish", "bot-setup"}
+    assert set(examples) == {"prepare", "publish", "execute", "bot-setup"}
     target = examples["publish"]["target"]
     assert target["instance"].startswith("local:")
     assert target["role"] == "harness"
@@ -64,6 +64,22 @@ def test_canonical_publish_contract_allows_the_selected_local_harness_target():
     publish = contract.split("→ Implement: `publish`\n", 1)[1].split("\n## ", 1)[0]
     assert "selected local Harness record" in publish
     assert "not a fallback" in publish
+
+
+def test_scope_selection_is_visible_and_not_inferred_from_context_or_host():
+    body = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    assert "never from the current Git" in body
+    assert "Claude Code, Devin or Codex" in body
+    assert "Only this repository (`repo-only`)" in body
+    assert "Only a Bot (`bot-only`)" in body
+    assert "Both the repository and a Bot (`repo-and-bot`)" in body
+    assert "stay\nundecided" in body or "stays\nundecided" in body
+    assert "check-setup-scope" in body
+    foundation = (SKILL / "FOUNDATION.md").read_text(encoding="utf-8")
+    assert "Bot intent may be recorded before a durable Bot identity exists" in foundation
+    records = (SKILL / "RECORD-FORMAT.md").read_text(encoding="utf-8")
+    assert "## Setup scope selection records" in records
+    assert "`effects` | Must be empty" in records
 
 
 def test_setup_selects_mode_before_any_prerequisite_route():

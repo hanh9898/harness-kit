@@ -76,8 +76,10 @@ an override does not authorize invocation of a user-only original.
 | Codex | Use a verified project binding or read the exact pinned file when policy allows. |
 
 Compare the default inventory and injected prompt before and after loading
-the selected ID. A read of one source file is not native invocation. If the
-host requires changing default registration, report the gap and leave the
+the selected ID. A read of one source file is not native invocation; record it
+as `pinned-instruction-read` under [the topic route contract](../skills/harness/harness-setup/DISCOVERY.md#topic-route-and-result).
+Do not register all discovery topics as public commands to avoid that distinction.
+If the host requires changing default registration, report the gap and leave the
 route off.
 
 ## Devin project links

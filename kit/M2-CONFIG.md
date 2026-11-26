@@ -71,11 +71,21 @@ The schema describes shape; it does not resolve references or grant authority.
 
 ## Target profile examples
 
-For an ordinary repo request, default to `repo-only` and `interactive` unless
-the existing caller mode is known. Do not ask Bot questions, load Inbox or
-Memory, write to a store for this default, or emit a `bot-setup` handoff.
-`repo_ref` identifies the repo, its Harness destination and Product location
-if present; do not derive the destination from the current directory.
+For a clear repo-only request or user selection, use `repo-only` and
+`interactive` unless the existing caller mode is known. State that scope
+briefly and continue. Do not ask Bot questions, load Inbox or Memory, write to
+a store for this default, or emit a `bot-setup` handoff. A bare request with
+unclear intent is not a repo request: keep the target profile undecided and let
+the user choose only the repository, only a Bot, or both. Do not infer the
+profile from the current directory or agent host. `repo_ref` identifies the
+repo, its Harness destination and Product location if present; do not derive
+the destination from the current directory.
+
+Record a selected Bot intent in the decision map even when no `bot_ref` exists
+yet. Do not fabricate a `bot_ref`; hold the M2 target profile incomplete or
+record the intent outside this schema until the exact target can be referenced.
+That selection grants nothing. It blocks only steps that configure, write to or
+activate a real Bot until the bot, instance, binding and grant are verified.
 
 ```json
 {
