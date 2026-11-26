@@ -306,3 +306,14 @@ def test_pack_checker_accepts_valid_catalog_layouts(bound, layout):
         path.write_bytes(path.read_bytes().rstrip(b"\r\n"))
     checked = run(CHECK, "--pack", pack, "--kit-dir", core)
     assert checked.returncode == 0, checked.stdout + checked.stderr
+
+
+def test_pack_checker_scans_decoded_index_text(bound):
+    _, pack, core, _ = bound
+    update_index(bound, lambda index: index["items"][BLIND].update(summary='Use rubric:"shared" for both variants.'))
+    checked = run(CHECK, "--pack", pack, "--kit-dir", core)
+    assert checked.returncode == 0, checked.stdout + checked.stderr
+
+    update_index(bound, lambda index: index["items"][BLIND].update(summary=r"Read C:\example"))
+    checked = run(CHECK, "--pack", pack, "--kit-dir", core)
+    assert checked.returncode == 1 and "Windows drive path" in checked.stdout

@@ -46,6 +46,18 @@ def check_overlay(index, catalog, overlay):
     return check_kit.main(["--dir", str(overlay)])
 
 
+def decoded_index_lines(value):
+    if isinstance(value, dict):
+        for key, child in value.items():
+            yield key
+            yield from decoded_index_lines(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from decoded_index_lines(child)
+    else:
+        yield str(value)
+
+
 def check_pack(pack, catalog):
     expected = {"index.json", "LICENSE", "guidance"} | {f"guidance/{i}.md" for i in RELEASE_IDS}
     entries = {path.relative_to(pack).as_posix(): path for path in pack.rglob("*")}
@@ -69,7 +81,7 @@ def check_pack(pack, catalog):
             body = method_pack.read_body(pack, identity, item)
             (scan / "guidance" / f"{identity}.md").write_text(body, encoding="utf-8")
             del item["provenance"]["url"]
-        (scan / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
+        (scan / "index.fields").write_text("\n".join(decoded_index_lines(index)), encoding="utf-8")
         if check_boundary.main(["--strict", "--root", str(scan)]):
             return 1
         return check_overlay(index, catalog, scratch / "catalog")
