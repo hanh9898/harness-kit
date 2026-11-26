@@ -114,8 +114,14 @@ def deployment_facts(target):
     return facts, signals
 
 
+def path_is_mentioned(text, target):
+    target = str(target)
+    pattern = rf"(?<![\w./-]){re.escape(target)}(?![\w.-])"
+    return re.search(pattern, text) is not None
+
+
 def line_mentions_writer(text, targets):
-    if not any(str(target) in text for target in targets):
+    if not any(path_is_mentioned(text, target) for target in targets):
         return False
     return bool(WRITE_COMMAND.search(text))
 
@@ -213,7 +219,7 @@ def build_report(args):
     deploy_facts, deploy_signals = deployment_facts(resolved)
     report["facts"].update(deploy_facts)
     report["signals"].extend(deploy_signals)
-    report["signals"].extend(scan_external_writers(dict.fromkeys((str(target), str(resolved)))))
+    report["signals"].extend(scan_external_writers(dict.fromkeys((str(target.absolute()), str(resolved)))))
 
     effects, effect_blockers = parse_effects(args.effect)
     report["effects"] = effects

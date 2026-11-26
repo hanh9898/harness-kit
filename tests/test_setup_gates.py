@@ -389,3 +389,19 @@ def test_verified_rejects_execution_ticket_from_another_harness_namespace(tmp_pa
     result = run(TRANSITION, path)
     assert result.returncode == 1
     assert "ticket_ref.namespace" in result.stderr
+
+
+def test_relative_dot_target_does_not_match_unrelated_dotted_filenames(tmp_path):
+    project = tmp_path / "project"
+    project.mkdir()
+    cron_line = "0 * * * * cd /opt/other && python3 cache.db-cleanup.py\n"
+    env = fake_path(tmp_path, crontab=cron_line)
+    result, report = run_json(
+        PREFLIGHT,
+        "--target", project,
+        "--mode", "apply",
+        "--effect", "write-record=grant:write@1",
+        env=env,
+    )
+    assert result.returncode == 0, report
+    assert "external-writer-candidate" not in {row["id"] for row in report["signals"]}
