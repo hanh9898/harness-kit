@@ -29,7 +29,7 @@ grant or evidence exists.
 | 5. Ask | [DECISION-MAP](DECISION-MAP.md) | Batch only actionable branch questions; map every answer to exact branch paths. | Confirmations name every branch they settle. | A blanket yes or unmapped answer arrives. |
 | 6. Pass two | [DISCOVERY](DISCOVERY.md) | Open only applicable child topics, one at a time. | Child outcomes linked to settled parents. | The parent is deferred, blocked or unsettled. |
 | 7. DesignReady | [DECISION-MAP](DECISION-MAP.md#check-designready-for-each-scope) | Validate the transition record before reporting readiness. | `check-setup-transition` exits 0. | Any branch decision, confirmation or checkpoint is missing. |
-| 8. Prepare | [RECORD-FORMAT](RECORD-FORMAT.md#current-stage-handoffs), [Implement WORK](../harness-implement/WORK.md#prepare) | Build and shape-check one `prepare`; invoke `harness-implement` by exact ID. | Draft refs, reused artifact refs or a named blocker. | The checker fails, H5 is missing or drafting authority is unclear. |
+| 8. Prepare | [RECORD-FORMAT](RECORD-FORMAT.md#current-stage-handoffs), [Implement WORK](../harness-implement/WORK.md#prepare) | Build and shape-check one `prepare`; invoke `harness-implement` by exact ID. | Draft refs, reused artifact refs or a named blocker. | The checker fails or drafting authority is unclear; missing H5 stops ticket drafting, not first spec drafting. |
 | 9. Publish | [Implement WORK](../harness-implement/WORK.md#publish-or-update) | Build and shape-check one `publish` only with the exact live grant. | Canonical Harness ticket readback or no write. | Target, split approval or publish grant is missing. |
 | 10. Execute | [Implement WORK](../harness-implement/WORK.md#dispatch-and-integrate) | The coordinator builds one `execute` at current `DispatchReady`. | A result handoff or `Unknown` checkpoint. | Claim, route, selection or effect authority is stale. |
 | 11. Verify | [CHECKLIST](CHECKLIST.md), [DECISION-MAP](DECISION-MAP.md) | Reconcile result, acceptance evidence and close authority; validate the transition record. | `check-setup-transition` exits 0 before `Verified`. | Evidence is unreadable, result is not Applied or close authority is missing. |
@@ -95,7 +95,7 @@ output or a different installation.
 | Call | Input example | Expected output | Stop when |
 | --- | --- | --- | --- |
 | `harness-library` | scope `project:docs`; need `choose a writing method for override guidance`; pin the approved distribution. | One selection handoff, or `Blocked` with the missing store, source, pin or access. | No configured store, wrong pin or denied read. |
-| `harness-implement` `prepare` | JSON with operation `prepare`, original request, scope, decision revision, acceptance and needed routes. Shape-check it first. | Spec or ticket draft refs, compatible existing refs or `AwaitSpecApproval`. | Shape check fails, H5 is missing or routes are unverified. |
+| `harness-implement` `prepare` | JSON with operation `prepare`, original request, scope, decision revision, acceptance and needed routes. Shape-check it first. | Spec or ticket draft refs, compatible existing refs or `AwaitSpecApproval`. | Shape check fails, routes are unverified, or H5 is missing for ticket drafting. |
 | `harness-implement` `publish` | JSON with operation `publish`, exact draft revision, Harness target, work ID and publish grant ref. Shape-check it first. | Canonical Harness `ticket_ref` after destination readback. | Grant, target or split approval is missing. |
 | `harness-implement` `execute` | JSON with operation `execute`, canonical ticket, assignment epoch, route, effect authority and expected target revision. | `Applied`, `Denied` or `Unknown` result with evidence refs. | Claim, route, target revision or effect grant is stale. |
 
@@ -159,7 +159,7 @@ Apply only. Require separate authority for each effect.
    Keep a small catalog with actual resolution and invocation evidence.
 2. Follow [v1 stage handoffs](RECORD-FORMAT.md#current-stage-handoffs) and invoke
    `harness-implement` by exact host ID. For a scoped `DesignReady` decision,
-   shape-check and send `prepare` to draft or reuse artifacts. Shape-check and
+   shape-check and validate the transition record before sending `prepare` to draft or reuse artifacts. Shape-check and
    send `publish` only for an exact draft with a current grant and a verified
    Harness destination. The coordinator builds `execute` only at
    `DispatchReady` with the current exclusive claim. Use the independent

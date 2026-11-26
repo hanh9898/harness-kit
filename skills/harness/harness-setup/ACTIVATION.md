@@ -37,8 +37,8 @@ confirmed missing originals. Inspect and Advice report blockers without installi
 1. Confirm Setup is in Apply before entering this route. The
    [entry gate](../../../kit/PROPOSAL-ENTRY.md#selection-h1) does not grant installation.
    Run the [target preflight](ENVIRONMENT.md#target-preflight-before-effects)
-   with one exact `install-upstream` effect and the tools the selected route
-   needs. If Node or npx is missing, stop at that blocker or use a separately
+   in Inspect mode with the tools the candidate route needs. This probes facts
+   only and does not require the install grant. If Node or npx is missing, stop at that blocker or use a separately
    approved project-scoped toolchain. Never run sudo, a system package manager,
    `npm install -g` or another machine-wide install.
 2. Choose the host route and include its exact command, destinations and
@@ -57,7 +57,9 @@ confirmed missing originals. Inspect and Advice report blockers without installi
    policy, command, destinations and lockfile or settings effects.
    Without a matching grant, leave configuration unchanged and report the
    blocked methods and next action. Apply the [write gate](../harness-implement/WORK.md#write-boundary-and-reconciliation),
-   including real-time confirmation for a permitted non-atomic send.
+   including real-time confirmation for a permitted non-atomic send. After H3,
+   rerun the preflight in Apply mode with the exact `install-upstream` effect
+   and grant ref before the installer.
 3. Check bundled skills and all proposed writes before running the installer.
    In Devin, use the target project root, `.devin/skills/` and `skills-lock.json`.
    Never install globally, use two install routes, or replace an existing source
@@ -289,7 +291,8 @@ not unrelated qualified uses.
   {"id": "setup.author-overrides", "requires": ["method.writing-for-agents", "original.to-spec", "original.to-tickets", "original.implement"]},
   {"id": "setup.discovery", "requires": ["method.grilling", "method.domain-modeling"]},
   {"id": "setup.execution-ready", "requires": ["override.to-spec", "override.to-tickets", "override.implement"]},
-  {"id": "setup.install", "requires": ["entry.explicit-apply", "authority.install"]},
+  {"id": "setup.preflight", "requires": []},
+  {"id": "setup.install", "requires": ["entry.explicit-apply", "authority.install", "setup.preflight"]},
   {"id": "trigger.enable.initial", "requires": ["bot.pilot.initial", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
   {"id": "trigger.enable.rebound", "requires": ["bot.pilot.rebound", "bot.exact-target", "trigger.exact-id", "pilot.manual-fresh-worker", "authority.trigger"]},
   {"id": "trigger.exact-id", "requires": []}
