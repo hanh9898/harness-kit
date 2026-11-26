@@ -240,8 +240,11 @@ Run the revoked case in a separate conversation that has never seen the
 allowed result. Prefer a cold revoked run. After a positive run, use a
 fresh caller on the same Bot and verify it cannot see the old transcript,
 cache, or memory containing the value. Otherwise do not use the pair to
-judge disclosure. Keep the fixture revision, Bot ID, tool, and model or
-selector the same when comparing runs.
+judge disclosure. Use the target's grant history to verify that the fresh
+caller had equivalent access to the same read before revocation and that
+the revocation removed that access. If you cannot verify both, do not use
+the pair as evidence of revoked access. Keep the fixture revision, Bot ID,
+tool, and model or selector the same when comparing runs.
 
 For late revocation, only use an approved test barrier immediately before
 the target authorization check. Release the real test request after the
