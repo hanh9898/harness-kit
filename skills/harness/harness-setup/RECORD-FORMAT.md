@@ -57,6 +57,23 @@ that already has a verified Harness binding:
 }
 ```
 
+A coordinator dispatch after current `DispatchReady` readback:
+
+```json
+{
+  "version": 1,
+  "operation": "execute",
+  "request_ref": "request:docs-guidance@1",
+  "scope_ref": "scope:docs",
+  "decision_ref": "decision:docs-guidance@2",
+  "ticket_ref": {"instance": "local:docs-work-records", "namespace": "harness:docs", "id": "ticket:docs-guidance", "revision": 1},
+  "assignment_ref": "assignment:docs-guidance@1",
+  "route_ref": "route:harness-project-implement@1",
+  "effect_ref": "effect:write-docs-guidance@1",
+  "expected_target_revision": 4
+}
+```
+
 A separate Bot-only workspace after configuration readback:
 
 ```json
@@ -73,6 +90,63 @@ A separate Bot-only workspace after configuration readback:
   "disabled_capabilities": ["wake"]
 }
 ```
+
+## Setup scope selection records
+
+Use one UTF-8 JSON object for the user-visible target scope before recording a
+target profile. Validate it locally:
+
+```sh
+<skill-dir>/../../../kit/scripts/check-setup-scope <scope.json>
+```
+
+The object has integer `version: 1` and exactly these fields:
+
+| Field | Contract |
+| --- | --- |
+| `request` | The user request text, empty for a bare invocation. |
+| `intent` | `repo-only`, `bot-only`, `repo-and-bot` or `unclear`. |
+| `basis` | Fact labels or refs. `user-request` or `user-selection` is required for a decided scope. `git-directory` and `agent-host` never decide an unclear scope. |
+| `user_view` | `text`, `shown_profile`, `options` and `bot_question_asked`: what the user saw and whether Bot questions opened. |
+| `recorded_profile` | The same profile shown, or `undecided`. |
+| `bot_identity` | `verified`, `missing` or `not-applicable`. Bot intent may be recorded while missing. |
+| `effects` | Must be empty: selecting scope grants no effect. |
+
+An undecided scope shows exactly three plain-language options with IDs
+`repo-only`, `bot-only` and `repo-and-bot`. A clear repo-only request may name
+`repo-only` briefly and continue without Bot questions. A nonzero check blocks
+use of the scope and writes nothing.
+
+## Setup transition records
+
+Use one UTF-8 JSON object when a state change needs local validation. The
+checker validates structure and cross-references, not live authority:
+
+```sh
+<skill-dir>/../../../kit/scripts/check-setup-transition <transition.json>
+```
+
+Required common fields are integer `version: 1`, `transition`, `scope_ref`,
+`decision_ref`, `branch_outcomes` and `confirmations`. `transition` is
+`design-ready`, `prepare` or `verified`.
+
+Each confirmation has `ref` and `covered_paths`. Each branch outcome has the
+exact Harness tree `path`, `status` (`settled`, `deferred` or
+`not-applicable`), `decision_ref`, `confirmation_ref` and `checkpoint_ref`.
+A deferral also has `deferral_ref` and `revisit_ref`. The checker requires all
+seven main branches and verifies that the referenced confirmation explicitly
+covers each branch path. Child branches are required only when applicable and
+cannot be settled under an unsettled parent.
+
+Embed handoffs under `handoffs` by operation. `prepare` requires
+`handoffs.prepare`. `verified` requires `prepare`, `publish`, `execute` and
+`result`, plus non-empty `acceptance_evidence` entries with `acceptance_ref`
+and `evidence_ref`, and separate `close_authority_ref`. `result` must be
+`Applied` and carry non-empty verification and evidence refs. Scope, decision
+and assignment references must agree across the chain.
+
+A failed check blocks the state claim. It does not change records, target
+files, tickets or grants.
 
 ## Historical formats
 

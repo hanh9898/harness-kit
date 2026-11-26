@@ -84,10 +84,13 @@ when both targets are in scope. See the [profile and mode examples](kit/M2-CONFI
 | [harness-library](skills/harness/harness-library/SKILL.md) | Find supplied pieces or work with saved resources in an approved store. |
 
 Setup checks for the [required upstream skills](skills/harness/harness-setup/ACTIVATION.md#install-required-upstream-skills).
-It installs a missing prerequisite only with permission. Inbox and Memory are
+It installs a missing prerequisite only with permission and never through a
+machine-wide install. Inbox and Memory are
 [opt-in](kit/HOST-ADAPTERS.md#select-one-entry-route). Setup loads discovery
-skills as needed. Use a project override only after its route is verified;
-do not add discovery or override directories to the default inventory.
+topics as needed through exact native invocation or a clearly recorded
+`pinned-instruction-read` from the same pinned checkout. Use a project override
+only after its route is verified; do not add discovery or override directories
+to the default inventory.
 
 A draft needs no tracker write. Publishing needs a separate grant at the
 Harness destination; never use a product tracker as a fallback. Execution

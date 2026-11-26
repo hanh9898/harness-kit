@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+"""Check one Setup transition record against the v1 readiness contract.
+
+The checker validates local structure and cross-references. It does not resolve
+references or prove live authority; receivers still reopen authoritative records.
+It never writes to the checked file or target records.
+"""
+
+import argparse
+import importlib.machinery
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+MAIN_BRANCHES = (
+    "Environment & authority",
+    "Guidance & knowledge",
+    "Capabilities",
+    "Agent configuration & roles",
+    "Coordination",
+    "Verification & feedback",
+    "State & continuation",
+)
+CHILD_PARENTS = {
+    "Capabilities / Skills": "Capabilities",
+    "Coordination / Workflows": "Coordination",
+    "Coordination / On demand / Hooks": "Coordination",
+    "Coordination / On demand / Automation": "Coordination",
+}
+KNOWN_PATHS = frozenset((*MAIN_BRANCHES, *CHILD_PARENTS))
+TRANSITIONS = ("design-ready", "prepare", "verified")
+HANDOFF_OPERATIONS = ("prepare", "publish", "execute", "result")
+
+
+def load_stage_checker():
+    path = Path(__file__).with_name("check-stage-handoff")
+    loader = importlib.machinery.SourceFileLoader("check_stage_handoff", str(path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+
+STAGE = load_stage_checker()
+
+
+def reference(value):
+    return isinstance(value, str) and bool(value) and value == value.strip() and value.isprintable()
+
+
+def unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON field: {key!r}")
+        result[key] = value
+    return result
+
+
+def invalid_constant(value):
+    raise ValueError(f"invalid JSON constant: {value}")
+
+
+def has_null(value):
+    if value is None:
+        return True
+    if isinstance(value, dict):
+        return any(has_null(item) for item in value.values())
+    if isinstance(value, list):
+        return any(has_null(item) for item in value)
+    return False
+
+
+def require_keys(value, required, optional, path, errors):
+    if not isinstance(value, dict):
+        errors.append(f"{path} must be an object")
+        return False
+    missing = required - value.keys()
+    unexpected = value.keys() - (required | optional)
+    if missing:
+        errors.append(f"{path} missing required fields: {', '.join(sorted(missing))}")
+    if unexpected:
+        errors.append(f"{path} has unexpected fields: {', '.join(sorted(unexpected))}")
+    return not missing and not unexpected
+
+
+def validate_confirmations(record, errors):
+    confirmations = record.get("confirmations")
+    if not isinstance(confirmations, list) or not confirmations:
+        errors.append("confirmations must be a non-empty array")
+        return {}
+    by_ref = {}
+    for index, confirmation in enumerate(confirmations):
+        path = f"confirmations[{index}]"
+        if not require_keys(confirmation, {"ref", "covered_paths"}, set(), path, errors):
+            continue
+        ref = confirmation["ref"]
+        covered = confirmation["covered_paths"]
+        if not reference(ref):
+            errors.append(f"{path}.ref must be a reference")
+        if not isinstance(covered, list) or not covered or not all(isinstance(item, str) for item in covered):
+            errors.append(f"{path}.covered_paths must be a non-empty string array")
+            continue
+        unknown = sorted(set(covered) - KNOWN_PATHS)
+        if unknown:
+            errors.append(f"{path}.covered_paths has unknown branch path(s): {', '.join(unknown)}")
+        if len(set(covered)) != len(covered):
+            errors.append(f"{path}.covered_paths has duplicate branch paths")
+        if ref in by_ref:
+            errors.append(f"{path}.ref duplicates another confirmation")
+        by_ref[ref] = set(covered)
+    return by_ref
+
+
+def validate_branch_outcomes(record, confirmations, errors):
+    outcomes = record.get("branch_outcomes")
+    if not isinstance(outcomes, list):
+        errors.append("branch_outcomes must be an array")
+        return
+
+    by_path = {}
+    for index, outcome in enumerate(outcomes):
+        path = f"branch_outcomes[{index}]"
+        if not require_keys(
+            outcome,
+            {"path", "status", "decision_ref", "confirmation_ref", "checkpoint_ref"},
+            {"deferral_ref", "revisit_ref"},
+            path,
+            errors,
+        ):
+            continue
+        branch = outcome["path"]
+        status = outcome["status"]
+        if branch not in KNOWN_PATHS:
+            errors.append(f"{path}.path is not a Harness discovery branch: {branch}")
+            continue
+        if branch in by_path:
+            errors.append(f"{path}.path duplicates {branch}")
+        by_path[branch] = outcome
+        if status not in ("settled", "deferred", "not-applicable"):
+            errors.append(f"{path}.status must be settled, deferred or not-applicable")
+        for field in ("decision_ref", "confirmation_ref", "checkpoint_ref"):
+            if not reference(outcome[field]):
+                errors.append(f"{path}.{field} must be a reference")
+        confirmation_ref = outcome["confirmation_ref"]
+        covered = confirmations.get(confirmation_ref, set())
+        if branch not in covered:
+            errors.append(
+                f"{path}: confirmation {confirmation_ref} does not cover exact branch {branch}"
+            )
+        if status == "deferred":
+            for field in ("deferral_ref", "revisit_ref"):
+                if not reference(outcome.get(field)):
+                    errors.append(f"{path}.{field} is required for an approved deferral")
+        elif "deferral_ref" in outcome or "revisit_ref" in outcome:
+            errors.append(f"{path}: deferral fields require status deferred")
+
+    for branch in MAIN_BRANCHES:
+        if branch not in by_path:
+            errors.append(f"missing branch outcome for {branch}")
+
+    for child, parent in CHILD_PARENTS.items():
+        child_outcome = by_path.get(child)
+        parent_outcome = by_path.get(parent)
+        if child_outcome is None:
+            continue
+        if parent_outcome is None:
+            errors.append(f"{child} has no parent outcome {parent}")
+        elif child_outcome["status"] == "settled" and parent_outcome["status"] != "settled":
+            errors.append(f"{child} cannot be settled while {parent} is {parent_outcome['status']}")
+
+
+def validate_handoff(value, operation, errors):
+    path = f"handoffs.{operation}"
+    if not isinstance(value, dict):
+        errors.append(f"{path} must be an embedded {operation} handoff object")
+        return None
+    try:
+        STAGE.validate(value, operation)
+    except ValueError as error:
+        errors.append(f"{path} invalid: {error}")
+        return None
+    return value
+
+
+def validate_handoffs(record, errors):
+    handoffs = record.get("handoffs")
+    if handoffs is None:
+        return {}
+    if not isinstance(handoffs, dict):
+        errors.append("handoffs must be an object keyed by operation")
+        return {}
+    unknown = sorted(set(handoffs) - set(HANDOFF_OPERATIONS))
+    if unknown:
+        errors.append(f"handoffs has unknown operation(s): {', '.join(unknown)}")
+    validated = {}
+    for operation in HANDOFF_OPERATIONS:
+        if operation in handoffs:
+            value = validate_handoff(handoffs[operation], operation, errors)
+            if value is not None:
+                validated[operation] = value
+    return validated
+
+
+def validate_transition(record):
+    errors = []
+    if not require_keys(
+        record,
+        {"version", "transition", "scope_ref", "decision_ref", "branch_outcomes", "confirmations"},
+        {"handoffs", "acceptance_evidence", "close_authority_ref"},
+        "transition-record",
+        errors,
+    ):
+        return errors
+
+    if record["version"] != 1 or type(record["version"]) is not int:
+        errors.append("version must be the integer 1")
+    transition = record["transition"]
+    if transition not in TRANSITIONS:
+        errors.append(f"transition must be one of: {', '.join(TRANSITIONS)}")
+    for field in ("scope_ref", "decision_ref"):
+        if not reference(record[field]):
+            errors.append(f"{field} must be a reference")
+
+    confirmations = validate_confirmations(record, errors)
+    validate_branch_outcomes(record, confirmations, errors)
+    handoffs = validate_handoffs(record, errors)
+
+    if transition in ("prepare", "verified") and "prepare" not in handoffs:
+        errors.append("handoffs.prepare is required for this transition")
+    if transition == "verified":
+        for operation in ("publish", "execute", "result"):
+            if operation not in handoffs:
+                errors.append(f"handoffs.{operation} is required for verified")
+
+    for operation in ("prepare", "execute"):
+        handoff = handoffs.get(operation)
+        if handoff is None:
+            continue
+        if handoff.get("scope_ref") != record["scope_ref"]:
+            errors.append(f"handoffs.{operation}.scope_ref does not match transition scope_ref")
+        if handoff.get("decision_ref") != record["decision_ref"]:
+            errors.append(f"handoffs.{operation}.decision_ref does not match transition decision_ref")
+
+    execute = handoffs.get("execute")
+    result = handoffs.get("result")
+    if execute is not None and result is not None:
+        if result.get("assignment_ref") != execute.get("assignment_ref"):
+            errors.append("handoffs.result.assignment_ref does not match handoffs.execute.assignment_ref")
+
+    if transition == "verified":
+        if result is not None and result.get("outcome") != "Applied":
+            errors.append("verified requires handoffs.result.outcome Applied")
+        if result is not None:
+            if not result.get("verification_refs"):
+                errors.append("verified requires non-empty handoffs.result.verification_refs")
+            if not result.get("evidence_refs"):
+                errors.append("verified requires non-empty handoffs.result.evidence_refs")
+        evidence = record.get("acceptance_evidence")
+        if not isinstance(evidence, list) or not evidence:
+            errors.append("acceptance_evidence must be a non-empty array for verified")
+        else:
+            for index, row in enumerate(evidence):
+                path = f"acceptance_evidence[{index}]"
+                if require_keys(row, {"acceptance_ref", "evidence_ref"}, set(), path, errors):
+                    for field in ("acceptance_ref", "evidence_ref"):
+                        if not reference(row[field]):
+                            errors.append(f"{path}.{field} must be a reference")
+        if not reference(record.get("close_authority_ref")):
+            errors.append("close_authority_ref is required for verified")
+    elif "close_authority_ref" in record or "acceptance_evidence" in record:
+        errors.append("acceptance_evidence and close_authority_ref are only valid for verified")
+
+    return errors
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("record", type=Path, help="UTF-8 Setup transition JSON")
+    args = parser.parse_args()
+    try:
+        record = json.loads(
+            args.record.read_text(encoding="utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=invalid_constant,
+        )
+        if not isinstance(record, dict):
+            raise ValueError("transition record must be an object")
+        if has_null(record):
+            raise ValueError("null is not allowed")
+    except (OSError, ValueError, RecursionError) as error:
+        print(f"invalid transition: {error}", file=sys.stderr)
+        return 1
+
+    errors = validate_transition(record)
+    if errors:
+        for error in errors:
+            print(f"invalid transition: {error}", file=sys.stderr)
+        return 1
+    print(f"OK: {record['transition']} transition record is complete")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

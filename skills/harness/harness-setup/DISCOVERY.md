@@ -35,15 +35,30 @@ affected nodes. Continue independent work. Checkpoint through the
 
 ## Topic route and result
 
-1. Before entering the topic, resolve its exact ID, pinned source and
-   revision or digest, current scope, authorized caller and host invocation
-   policy. `harness-setup` is the only internal caller. A permitted user
-   invocation can use the topic for inline discovery, not take over Setup's
-   map. Missing or ambiguous route, wrong caller or source, or insufficient
-   access returns a blocker; hold dependent discovery. Invoke only the
-   resolved topic through the authorized host route. Do not use another
-   file, caller or installation as a fallback. Topics are not default entries.
-2. Pass the node and question, parent direction, mode and scope, relevant
+Before entering a topic, resolve its exact ID, pinned source and revision or
+digest, current scope, authorized caller and host invocation policy.
+`harness-setup` is the only internal caller. A permitted user invocation can
+use the topic for inline discovery, not take over Setup's map. Topics are not default entries,
+and Setup must not register all eleven topics as public commands to make them
+reachable.
+
+Choose one route mode for each topic and record it in the node outcome:
+
+| Route mode | Use when | Required evidence |
+| --- | --- | --- |
+| `native-invocation` | The host can invoke the exact internal ID in this caller and project. | Exact ID, resolved Source, revision or digest, caller and invocation policy. |
+| `pinned-instruction-read` | The topic is not registered and the host policy lets Setup read one exact file from the same pinned plugin checkout. | Exact file path, pinned revision or digest, caller and read result. |
+
+`pinned-instruction-read` loads the topic instructions inside Setup's working
+context. It is not a skill invocation, does not prove host registration, and
+must not be reported as one. It is valid only for the exact internal topic in
+the pinned distribution. Do not use another file, caller or installation as a
+fallback. If neither route mode is available, or the route, wrong caller,
+source or access is ambiguous, return a blocker and hold dependent discovery.
+
+Then run the node in one working context:
+
+1. Pass the node and question, parent direction, mode and scope, relevant
    static facts, Library pin and prior decision/Glossary/ADR refs. Use the
    same working context for both methods. [Verify the originals](ACTIVATION.md#verify-upstream-prerequisites),
    then call original [grilling][grilling] and [domain-modeling][domain]
@@ -51,20 +66,20 @@ affected nodes. Continue independent work. Checkpoint through the
    effects, return a blocker. Don't invoke user-only wrappers or copy the
    methods. Reuse a load only in the same context and scope/revision with
    evidence that reuse preserves the node-specific result.
-3. Ask `harness-library` directly for the scoped need, not the whole
+2. Ask `harness-library` directly for the scoped need, not the whole
    catalog. Compare static repo facts, effective host defaults and relevant
    enabled Library resources at the pin; verify only viable candidates.
    Do not substitute a raw catalog or CLI. A default or Library entry is
    not an applied choice; an unreadable source is unknown, not empty.
-4. Return findings and applicable intents with source refs, scope,
-   dependencies, proposed checks and any links or Glossary/ADR refs.
-   An empty node gets add or defer. Otherwise consider keep, improve, move
-   layer or replace, and remove. Link only after both endpoints are
-   confirmed keep/add; record their actual tree paths. Trace consumers and
-   recovery before removal; project removal is not Library disable.
-   Return material unresolved H2 questions with a recommendation and
-   consequence, explicit deferrals with reasons and revisit triggers, or
-   blockers. Route answers to their originating node.
+3. Return findings and applicable intents with source refs, route mode,
+   route evidence, scope, dependencies, proposed checks and any links or
+   Glossary/ADR refs. An empty node gets add or defer. Otherwise consider
+   keep, improve, move layer or replace, and remove. Link only after both
+   endpoints are confirmed keep/add; record their actual tree paths. Trace
+   consumers and recovery before removal; project removal is not Library
+   disable. Return material unresolved H2 questions with a recommendation
+   and consequence, explicit deferrals with reasons and revisit triggers,
+   or blockers. Route answers to their originating node.
 
 Use the Harness Glossary for terms and ADRs for qualifying choices. Reuse
 adequate documents and follow an existing glossary map. Point to the ADR

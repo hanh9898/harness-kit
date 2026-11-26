@@ -154,6 +154,9 @@ def test_discovery_routes_match_pass_order_and_parents():
     assert "deferred parent" in text and "independent" in text
     assert "wrong caller" in text and "harness-setup" in text and "pinned source" in text
     assert "not default entries" in text
+    assert "native-invocation" in text and "pinned-instruction-read" in text
+    assert "not a skill invocation" in text
+    assert "must not register all eleven topics as public" in text
 
 
 def test_discovery_retains_branch_choices_without_extra_topic_routes():

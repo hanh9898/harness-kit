@@ -1,0 +1,289 @@
+#!/usr/bin/env python3
+"""Read-only Setup target preflight.
+
+The report separates facts, review signals and blockers. It never writes to the
+target or treats a deployment-shaped checkout as proof of deployment.
+"""
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+WRITE_COMMAND = re.compile(r"\b(git|rsync|cp|mv|rm|curl|wget|bash|sh|python[0-9.]*|deploy|ansible|kubectl)\b")
+EFFECT_NAME = re.compile(r"[a-z][a-z0-9-]*\Z")
+DEPLOY_FILES = (
+    "vercel.json",
+    "netlify.toml",
+    "render.yaml",
+    "fly.toml",
+    "railway.json",
+    "app.yaml",
+    "appspec.yml",
+    "now.json",
+    "amplify.yml",
+)
+
+
+def printable_reference(value):
+    return isinstance(value, str) and bool(value) and value == value.strip() and value.isprintable()
+
+
+def run_command(command, timeout=5):
+    try:
+        return subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
+def git_output(target, *args):
+    result = run_command(["git", "-C", str(target), *args])
+    if result is None or result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def git_facts(target):
+    inside = git_output(target, "rev-parse", "--is-inside-work-tree")
+    facts = {"git_worktree": inside == "true"}
+    signals = []
+    if inside != "true":
+        return facts, signals
+
+    branch = git_output(target, "symbolic-ref", "--quiet", "--short", "HEAD")
+    facts["detached_head"] = branch is None
+    if branch is None:
+        signals.append({
+            "id": "detached-head",
+            "detail": "HEAD is detached; confirm whether this is a real work checkout before writing",
+        })
+    else:
+        facts["branch"] = branch
+
+    remotes = git_output(target, "remote") or ""
+    facts["remote_count"] = len([line for line in remotes.splitlines() if line.strip()])
+    if facts["remote_count"] == 0:
+        signals.append({
+            "id": "no-git-remote",
+            "detail": "the checkout has no Git remote; confirm its source and role before writing",
+        })
+
+    shallow = git_output(target, "rev-parse", "--is-shallow-repository") == "true"
+    count_text = git_output(target, "rev-list", "--count", "HEAD")
+    try:
+        count = int(count_text) if count_text else None
+    except ValueError:
+        count = None
+    facts["shallow"] = shallow
+    facts["commit_count"] = count
+    if shallow or count == 1:
+        signals.append({
+            "id": "shallow-or-single-commit",
+            "detail": "history is shallow or has one commit; confirm this is not only an exported copy",
+        })
+    return facts, signals
+
+
+def deployment_facts(target):
+    facts = {"deployment_indicators": []}
+    signals = []
+    for name in DEPLOY_FILES:
+        if (target / name).is_file():
+            facts["deployment_indicators"].append(name)
+
+    workflows = target / ".github" / "workflows"
+    if workflows.is_dir():
+        for path in sorted(list(workflows.glob("*.yml")) + list(workflows.glob("*.yaml")))[:20]:
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace").lower()
+            except OSError:
+                continue
+            if any(word in text for word in ("deploy", "rsync", "ssh", "production")):
+                facts["deployment_indicators"].append(path.relative_to(target).as_posix())
+                break
+
+    if facts["deployment_indicators"]:
+        signals.append({
+            "id": "deployment-indicator",
+            "detail": "deployment configuration is present; check whether a service or job overwrites this directory",
+        })
+    return facts, signals
+
+
+def line_mentions_writer(text, target):
+    if str(target) not in text:
+        return False
+    return bool(WRITE_COMMAND.search(text))
+
+
+def scan_external_writers(target):
+    signals = []
+    sources = []
+
+    crontab = shutil.which("crontab")
+    if crontab:
+        result = run_command([crontab, "-l"])
+        if result is not None and result.returncode == 0:
+            for line in result.stdout.splitlines():
+                stripped = line.strip()
+                if stripped and not stripped.startswith("#") and line_mentions_writer(stripped, target):
+                    sources.append("user crontab")
+                    break
+
+    home = Path(os.environ.get("HOME", "")).expanduser()
+    systemd = home / ".config" / "systemd" / "user"
+    if systemd.is_dir():
+        for path in sorted(systemd.glob("*.service")) + sorted(systemd.glob("*.timer")):
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            if line_mentions_writer(text, target):
+                sources.append(f"systemd user unit {path.name}")
+
+    cron_d = Path("/etc/cron.d")
+    if cron_d.is_dir():
+        for path in sorted(cron_d.iterdir()):
+            if not path.is_file():
+                continue
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            if line_mentions_writer(text, target):
+                sources.append(f"/etc/cron.d/{path.name}")
+
+    for source in dict.fromkeys(sources):
+        signals.append({
+            "id": "external-writer-candidate",
+            "detail": f"{source} mentions the target with a write-capable command; verify whether it overwrites the directory",
+        })
+    return signals
+
+
+def parse_effects(values):
+    effects = []
+    blockers = []
+    for raw in values:
+        name, separator, grant = raw.partition("=")
+        if not separator or not EFFECT_NAME.fullmatch(name) or not printable_reference(grant):
+            blockers.append({
+                "id": "missing-effect-grant",
+                "effect": name or raw,
+                "next": "record the exact live grant for this effect before applying it",
+            })
+            continue
+        effects.append({"name": name, "grant_ref": grant})
+    return effects, blockers
+
+
+def build_report(args):
+    target = Path(args.target).expanduser()
+    try:
+        resolved = target.resolve(strict=True)
+    except OSError:
+        resolved = target.absolute()
+
+    report = {
+        "version": 1,
+        "ready": False,
+        "mode": args.mode,
+        "target": str(resolved),
+        "facts": {},
+        "signals": [],
+        "blockers": [],
+        "effects": [],
+    }
+
+    if not target.is_dir():
+        report["blockers"].append({
+            "id": "target-missing",
+            "next": "choose an existing target directory before setup",
+        })
+        return report
+
+    facts, signals = git_facts(resolved)
+    report["facts"].update(facts)
+    report["signals"].extend(signals)
+
+    deploy_facts, deploy_signals = deployment_facts(resolved)
+    report["facts"].update(deploy_facts)
+    report["signals"].extend(deploy_signals)
+    report["signals"].extend(scan_external_writers(resolved))
+
+    effects, effect_blockers = parse_effects(args.effect)
+    report["effects"] = effects
+    report["blockers"].extend(effect_blockers)
+    if args.mode == "apply" and not effects and not effect_blockers:
+        report["blockers"].append({
+            "id": "missing-effect-grant",
+            "effect": "apply",
+            "next": "name each exact effect and its live grant before applying",
+        })
+
+    missing_tools = [tool for tool in args.requires_tool if shutil.which(tool) is None]
+    report["facts"]["missing_tools"] = missing_tools
+    needed_for = ",".join(effect["name"] for effect in effects) or "requested route"
+    for tool in missing_tools:
+        report["blockers"].append({
+            "id": "missing-tool",
+            "tool": tool,
+            "needed_for": needed_for,
+            "next": "install or select the tool through a separately approved project-scoped route; Setup must not install machine-wide",
+        })
+
+    target_role_signals = {"detached-head", "no-git-remote", "shallow-or-single-commit", "deployment-indicator"}
+    if args.mode == "apply" and any(signal["id"] in target_role_signals for signal in report["signals"]):
+        if not args.target_role_evidence:
+            report["blockers"].append({
+                "id": "target-role-unverified",
+                "next": "record evidence that the target is the intended writable work location, not an export or deploy copy",
+            })
+
+    if args.mode == "apply" and any(signal["id"] == "external-writer-candidate" for signal in report["signals"]):
+        if not args.writer_evidence:
+            report["blockers"].append({
+                "id": "external-writer-unverified",
+                "next": "record evidence that no cron, scheduler, CI or deploy task can overwrite the target during setup",
+            })
+
+    report["ready"] = not report["blockers"]
+    return report
+
+
+def print_text(report):
+    if report["ready"]:
+        print(f"Ready: {report['target']} passed read-only setup preflight for {report['mode']}")
+    for signal in report["signals"]:
+        print(f"Signal {signal['id']}: {signal['detail']}")
+    for blocker in report["blockers"]:
+        detail = f" for {blocker['effect']}" if "effect" in blocker else ""
+        tool = f" {blocker['tool']}" if "tool" in blocker else ""
+        print(f"BLOCKED {blocker['id']}{tool}{detail}: {blocker['next']}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--target", required=True, help="target directory to inspect")
+    parser.add_argument("--mode", required=True, choices=("inspect", "advice", "apply"))
+    parser.add_argument("--effect", action="append", default=[], help="effect-name=grant-ref; repeat for each Apply effect")
+    parser.add_argument("--requires-tool", action="append", default=[], help="executable required by the selected route")
+    parser.add_argument("--target-role-evidence", help="reference to evidence resolving target-role signals")
+    parser.add_argument("--writer-evidence", help="reference to evidence resolving external-writer signals")
+    parser.add_argument("--json", action="store_true", help="print the machine-readable report")
+    args = parser.parse_args()
+
+    report = build_report(args)
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print_text(report)
+    return 0 if report["ready"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
