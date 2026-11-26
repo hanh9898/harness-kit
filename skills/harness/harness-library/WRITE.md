@@ -45,7 +45,9 @@ transaction is not a sufficient automatic boundary.
 1. Read the relevant live revision and approve the exact input file. A trusted
    caller uses `library --store <selected-path> grant-write <operation> <id> --source supplied --kit-dir <pinned-catalog> --input <file> --expect-revision <rev> --ttl-seconds <ttl>`
    for a supplied exclusion/restoration. Use the selection revision. For
-   saved resources use `--source saved` without a catalog flag (content
+   pinned methods, put `--pack-binding <verified-binding>` before the command;
+   its catalog pin replaces `--kit-dir`. For saved resources use
+   `--source saved` without a catalog flag (content
    revision for `save`/`update`). Use a short TTL.
    Issuance validates the request and compares the live revision before enabling
    guarding or replacing a grant. On conflict, reread content or selection
@@ -54,8 +56,9 @@ transaction is not a sufficient automatic boundary.
    mutation with unchanged input bytes, store, source, resource and revision.
    For supplied resources, run
    `library --store <selected-path> <operation> <id> --source supplied --kit-dir <pinned-catalog> --input <file> --expect-selection-revision <rev> --write-grant <grant-id>`.
-   The host must enforce the pin and intended writer; SQLite does not bind
-   the grant to the catalog revision or caller. Keep the grant out of handoffs and logs.
+   For pinned methods, use the same binding as at issuance. Pack grants bind
+   the binding bytes; core grants do not bind the catalog revision. The host
+   must enforce the pin and intended writer. Keep the grant out of handoffs and logs.
    For content mutations use `--expect-revision`. A grant is single-use. A rejection does
    not authorize a retry, a different input, or a downgrade to an unguarded store.
 3. Revoke the exact grant at the target with `revoke-write <grant_id>` when

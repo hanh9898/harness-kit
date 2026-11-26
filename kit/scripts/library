@@ -16,6 +16,7 @@ import subprocess
 import sys
 import time
 from contextlib import closing, contextmanager
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
@@ -24,21 +25,14 @@ from uuid import uuid4
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from piece_ids import PieceAliases
+import method_pack
+from method_pack import unique_object
+from piece_ids import ALIAS_FILE, PieceAliases
 sys.path.pop(0)
 
 CONSUMPTION = "Requires checking conditions and gaps; saving is not adoption."
 MARKDOWN_ENTRY_NOT_FOUND = 3  # kit show found no matching pattern or delegation entry.
 WRITE_OPERATIONS = ("save", "update", "disable", "restore")
-
-
-def unique_object(pairs):
-    result = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError(f"Ambiguous duplicate JSON field: {key}.")
-        result[key] = value
-    return result
 
 
 def require_resource_id(identity):
@@ -203,14 +197,17 @@ def has_table(db, name):
 
 
 @contextmanager
-def write_transaction(store, mode="rw"):
-    with closing(sqlite3.connect(store.resolve().as_uri() + "?mode=" + mode, uri=True)) as db, db:
+def write_transaction(store, mode="rw", *, binding=None):
+    target = read_target(store, binding)[0] if binding is not None else store.resolve()
+    with closing(sqlite3.connect(target.as_uri() + "?mode=" + mode, uri=True)) as db, db:
+        if binding is not None:
+            read_target(store, binding)
         db.execute("PRAGMA synchronous=FULL")
         db.execute("BEGIN IMMEDIATE")
         yield db
 
 
-def grant_write(args):
+def grant_write(args, pack):
     content_write = args.operation in ("save", "update")
     if content_write and args.source != "saved":
         raise ValueError("Content write grants require --source saved.")
@@ -226,21 +223,23 @@ def grant_write(args):
             raise ValueError("Save input id must match the grant resource ID.")
     else:
         validate_selection_input(args.operation, args.source, args.id, request)
+    if pack:
+        pack.binding.require_scope(request)
 
     def validate_target(db):
         if content_write:
             record = prepare_content_write(db, args.operation, args.id, args.expect_revision, request)
         else:
             _, record = prepare_selection_write(db, args.kit_dir, args.operation, args.source,
-                                                args.id, args.expect_revision, request)
+                                                args.id, args.expect_revision, request, pack)
         encode_write_record(record)
 
     mode = "rw"
-    if not store_exists(args.store):
+    if pack is None and not store_exists(args.store):
         # Opening with mode=rwc can leave a file even if the transaction rolls back.
         validate_target(None)
         mode = "rwc"
-    with write_transaction(args.store, mode) as db:
+    with write_transaction(args.store, mode, binding=pack.binding if pack else None) as db:
         validate_target(db)
         db.execute("""CREATE TABLE IF NOT EXISTS write_grants (
             operation TEXT NOT NULL, source TEXT NOT NULL, id TEXT NOT NULL,
@@ -249,11 +248,17 @@ def grant_write(args):
             PRIMARY KEY (operation, source, id)
         )""")
         grant_id = uuid4().hex
-        digest = hashlib.sha256(request_bytes).hexdigest()
+        digest = hashlib.sha256(grant_payload(request_bytes, pack)).hexdigest()
         expires_at = time.time() + args.ttl_seconds
         db.execute("INSERT OR REPLACE INTO write_grants VALUES (?, ?, ?, ?, ?, ?, ?)",
                    (args.operation, args.source, args.id, grant_id, args.expect_revision, digest, expires_at))
     return dict(write_grant=grant_id, expires_at=datetime.fromtimestamp(expires_at, timezone.utc).isoformat())
+
+
+def grant_payload(request_bytes, pack):
+    if pack is None:
+        return request_bytes
+    return bytes.fromhex(pack.binding.binding_sha256) + b"\0" + request_bytes
 
 
 def revoke_write(args):
@@ -351,16 +356,52 @@ def selection_records(db, source, identity):
         (source, identity))]
 
 
-def supplied_catalog(kit_dir):
+def supplied_catalog(kit_dir, files=None):
     catalog, pieces = [], []
     for filename, kind in (("legos.csv", "piece"), ("rules.csv", "rule")):
-        with (kit_dir / filename).open(encoding="utf-8", newline="") as stream:
+        with (StringIO(files[filename].decode("utf-8"), newline="") if files is not None
+              else (kit_dir / filename).open(encoding="utf-8", newline="")) as stream:
             reader = csv.DictReader(stream)
             for row in reader:
                 if kind == "piece":
                     pieces.append((reader.line_num, row))
                 catalog.append((filename, kind, row))
-    return catalog, PieceAliases.load(kit_dir, pieces, (row["id"] for _, kind, row in catalog if kind == "rule"))
+    rule_ids = (row["id"] for _, kind, row in catalog if kind == "rule")
+    alias_text = files[ALIAS_FILE].decode("utf-8") if files is not None else None
+    return catalog, PieceAliases.load(kit_dir, pieces, rule_ids, text=alias_text)
+
+
+@dataclass(frozen=True)
+class BoundPack:
+    binding: method_pack.Binding
+    items: dict
+    scenarios: dict
+    catalog: tuple
+
+    @classmethod
+    def load(cls, path):
+        binding = method_pack.read_binding(path)
+        index = method_pack.read_index(binding.pack, binding.index_sha256)
+        core, aliases = supplied_catalog(binding.catalog, binding.core_bytes())
+        core_ids = {row["id"] for _, _, row in core} | aliases.by_legacy.keys() | aliases.by_slug.keys()
+        method_pack.require_disjoint(index, core_ids)
+        items = index["items"]
+        catalog = tuple(("index.json", "method", dict(method_pack.catalog_row(identity, item),
+                                                     index_sha256=binding.index_sha256,
+                                                     body_sha256=item["body_sha256"]))
+                        for identity, item in items.items())
+        return cls(binding, items, index["scenarios"], catalog)
+
+    def require_id(self, identity):
+        if identity not in self.items:
+            raise ValueError(f"Unknown method ID: {identity}.")
+
+    def selection(self, db, identity):
+        self.require_id(identity)
+        _, state = selection_view(db, self.binding.catalog, "supplied", identity, self.catalog)
+        if state["record"] is not None:
+            self.binding.require_scope(state["record"])
+        return state
 
 
 def latest_selections(db):
@@ -456,7 +497,7 @@ def selection_view(db, kit_dir, source, identity, catalog=(), aliases=None):
     snapshot = resource_snapshot(db, kit_dir, source, identity, catalog)
     pending = []
     key = identity
-    if source == "supplied" and (identity in aliases.by_slug or
+    if source == "supplied" and aliases is not None and (identity in aliases.by_slug or
                                 (snapshot and snapshot["kind"] in ("piece", "rule"))):
         records, reconciled = latest_selections(db)
         key = selection_key(records, source, identity, aliases)
@@ -490,7 +531,7 @@ class StoreReadError(ValueError):
         super().__init__(f"Store is {state}: {store}" + (f" ({reason})" if reason else ""))
 
 
-def read_target(store):
+def read_target(store, binding=None):
     try:
         target = store.resolve(strict=True)
         fd = os.open(target, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0))
@@ -503,6 +544,8 @@ def read_target(store):
         raise StoreReadError("missing", store) from None
     except (OSError, RuntimeError):
         raise StoreReadError("unreadable", store) from None
+    if binding is not None and not binding.target_matches(target, stat):
+        raise StoreReadError("wrong-identity", store)
     if len(header) != 100 or not header.startswith(b"SQLite format 3\0") or header[18:20] != b"\x01\x01":
         raise StoreReadError("unreadable", store)
     return target, stat
@@ -533,11 +576,11 @@ def deny_filesystem_writes(store):
 
 
 @contextmanager
-def read_store(store, *, require_existing_store):
+def read_store(store, *, require_existing_store, binding=None):
     if not require_existing_store and not store_exists(store):
         yield None
         return
-    target, stat = read_target(store)
+    target, stat = read_target(store, binding)
     deny_filesystem_writes(store)
     try:
         with closing(sqlite3.connect(target.as_uri() + "?mode=ro", uri=True)) as db:
@@ -575,8 +618,18 @@ def selection_result(db, kit_dir, source, identity, history):
     return selection_view(db, kit_dir, source, identity, catalog, aliases)[1]
 
 
-def read_selection(store, kit_dir, source, identity, history=False, *, require_existing_store=False):
-    with read_store(store, require_existing_store=require_existing_store) as db:
+def read_selection(store, kit_dir, source, identity, history=False, *, require_existing_store=False, pack=None):
+    with read_store(store, require_existing_store=require_existing_store or pack is not None,
+                    binding=pack.binding if pack else None) as db:
+        if pack:
+            if not history:
+                return pack.selection(db, identity)
+            records = selection_records(db, source, identity)
+            if not any(record["snapshot"]["kind"] == "method" for record in records):
+                pack.require_id(identity)
+            for record in records:
+                pack.binding.require_scope(record)
+            return records
         return selection_result(db, kit_dir, source, identity, history)
 
 
@@ -594,10 +647,14 @@ def validate_selection_input(operation, source, identity, facts):
             raise ValueError("confirm_rename_from applies only to disabling supplied catalog pieces and rules.")
 
 
-def prepare_selection_write(db, kit_dir, operation, source, identity, expected, facts):
-    catalog, aliases = supplied_catalog(kit_dir) if source == "supplied" else ((), PieceAliases())
-    require_canonical_id(identity, aliases.canonical(identity))
-    storage_id, current = selection_view(db, kit_dir, source, identity, catalog, aliases)
+def prepare_selection_write(db, kit_dir, operation, source, identity, expected, facts, pack=None):
+    if pack:
+        current = pack.selection(db, identity)
+        storage_id = identity
+    else:
+        catalog, aliases = supplied_catalog(kit_dir) if source == "supplied" else ((), PieceAliases())
+        require_canonical_id(identity, aliases.canonical(identity))
+        storage_id, current = selection_view(db, kit_dir, source, identity, catalog, aliases)
     if current["revision"] != expected:
         raise ValueError(f"Selection revision conflict: expected {expected}, found {current['revision']}; "
                          "read selection or selection-history before retry.")
@@ -630,28 +687,34 @@ def prepare_selection_write(db, kit_dir, operation, source, identity, expected, 
     return storage_id, record
 
 
-def change_selection(args):
+def change_selection(args, pack):
     facts, request_bytes = read_write_input(args.input)
     validate_selection_input(args.command, args.source, args.id, facts)
+    if pack:
+        pack.binding.require_scope(facts)
+        if not args.write_grant:
+            raise ValueError("Method selection changes require a matching write grant.")
     expected = args.expect_selection_revision
     if expected < 0:
         raise ValueError("Expected selection revision must be zero or the inspected revision.")
 
     def prepare(db):
-        return prepare_selection_write(db, args.kit_dir, args.command, args.source, args.id, expected, facts)
+        return prepare_selection_write(db, args.kit_dir, args.command, args.source, args.id, expected, facts, pack)
 
     mode = "rw"
-    if (not store_exists(args.store) and args.write_grant is None and expected == 0
+    if (pack is None and not store_exists(args.store) and args.write_grant is None and expected == 0
             and args.command == "disable"):
         encode_write_record(prepare(None)[1])
         mode = "rwc"
-    with write_transaction(args.store, mode) as db:
+    with write_transaction(args.store, mode, binding=pack.binding if pack else None) as db:
         storage_id, record = prepare(db)
         payload = encode_write_record(record)
         db.execute("CREATE TABLE IF NOT EXISTS selection_revisions (source TEXT, id TEXT, revision INTEGER, record TEXT NOT NULL, PRIMARY KEY (source, id, revision))")
-        consume_write_grant(db, args, args.source, args.id, expected, request_bytes)
+        consume_write_grant(db, args, args.source, args.id, expected, grant_payload(request_bytes, pack))
         db.execute("INSERT INTO selection_revisions VALUES (?, ?, ?, ?)",
                    (args.source, storage_id, record["revision"], payload))
+        if pack:
+            return pack.selection(db, args.id)
         return selection_result(db, args.kit_dir, args.source, args.id, history=False)
 
 
@@ -696,11 +759,51 @@ def search(store, kit_dir, query, limit, include_disabled=False, *, require_exis
                 coverage="Supplied pieces/rules and this store only. Use kit list P/delegation for those references.")
 
 
+PACK_READS = ("pack-discover", "pack-browse", "pack-show")
+
+
+def method_summary(identity, item):
+    return dict(id=identity, **{key: item[key] for key in ("name", "summary", "needed_when", "kind")})
+
+
+def read_methods(args, pack):
+    if pack is None:
+        return dict(total=0, matches=[], groups=[])
+    with read_store(args.store, require_existing_store=True, binding=pack.binding) as db:
+        if args.command == "pack-show":
+            if not pack.selection(db, args.id)["effective"]:
+                raise ValueError(f"Method is excluded from the bound selection: {args.id}.")
+            item = pack.items[args.id]
+            return dict(method_summary(args.id, item), provenance=item["provenance"],
+                        body_sha256=item["body_sha256"], content=method_pack.read_body(pack.binding.pack, args.id, item))
+        scenarios = pack.scenarios
+        if args.scenario is not None:
+            if args.scenario not in scenarios:
+                raise ValueError(f"Unknown method scenario: {args.scenario}.")
+            scenarios = {args.scenario: scenarios[args.scenario]}
+        candidates = {identity for scenario in scenarios.values() for identity in scenario["ids"]}
+        if args.command == "pack-discover":
+            facts = set(args.fact)
+            candidates = {identity for identity in candidates
+                          if (item := pack.items[identity])["node"] == args.node
+                          and facts.issuperset(item["all"]) and not facts.intersection(item["none"])}
+        effective = {identity for identity in sorted(candidates) if pack.selection(db, identity)["effective"]}
+        matches = [method_summary(identity, pack.items[identity]) for identity in sorted(effective)]
+        groups = []
+        if args.view == "scenarios":
+            for identity, scenario in sorted(scenarios.items()):
+                ids = [member for member in scenario["ids"] if member in effective]
+                if ids:
+                    groups.append(dict(id=identity, name=scenario["name"], ids=ids))
+        return dict(total=len(matches), matches=matches, groups=groups)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--store", required=True, type=Path)
     ap.add_argument("--require-existing-store", action="store_true",
                     help="Fail if search, selection or selection-history cannot read the configured store")
+    ap.add_argument("--pack-binding", type=Path, help="Verified consumer binding for optional methods")
     sub = ap.add_subparsers(dest="command", required=True)
     save = sub.add_parser("save", help="Create at revision 0 or edit the inspected revision")
     save.add_argument("--input", required=True, type=Path)
@@ -718,7 +821,7 @@ def main():
     grant.add_argument("operation", choices=WRITE_OPERATIONS)
     grant.add_argument("id")
     grant.add_argument("--source", required=True, choices=("supplied", "saved"))
-    grant.add_argument("--kit-dir", type=Path, default=Path(__file__).resolve().parent.parent)
+    grant.add_argument("--kit-dir", type=Path)
     grant.add_argument("--input", required=True, type=Path)
     grant.add_argument("--expect-revision", required=True, type=int)
     grant.add_argument("--ttl-seconds", required=True, type=int)
@@ -726,14 +829,23 @@ def main():
     revoke.add_argument("grant_id")
     find = sub.add_parser("search", help="Focused supplied and saved resource summaries")
     find.add_argument("query")
-    find.add_argument("--kit-dir", type=Path, default=Path(__file__).resolve().parent.parent)
+    find.add_argument("--kit-dir", type=Path)
     find.add_argument("--limit", type=int, default=12)
     find.add_argument("--include-disabled", action="store_true", help="Inspect excluded matches without restoring them")
+    for command, help_text in (("pack-discover", "Suggest methods for confirmed facts"),
+                               ("pack-browse", "Browse effective methods without trigger facts")):
+        parser = sub.add_parser(command, help=help_text)
+        parser.add_argument("--view", choices=("methods", "scenarios"), default="methods")
+        parser.add_argument("--scenario")
+        if command == "pack-discover":
+            parser.add_argument("--node", required=True)
+            parser.add_argument("--fact", action="append", default=[], choices=method_pack.FACTS)
+    sub.add_parser("pack-show", help="Open one effective method by exact ID").add_argument("id")
     for command in ("selection", "selection-history", "disable", "restore"):
         parser = sub.add_parser(command, help="Inspect or explicitly change effective library selection")
         parser.add_argument("id")
         parser.add_argument("--source", required=True, choices=("supplied", "saved"))
-        parser.add_argument("--kit-dir", type=Path, default=Path(__file__).resolve().parent.parent)
+        parser.add_argument("--kit-dir", type=Path)
         if command in ("disable", "restore"):
             parser.add_argument("--input", required=True, type=Path)
             parser.add_argument("--expect-selection-revision", required=True, type=int)
@@ -742,18 +854,35 @@ def main():
     args = ap.parse_args()
     if args.require_existing_store and args.command not in ("search", "selection", "selection-history"):
         ap.error("--require-existing-store applies only to search, selection and selection-history")
+    method_selection = args.command in ("selection", "selection-history", "disable", "restore", "grant-write")
+    if args.pack_binding and args.command not in PACK_READS and (
+            not method_selection or args.source != "supplied"
+            or (args.command == "grant-write" and args.operation not in ("disable", "restore"))):
+        ap.error("--pack-binding applies only to method reads and supplied method selection operations")
+    if args.command in ("pack-browse", "pack-show") and args.pack_binding is None:
+        ap.error("explicit method browsing and retrieval require --pack-binding")
     try:
-        if args.command == "search":
+        pack = BoundPack.load(args.pack_binding) if args.pack_binding is not None else None
+        if pack and method_selection:
+            if args.command != "selection-history":
+                pack.require_id(args.id)
+            if args.kit_dir is not None and args.kit_dir != pack.binding.catalog:
+                raise ValueError("--kit-dir must match the method binding catalog when supplied.")
+        if hasattr(args, "kit_dir") and args.kit_dir is None:
+            args.kit_dir = Path(__file__).resolve().parent.parent
+        if args.command in PACK_READS:
+            result = read_methods(args, pack)
+        elif args.command == "search":
             result = search(args.store, args.kit_dir, args.query, args.limit, args.include_disabled,
                             require_existing_store=args.require_existing_store)
         elif args.command in ("selection", "selection-history"):
             result = read_selection(args.store, args.kit_dir, args.source, args.id,
                                     args.command == "selection-history",
-                                    require_existing_store=args.require_existing_store)
+                                    require_existing_store=args.require_existing_store, pack=pack)
         elif args.command in ("disable", "restore"):
-            result = change_selection(args)
+            result = change_selection(args, pack)
         elif args.command == "grant-write":
-            result = grant_write(args)
+            result = grant_write(args, pack)
         elif args.command == "revoke-write":
             result = revoke_write(args)
         elif args.command in ("show", "history", "compare"):
@@ -780,8 +909,10 @@ def main():
     except StoreReadError as exc:
         print(f"ERROR: {exc}\nNext: reconcile the authorized store binding before retrying.", file=sys.stderr)
         return 2
-    except (OSError, ValueError, sqlite3.Error) as exc:
-        print(f"ERROR: {exc}\nNext: inspect the live store before retry; no successful save is claimed.", file=sys.stderr)
+    except (OSError, ValueError, RuntimeError, sqlite3.Error) as exc:
+        next_step = ("reconcile the configured method binding or selected ID before retrying."
+                     if args.pack_binding else "inspect the live store before retry; no successful save is claimed.")
+        print(f"ERROR: {exc}\nNext: {next_step}", file=sys.stderr)
         return 2
 
 

@@ -2,6 +2,7 @@
 
 import csv
 import re
+from io import StringIO
 
 
 SLUG = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*")
@@ -16,10 +17,11 @@ class PieceAliases:
         self.by_slug = {}
 
     @classmethod
-    def load(cls, kit_dir, entries, rule_ids):
+    def load(cls, kit_dir, entries, rule_ids, *, text=None):
         aliases = cls()
         try:
-            stream = (kit_dir / ALIAS_FILE).open(encoding="utf-8", newline="")
+            stream = (StringIO(text, newline="") if text is not None
+                      else (kit_dir / ALIAS_FILE).open(encoding="utf-8", newline=""))
         except FileNotFoundError:
             return aliases
 

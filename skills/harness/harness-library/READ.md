@@ -9,7 +9,7 @@ Report missing, unreadable and wrong-identity separately; block the dependent
 read until the original binding is recovered or an authorized rebind is
 verified. Only confirmed unconfigured scopes may read raw catalog provenance;
 do not create a store or report effective selection for those scopes.
-All six Library read commands reject WAL stores and hosts that cannot
+Library reads of existing stores reject WAL stores and hosts that cannot
 enforce a no-write SQLite open. Report the blocker. Do not checkpoint the
 store, change its permissions or reopen it as immutable.
 
@@ -30,6 +30,15 @@ empty result proves nothing beyond that scope. Open only useful candidates via
 supplied hit's retrieval path against the pin first. Pass the same `--dir`
 to targeted lists where useful. The group index classifies resources, not
 discovery nodes. Raw kit output is provenance, not current selection evidence.
+
+For an explicitly enabled [verification method pack](../../../kit/LIBRARY.md#optional-verification-method-pack),
+confirm the consumer's pack pin as well as its core and store binding. Pass
+only confirmed static facts or user needs to `pack-discover`; do not guess
+required facts or treat literal core matches as pack results. Offer neutral
+names from `matches`, individually or under the scenario names in `groups`.
+Ask which exact ID to open. Use `pack-show` with the same binding, then
+check the method's conditions. An explicit `pack-browse` request can list
+methods without trigger facts; browsing is not a suitability claim.
 
 For Bot role templates, use the pinned commands above. Look up the exact
 role by slug or use the literal query `bot role template` with `--limit 30`.
@@ -70,6 +79,10 @@ content. Pin the template and linked content to the same distribution
 revision. If store, scope, revision or identity is unverified, return the
 blocker rather than guessing a handoff. A possible rename is a hold, not
 proof of lineage.
+
+For a supplied optional method, record the verified pack distribution or
+index pin rather than the core revision. Keep the verified body digest with
+the provenance evidence.
 
 The consumer must reread the live selection with the same store, scope and pin
 before an independently authorized application. Disabled,
