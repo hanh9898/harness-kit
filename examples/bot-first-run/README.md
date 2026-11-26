@@ -83,11 +83,12 @@ Agree on the timeout and stop conditions before starting.
 
    Verify each handoff has the expected canonical ID and supplied source
    and is enabled and available. Match its selection revision, distribution
-   SHA, and catalog-row digest to the approved selection. Open the two
-   linked sources and verify their digests separately. A configured store
-   that is missing, mismatched, unreadable, or not qualified for no-write
-   reads blocks apply. If you confirm no store is configured, stop at
-   catalog preview.
+   SHA, and catalog-row digest to the approved selection. The row digest
+   does not cover the linked files. Open the role and contract sources
+   separately, and match each file's digest to the same file in the
+   approved Git commit. A configured store that is missing, mismatched,
+   unreadable, or not qualified for no-write reads blocks apply. If you
+   confirm no store is configured, stop at catalog preview.
 4. **Apply the disabled configuration once.** Use H2 to confirm the exact
    target, read-only test scope, and design revision. Verify the test tool
    route for the caller without granting data access yet. Obtain H19 for
