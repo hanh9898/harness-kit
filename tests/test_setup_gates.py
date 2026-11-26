@@ -406,10 +406,11 @@ def test_relative_dot_target_does_not_match_unrelated_dotted_filenames(tmp_path)
     env = fake_path(tmp_path, crontab=cron_line)
     result, report = run_json(
         PREFLIGHT,
-        "--target", project,
+        "--target", ".",
         "--mode", "apply",
         "--effect", "write-record=grant:write@1",
         env=env,
+        cwd=project,
     )
     assert result.returncode == 0, report
     assert "external-writer-candidate" not in {row["id"] for row in report["signals"]}
