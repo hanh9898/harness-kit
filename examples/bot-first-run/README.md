@@ -74,13 +74,20 @@ Agree on the timeout and stop conditions before starting.
    done
    ```
 
-   Verify each `selection` handoff has the expected ID and supplied source
+   The CLI returns snapshots. Build one v1
+   [`selection` handoff](../../skills/harness/harness-library/READ.md#selection-handoff)
+   per snapshot. Use the verified store and scope refs, the pinned catalog
+   SHA as `distribution_revision`, and evidence refs for the readback
+   and provenance. Map `revision` to `selection_revision` and
+   `current_snapshot.sha256` to `digest`.
+
+   Verify each handoff has the expected canonical ID and supplied source
    and is enabled and available. Match its selection revision, distribution
-   SHA, catalog-row digest, and linked source digest to the approved
-   selection. Read the two linked sources
-   independently. A configured store that is missing, mismatched,
-   unreadable, or not qualified for no-write reads blocks apply. If you
-   confirm no store is configured, stop at catalog preview.
+   SHA, and catalog-row digest to the approved selection. Open the two
+   linked sources and verify their digests separately. A configured store
+   that is missing, mismatched, unreadable, or not qualified for no-write
+   reads blocks apply. If you confirm no store is configured, stop at
+   catalog preview.
 4. **Apply the disabled configuration once.** Use H2 to confirm the exact
    target, read-only test scope, and design revision. Verify the test tool
    route for the caller without granting data access yet. Obtain H19 for
