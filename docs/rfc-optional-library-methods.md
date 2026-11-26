@@ -91,15 +91,15 @@ consumer without a pack binding is unaffected by a broken pack.
    existing ledger, with the exact ID, scope and revision. Pack grants also
    bind the binding bytes. The first grant enables the existing store-wide
    guard; discovery never issues a grant. No schema migration.
-5. Pass two of Setup may ask Library about the verified verification node
-   after its existing intent/prerequisite checks. No changes to pass order,
+5. Setup's pass-one verification topic can ask Library about that node
+   after the existing caller and prerequisite checks. No changes to pass order,
    H gates, Evolve routing, default skills, adoption, wake, ACK or dispatch.
 
 ## File whitelist and strict checks
 
 | Scope | Allowed additions or edits |
 | --- | --- |
-| Design and caller | This RFC, `kit/LIBRARY.md`, `skills/harness/harness-library/READ.md`, `skills/discovery/verification-discovery/SKILL.md` |
+| Design and caller | This RFC, `kit/LIBRARY.md`, `skills/harness/harness-library/{READ,WRITE}.md`, `skills/discovery/verification-discovery/SKILL.md` |
 | Runtime | `kit/scripts/library`, `kit/scripts/method_pack.py`, `kit/scripts/piece_ids.py` |
 | Pack | `packs/verification-methods/index.json`, `LICENSE`, and exactly three `guidance/<id>.md` files named above |
 | Gates | `tools/check_method_pack.py`, `tests/test_library_method_pack.py`, `.github/workflows/v1-guard.yml` |
@@ -107,9 +107,10 @@ consumer without a pack binding is unaffected by a broken pack.
 Keep `tools/check_boundary.py --strict` and its token list unchanged for
 core. Check the pack separately. First validate its exact file inventory,
 schema and digests, including a digest of the reviewed provenance map for
-the three shipped IDs. Then scan every whitelisted file, omitting only the
-validated and allowlisted `provenance.url` values in a temporary serialized index. Do not
-normalize display content, paths or body text. In a second temporary view,
+the three shipped IDs. Scan the license, guidance bodies and decoded index
+keys and values, omitting only the validated and allowlisted
+`provenance.url` values. Do not normalize display content, paths or body
+text. In a second temporary view,
 map methods to ordinary catalog rows and use `check_kit.py` to catch
 invalid rows and collisions. Neither temporary view ships or becomes a
 runtime catalog. A pack path is not a boundary exemption.
